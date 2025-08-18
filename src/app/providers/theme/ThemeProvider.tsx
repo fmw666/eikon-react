@@ -1,0 +1,93 @@
+/**
+ * @file ThemeProvider.tsx
+ * @description ThemeProvider component, provides theme UI state using Zustand
+ * @author fmw666@github
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+import React, { useCallback, useEffect, type ReactNode } from 'react';
+
+import { useStore } from 'zustand';
+
+import { useLocalStorage } from '@/shared/hooks/useLocalStorage';
+
+import { themeStore } from './themeStore';
+import type { Theme } from './themeStore';
+
+// =================================================================================================
+// Types
+// =================================================================================================
+
+interface ThemeProviderProps {
+  children: ReactNode;
+}
+
+// =================================================================================================
+// Component
+// =================================================================================================
+
+const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  const [theme, setTheme] = useLocalStorage<Theme>('theme', 'system');
+  const setIsDarkMode = useStore(themeStore, state => state.setIsDarkMode);
+
+  useEffect(() => {
+    themeStore.getState().setTheme(theme);
+  }, [theme]);
+
+  useEffect(() => {
+    const updateDarkMode = () => {
+      if (theme === 'system') {
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setIsDarkMode(systemPrefersDark);
+      } else {
+        setIsDarkMode(theme === 'dark');
+      }
+    };
+
+    updateDarkMode();
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', updateDarkMode);
+
+    return () => mediaQuery.removeEventListener('change', updateDarkMode);
+  }, [theme, setIsDarkMode]);
+
+  useEffect(() => {
+    const { isDarkMode } = themeStore.getState();
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+    root.classList.add(isDarkMode ? 'dark' : 'light');
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = themeStore.subscribe(
+      (state) => state.isDarkMode,
+      (isDarkMode) => {
+        const root = window.document.documentElement;
+        root.classList.remove('light', 'dark');
+        root.classList.add(isDarkMode ? 'dark' : 'light');
+      }
+    );
+
+    return unsubscribe;
+  }, []);
+
+  const handleSetTheme = useCallback((newTheme: Theme) => {
+    setTheme(newTheme);
+  }, [setTheme]);
+
+  useEffect(() => {
+    themeStore.setState({ setTheme: handleSetTheme });
+  }, [handleSetTheme]);
+
+  return <>{children}</>;
+};
+
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export { ThemeProvider };

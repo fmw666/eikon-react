@@ -1,0 +1,17 @@
+{
+  "name": "DesignChat AI",
+  "short_name": "DesignChat",
+  "description": "一站式 AI 图像生成服务，支持多种模型，快速生成高质量图片",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#4F46E5",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/",
+  "orientation": "portrait"
+}

@@ -1,0 +1,29 @@
+{
+  "name": "ai-devkit-docs",
+  "version": "1.0.0",
+  "description": "AI-DevKit 项目文档站点",
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview",
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "^1.0.0-rc.44"
+  },
+  "keywords": [
+    "ai-devkit",
+    "react",
+    "performance",
+    "documentation",
+    "vitepress"
+  ],
+  "author": "AI-DevKit Team",
+  "license": "MIT",
+  "dependencies": {
+    "mermaid": "^11.9.0"
+  }
+}
