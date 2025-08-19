@@ -1,6 +1,6 @@
 /**
- * @file Button
- * @description Button component
+ * @file Select
+ * @description Select component
  * @author fmw666@github
  */
 
@@ -8,5 +8,5 @@
 // Exports
 // =================================================================================================
 
-export { Button } from './Button';
-export type { ButtonProps } from './Button';
+export { default as Select } from './Select';
+export type { SelectProps, SelectOption } from './Select';

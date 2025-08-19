@@ -8,10 +8,16 @@
 // Import
 // =================================================================================================
 
+// --- Core Libraries ---
 import React from 'react';
 
+// --- Core-related Libraries ---
 import { useNavigate } from 'react-router-dom';
 
+// --- Third-party Libraries ---
+import { RocketLaunchIcon, SparklesIcon, BoltIcon, DevicePhoneMobileIcon } from '@heroicons/react/24/outline';
+
+// --- Absolute Imports ---
 import { ROUTES } from '@/app/router/constants';
 import { Button } from '@/shared/components/Button';
 
@@ -102,6 +108,26 @@ const HomePage: React.FC = () => {
                 }}>
                   本项目旨在为 AI 阅读和二次开发提供清晰、易扩展的项目架构。你可以基于本模板快速搭建自己的 AI 应用或业务系统。
                 </p>
+
+                {/* 关键卖点一排展示 */}
+                <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  <div className="flex items-center space-x-2">
+                    <RocketLaunchIcon className="w-5 h-5 text-gray-800" />
+                    <span className="text-gray-800 font-bold" style={{ textShadow: '1px 1px 0px #fff' }}>快速开发</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <SparklesIcon className="w-5 h-5 text-gray-800" />
+                    <span className="text-gray-800 font-bold" style={{ textShadow: '1px 1px 0px #fff' }}>AI 友好</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <BoltIcon className="w-5 h-5 text-gray-800" />
+                    <span className="text-gray-800 font-bold" style={{ textShadow: '1px 1px 0px #fff' }}>高性能</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <DevicePhoneMobileIcon className="w-5 h-5 text-gray-800" />
+                    <span className="text-gray-800 font-bold" style={{ textShadow: '1px 1px 0px #fff' }}>响应式</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -165,9 +191,9 @@ const HomePage: React.FC = () => {
               backfaceVisibility: 'hidden',
               transform: 'translateZ(0)'
             }}>
-                             {/* 漫画对话框尾巴 */}
-               <div className="absolute -top-4 left-8 w-0 h-0 border-l-[20px] border-l-transparent border-b-[20px] border-b-black"></div>
-               <div className="absolute -top-2 left-10 w-0 h-0 border-l-[16px] border-l-transparent border-b-[16px] border-b-sky-50"></div>
+              {/* 漫画对话框尾巴 */}
+              <div className="absolute -top-4 left-8 w-0 h-0 border-l-[20px] border-l-transparent border-b-[20px] border-b-black"></div>
+              <div className="absolute -top-2 left-10 w-0 h-0 border-l-[16px] border-l-transparent border-b-[16px] border-b-sky-50"></div>
               
               {/* 漫画装饰 */}
               <div className="absolute top-2 right-2 text-4xl">📝</div>
@@ -201,60 +227,52 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* 第四格：特色功能 */}
-          <div className="relative transform -rotate-2 hover:rotate-0 transition-transform duration-500" style={{
+
+          {/* 第四格：组件案例 */}
+          <div className="relative transform rotate-0 hover:-rotate-1 transition-transform duration-500" style={{
             backfaceVisibility: 'hidden',
             transformStyle: 'preserve-3d',
             willChange: 'transform'
           }}>
-            <div className="bg-emerald-50 rounded-none p-6 relative overflow-hidden" style={{
+            <div className="bg-violet-50 rounded-none p-6 relative overflow-hidden" style={{
               border: '4px solid #000',
               boxShadow: '8px 8px 0px #000',
-              background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
+              background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)',
               backfaceVisibility: 'hidden',
               transform: 'translateZ(0)'
             }}>
-                             {/* 漫画对话框尾巴 */}
-               <div className="absolute -top-4 right-8 w-0 h-0 border-r-[20px] border-r-transparent border-b-[20px] border-b-black"></div>
-               <div className="absolute -top-2 right-10 w-0 h-0 border-r-[16px] border-r-transparent border-b-[16px] border-b-emerald-50"></div>
+              {/* 漫画对话框尾巴 */}
+              <div className="absolute -bottom-4 left-8 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-black"></div>
+              <div className="absolute -bottom-2 left-10 w-0 h-0 border-l-[16px] border-l-transparent border-t-[16px] border-t-violet-50"></div>
               
               {/* 漫画装饰 */}
-              <div className="absolute top-2 left-2 text-4xl">🎨</div>
-              <div className="absolute bottom-2 right-2 text-2xl">🔥</div>
+              <div className="absolute top-2 right-2 text-4xl">🧩</div>
+              <div className="absolute bottom-2 left-2 text-2xl">🔍</div>
               
               <div className="relative z-10">
                 <h2 className="text-2xl font-black text-gray-800 mb-4" style={{
                   textShadow: '2px 2px 0px #fff',
                   fontFamily: 'Impact, Arial Black, sans-serif'
                 }}>
-                  特色功能
+                  组件案例
                 </h2>
-                <div className="space-y-0">
-                  <div className="flex items-center text-gray-700 font-bold" style={{
-                    textShadow: '1px 1px 0px #fff'
-                  }}>
-                    <span className="text-2xl mr-2">⚡</span>
-                    <span>高性能架构</span>
-                  </div>
-                  <div className="flex items-center text-gray-700 font-bold" style={{
-                    textShadow: '1px 1px 0px #fff'
-                  }}>
-                    <span className="text-2xl mr-2">🎯</span>
-                    <span>AI 友好设计</span>
-                  </div>
-                  <div className="flex items-center text-gray-700 font-bold" style={{
-                    textShadow: '1px 1px 0px #fff'
-                  }}>
-                    <span className="text-2xl mr-2">🚀</span>
-                    <span>快速开发</span>
-                  </div>
-                  <div className="flex items-center text-gray-700 font-bold" style={{
-                    textShadow: '1px 1px 0px #fff'
-                  }}>
-                    <span className="text-2xl mr-2">💻</span>
-                    <span>响应式设计</span>
-                  </div>
-                </div>
+                <p className="text-gray-700 font-bold mb-4" style={{
+                  textShadow: '1px 1px 0px #fff'
+                }}>
+                  查看项目内可复用的 UI 组件示例与演示：
+                </p>
+                <Button
+                  onClick={() => navigate(ROUTES.EXAMPLE.ROOT)}
+                  className="w-full bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 font-black text-lg transition-all duration-300 transform hover:scale-105 border-4 border-black shadow-4xl hover:shadow-5xl"
+                  style={{
+                    boxShadow: '6px 6px 0px #000',
+                    textShadow: '2px 2px 0px #000',
+                    backfaceVisibility: 'hidden',
+                    transform: 'translateZ(0)'
+                  }}
+                >
+                  进入示例模块 🔗
+                </Button>
               </div>
             </div>
           </div>

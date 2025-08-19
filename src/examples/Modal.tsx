@@ -29,6 +29,7 @@ import {
 
 import { Button } from '@/shared/components/Button';
 import { Modal, type ModalSize } from '@/shared/components/Modal';
+import { Select } from '@/shared/components/Select';
 
 // =================================================================================================
 // Component
@@ -326,12 +327,20 @@ const ModalExample: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 角色
               </label>
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option>请选择角色</option>
-                <option>管理员</option>
-                <option>编辑者</option>
-                <option>查看者</option>
-              </select>
+              {/* 示例使用新的 Select 组件 */}
+              <div className="w-full">
+                {/* 该示例为静态展示，若需要交互可引入 useState 管理 value */}
+                <Select
+                  value={"viewer"}
+                  onChange={() => {}}
+                  options={[
+                    { value: 'placeholder', label: '请选择角色' },
+                    { value: 'admin', label: '管理员' },
+                    { value: 'editor', label: '编辑者' },
+                    { value: 'viewer', label: '查看者' },
+                  ]}
+                />
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -479,21 +488,29 @@ const ModalExample: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     语言
                   </label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option>简体中文</option>
-                    <option>English</option>
-                    <option>日本語</option>
-                  </select>
+                  <Select
+                    value={"zh"}
+                    onChange={() => {}}
+                    options={[
+                      { value: 'zh', label: '简体中文' },
+                      { value: 'en', label: 'English' },
+                      { value: 'jp', label: '日本語' },
+                    ]}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     时区
                   </label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option>UTC+8 (北京时间)</option>
-                    <option>UTC+0 (格林威治时间)</option>
-                    <option>UTC-5 (东部时间)</option>
-                  </select>
+                  <Select
+                    value={"utc+8"}
+                    onChange={() => {}}
+                    options={[
+                      { value: 'utc+8', label: 'UTC+8 (北京时间)' },
+                      { value: 'utc+0', label: 'UTC+0 (格林威治时间)' },
+                      { value: 'utc-5', label: 'UTC-5 (东部时间)' },
+                    ]}
+                  />
                 </div>
               </div>
             </div>

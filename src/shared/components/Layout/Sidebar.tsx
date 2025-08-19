@@ -57,7 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
-        <div className="flex-1 flex flex-col justify-center items-center w-full gap-3">
+        <div className="flex-1 flex flex-col justify-center items-center">
           <div>Sidebar</div>
         </div>
         <div className="mb-3 w-full flex flex-col items-center">

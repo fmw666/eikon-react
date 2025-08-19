@@ -1,11 +1,44 @@
+/**
+ * @file Button.tsx
+ * @description Button component
+ * @author fmw666@github
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
 import React from 'react';
 
 import { cn } from '@/shared/utils/cn';
+
+// =================================================================================================
+// Types
+// =================================================================================================
 
 // Button variant types
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success';
 type ButtonSize = 'sm' | 'md' | 'lg' | 'xl';
 type ButtonRadius = 'default' | 'rounded' | 'pill' | 'full' | 'none';
+
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children?: React.ReactNode;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  radius?: ButtonRadius;
+  fullWidth?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  loading?: boolean;
+  loadingText?: string;
+  // Icon mode props
+  icon?: React.ReactNode;
+  isIcon?: boolean;
+}
+
+// =================================================================================================
+// Styles
+// =================================================================================================
 
 // Variant styles mapping
 const variantStyles: Record<ButtonVariant, string> = {
@@ -42,20 +75,9 @@ const radiusStyles: Record<ButtonRadius, string> = {
   none: "rounded-none",
 };
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children?: React.ReactNode;
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-  radius?: ButtonRadius;
-  fullWidth?: boolean;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-  loading?: boolean;
-  loadingText?: string;
-  // Icon mode props
-  icon?: React.ReactNode;
-  isIcon?: boolean;
-}
+// =================================================================================================
+// Component
+// =================================================================================================
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
@@ -84,7 +106,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const buttonClasses = cn(
       // Base styles - mobile-first approach
-      "inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 touch-manipulation",
+      "inline-flex items-center justify-center font-medium transition-all duration-200 outline-none focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 touch-manipulation",
       // Focus ring - only add if not explicitly removed
       !className?.includes('focus:ring-0') && "focus:ring-2 focus:ring-offset-2",
       variantStyles[variant],
@@ -176,4 +198,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 Button.displayName = "Button";
 
+// =================================================================================================
+// Exports
+// =================================================================================================
+
 export { Button };
+export type { ButtonProps };

@@ -2,7 +2,6 @@
  * @file main.tsx
  * @description Main entry point for the application
  * @author fmw666@github
- * @date 2025-07-21
  */
 
 // =================================================================================================
