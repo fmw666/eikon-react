@@ -22,7 +22,7 @@ import { RouteConfig } from './types';
 // Lazy-loaded Components
 // =================================================================================================
 
-const ExamplePage = lazy(() => import('@/features/example/pages/PerformanceDemoPage'));
+const ExamplePage = lazy(() => import('@/features/example/pages/ExamplePage'));
 const NotFoundPage = lazy(() => import('@/app/pages/NotFoundPage'));
 const HomePage = lazy(() => import('@/features/home/pages/HomePage'));
 const TaskIndexPage = lazy(() => import('@/features/task/pages/TaskIndexPage'));

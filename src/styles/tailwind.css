@@ -75,7 +75,21 @@
 
 @layer components {}
 
-@layer utilities {}
+@layer utilities {
+  /* 自定义动画速度 */
+  .animate-ping-slow {
+    animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  .animate-ping-fast {
+    animation: ping 0.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  .animate-ping-very-fast {
+    animation: ping 0.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  .animate-ping-very-slow {
+    animation: ping 5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+}
 
 @layer base {
   * {

@@ -85,7 +85,7 @@ const TaskDetailsPage: React.FC = () => {
       buttonText={t('task.details.back')} 
       buttonClick={() => navigate(ROUTES.TASK.ROOT)}
     >
-      <div className="max-w-2xl mx-auto max-h-[600px] overflow-y-auto pr-2">
+      <div className="max-w-2xl mx-auto max-h-[40vh] overflow-y-auto pr-2">
         <div className="bg-white break-words rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{task.title}</h1>
           <p className="text-sm text-gray-500">#{task.id}</p>
