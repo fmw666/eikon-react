@@ -14,7 +14,6 @@
     @apply w-1 h-1;
     background-color: #6fb1d02e;
   }
-
   ::-webkit-scrollbar-thumb {
     background-color: #6fb1d0;
   }
@@ -36,7 +35,7 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
+    --input: 0 0% 94.8%;
     --ring: 0 0% 3.9%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
@@ -46,30 +45,30 @@
     --radius: 0.5rem;
   }
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --background: 240 16% 10%;              /* 深蓝灰背景 */
+    --foreground: 220 20% 96%;              /* 几乎白色文字 */
+    --card: 230 16% 14%;                    /* 卡片深色 */
+    --card-foreground: 220 20% 96%;
+    --popover: 240 16% 12%;
+    --popover-foreground: 220 20% 96%;
+    --primary: 260 80% 70%;                 /* 主色：亮紫蓝 */
+    --primary-foreground: 240 16% 10%;      /* 主色前景：深色 */
+    --secondary: 220 20% 20%;               /* 次色：深蓝 */
+    --secondary-foreground: 220 20% 96%;
+    --muted: 220 16% 18%;                   /* 静默色：更深蓝灰 */
+    --muted-foreground: 220 10% 60%;
+    --accent: 280 60% 40%;                  /* 强调色：紫色 */
+    --accent-foreground: 220 20% 96%;
+    --destructive: 0 80% 50%;               /* 错误色：红色 */
+    --destructive-foreground: 220 20% 96%;
+    --border: 220 16% 22%;                  /* 边框色：深蓝灰 */
+    --input: 220 16% 22%;
+    --ring: 260 80% 70%;                    /* 高亮色：主色 */
+    --chart-1: 260 80% 70%;
+    --chart-2: 200 80% 60%;
+    --chart-3: 340 80% 60%;
+    --chart-4: 50 90% 60%;
+    --chart-5: 120 60% 50%;
   }
 }
 

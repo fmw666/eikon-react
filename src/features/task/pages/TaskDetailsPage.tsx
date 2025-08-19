@@ -56,8 +56,8 @@ const TaskDetailsPage: React.FC = () => {
         buttonClick={() => navigate(ROUTES.TASK.ROOT)}
       >
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-gray-600">{t('task.details.loading')}</span>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+          <span className="ml-3 text-muted-foreground">{t('task.details.loading')}</span>
         </div>
       </TaskLayout>
     );
@@ -70,10 +70,10 @@ const TaskDetailsPage: React.FC = () => {
         buttonText={t('task.details.back')} 
         buttonClick={() => navigate(ROUTES.TASK.ROOT)}
       >
-        <div className="flex flex-col items-center justify-center min-h-[400px] text-gray-500">
-          <ExclamationTriangleIcon className="h-16 w-16 text-gray-300 mb-4" />
+        <div className="flex flex-col items-center justify-center min-h-[400px] text-muted-foreground">
+          <ExclamationTriangleIcon className="h-16 w-16 text-muted-foreground/60 mb-4" />
           <h3 className="text-lg font-medium mb-2">{t('task.details.notFound')}</h3>
-          <p className="text-sm text-gray-400">任务不存在或已被删除</p>
+          <p className="text-sm text-muted-foreground/70">任务不存在或已被删除</p>
         </div>
       </TaskLayout>
     );
@@ -86,16 +86,16 @@ const TaskDetailsPage: React.FC = () => {
       buttonClick={() => navigate(ROUTES.TASK.ROOT)}
     >
       <div className="max-w-2xl mx-auto max-h-[40vh] overflow-y-auto pr-2">
-        <div className="bg-white break-words rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{task.title}</h1>
-          <p className="text-sm text-gray-500">#{task.id}</p>
-          <div className="flex flex-wrap items-center text-xs text-gray-400 mt-1 mb-2 space-x-4">
+        <div className="bg-card break-words rounded-lg shadow-sm border border-border p-6 mb-6">
+          <h1 className="text-2xl font-bold mb-2">{task.title}</h1>
+          <p className="text-sm text-muted-foreground">#{task.id}</p>
+          <div className="flex flex-wrap items-center text-xs text-muted-foreground mt-1 mb-2 space-x-4">
             <span>User ID: {task.userId || '未知'}</span>
             <span>
               Date: {task.createdAt ? new Date(task.createdAt).toLocaleString(i18n.language) : 'Unknown'}
             </span>
           </div>
-          <p className="text-gray-700 mt-4 leading-relaxed whitespace-pre-wrap">
+          <p className="mt-4 leading-relaxed whitespace-pre-wrap">
             {task.description || '暂无描述'}
           </p>
         </div>

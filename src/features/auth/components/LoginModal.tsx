@@ -60,7 +60,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t('auth.loginModal.email')}
-          className="border p-2 rounded"
+          className="border border-border bg-input text-foreground placeholder:text-muted-foreground p-2 rounded focus:outline-none focus:ring-2 focus:ring-ring transition-colors transition-shadow duration-200"
           autoComplete="email"
         />
         <input
@@ -68,10 +68,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder={t('auth.loginModal.password')}
-          className="border p-2 rounded"
+          className="border border-border bg-input text-foreground placeholder:text-muted-foreground p-2 rounded focus:outline-none focus:ring-2 focus:ring-ring transition-colors transition-shadow duration-200"
           autoComplete="current-password"
         />
-        {error && <div className="text-red-500 text-sm">{t(error)}</div>}
+        {error && <div className="text-destructive text-sm">{t(error)}</div>}
         <Button onClick={handleLogin} disabled={loading}>
           {loading ? t('auth.loginModal.loggingIn') : t('auth.loginModal.login')}
         </Button>

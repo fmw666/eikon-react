@@ -75,7 +75,7 @@ const TaskIndexPage: React.FC = () => {
           </div>
 
           {tasks.length === 0 ? (
-            <div className="text-gray-500">{t('task.index.noTasks')}</div>
+            <div className="text-muted-foreground">{t('task.index.noTasks')}</div>
           ) : (
             <div className="flex flex-col gap-1 max-h-[30vh] overflow-y-auto pr-2">
               {tasks.map(task => <TaskCard key={task.id} task={task} onClick={() => navigate(ROUTES.TASK.BY_ID.replace(':id', task.id))} />)}
@@ -83,7 +83,7 @@ const TaskIndexPage: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="text-gray-500 flex gap-4 items-center">
+        <div className="text-muted-foreground flex gap-4 items-center">
           <div>{t('auth.notLoggedIn')}</div>
           <Button
             variant="primary"

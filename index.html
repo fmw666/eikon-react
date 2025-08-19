@@ -9,8 +9,22 @@
     <title>AI-DevKit</title>
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <link rel="manifest" href="/site.webmanifest" />
+    <!-- Initialize theme early to avoid flash -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var resolved = stored ? (function (t) { try { return JSON.parse(t); } catch (e) { return t; } })(stored) : 'system';
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var isDark = resolved === 'dark' || (resolved !== 'light' && prefersDark);
+          var root = document.documentElement;
+          root.classList.remove('light', 'dark');
+          root.classList.add(isDark ? 'dark' : 'light');
+        } catch (e) {}
+      })();
+    </script>
   </head>
-  <body class="bg-gray-50 dark:bg-gray-900">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

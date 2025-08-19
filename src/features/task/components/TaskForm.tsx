@@ -33,9 +33,9 @@ const TaskForm: React.FC<TaskFormProps> = ({
       className="space-y-4"
     >
       <div>
-        <label className="block mb-1">{t('task.new.form.title')}</label>
+        <label className="block mb-1 text-sm text-foreground">{t('task.new.form.title')}</label>
         <input
-          className="w-full border p-2 rounded"
+          className="w-full border border-border bg-input text-foreground placeholder:text-muted-foreground p-2 rounded focus:outline-none focus:ring-2 focus:ring-ring transition-colors transition-shadow duration-200"
           value={title}
           onChange={e => onTitleChange(e.target.value)}
           required
@@ -43,9 +43,9 @@ const TaskForm: React.FC<TaskFormProps> = ({
         />
       </div>
       <div>
-        <label className="block mb-1">{t('task.new.form.description')}</label>
+        <label className="block mb-1 text-sm text-foreground">{t('task.new.form.description')}</label>
         <textarea
-          className="w-full border p-2 rounded"
+          className="w-full border border-border bg-input text-foreground placeholder:text-muted-foreground p-2 rounded focus:outline-none focus:ring-2 focus:ring-ring transition-colors transition-shadow duration-200"
           value={description}
           onChange={e => onDescriptionChange(e.target.value)}
           rows={4}

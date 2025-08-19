@@ -51,8 +51,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       <aside
         className={`
           fixed left-0 top-1/2 -translate-y-1/2 h-[30vh] min-h-[200px] 
-          border-t border-r border-gray-200 rounded-r-lg flex flex-col items-center 
-          shadow-lg z-40 bg-white px-2 transition-transform duration-300 ease-in-out
+          border-t border-r border-border rounded-r-lg flex flex-col items-center 
+          shadow-lg z-40 bg-card text-card-foreground px-2 transition-transform duration-300 ease-in-out
           md:translate-x-0
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}

@@ -9,12 +9,12 @@ type ButtonRadius = 'default' | 'rounded' | 'pill' | 'full' | 'none';
 
 // Variant styles mapping
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-sm hover:shadow-md disabled:hover:bg-blue-600 disabled:hover:shadow-sm",
-  secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500 border border-gray-300 disabled:hover:bg-gray-100",
-  outline: "bg-transparent text-blue-600 border border-blue-600 hover:bg-blue-50 focus:ring-blue-500 disabled:hover:bg-transparent",
-  ghost: "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-500 disabled:hover:bg-transparent",
-  danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm hover:shadow-md disabled:hover:bg-red-600 disabled:hover:shadow-sm",
-  success: "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 shadow-sm hover:shadow-md disabled:hover:bg-green-600 disabled:hover:shadow-sm",
+  primary: "bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-ring shadow-sm hover:shadow-md disabled:hover:bg-primary disabled:hover:shadow-sm",
+  secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:ring-ring border border-border disabled:hover:bg-secondary",
+  outline: "bg-transparent text-foreground border border-border hover:bg-accent hover:text-accent-foreground focus:ring-ring disabled:hover:bg-transparent",
+  ghost: "bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground focus:ring-ring disabled:hover:bg-transparent",
+  danger: "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-ring shadow-sm hover:shadow-md disabled:hover:bg-destructive disabled:hover:shadow-sm",
+  success: "bg-green-600 text-white hover:bg-green-700 focus:ring-ring shadow-sm hover:shadow-md disabled:hover:bg-green-600 disabled:hover:shadow-sm",
 };
 
 // Size styles mapping

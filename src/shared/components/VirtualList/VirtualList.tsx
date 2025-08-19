@@ -80,7 +80,7 @@ export function VirtualList<T>({
         className={`virtual-list-empty ${className}`}
         style={{ height, width, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
-        <div className="text-gray-500 text-center">
+        <div className="text-muted-foreground text-center">
           <div className="text-4xl mb-2">📭</div>
           <div>暂无数据</div>
         </div>

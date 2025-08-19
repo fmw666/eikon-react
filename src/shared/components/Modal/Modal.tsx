@@ -62,14 +62,14 @@ const Modal: React.FC<ModalProps> = ({
   if (!open) return null;
 
   const modalContent = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-30">
-      <div className={`bg-white rounded-xl shadow-lg w-full ${getModalSizeClasses(size)} ${getModalPadding(size)} relative`}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30">
+      <div className={`bg-card text-card-foreground rounded-xl shadow-lg w-full ${getModalSizeClasses(size)} ${getModalPadding(size)} relative`}>
         <Button
           variant="ghost"
           size="sm"
           icon={<XMarkIcon className="w-6 h-6" />}
           onClick={onClose}
-          className="absolute right-6 top-5 text-gray-400 hover:text-black"
+          className="absolute right-6 top-5 text-muted-foreground hover:text-foreground"
           aria-label="Close"
         />
         {title && <div className="text-lg font-semibold mb-4">{title}</div>}

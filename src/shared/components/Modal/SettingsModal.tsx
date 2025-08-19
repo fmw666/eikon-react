@@ -46,7 +46,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         <section>
           <div className="text-sm font-medium mb-2">{t('settings.language')}</div>
           <select
-            className="w-full p-2 border border-gray-300 rounded bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition hover:border-blue-400"
+            className="w-full p-2 border border-border rounded bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition hover:border-ring"
             value={i18n.language}
             onChange={handleLanguageChange}
           >
@@ -58,7 +58,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         <section>
           <div className="text-sm font-medium mb-2">{t('settings.theme')}</div>
           <select
-            className="w-full p-2 border border-gray-300 rounded bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition hover:border-blue-400"
+            className="w-full p-2 border border-border rounded bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition hover:border-ring"
             value={theme}
             onChange={handleThemeChange}
           >
