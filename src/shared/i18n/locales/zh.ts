@@ -45,4 +45,19 @@ export default {
       },
     },
   },
+  settings: {
+    title: '设置',
+    open: '设置',
+    language: '语言',
+    languages: {
+      en: '英文',
+      zh: '中文',
+    },
+    theme: '主题',
+    themes: {
+      system: '跟随系统',
+      light: '浅色',
+      dark: '深色',
+    },
+  },
 };

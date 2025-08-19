@@ -45,4 +45,19 @@ export default {
       },
     },
   },
+  settings: {
+    title: 'Settings',
+    open: 'Setting',
+    language: 'Language',
+    languages: {
+      en: 'English',
+      zh: 'Chinese',
+    },
+    theme: 'Theme',
+    themes: {
+      system: 'System',
+      light: 'Light',
+      dark: 'Dark',
+    },
+  },
 };

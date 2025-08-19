@@ -32,7 +32,7 @@ const TaskDetailsPage: React.FC = () => {
   const { getTaskById } = useTaskActions();
   const navigate = useNavigate();
   const [task, setTask] = useState<Task | null>(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isFetchingTask, setIsFetchingTask] = useState<boolean>(true);
 
   useEffect(() => {
@@ -89,6 +89,12 @@ const TaskDetailsPage: React.FC = () => {
         <div className="bg-white break-words rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{task.title}</h1>
           <p className="text-sm text-gray-500">#{task.id}</p>
+          <div className="flex flex-wrap items-center text-xs text-gray-400 mt-1 mb-2 space-x-4">
+            <span>User ID: {task.userId || '未知'}</span>
+            <span>
+              Date: {task.createdAt ? new Date(task.createdAt).toLocaleString(i18n.language) : 'Unknown'}
+            </span>
+          </div>
           <p className="text-gray-700 mt-4 leading-relaxed whitespace-pre-wrap">
             {task.description || '暂无描述'}
           </p>

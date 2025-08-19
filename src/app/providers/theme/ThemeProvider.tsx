@@ -34,7 +34,7 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const setIsDarkMode = useStore(themeStore, state => state.setIsDarkMode);
 
   useEffect(() => {
-    themeStore.getState().setTheme(theme);
+    themeStore.setState({ theme });
   }, [theme]);
 
   useEffect(() => {

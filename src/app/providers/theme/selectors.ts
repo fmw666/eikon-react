@@ -11,6 +11,7 @@
 import { useStore } from 'zustand';
 
 import { themeStore } from './themeStore';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
 
 // =================================================================================================
 // Types
@@ -51,24 +52,30 @@ function useIsManualTheme() {
 // =================================================================================================
 
 function useMemoizedThemeConfig() {
-  return useStore(
+  return useStoreWithEqualityFn(
     themeStore,
     state => ({
       theme: state.theme,
       isDarkMode: state.isDarkMode,
       isSystem: state.theme === 'system',
-    })
+    }),
+    (prev, next) => {
+      return prev.theme === next.theme && prev.isDarkMode === next.isDarkMode && prev.isSystem === next.isSystem;
+    }
   );
 }
 
 function useMemoizedThemeState() {
-  return useStore(
+  return useStoreWithEqualityFn(
     themeStore,
     state => ({
       theme: state.theme,
       isDarkMode: state.isDarkMode,
       setTheme: state.setTheme,
-    })
+    }),
+    (prev, next) => {
+      return prev.theme === next.theme && prev.isDarkMode === next.isDarkMode && prev.setTheme === next.setTheme;
+    }
   );
 }
 
