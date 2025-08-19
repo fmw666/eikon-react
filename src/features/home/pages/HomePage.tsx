@@ -49,7 +49,7 @@ const HomePage: React.FC = () => {
       <div className="absolute top-20 right-20 w-16 h-16 bg-red-400 rounded-full opacity-15 animate-bounce"></div>
       <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-green-400 rounded-full opacity-20 animate-ping-slow"></div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
+      <div className="sm:w-[80vw] w-[90vw] mx-auto px-4 py-16 relative z-10 flex flex-col justify-center items-center min-h-screen">
         {/* 漫画标题 */}
         <div className="text-center mb-12">
           <h1 className="text-6xl font-black text-gray-800 mb-4 relative" style={{
