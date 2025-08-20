@@ -9,7 +9,7 @@
 // =================================================================================================
 
 export { AppProvider } from './AppProvider';
-export { AuthInitializer, TaskInitializer } from './initializers';
+export { AuthInitializer, TaskInitializer, LanguageInitializer } from './initializers';
 
 // Theme exports
 export {
@@ -23,6 +23,14 @@ export {
   useMemoizedThemeState,
 } from './theme';
 export type { Theme, ThemeState } from './theme';
+
+// Language exports
+export {
+  useLanguage,
+  useSetLanguage,
+  useMemoizedLanguageState,
+} from './language';
+export type { Language, LanguageState } from './language';
 
 // Auth UI exports
 export {

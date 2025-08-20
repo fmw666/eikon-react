@@ -1,6 +1,6 @@
 /**
- * @file AppProvider.tsx
- * @description AppProvider component, provides all providers to the app
+ * @file languageStore.ts
+ * @description Language state store using Zustand
  * @author fmw666@github
  */
 
@@ -8,41 +8,35 @@
 // Imports
 // =================================================================================================
 
-import React, { type ReactNode } from 'react';
-
-import { AuthUIProvider } from './auth';
-import { AuthInitializer, LanguageInitializer } from './initializers';
-import { LanguageProvider } from './language';
-import { ThemeProvider } from './theme';
+// --- Third-party Libraries ---
+import { createStore } from 'zustand/vanilla';
+import { subscribeWithSelector } from 'zustand/middleware';
 
 // =================================================================================================
 // Types
 // =================================================================================================
 
-interface AppProviderProps {
-  children: ReactNode;
+type Language = 'zh' | 'en';
+
+interface LanguageState {
+  language: Language;
+  setLanguage: (language: Language) => void;
 }
 
 // =================================================================================================
-// Components
+// Store
 // =================================================================================================
 
-const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <AuthUIProvider>
-          {children}
-        </AuthUIProvider>
-        <AuthInitializer />
-        <LanguageInitializer />
-      </LanguageProvider>
-    </ThemeProvider>
-  );
-};
+const languageStore = createStore(
+  subscribeWithSelector<LanguageState>((set) => ({
+    language: 'zh',
+    setLanguage: (language) => set({ language }),
+  }))
+);
 
 // =================================================================================================
 // Exports
 // =================================================================================================
 
-export { AppProvider };
+export { languageStore };
+export type { Language, LanguageState };

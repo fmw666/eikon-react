@@ -15,7 +15,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 // --- Absolute Imports ---
-import { useMemoizedThemeState } from '@/app/providers/theme/selectors';
+import { useMemoizedThemeState, useMemoizedLanguageState } from '@/app/providers';
 import { Select } from '@/shared/components/Select';
 
 // --- Relative Imports ---
@@ -33,8 +33,9 @@ interface SettingsModalProps extends Pick<ModalProps, 'open' | 'onClose'> {}
 // =================================================================================================
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
-  const { i18n, t } = useTranslation();
+  const { t } = useTranslation();
   const { theme, setTheme } = useMemoizedThemeState();
+  const { language, setLanguage } = useMemoizedLanguageState();
 
   const languageOptions = useMemo(
     () => [
@@ -59,9 +60,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ open, onClose }) => {
         <section>
           <div className="text-sm font-medium mb-2">{t('settings.language')}</div>
           <Select
-            value={i18n.language}
+            value={language}
             options={languageOptions}
-            onChange={(val) => i18n.changeLanguage(val)}
+            onChange={(val) => setLanguage(val as 'zh' | 'en')}
           />
         </section>
 

@@ -92,7 +92,7 @@ export default {
       },
     },
     footer: {
-      message: '准备好开始你的 AI 开发之旅了吗？',
+      message: '准备好开始你的开发之旅了吗？',
     },
   },
 };
