@@ -59,7 +59,6 @@ export default defineConfig({
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
           ui: ['@headlessui/react', '@heroicons/react'],
-          motion: ['framer-motion'],
         },
       },
     },
