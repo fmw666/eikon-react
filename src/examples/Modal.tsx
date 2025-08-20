@@ -1,6 +1,6 @@
 /**
  * @file Modal.tsx
- * @description Modal component example
+ * @description Modal component example with anime style design
  * @author fmw666@github
  */
 
@@ -25,17 +25,23 @@ import {
   ArrowDownTrayIcon,
   ArrowRightIcon,
   ArrowLeftIcon,
+  RocketLaunchIcon,
+  SparklesIcon,
+  BoltIcon,
+  FireIcon,
 } from '@heroicons/react/24/outline';
 
 import { Button } from '@/shared/components/Button';
 import { Modal, type ModalSize } from '@/shared/components/Modal';
 import { Select } from '@/shared/components/Select';
+import { useMemoizedThemeState } from '@/app/providers';
 
 // =================================================================================================
 // Component
 // =================================================================================================
 
 const ModalExample: React.FC = () => {
+  const { isDarkMode } = useMemoizedThemeState();
   const [basicModalOpen, setBasicModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [formModalOpen, setFormModalOpen] = useState(false);
@@ -82,22 +88,68 @@ const ModalExample: React.FC = () => {
   // =================================================================================================
 
   return (
-    <div className="p-6 space-y-8 max-w-6xl mx-auto">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">Modal 组件示例</h2>
-        <p className="text-lg text-gray-600">
+    <div className={`space-y-8 transition-all duration-500 ease-out ${
+      isDarkMode ? 'text-gray-200' : 'text-gray-800'
+    }`}>
+      {/* 动漫风格标题 */}
+      <div className={`text-center mb-8 transition-all duration-500 ease-out ${
+        isDarkMode ? 'text-white' : 'text-gray-800'
+      }`}>
+        <h2 className={`text-4xl font-black mb-4 transition-all duration-500 ease-out ${
+          isDarkMode ? 'text-white' : 'text-gray-800'
+        }`} style={{
+          textShadow: isDarkMode 
+            ? '3px 3px 0px #374151, 6px 6px 0px #000' 
+            : '3px 3px 0px #fff, 6px 6px 0px #000',
+          fontFamily: 'Impact, Arial Black, sans-serif'
+        }}>
+          🎭 Modal 组件示例
+        </h2>
+        <div className={`w-24 h-2 mx-auto mb-4 transition-all duration-500 ease-out ${
+          isDarkMode ? 'bg-white' : 'bg-black'
+        }`}></div>
+        <p className={`text-lg font-bold transition-all duration-500 ease-out ${
+          isDarkMode ? 'text-gray-300' : 'text-gray-700'
+        }`} style={{
+          textShadow: isDarkMode ? '1px 1px 0px #374151' : '1px 1px 0px #fff'
+        }}>
           展示 Modal 组件的各种使用场景和功能，包括基础 Modal、确认 Modal、表单 Modal、图片画廊、设置面板等
         </p>
       </div>
 
       {/* Basic Modal */}
-      <section className="bg-white rounded-lg shadow-lg p-8">
-        <h3 className="text-2xl font-semibold mb-6 text-gray-800">基础 Modal</h3>
+      <section className={`rounded-none p-6 border-4 border-black transition-all duration-500 ease-out ${
+        isDarkMode ? 'bg-gray-800' : 'bg-white'
+      }`} style={{
+        boxShadow: '8px 8px 0px #000',
+        backfaceVisibility: 'hidden',
+        transform: 'translateZ(0)'
+      }}>
+        {/* 漫画装饰 */}
+        <div className="absolute top-2 right-2 text-4xl">🎭</div>
+        <div className="absolute bottom-2 left-2 text-2xl">✨</div>
+        
+        <h3 className={`text-2xl font-black mb-6 transition-all duration-500 ease-out ${
+          isDarkMode ? 'text-white' : 'text-gray-800'
+        }`} style={{
+          textShadow: isDarkMode ? '2px 2px 0px #374151' : '2px 2px 0px #fff',
+          fontFamily: 'Impact, Arial Black, sans-serif'
+        }}>
+          🎪 基础 Modal
+        </h3>
         <div className="space-y-4">
-          <p className="text-gray-600">
+          <p className={`font-bold transition-all duration-500 ease-out ${
+            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+          }`} style={{
+            textShadow: isDarkMode ? '1px 1px 0px #374151' : '1px 1px 0px #fff'
+          }}>
             最基础的 Modal 使用方式，包含标题、内容和操作按钮。
           </p>
-          <Button variant="primary" onClick={() => setBasicModalOpen(true)}>
+          <Button 
+            variant="primary" 
+            onClick={() => setBasicModalOpen(true)}
+          >
+            <RocketLaunchIcon className="w-5 h-5 mr-2" />
             打开基础 Modal
           </Button>
         </div>
@@ -117,20 +169,43 @@ const ModalExample: React.FC = () => {
             </>
           }
         >
-          <p className="text-gray-600 mb-4">
-            这是一个基础的 Modal 示例，展示了 Modal 组件的基本功能。
-          </p>
-          <p className="text-gray-600">
-            您可以在这里放置任何内容，包括文本、表单、图片等。
-          </p>
+          <div className="space-y-4">
+            <p className="text-gray-600">
+              这是一个基础的 Modal 示例，展示了 Modal 组件的基本功能。
+            </p>
+            <p className="text-gray-600">
+              您可以在这里放置任何内容，包括文本、表单、图片等。
+            </p>
+          </div>
         </Modal>
       </section>
 
       {/* Modal Sizes */}
-      <section className="bg-white rounded-lg shadow-lg p-8">
-        <h3 className="text-2xl font-semibold mb-6 text-gray-800">Modal 尺寸</h3>
+      <section className={`rounded-none p-6 border-4 border-black transition-all duration-500 ease-out ${
+        isDarkMode ? 'bg-gray-800' : 'bg-white'
+      }`} style={{
+        boxShadow: '8px 8px 0px #000',
+        backfaceVisibility: 'hidden',
+        transform: 'translateZ(0)'
+      }}>
+        {/* 漫画装饰 */}
+        <div className="absolute top-2 right-2 text-4xl">📏</div>
+        <div className="absolute bottom-2 left-2 text-2xl">🔍</div>
+        
+        <h3 className={`text-2xl font-black mb-6 transition-all duration-500 ease-out ${
+          isDarkMode ? 'text-white' : 'text-gray-800'
+        }`} style={{
+          textShadow: isDarkMode ? '2px 2px 0px #374151' : '2px 2px 0px #fff',
+          fontFamily: 'Impact, Arial Black, sans-serif'
+        }}>
+          📏 Modal 尺寸
+        </h3>
         <div className="space-y-4">
-          <p className="text-gray-600">
+          <p className={`font-bold transition-all duration-500 ease-out ${
+            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+          }`} style={{
+            textShadow: isDarkMode ? '1px 1px 0px #374151' : '1px 1px 0px #fff'
+          }}>
             Modal 组件支持多种尺寸配置，适应不同的内容需求。
           </p>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -141,7 +216,8 @@ const ModalExample: React.FC = () => {
                 setSizeModalOpen(true);
               }}
             >
-              小尺寸 (sm)
+              <SparklesIcon className="w-4 h-4 mr-1" />
+              小尺寸
             </Button>
             <Button 
               variant="outline" 
@@ -150,7 +226,8 @@ const ModalExample: React.FC = () => {
                 setSizeModalOpen(true);
               }}
             >
-              中等尺寸 (md)
+              <BoltIcon className="w-4 h-4 mr-1" />
+              中等尺寸
             </Button>
             <Button 
               variant="outline" 
@@ -159,7 +236,8 @@ const ModalExample: React.FC = () => {
                 setSizeModalOpen(true);
               }}
             >
-              大尺寸 (lg)
+              <FireIcon className="w-4 h-4 mr-1" />
+              大尺寸
             </Button>
             <Button 
               variant="outline" 
@@ -168,7 +246,8 @@ const ModalExample: React.FC = () => {
                 setSizeModalOpen(true);
               }}
             >
-              超大尺寸 (xl)
+              <StarIcon className="w-4 h-4 mr-1" />
+              超大尺寸
             </Button>
             <Button 
               variant="outline" 
@@ -177,7 +256,8 @@ const ModalExample: React.FC = () => {
                 setSizeModalOpen(true);
               }}
             >
-              全屏尺寸 (full)
+              <HeartIcon className="w-4 h-4 mr-1" />
+              全屏尺寸
             </Button>
           </div>
         </div>
@@ -200,54 +280,55 @@ const ModalExample: React.FC = () => {
         >
           <div className="space-y-4">
             <p className="text-gray-600">
-              这是一个 <strong>{currentSize.toUpperCase()}</strong> 尺寸的 Modal 示例。
+              这是 {currentSize.toUpperCase()} 尺寸的 Modal 示例。
             </p>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900 mb-2">尺寸说明</h4>
-              <ul className="text-sm text-gray-600 space-y-1">
-                <li>• <strong>sm</strong>: 小尺寸，适合简单的确认对话框</li>
-                <li>• <strong>md</strong>: 中等尺寸，适合一般的表单和内容</li>
-                <li>• <strong>lg</strong>: 大尺寸，适合复杂表单</li>
-                <li>• <strong>xl</strong>: 超大尺寸，适合详细内容展示</li>
-                <li>• <strong>full</strong>: 全屏尺寸，适合复杂界面</li>
-              </ul>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-blue-50 rounded-lg p-4">
-                <h5 className="font-medium text-blue-900 mb-2">当前尺寸</h5>
-                <p className="text-blue-800 text-sm">{currentSize.toUpperCase()}</p>
-              </div>
-              <div className="bg-green-50 rounded-lg p-4">
-                <h5 className="font-medium text-green-900 mb-2">适用场景</h5>
-                <p className="text-green-800 text-sm">
-                  {currentSize === 'sm' && '简单确认、提示信息'}
-                  {currentSize === 'md' && '一般表单、设置面板'}
-                  {currentSize === 'lg' && '复杂表单、详细信息'}
-                  {currentSize === 'xl' && '数据展示、复杂界面'}
-                  {currentSize === 'full' && '全屏应用、复杂工作台'}
-                </p>
-              </div>
-            </div>
+            <p className="text-gray-600">
+              不同尺寸适用于不同的内容展示需求。
+            </p>
           </div>
         </Modal>
       </section>
 
-      {/* Confirmation Modal */}
-      <section className="bg-white rounded-lg shadow-lg p-8">
-        <h3 className="text-2xl font-semibold mb-6 text-gray-800">确认 Modal</h3>
+      {/* 确认 Modal */}
+      <section className={`rounded-none p-6 border-4 border-black transition-all duration-500 ease-out ${
+        isDarkMode ? 'bg-gray-800' : 'bg-white'
+      }`} style={{
+        boxShadow: '8px 8px 0px #000',
+        backfaceVisibility: 'hidden',
+        transform: 'translateZ(0)'
+      }}>
+        {/* 漫画装饰 */}
+        <div className="absolute top-2 right-2 text-4xl">⚠️</div>
+        <div className="absolute bottom-2 left-2 text-2xl">💥</div>
+        
+        <h3 className={`text-2xl font-black mb-6 transition-all duration-500 ease-out ${
+          isDarkMode ? 'text-white' : 'text-gray-800'
+        }`} style={{
+          textShadow: isDarkMode ? '2px 2px 0px #374151' : '2px 2px 0px #fff',
+          fontFamily: 'Impact, Arial Black, sans-serif'
+        }}>
+          ⚠️ 确认 Modal
+        </h3>
         <div className="space-y-4">
-          <p className="text-gray-600">
-            用于确认用户操作的 Modal，通常包含警告信息和确认按钮。
+          <p className={`font-bold transition-all duration-500 ease-out ${
+            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+          }`} style={{
+            textShadow: isDarkMode ? '1px 1px 0px #374151' : '1px 1px 0px #fff'
+          }}>
+            用于需要用户确认的重要操作，如删除、退出等。
           </p>
-          <Button variant="danger" onClick={() => setConfirmModalOpen(true)}>
-            删除项目
+          <Button 
+            variant="danger" 
+            onClick={() => setConfirmModalOpen(true)}
+          >
+            <ExclamationTriangleIcon className="w-5 h-5 mr-2" />
+            删除确认
           </Button>
         </div>
 
         <Modal
           open={confirmModalOpen}
           title="确认删除"
-          size="sm"
           onClose={() => setConfirmModalOpen(false)}
           actions={
             <>
@@ -260,14 +341,91 @@ const ModalExample: React.FC = () => {
             </>
           }
         >
-          <div className="flex items-start space-x-3">
-            <ExclamationTriangleIcon className="w-6 h-6 text-yellow-500 mt-0.5" />
-            <div>
-              <p className="text-gray-900 font-medium mb-2">您确定要删除这个项目吗？</p>
-              <p className="text-gray-600 text-sm">
-                此操作无法撤销，删除后项目及其所有相关数据将永久丢失。
-              </p>
-            </div>
+          <div className="space-y-4">
+            <p className="text-gray-600">
+              您确定要删除这个项目吗？此操作无法撤销。
+            </p>
+            <p className="text-gray-600">
+              删除后，所有相关数据将被永久移除。
+            </p>
+          </div>
+        </Modal>
+      </section>
+
+      {/* 成功/错误 Modal */}
+      <section className={`rounded-none p-6 border-4 border-black transition-all duration-500 ease-out ${
+        isDarkMode ? 'bg-gray-800' : 'bg-white'
+      }`} style={{
+        boxShadow: '8px 8px 0px #000',
+        backfaceVisibility: 'hidden',
+        transform: 'translateZ(0)'
+      }}>
+        {/* 漫画装饰 */}
+        <div className="absolute top-2 right-2 text-4xl">🎉</div>
+        <div className="absolute bottom-2 left-2 text-2xl">💔</div>
+        
+        <h3 className={`text-2xl font-black mb-6 transition-all duration-500 ease-out ${
+          isDarkMode ? 'text-white' : 'text-gray-800'
+        }`} style={{
+          textShadow: isDarkMode ? '2px 2px 0px #374151' : '2px 2px 0px #fff',
+          fontFamily: 'Impact, Arial Black, sans-serif'
+        }}>
+          🎉 成功/错误 Modal
+        </h3>
+        <div className="grid grid-cols-2 gap-4">
+          <Button 
+            variant="success" 
+            onClick={() => setSuccessModalOpen(true)}
+          >
+            <CheckCircleIcon className="w-5 h-5 mr-2" />
+            成功消息
+          </Button>
+          <Button 
+            variant="danger" 
+            onClick={() => setErrorModalOpen(true)}
+          >
+            <XCircleIcon className="w-5 h-5 mr-2" />
+            错误消息
+          </Button>
+        </div>
+
+        <Modal
+          open={successModalOpen}
+          title="操作成功"
+          onClose={() => setSuccessModalOpen(false)}
+          actions={
+            <Button variant="primary" onClick={() => setSuccessModalOpen(false)}>
+              确定
+            </Button>
+          }
+        >
+          <div className="space-y-4">
+            <p className="text-gray-600">
+              恭喜！您的操作已成功完成。
+            </p>
+            <p className="text-gray-600">
+              数据已保存，您可以继续其他操作。
+            </p>
+          </div>
+        </Modal>
+
+        <Modal
+          open={errorModalOpen}
+          title="操作失败"
+          onClose={() => setErrorModalOpen(false)}
+          actions={
+            <Button variant="danger" onClick={() => setErrorModalOpen(false)}>
+              确定
+            </Button>
+          }
+        >
+          <div className="space-y-4">
+            <p className="text-gray-600">
+              抱歉，操作失败了。
+            </p>
+            <p className="text-gray-600">
+              请检查网络连接或稍后重试。
+            </p>
           </div>
         </Modal>
       </section>
@@ -1137,7 +1295,7 @@ const ModalExample: React.FC = () => {
 };
 
 // =================================================================================================
-// Exports
+// Export
 // =================================================================================================
 
 export { ModalExample };

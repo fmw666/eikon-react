@@ -111,6 +111,21 @@
   animation: scale-in 0.6s ease-out forwards;
 }
 
+.animate-slide-in-down {
+  animation: slide-in-down 0.6s ease-out forwards;
+}
+
+@keyframes slide-in-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* 高级阴影效果 */
 .shadow-4xl {
   box-shadow: 6px 6px 0px #000;
