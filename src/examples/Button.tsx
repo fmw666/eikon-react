@@ -8,8 +8,10 @@
 // Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React, { useState } from 'react';
 
+// --- Third-party Libraries ---
 import {
   ChevronDownIcon,
   EllipsisHorizontalIcon,
@@ -19,8 +21,9 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
-import { Button } from '@/shared/components/Button';
+// --- Absolute Imports ---
 import { useMemoizedThemeState } from '@/app/providers';
+import { Button } from '@/shared/components/Button';
 
 // =================================================================================================
 // Component

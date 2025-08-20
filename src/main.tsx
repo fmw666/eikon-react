@@ -17,10 +17,12 @@ import { BrowserRouter as Router } from 'react-router-dom';
 // --- Third-party Libraries ---
 import ReactDOM from 'react-dom/client';
 
+// --- Absolute Imports ---
 import '@/shared/i18n';
-import '@/styles/index';
 import '@/shared/services/sentry';
+import '@/styles/index';
 
+// --- Relative Imports ---
 import App from './App';
 
 // =================================================================================================

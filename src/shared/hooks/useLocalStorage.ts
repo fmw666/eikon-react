@@ -4,8 +4,14 @@
  * @author fmw666@github
  */
 
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Core Libraries ---
 import { useState, useEffect, useCallback } from 'react';
 
+// --- Absolute Imports ---
 import type { StorageKey } from '@/shared/types/storage';
 
 // =================================================================================================
@@ -15,7 +21,7 @@ import type { StorageKey } from '@/shared/types/storage';
 /**
  * Options for useLocalStorage hook
  */
-export interface UseLocalStorageOptions {
+interface UseLocalStorageOptions {
   /** Whether to serialize/deserialize the value (default: true) */
   serialize?: boolean;
   /** Custom serializer function */
@@ -29,7 +35,7 @@ export interface UseLocalStorageOptions {
 /**
  * Return type for useLocalStorage hook
  */
-export type UseLocalStorageReturn<T> = [
+type UseLocalStorageReturn<T> = [
   T,
   (value: T | ((val: T) => T)) => void,
   () => void // remove function
@@ -94,7 +100,7 @@ const defaultDeserializer = <T>(value: string): T => {
  * removeUser();
  * ```
  */
-export function useLocalStorage<T>(
+function useLocalStorage<T>(
   key: StorageKey | string,
   initialValue: T,
   options: UseLocalStorageOptions = {}
@@ -216,7 +222,7 @@ export function useLocalStorage<T>(
 /**
  * Convenience hook for boolean localStorage values
  */
-export function useLocalStorageBoolean(
+function useLocalStorageBoolean(
   key: StorageKey | string,
   initialValue: boolean = false
 ): UseLocalStorageReturn<boolean> {
@@ -226,7 +232,7 @@ export function useLocalStorageBoolean(
 /**
  * Convenience hook for string localStorage values
  */
-export function useLocalStorageString(
+function useLocalStorageString(
   key: StorageKey | string,
   initialValue: string = ''
 ): UseLocalStorageReturn<string> {
@@ -236,9 +242,15 @@ export function useLocalStorageString(
 /**
  * Convenience hook for number localStorage values
  */
-export function useLocalStorageNumber(
+function useLocalStorageNumber(
   key: StorageKey | string,
   initialValue: number = 0
 ): UseLocalStorageReturn<number> {
   return useLocalStorage(key, initialValue);
 }
+
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export { useLocalStorage, useLocalStorageBoolean, useLocalStorageString, useLocalStorageNumber };

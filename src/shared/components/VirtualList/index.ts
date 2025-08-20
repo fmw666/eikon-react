@@ -1,8 +1,12 @@
 /**
  * @file index.ts
- * @description VirtualList 组件导出
+ * @description VirtualList component
  * @author fmw666@github
  */
+
+// =================================================================================================
+// Exports
+// =================================================================================================
 
 export { default as VirtualList } from './VirtualList';
 export { default } from './VirtualList';

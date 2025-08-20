@@ -8,10 +8,13 @@
 // Imports
 // =================================================================================================
 
+// --- Third-party Libraries ---
 import { useStore } from 'zustand';
 import { useStoreWithEqualityFn } from 'zustand/traditional';
 
+// --- Relative Imports ---
 import { taskStore } from '../store/taskStore';
+
 import type { Task } from '../types/taskTypes';
 
 // =================================================================================================

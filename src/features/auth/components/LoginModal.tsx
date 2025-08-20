@@ -8,14 +8,16 @@
 // Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React, { useState } from 'react';
 
+// --- Core-related Libraries ---
 import { useTranslation } from 'react-i18next';
 
+// --- Absolute Imports ---
+import { useAuthActions } from '@/features/auth';
 import { Button } from '@/shared/components/Button';
 import { Modal } from '@/shared/components/Modal';
-
-import { useAuthActions } from '@/features/auth';
 
 // =================================================================================================
 // Types

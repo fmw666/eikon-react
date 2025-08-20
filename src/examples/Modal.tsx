@@ -8,8 +8,10 @@
 // Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React, { useState } from 'react';
 
+// --- Third-party Libraries ---
 import {
   ExclamationTriangleIcon,
   InformationCircleIcon,
@@ -31,10 +33,11 @@ import {
   FireIcon,
 } from '@heroicons/react/24/outline';
 
+// --- Absolute Imports ---
+import { useMemoizedThemeState } from '@/app/providers';
 import { Button } from '@/shared/components/Button';
 import { Modal, type ModalSize } from '@/shared/components/Modal';
 import { Select } from '@/shared/components/Select';
-import { useMemoizedThemeState } from '@/app/providers';
 
 // =================================================================================================
 // Component
@@ -1303,7 +1306,7 @@ const ModalExample: React.FC = () => {
 };
 
 // =================================================================================================
-// Export
+// Exports
 // =================================================================================================
 
 export { ModalExample };

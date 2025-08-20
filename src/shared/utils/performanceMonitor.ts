@@ -1,6 +1,6 @@
 /**
  * @file performanceMonitor.ts
- * @description 性能监控工具 - 监控应用性能指标
+ * @description Performance monitoring tool
  * @author fmw666@github
  */
 
@@ -8,6 +8,7 @@
 // Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React from 'react';
 
 // =================================================================================================
@@ -282,7 +283,7 @@ class PerformanceMonitor {
 // Global Instance
 // =================================================================================================
 
-export const performanceMonitor = new PerformanceMonitor();
+const performanceMonitor = new PerformanceMonitor();
 
 // =================================================================================================
 // Utility Functions
@@ -291,7 +292,7 @@ export const performanceMonitor = new PerformanceMonitor();
 /**
  * 性能装饰器 - 用于测量函数执行时间
  */
-export function measurePerformance(name?: string) {
+function measurePerformance(name?: string) {
   return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value;
     const metricName = name || `${target.constructor.name}_${propertyName}`;
@@ -310,13 +311,13 @@ export function measurePerformance(name?: string) {
 /**
  * React 组件性能监控 HOC
  */
-export function withPerformanceMonitoring<P extends object>(
+function withPerformanceMonitoring<P extends object>(
   WrappedComponent: React.ComponentType<P>,
   componentName?: string
 ) {
-  return React.forwardRef<any, P>((props, ref) => {
-    const name = componentName || WrappedComponent.displayName || WrappedComponent.name;
-    
+  const name = componentName || WrappedComponent.displayName || WrappedComponent.name;
+  
+  const PerformanceMonitoredComponent = React.forwardRef<any, P>((props, ref) => {
     React.useEffect(() => {
       const start = performance.now();
       
@@ -328,11 +329,15 @@ export function withPerformanceMonitoring<P extends object>(
 
     return React.createElement(WrappedComponent, { ...props, ref } as any);
   });
+
+  PerformanceMonitoredComponent.displayName = `withPerformanceMonitoring(${name})`;
+  
+  return PerformanceMonitoredComponent;
 }
 
 // =================================================================================================
 // Exports
 // =================================================================================================
 
-export { PerformanceMonitor };
+export { performanceMonitor, measurePerformance, withPerformanceMonitoring };
 export type { PerformanceMetrics };

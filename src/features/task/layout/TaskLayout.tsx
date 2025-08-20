@@ -8,12 +8,14 @@
 // Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React from 'react';
 
+// --- Core-related Libraries ---
 import { useTranslation } from 'react-i18next';
 
+// --- Absolute Imports ---
 import { TaskInitializer } from '@/app/providers/initializers';
-
 import { Button } from '@/shared/components/Button';
 
 // =================================================================================================

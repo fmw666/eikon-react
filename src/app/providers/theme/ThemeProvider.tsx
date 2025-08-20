@@ -8,13 +8,19 @@
 // Imports
 // =================================================================================================
 
-import React, { useCallback, useEffect, type ReactNode } from 'react';
+// --- Core Libraries ---
+import React, { useCallback, useEffect } from 'react';
+import type { ReactNode } from 'react';
 
+// --- Third-party Libraries ---
 import { useStore } from 'zustand';
 
+// --- Absolute Imports ---
 import { useLocalStorage } from '@/shared/hooks/useLocalStorage';
 
+// --- Relative Imports ---
 import { themeStore } from './themeStore';
+
 import type { Theme } from './themeStore';
 
 // =================================================================================================

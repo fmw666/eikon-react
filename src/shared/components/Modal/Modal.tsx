@@ -1,14 +1,35 @@
+/**
+ * @file Modal.tsx
+ * @description Modal component
+ * @author fmw666@github
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Core Libraries ---
 import React from 'react';
 
+// --- Third-party Libraries ---
 import ReactDOM from 'react-dom';
 
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
-import { Button } from '../Button';
+// --- Absolute Imports ---
+import { Button } from '@/shared/components/Button';
 
-export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+// =================================================================================================
+// Types
+// =================================================================================================
 
-export interface ModalProps {
+type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
+
+// =================================================================================================
+// Component
+// =================================================================================================
+
+interface ModalProps {
   open: boolean;
   title?: string;
   children: React.ReactNode;
@@ -16,6 +37,10 @@ export interface ModalProps {
   actions?: React.ReactNode;
   size?: ModalSize;
 }
+
+// =================================================================================================
+// Component
+// =================================================================================================
 
 const getModalSizeClasses = (size: ModalSize): string => {
   switch (size) {
@@ -82,4 +107,9 @@ const Modal: React.FC<ModalProps> = ({
   return ReactDOM.createPortal(modalContent, document.body);
 };
 
+// =================================================================================================
+// Exports
+// =================================================================================================
+
 export default Modal;
+export type { ModalSize, ModalProps };

@@ -1,14 +1,17 @@
 /**
  * @file TaskInitializer.tsx
  * @description Initializes task state after auth is ready
+ * @author fmw666@github
  */
 
 // =================================================================================================
 // Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React, { useEffect } from 'react';
 
+// --- Absolute Imports ---
 import { useAuthInitialized, useAuthLoading, useUser } from '@/features/auth';
 import { useTaskActions, useTaskInitialized, useTaskLoading } from '@/features/task/selectors';
 

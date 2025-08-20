@@ -15,9 +15,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { SunIcon, MoonIcon, LanguageIcon } from '@heroicons/react/24/outline';
 
 // --- Absolute Imports ---
-import { getStaticExampleComponents, type ExampleComponent } from '../utils/componentDiscovery';
 import { useMemoizedThemeState, useMemoizedLanguageState } from '@/app/providers';
 import { Button } from '@/shared/components/Button';
+
+import { getStaticExampleComponents, type ExampleComponent } from '../utils/componentDiscovery';
 
 // =================================================================================================
 // Component

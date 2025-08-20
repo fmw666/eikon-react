@@ -8,10 +8,12 @@
 // Imports
 // =================================================================================================
 
+// --- Third-party Libraries ---
 import { useStore } from 'zustand';
-
-import { themeStore } from './themeStore';
 import { useStoreWithEqualityFn } from 'zustand/traditional';
+
+// --- Relative Imports ---
+import { themeStore } from './themeStore';
 
 // =================================================================================================
 // Types

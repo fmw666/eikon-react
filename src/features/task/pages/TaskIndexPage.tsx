@@ -8,13 +8,17 @@
 // Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React, { useState } from 'react';
 
+// --- Core-related Libraries ---
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+// --- Third-party Libraries ---
 import { ArrowRightStartOnRectangleIcon, UserIcon } from '@heroicons/react/24/solid';
 
+// --- Absolute Imports ---
 import { useOpenSignInModal } from '@/app/providers';
 import { ROUTES } from '@/app/router/constants';
 import { useUser, useAuthLoading, useAuthActions } from '@/features/auth';

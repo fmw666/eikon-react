@@ -1,9 +1,25 @@
+/**
+ * @file authService.ts
+ * @description Auth service
+ * @author fmw666@github
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Absolute Imports ---
 import { mockUser } from '@/mock/user';
 import { supabase } from '@/shared/services/supabase';
 
+// --- Relative Imports ---
 import { User } from '../types/authTypes';
 
-export const authService = {
+// =================================================================================================
+// Services
+// =================================================================================================
+
+const authService = {
   getSession: async (): Promise<User | null> => {
     if (!supabase) {
       console.warn('Supabase client is not initialized, returning mock data.');
@@ -83,3 +99,9 @@ export const authService = {
     }
   },
 };
+
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export { authService };

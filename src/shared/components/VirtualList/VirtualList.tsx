@@ -1,6 +1,6 @@
 /**
  * @file VirtualList.tsx
- * @description 虚拟滚动列表组件 - 优化大列表渲染性能
+ * @description VirtualList component - optimize large list rendering performance
  * @author fmw666@github
  */
 
@@ -8,7 +8,10 @@
 // Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React, { useCallback } from 'react';
+
+// --- Third-party Libraries ---
 import { FixedSizeList as List } from 'react-window';
 
 // =================================================================================================
@@ -31,7 +34,7 @@ interface VirtualListProps<T> {
 // Component
 // =================================================================================================
 
-export function VirtualList<T>({
+function VirtualList<T>({
   items,
   height,
   itemHeight,

@@ -5,9 +5,10 @@
  */
 
 // =================================================================================================
-// Import
+// Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React from 'react';
 
 // =================================================================================================
@@ -111,7 +112,7 @@ const AnimationDemo: React.FC = () => {
         </h5>
         <div className="text-xs text-gray-700 space-y-1">
           <p><strong>预定义类：</strong>使用 <code>animate-ping-very-fast</code>、<code>animate-ping-fast</code> 等</p>
-          <p><strong>自定义速度：</strong>使用内联样式 <code>animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite'</code></p>
+          <p><strong>自定义速度：</strong>使用内联样式 <code>animation: &apos;ping 2s cubic-bezier(0, 0, 0.2, 1) infinite&apos;</code></p>
         </div>
       </div>
     </div>

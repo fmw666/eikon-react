@@ -8,11 +8,14 @@
 // Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import { lazy, Suspense } from 'react';
 
+// --- Absolute Imports ---
 import { MainLayout, SimpleLayout } from '@/shared/components/Layout';
 import { PageLoading } from '@/shared/components/Loading';
 
+// --- Relative Imports ---
 import { ROUTES } from './constants';
 import { LayoutWrapper } from './LayoutWrapper';
 import { PrivateRoute } from './PrivateRoute';

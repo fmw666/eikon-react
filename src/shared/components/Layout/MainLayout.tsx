@@ -5,15 +5,19 @@
  */
 
 // =================================================================================================
-// Import
+// Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React, { useState } from 'react';
 
+// --- Third-party Libraries ---
 import { Bars3Icon } from '@heroicons/react/24/outline';
 
+// --- Absolute Imports ---
 import { Button } from '@/shared/components/Button';
 
+// --- Relative Imports ---
 import Header from './Header';
 import Sidebar from './Sidebar';
 
@@ -57,7 +61,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 // =================================================================================================
-// Export
+// Exports
 // =================================================================================================
 
 export default MainLayout;

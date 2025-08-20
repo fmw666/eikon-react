@@ -8,8 +8,10 @@
 // Imports
 // ================================================================================================
 
+// --- Core Libraries ---
 import React, { useEffect } from 'react';
 
+// --- Absolute Imports ---
 import { useAuthActions, useAuthInitialized, useAuthLoading } from '@/features/auth/selectors';
 
 // ================================================================================================

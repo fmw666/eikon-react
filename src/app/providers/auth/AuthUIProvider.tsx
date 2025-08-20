@@ -8,12 +8,17 @@
 // Imports
 // =================================================================================================
 
-import React, { type ReactNode } from 'react';
+// --- Core Libraries ---
+import React from 'react';
+import type { ReactNode } from 'react';
 
+// --- Third-party Libraries ---
 import { useStore } from 'zustand';
 
+// --- Absolute Imports ---
 import { LoginModal } from '@/features/auth';
 
+// --- Relative Imports ---
 import { authUIStore } from './authUIStore';
 
 // =================================================================================================

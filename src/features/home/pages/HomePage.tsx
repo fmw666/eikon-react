@@ -12,15 +12,15 @@
 import React, { useCallback, useState, useEffect } from 'react';
 
 // --- Core-related Libraries ---
+import { useTranslation, Trans } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 // --- Third-party Libraries ---
 import { RocketLaunchIcon, SparklesIcon, BoltIcon, DevicePhoneMobileIcon, SunIcon, MoonIcon, LanguageIcon } from '@heroicons/react/24/outline';
-import { useTranslation, Trans } from 'react-i18next';
 
 // --- Absolute Imports ---
-import { ROUTES } from '@/app/router/constants';
 import { useMemoizedThemeState, useMemoizedLanguageState } from '@/app/providers';
+import { ROUTES } from '@/app/router/constants';
 import { Button } from '@/shared/components/Button';
 
 // =================================================================================================
@@ -111,7 +111,7 @@ const HomePage: React.FC = () => {
       }`} style={{
         transitionDelay: isTransitioning ? '100ms' : '0ms'
       }}></div>
-      <div className={`absolute top-20 right-20 w-16 h-16 rounded-full opacity-10 animate-bounce transition-all duration-500 ease-out ${
+      <div className={`absolute top-20 right-20 w-16 h-16 rounded-full opacity-10 animate-bounce-slow transition-all duration-500 ease-out ${
         isDarkMode ? 'bg-blue-500' : 'bg-blue-400'
       }`} style={{
         transitionDelay: isTransitioning ? '150ms' : '0ms'

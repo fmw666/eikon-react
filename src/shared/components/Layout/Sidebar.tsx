@@ -5,15 +5,19 @@
  */
 
 // =================================================================================================
-// Import
+// Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React, { useCallback, useState } from 'react';
 
+// --- Core-related Libraries ---
 import { useTranslation } from 'react-i18next';
 
+// --- Third-party Libraries ---
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 
+// --- Absolute Imports ---
 import { Button } from '@/shared/components/Button';
 import { SettingsModal } from '@/shared/components/Modal';
 
@@ -79,7 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 };
 
 // =================================================================================================
-// Export
+// Exports
 // =================================================================================================
 
 export default Sidebar;

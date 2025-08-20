@@ -21,7 +21,7 @@ class PreloadService {
   private preloadCache = new Map<string, Promise<any>>();
   // private config: Required<PreloadConfig>;
 
-  constructor(config: PreloadConfig = {}) {
+  constructor(_: PreloadConfig = {}) {
     // this.config = {
     //   cacheTime: config.cacheTime || 5 * 60 * 1000, // 5分钟
     //   staleTime: config.staleTime || 30 * 1000, // 30秒

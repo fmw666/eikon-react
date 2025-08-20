@@ -8,23 +8,27 @@
 // Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React, { useEffect, useState } from 'react';
 
+// --- Core-related Libraries ---
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 
+// --- Third-party Libraries ---
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
+// --- Absolute Imports ---
 import { ROUTES } from '@/app/router/constants';
 
-import { useTaskActions, useTaskLoading } from '../selectors';
+// --- Relative Imports ---
 import TaskLayout from '../layout/TaskLayout';
+import { useTaskActions, useTaskLoading } from '../selectors';
 import { type Task } from '../types/taskTypes';
 
 // =================================================================================================
 // Component
 // =================================================================================================
-
 
 const TaskDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

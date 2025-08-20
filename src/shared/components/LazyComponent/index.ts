@@ -1,8 +1,12 @@
 /**
  * @file index.ts
- * @description LazyComponent 组件导出
+ * @description LazyComponent component
  * @author fmw666@github
  */
+
+// =================================================================================================
+// Exports
+// =================================================================================================
 
 export { createLazyComponent, preloadComponent, preloadComponents, ErrorBoundary } from './LazyComponent';
 export type { LazyComponentProps, LazyComponentConfig } from './LazyComponent';

@@ -8,10 +8,13 @@
 // Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React from 'react';
 
+// --- Third-party Libraries ---
 import { Routes, Route } from 'react-router-dom';
 
+// --- Relative Imports ---
 import { routes, wrapRoutesWithLayouts } from './routes';
 
 // =================================================================================================

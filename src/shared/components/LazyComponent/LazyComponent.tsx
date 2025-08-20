@@ -1,6 +1,6 @@
 /**
  * @file LazyComponent.tsx
- * @description 懒加载组件工具 - 实现组件按需加载和错误边界
+ * @description LazyComponent component - implements lazy loading and error boundary
  * @author fmw666@github
  */
 
@@ -8,7 +8,9 @@
 // Imports
 // =================================================================================================
 
-import React, { Suspense, lazy, Component, ReactNode } from 'react';
+// --- Core Libraries ---
+import React, { Suspense, lazy, Component } from 'react';
+import type { ReactNode } from 'react';
 
 // =================================================================================================
 // Types
@@ -82,7 +84,7 @@ class ErrorBoundary extends Component<
 /**
  * 创建懒加载组件
  */
-export function createLazyComponent(config: LazyComponentConfig) {
+const createLazyComponent = (config: LazyComponentConfig): React.ComponentType<any> => {
   const { component, fallback, preload = false, errorBoundary = true } = config;
 
   // 创建懒加载组件
@@ -111,7 +113,7 @@ export function createLazyComponent(config: LazyComponentConfig) {
   WrappedComponent.displayName = 'LazyComponent';
 
   return WrappedComponent;
-}
+};
 
 // =================================================================================================
 // Utility Functions
@@ -120,20 +122,20 @@ export function createLazyComponent(config: LazyComponentConfig) {
 /**
  * 预加载组件
  */
-export function preloadComponent(component: () => Promise<{ default: React.ComponentType<any> }>) {
+const preloadComponent = (component: () => Promise<{ default: React.ComponentType<any> }>) => {
   return component();
-}
+};
 
 /**
  * 预加载多个组件
  */
-export function preloadComponents(components: Array<() => Promise<{ default: React.ComponentType<any> }>>) {
+const preloadComponents = (components: Array<() => Promise<{ default: React.ComponentType<any> }>>) => {
   return Promise.all(components.map(component => component()));
-}
+};
 
 // =================================================================================================
 // Exports
 // =================================================================================================
 
-export { ErrorBoundary };
+export { createLazyComponent, ErrorBoundary, preloadComponent, preloadComponents };
 export type { LazyComponentConfig, LazyComponentProps };

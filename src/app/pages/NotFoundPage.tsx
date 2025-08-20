@@ -8,10 +8,13 @@
 // Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React from 'react';
 
+// --- Core-related Libraries ---
 import { useNavigate } from 'react-router-dom';
 
+// --- Absolute Imports ---
 import { Button } from '@/shared/components/Button';
 
 // =================================================================================================

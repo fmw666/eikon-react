@@ -5,14 +5,16 @@
  */
 
 // =================================================================================================
-// Import
+// Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React from 'react';
 
+// --- Absolute Imports ---
+import { AnimationDemo } from '@/examples/AnimationDemo';
 import { ButtonExample } from '@/examples/Button';
 import { ModalExample } from '@/examples/Modal';
-import { AnimationDemo } from '@/examples/AnimationDemo';
 import { PerformancePanel, CacheTestPanel, VirtualScrollDemo, LazyLoadDemo } from '@/examples/performance';
 import { SentryDemo } from '@/examples/SentryDemo';
 
@@ -20,7 +22,7 @@ import { SentryDemo } from '@/examples/SentryDemo';
 // Types
 // =================================================================================================
 
-export interface ExampleComponent {
+interface ExampleComponent {
   id: string;
   name: string;
   component: React.FC;
@@ -56,11 +58,7 @@ const componentImports = {
   })),
 };
 
-// =================================================================================================
-// Export
-// =================================================================================================
-
-export const discoverExampleComponents = async (): Promise<ExampleComponent[]> => {
+const discoverExampleComponents = async (): Promise<ExampleComponent[]> => {
   const components: ExampleComponent[] = [];
   
   for (const [id, importFn] of Object.entries(componentImports)) {
@@ -81,7 +79,7 @@ export const discoverExampleComponents = async (): Promise<ExampleComponent[]> =
 };
 
 // 同步版本，用于静态导入
-export const getStaticExampleComponents = (): ExampleComponent[] => {
+const getStaticExampleComponents = (): ExampleComponent[] => {
   return [
     {
       id: 'button',
@@ -133,3 +131,9 @@ export const getStaticExampleComponents = (): ExampleComponent[] => {
     }
   ];
 };
+
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export { discoverExampleComponents, getStaticExampleComponents };

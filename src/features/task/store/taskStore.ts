@@ -8,9 +8,11 @@
 // Imports
 // =================================================================================================
 
+// --- Third-party Libraries ---
 import { subscribeWithSelector } from 'zustand/middleware';
 import { createStore } from 'zustand/vanilla';
 
+// --- Relative Imports ---
 import { taskService } from '../services/taskService';
 import { Task } from '../types/taskTypes';
 

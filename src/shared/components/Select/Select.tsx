@@ -1,20 +1,40 @@
+/**
+ * @file Select.tsx
+ * @description Select component
+ * @author fmw666@github
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Core Libraries ---
 import React, { Fragment, useMemo } from 'react';
 
+// --- Third-party Libraries ---
 import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
 
-export interface SelectOption {
+// =================================================================================================
+// Types
+// =================================================================================================
+
+interface SelectOption {
   value: string;
   label: string;
 }
 
-export interface SelectProps {
+interface SelectProps {
   value: string;
   options: SelectOption[];
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
 }
+
+// =================================================================================================
+// Component
+// =================================================================================================
 
 const Select: React.FC<SelectProps> = ({ value, options, onChange, placeholder, className = '' }) => {
   const selectedOption = useMemo(() => options.find((opt) => opt.value === value) || null, [options, value]);
@@ -70,4 +90,9 @@ const Select: React.FC<SelectProps> = ({ value, options, onChange, placeholder, 
   );
 };
 
+// =================================================================================================
+// Exports
+// =================================================================================================
+
 export default Select;
+export type { SelectOption, SelectProps };

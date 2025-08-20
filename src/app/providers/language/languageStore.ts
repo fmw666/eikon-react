@@ -9,8 +9,8 @@
 // =================================================================================================
 
 // --- Third-party Libraries ---
-import { createStore } from 'zustand/vanilla';
 import { subscribeWithSelector } from 'zustand/middleware';
+import { createStore } from 'zustand/vanilla';
 
 // =================================================================================================
 // Types

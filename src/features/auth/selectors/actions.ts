@@ -8,10 +8,12 @@
 // Imports
 // =================================================================================================
 
+// --- Third-party Libraries ---
 import { useStore } from 'zustand';
 import { shallow } from 'zustand/shallow';
 import { useStoreWithEqualityFn } from 'zustand/traditional';
 
+// --- Relative Imports ---
 import { authStore } from '../store/authStore';
 
 // =================================================================================================

@@ -1,14 +1,16 @@
 /**
  * @file themeStore.ts
  * @description Theme state store using Zustand
+ * @author fmw666@github
  */
 
 // =================================================================================================
 // Imports
 // =================================================================================================
 
-import { createStore } from 'zustand/vanilla';
+// --- Third-party Libraries ---
 import { subscribeWithSelector } from 'zustand/middleware';
+import { createStore } from 'zustand/vanilla';
 
 // =================================================================================================
 // Types

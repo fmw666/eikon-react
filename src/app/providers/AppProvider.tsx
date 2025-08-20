@@ -8,8 +8,11 @@
 // Imports
 // =================================================================================================
 
-import React, { type ReactNode } from 'react';
+// --- Core Libraries ---
+import React from 'react';
+import type { ReactNode } from 'react';
 
+// --- Relative Imports ---
 import { AuthUIProvider } from './auth';
 import { AuthInitializer, LanguageInitializer } from './initializers';
 import { LanguageProvider } from './language';

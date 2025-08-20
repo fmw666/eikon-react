@@ -100,6 +100,18 @@
   .animate-pulse-very-slow {
     animation: pulse 5s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
+  .animate-bounce-slow {
+    animation: bounce 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  .animate-bounce-fast {
+    animation: bounce 0.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  .animate-bounce-very-fast {
+    animation: bounce 0.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  .animate-bounce-very-slow {
+    animation: bounce 5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
 }
 
 @layer base {

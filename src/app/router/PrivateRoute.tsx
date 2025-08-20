@@ -8,16 +8,22 @@
 // Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React, { useEffect, useRef } from 'react';
 
+// --- Core-related Libraries ---
 import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router-dom';
 
+// --- Third-party Libraries ---
 import { toast } from 'sonner';
 
+// --- Absolute Imports ---
 import { useUser, useAuthInitialized, useAuthLoading } from '@/features/auth';
 
+// --- Relative Imports ---
 import { ROUTES } from './constants';
+
 import type { PrivateRouteProps } from './types';
 
 // =================================================================================================

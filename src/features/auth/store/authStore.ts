@@ -8,9 +8,11 @@
 // Imports
 // =================================================================================================
 
+// --- Third-party Libraries ---
 import { subscribeWithSelector } from 'zustand/middleware';
 import { createStore } from 'zustand/vanilla';
 
+// --- Relative Imports ---
 import { authService } from '../services/authService';
 import { User } from '../types/authTypes';
 

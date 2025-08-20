@@ -1,10 +1,25 @@
+/**
+ * @file taskService.ts
+ * @description Task service
+ * @author fmw666@github
+ */
 
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Absolute Imports ---
 import { mockTasks } from '@/mock/task';
 import { supabase } from '@/shared/services/supabase';
 
+// --- Relative Imports ---
 import { Task } from '../types/taskTypes';
 
-export const taskService = {
+// =================================================================================================
+// Services
+// =================================================================================================
+
+const taskService = {
   getTasks: async (): Promise<Task[]> => {
     if (!supabase) {
       console.warn('Supabase client is not initialized, returning mock data.');
@@ -48,3 +63,9 @@ export const taskService = {
     return data;
   },
 };
+
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export { taskService };

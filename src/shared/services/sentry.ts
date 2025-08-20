@@ -9,11 +9,12 @@
 // =================================================================================================
 
 // --- Core Libraries ---
-import * as Sentry from '@sentry/react';
 import { useEffect } from 'react';
 
 // --- Core-Relative Imports ---
 import { createRoutesFromChildren, matchRoutes, useLocation, useNavigationType } from 'react-router-dom';
+
+import * as Sentry from '@sentry/react';
 
 // =================================================================================================
 // Init
