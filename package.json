@@ -16,6 +16,7 @@
     "@headlessui/react": "^1.7.18",
     "@heroicons/react": "^2.2.0",
     "@radix-ui/react-slot": "^1.2.3",
+    "@sentry/react": "8.30.0",
     "@supabase/supabase-js": "^2.49.4",
     "@types/react-window": "^1.8.8",
     "class-variance-authority": "^0.7.1",
@@ -34,6 +35,7 @@
     "zustand": "^4.5.1"
   },
   "devDependencies": {
+    "@sentry/vite-plugin": "2.20.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^14.3.1",
     "@testing-library/user-event": "^14.6.1",

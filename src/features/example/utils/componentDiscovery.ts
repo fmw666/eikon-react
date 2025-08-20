@@ -14,6 +14,7 @@ import { ButtonExample } from '@/examples/Button';
 import { ModalExample } from '@/examples/Modal';
 import { AnimationDemo } from '@/examples/AnimationDemo';
 import { PerformancePanel, CacheTestPanel, VirtualScrollDemo, LazyLoadDemo } from '@/examples/performance';
+import { SentryDemo } from '@/examples/SentryDemo';
 
 // =================================================================================================
 // Types
@@ -47,7 +48,12 @@ const componentImports = {
     default: module.AnimationDemo,
     name: 'Animation 组件',
     description: '展示 Animation 组件的各种使用场景和功能，包括基础 Animation、确认 Animation、表单 Animation 等'
-  }))
+  })),
+  sentry: () => import('@/examples/SentryDemo').then(module => ({
+    default: module.SentryDemo,
+    name: 'Sentry 捕获示例',
+    description: '展示 Sentry ErrorBoundary、captureException、captureMessage、Breadcrumb、User、异步异常等用法'
+  })),
 };
 
 // =================================================================================================
@@ -94,6 +100,12 @@ export const getStaticExampleComponents = (): ExampleComponent[] => {
       name: 'Animation 组件',
       component: AnimationDemo,
       description: '展示 Animation 组件的各种使用场景和功能，包括基础 Animation、确认 Animation、表单 Animation 等'
+    },
+    {
+      id: 'sentry',
+      name: 'Sentry 捕获示例',
+      component: SentryDemo,
+      description: '展示 Sentry ErrorBoundary、captureException、captureMessage、Breadcrumb、User、异步异常等用法'
     },
     {
       id: 'perf-panel',

@@ -8,11 +8,15 @@
 // Imports
 // =================================================================================================
 
+// --- Core Libraries ---
 import React from 'react';
 
+// --- Absolute Imports ---
+import ErrorPage from '@/app/pages/ErrorPage';
 import { AppProvider } from '@/app/providers';
 import { AppRouter } from '@/app/router';
 import { AppToaster } from '@/shared/components/Toast';
+import { Sentry } from '@/shared/services/sentry';
 
 // =================================================================================================
 // Component
@@ -21,10 +25,12 @@ import { AppToaster } from '@/shared/components/Toast';
 const App: React.FC = () => {
   return (
     <>
-      <AppToaster />
-      <AppProvider>
-        <AppRouter />
-      </AppProvider>
+      <Sentry.ErrorBoundary fallback={<ErrorPage />}>
+        <AppToaster />
+        <AppProvider>
+          <AppRouter />
+        </AppProvider>
+      </Sentry.ErrorBoundary>
     </>
   );
 };

@@ -19,6 +19,7 @@ import ReactDOM from 'react-dom/client';
 
 import '@/shared/i18n';
 import '@/styles/index';
+import '@/shared/services/sentry';
 
 import App from './App';
 
