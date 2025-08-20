@@ -12,18 +12,11 @@ import React, { useState } from 'react';
 
 import {
   ChevronDownIcon,
-  ChevronUpIcon,
   EllipsisHorizontalIcon,
   PencilIcon,
   PlusIcon,
   TrashIcon,
   XMarkIcon,
-  RocketLaunchIcon,
-  SparklesIcon,
-  BoltIcon,
-  StarIcon,
-  HeartIcon,
-  FireIcon,
 } from '@heroicons/react/24/outline';
 
 import { Button } from '@/shared/components/Button';

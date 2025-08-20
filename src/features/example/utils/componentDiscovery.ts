@@ -13,6 +13,7 @@ import React from 'react';
 import { ButtonExample } from '@/examples/Button';
 import { ModalExample } from '@/examples/Modal';
 import { AnimationDemo } from '@/examples/AnimationDemo';
+import { PerformancePanel, CacheTestPanel, VirtualScrollDemo, LazyLoadDemo } from '@/examples/performance';
 
 // =================================================================================================
 // Types
@@ -93,6 +94,30 @@ export const getStaticExampleComponents = (): ExampleComponent[] => {
       name: 'Animation 组件',
       component: AnimationDemo,
       description: '展示 Animation 组件的各种使用场景和功能，包括基础 Animation、确认 Animation、表单 Animation 等'
+    },
+    {
+      id: 'perf-panel',
+      name: '性能监控面板',
+      component: PerformancePanel,
+      description: '展示性能监控指标（FCP/LCP/FID/CLS、内存等）'
+    },
+    {
+      id: 'perf-cache',
+      name: '缓存测试',
+      component: CacheTestPanel,
+      description: '演示缓存服务的使用与性能收益'
+    },
+    {
+      id: 'perf-virtual-list',
+      name: '虚拟滚动演示',
+      component: VirtualScrollDemo,
+      description: '展示 10,000 项虚拟滚动的渲染性能'
+    },
+    {
+      id: 'perf-lazy',
+      name: '懒加载演示',
+      component: LazyLoadDemo,
+      description: '展示按需加载重型组件的效果'
     }
   ];
 };

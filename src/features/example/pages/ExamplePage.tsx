@@ -9,12 +9,10 @@
 // =================================================================================================
 
 // --- Core Libraries ---
-import { useState, useEffect, useCallback } from 'react';
-import type { FC } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 // --- Third-party Libraries ---
 import { SunIcon, MoonIcon, LanguageIcon } from '@heroicons/react/24/outline';
-import { useTranslation } from 'react-i18next';
 
 // --- Absolute Imports ---
 import { getStaticExampleComponents, type ExampleComponent } from '../utils/componentDiscovery';
@@ -25,8 +23,7 @@ import { Button } from '@/shared/components/Button';
 // Component
 // =================================================================================================
 
-const ExamplePage: FC = () => {
-  const { t } = useTranslation();
+const ExamplePage: React.FC = () => {
   const { isDarkMode, setTheme } = useMemoizedThemeState();
   const { language, setLanguage } = useMemoizedLanguageState();
   const [exampleComponents, setExampleComponents] = useState<ExampleComponent[]>([]);
@@ -246,12 +243,12 @@ const ExamplePage: FC = () => {
               backfaceVisibility: 'hidden',
               transform: 'translateZ(0)'
             }}>
-              <nav className="flex space-x-4 overflow-x-auto">
+              <nav className="pb-3 flex flex-nowrap gap-4 overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth snap-x snap-mandatory">
                 {exampleComponents.map((component, index) => (
                   <button
                     key={component.id}
                     onClick={() => setActiveTab(component.id)}
-                    className={`py-3 px-6 font-black text-sm transition-all duration-300 ease-out transform hover:scale-105 border-4 border-black ${
+                    className={`py-3 px-6 font-black text-sm transition-all duration-300 ease-out transform hover:scale-105 border-4 border-black flex-shrink-0 snap-start ${
                       activeTab === component.id
                         ? 'bg-blue-500 text-white shadow-4xl'
                         : isDarkMode 
