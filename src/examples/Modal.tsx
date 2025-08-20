@@ -125,10 +125,6 @@ const ModalExample: React.FC = () => {
         backfaceVisibility: 'hidden',
         transform: 'translateZ(0)'
       }}>
-        {/* 漫画装饰 */}
-        <div className="absolute top-2 right-2 text-4xl">🎭</div>
-        <div className="absolute bottom-2 left-2 text-2xl">✨</div>
-        
         <h3 className={`text-2xl font-black mb-6 transition-all duration-500 ease-out ${
           isDarkMode ? 'text-white' : 'text-gray-800'
         }`} style={{
@@ -178,6 +174,12 @@ const ModalExample: React.FC = () => {
             </p>
           </div>
         </Modal>
+        
+        {/* 漫画装饰 - 放在底部 */}
+        <div className="flex justify-between items-center mt-6 pt-4 border-t-2 border-gray-300">
+          <div className="text-2xl">🎭</div>
+          <div className="text-2xl">✨</div>
+        </div>
       </section>
 
       {/* Modal Sizes */}
@@ -188,10 +190,6 @@ const ModalExample: React.FC = () => {
         backfaceVisibility: 'hidden',
         transform: 'translateZ(0)'
       }}>
-        {/* 漫画装饰 */}
-        <div className="absolute top-2 right-2 text-4xl">📏</div>
-        <div className="absolute bottom-2 left-2 text-2xl">🔍</div>
-        
         <h3 className={`text-2xl font-black mb-6 transition-all duration-500 ease-out ${
           isDarkMode ? 'text-white' : 'text-gray-800'
         }`} style={{
@@ -287,6 +285,12 @@ const ModalExample: React.FC = () => {
             </p>
           </div>
         </Modal>
+        
+        {/* 漫画装饰 - 放在底部 */}
+        <div className="flex justify-between items-center mt-6 pt-4 border-t-2 border-gray-300">
+          <div className="text-2xl">📏</div>
+          <div className="text-2xl">🔍</div>
+        </div>
       </section>
 
       {/* 确认 Modal */}
@@ -297,10 +301,6 @@ const ModalExample: React.FC = () => {
         backfaceVisibility: 'hidden',
         transform: 'translateZ(0)'
       }}>
-        {/* 漫画装饰 */}
-        <div className="absolute top-2 right-2 text-4xl">⚠️</div>
-        <div className="absolute bottom-2 left-2 text-2xl">💥</div>
-        
         <h3 className={`text-2xl font-black mb-6 transition-all duration-500 ease-out ${
           isDarkMode ? 'text-white' : 'text-gray-800'
         }`} style={{
@@ -350,6 +350,12 @@ const ModalExample: React.FC = () => {
             </p>
           </div>
         </Modal>
+        
+        {/* 漫画装饰 - 放在底部 */}
+        <div className="flex justify-between items-center mt-6 pt-4 border-t-2 border-gray-300">
+          <div className="text-2xl">⚠️</div>
+          <div className="text-2xl">💥</div>
+        </div>
       </section>
 
       {/* 成功/错误 Modal */}
@@ -360,10 +366,6 @@ const ModalExample: React.FC = () => {
         backfaceVisibility: 'hidden',
         transform: 'translateZ(0)'
       }}>
-        {/* 漫画装饰 */}
-        <div className="absolute top-2 right-2 text-4xl">🎉</div>
-        <div className="absolute bottom-2 left-2 text-2xl">💔</div>
-        
         <h3 className={`text-2xl font-black mb-6 transition-all duration-500 ease-out ${
           isDarkMode ? 'text-white' : 'text-gray-800'
         }`} style={{
@@ -428,6 +430,12 @@ const ModalExample: React.FC = () => {
             </p>
           </div>
         </Modal>
+        
+        {/* 漫画装饰 - 放在底部 */}
+        <div className="flex justify-between items-center mt-6 pt-4 border-t-2 border-gray-300">
+          <div className="text-2xl">🎉</div>
+          <div className="text-2xl">💔</div>
+        </div>
       </section>
 
       {/* Form Modal */}
