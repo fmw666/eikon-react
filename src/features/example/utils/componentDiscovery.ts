@@ -137,3 +137,4 @@ const getStaticExampleComponents = (): ExampleComponent[] => {
 // =================================================================================================
 
 export { discoverExampleComponents, getStaticExampleComponents };
+export type { ExampleComponent };
