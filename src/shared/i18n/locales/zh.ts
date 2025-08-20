@@ -60,4 +60,39 @@ export default {
       dark: '深色',
     },
   },
+  home: {
+    title: 'AI-DevKit',
+    subtitle: 'AI 开发工具箱，快速搭建你的 AI 应用！',
+    sections: {
+      introduction: {
+        title: '项目介绍',
+        description: '本项目旨在为 AI 阅读和二次开发提供清晰、易扩展的项目架构。你可以基于本模板快速搭建自己的 AI 应用或业务系统。',
+        features: {
+          rapidDevelopment: '快速开发',
+          aiFriendly: 'AI 友好',
+          highPerformance: '高性能',
+          responsive: '响应式',
+        },
+      },
+      quickStart: {
+        title: '快速开始',
+        command: 'cd docs-site/ && npm install && npm run dev',
+        description: '然后打开 <url>{{url}}</url> 查看文档',
+        url: 'localhost:5173',
+      },
+      examples: {
+        title: '示例模块',
+        description: '我们为你提供了 task 模块作为示例：',
+        button: '进入 task 模块 🎮',
+      },
+      components: {
+        title: '组件案例',
+        description: '查看项目内可复用的 UI 组件示例与演示：',
+        button: '进入示例模块 🔗',
+      },
+    },
+    footer: {
+      message: '准备好开始你的 AI 开发之旅了吗？',
+    },
+  },
 };

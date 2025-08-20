@@ -60,4 +60,39 @@ export default {
       dark: 'Dark',
     },
   },
+  home: {
+    title: 'AI-DevKit',
+    subtitle: 'AI Development Toolkit - Build Your AI Applications Fast!',
+    sections: {
+      introduction: {
+        title: 'Project Introduction',
+        description: 'A clear and extensible architecture for rapid AI application development.',
+        features: {
+          rapidDevelopment: 'Fast Dev',
+          aiFriendly: 'For AI',
+          highPerformance: 'H-PERF',
+          responsive: 'RWD',
+        },
+      },
+      quickStart: {
+        title: 'Quick Start',
+        command: 'cd docs-site/ && npm install && npm run dev',
+        description: 'Then open <url>{{url}}</url> to view the documentation',
+        url: 'localhost:5173',
+      },
+      examples: {
+        title: 'Example Modules',
+        description: 'We provide you with the task module as an example:',
+        button: 'Enter Task Module 🎮',
+      },
+      components: {
+        title: 'Component Examples',
+        description: 'View reusable UI component examples and demonstrations in the project:',
+        button: 'Enter Example Module 🔗',
+      },
+    },
+    footer: {
+      message: 'Ready to start your AI development journey?',
+    },
+  },
 };

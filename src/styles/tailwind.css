@@ -88,6 +88,18 @@
   .animate-ping-very-slow {
     animation: ping 5s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  .animate-pulse-fast {
+    animation: pulse 0.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  .animate-pulse-very-fast {
+    animation: pulse 0.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  .animate-pulse-very-slow {
+    animation: pulse 5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
 }
 
 @layer base {
