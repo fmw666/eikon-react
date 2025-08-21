@@ -5,7 +5,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="AI-DevKit" />
-    <meta name="theme-color" content="#4F46E5" />
+    <meta name="theme-color" content="#fff" />
     <title>AI-DevKit</title>
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
     <link rel="manifest" href="/site.webmanifest" />
@@ -20,6 +20,19 @@
           var root = document.documentElement;
           root.classList.remove('light', 'dark');
           root.classList.add(isDark ? 'dark' : 'light');
+          
+          // 初始化移动端主题色
+          var themeColors = {
+            light: { themeColor: '#fff', backgroundColor: '#ffffff' },
+            dark: { themeColor: '#15151E', backgroundColor: '#111827' }
+          };
+          var colors = isDark ? themeColors.dark : themeColors.light;
+          
+          // 更新 meta theme-color
+          var metaThemeColor = document.querySelector('meta[name="theme-color"]');
+          if (metaThemeColor) {
+            metaThemeColor.setAttribute('content', colors.themeColor);
+          }
         } catch (e) {}
       })();
     </script>

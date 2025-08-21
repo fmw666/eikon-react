@@ -17,6 +17,7 @@ import { useStore } from 'zustand';
 
 // --- Absolute Imports ---
 import { useLocalStorage } from '@/shared/hooks/useLocalStorage';
+import { updateThemeColor } from '@/shared/utils/themeColorManager';
 
 // --- Relative Imports ---
 import { themeStore } from './themeStore';
@@ -66,6 +67,9 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(isDarkMode ? 'dark' : 'light');
+    
+    // 初始化移动端主题色
+    updateThemeColor(isDarkMode);
   }, []);
 
   useEffect(() => {
@@ -75,6 +79,9 @@ const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         const root = window.document.documentElement;
         root.classList.remove('light', 'dark');
         root.classList.add(isDarkMode ? 'dark' : 'light');
+        
+        // 更新移动端主题色
+        updateThemeColor(isDarkMode);
       }
     );
 

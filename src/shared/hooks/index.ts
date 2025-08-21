@@ -1,6 +1,6 @@
 /**
  * @file index.ts
- * @description Exports for utility functions
+ * @description Exports for custom hooks
  * @author fmw666@github
  */
 
@@ -8,5 +8,5 @@
 // Exports
 // =================================================================================================
 
-export * from './cn';
-export * from './themeColorManager';
+export * from './useLocalStorage';
+export * from './useThemeColor';
