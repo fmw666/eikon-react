@@ -12,7 +12,7 @@
 import React, { useState, useCallback } from 'react';
 
 // --- Absolute Imports ---
-import { cacheService } from '@/shared/services/cacheService';
+import { cacheService } from '@/shared/infrastructure/cache';
 
 // =================================================================================================
 // Component

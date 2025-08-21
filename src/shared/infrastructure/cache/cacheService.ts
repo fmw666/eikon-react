@@ -1,6 +1,6 @@
 /**
  * @file cacheService.ts
- * @description 智能缓存服务 - 实现请求缓存、合并和过期策略
+ * @description Smart cache service - implements request caching, merging, and expiration strategies
  * @author fmw666@github
  */
 
@@ -161,9 +161,10 @@ class CacheService {
 
 const cacheService = new CacheService();
 
+
 // =================================================================================================
 // Exports
 // =================================================================================================
 
-export { cacheService, CacheService };
+export { cacheService };
 export type { CacheConfig };

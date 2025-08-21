@@ -22,6 +22,11 @@ export default {
   task: {
     layout: {
       simulatedDelayNotice: 'All network delays are simulated for demo purposes to showcase loading states and performance optimizations.',
+      serviceMode: 'Current service:',
+      modes: {
+        mock: 'Mock (offline)',
+        supabase: 'Supabase (online)',
+      },
     },
     index: {
       title: 'Task List',

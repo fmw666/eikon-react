@@ -22,6 +22,11 @@ export default {
   task: {
     layout: {
       simulatedDelayNotice: '此处所有网络延迟均为模拟实现，仅用于演示加载与性能优化效果。',
+      serviceMode: '当前服务配置：',
+      modes: {
+        mock: 'Mock (离线)',
+        supabase: 'Supabase (在线)',
+      },
     },
     index: {
       title: '任务列表',

@@ -14,7 +14,7 @@ import React from 'react';
 // --- Absolute Imports ---
 import { useMemoizedThemeState } from '@/app/providers';
 import { Button } from '@/shared/components/Button';
-import { Sentry } from '@/shared/services/sentry';
+import { Sentry } from '@/shared/infrastructure/external/sentry';
 
 // =================================================================================================
 // Component

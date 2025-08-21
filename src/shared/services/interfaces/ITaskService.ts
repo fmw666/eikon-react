@@ -1,6 +1,6 @@
 /**
- * @file App.tsx
- * @description Main App component
+ * @file ITaskService.ts
+ * @description Task service interface
  * @author fmw666@github
  */
 
@@ -8,35 +8,23 @@
 // Imports
 // =================================================================================================
 
-// --- Core Libraries ---
-import React from 'react';
-
 // --- Absolute Imports ---
-import ErrorPage from '@/app/pages/ErrorPage';
-import { AppProvider } from '@/app/providers';
-import { AppRouter } from '@/app/router';
-import { AppToaster } from '@/shared/components/Toast';
-import { Sentry } from '@/shared/infrastructure/external/sentry';
+import type { Task } from '@/features/task';
 
 // =================================================================================================
-// Component
+// Interface
 // =================================================================================================
 
-const App: React.FC = () => {
-  return (
-    <>
-      <Sentry.ErrorBoundary fallback={<ErrorPage />}>
-        <AppToaster />
-        <AppProvider>
-          <AppRouter />
-        </AppProvider>
-      </Sentry.ErrorBoundary>
-    </>
-  );
-};
+interface ITaskService {
+  getTasks(): Promise<Task[]>;
+  addTask(task: Task): Promise<Task>;
+  getTaskById(id: string): Promise<Task | null>;
+  updateTask(id: string, task: Partial<Task>): Promise<Task>;
+  deleteTask(id: string): Promise<void>;
+}
 
 // =================================================================================================
 // Exports
 // =================================================================================================
 
-export default App;
+export type { ITaskService };

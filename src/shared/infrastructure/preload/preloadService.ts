@@ -1,6 +1,6 @@
 /**
  * @file preloadService.ts
- * @description 预加载服务 - 实现 React 18 use() hook 的数据预加载
+ * @description Preload service - implements data preloading for React 18 use() hook
  * @author fmw666@github
  */
 
@@ -101,43 +101,10 @@ class PreloadService {
 // Global Instance
 // =================================================================================================
 
-export const preloadService = new PreloadService();
-
-// =================================================================================================
-// Utility Functions
-// =================================================================================================
-
-/**
- * 创建预加载函数 - 用于 React 18 use() hook
- */
-export function createPreloader<T>(
-  key: string,
-  fetcher: () => Promise<T>
-) {
-  return () => preloadService.preload(key, fetcher);
-}
-
-/**
- * 预加载用户数据
- */
-export const preloadUser = createPreloader('user', async () => {
-  // 这里可以调用实际的用户服务
-  const response = await fetch('/api/user');
-  return response.json();
-});
-
-/**
- * 预加载任务列表
- */
-export const preloadTasks = createPreloader('tasks', async () => {
-  // 这里可以调用实际的任务服务
-  const response = await fetch('/api/tasks');
-  return response.json();
-});
+const preloadService = new PreloadService();
 
 // =================================================================================================
 // Exports
 // =================================================================================================
 
-export { PreloadService };
-export type { PreloadConfig };
+export { preloadService };

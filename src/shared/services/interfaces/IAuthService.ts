@@ -1,6 +1,6 @@
 /**
- * @file App.tsx
- * @description Main App component
+ * @file IAuthService.ts
+ * @description Authentication service interface
  * @author fmw666@github
  */
 
@@ -8,35 +8,23 @@
 // Imports
 // =================================================================================================
 
-// --- Core Libraries ---
-import React from 'react';
-
 // --- Absolute Imports ---
-import ErrorPage from '@/app/pages/ErrorPage';
-import { AppProvider } from '@/app/providers';
-import { AppRouter } from '@/app/router';
-import { AppToaster } from '@/shared/components/Toast';
-import { Sentry } from '@/shared/infrastructure/external/sentry';
+import type { User } from '@/features/auth';
 
 // =================================================================================================
-// Component
+// Interface
 // =================================================================================================
 
-const App: React.FC = () => {
-  return (
-    <>
-      <Sentry.ErrorBoundary fallback={<ErrorPage />}>
-        <AppToaster />
-        <AppProvider>
-          <AppRouter />
-        </AppProvider>
-      </Sentry.ErrorBoundary>
-    </>
-  );
-};
+interface IAuthService {
+  getSession(): Promise<User | null>;
+  logout(): Promise<void>;
+  pwdLogin(email: string, password: string): Promise<User | null>;
+  sendEmailVerification(email: string): Promise<void>;
+  verifyEmailCode(email: string, code: string): Promise<void>;
+}
 
 // =================================================================================================
 // Exports
 // =================================================================================================
 
-export default App;
+export type { IAuthService };

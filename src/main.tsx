@@ -19,7 +19,7 @@ import ReactDOM from 'react-dom/client';
 
 // --- Absolute Imports ---
 import '@/shared/i18n';
-import '@/shared/services/sentry';
+import '@/shared/infrastructure/external/sentry';
 import '@/styles/index';
 
 // --- Relative Imports ---
