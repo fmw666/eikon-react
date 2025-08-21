@@ -8,5 +8,7 @@
 // Exports
 // =================================================================================================
 
-export { createLazyComponent, preloadComponent, preloadComponents, ErrorBoundary } from './LazyComponent';
-export type { LazyComponentProps, LazyComponentConfig } from './LazyComponent';
+export { ErrorBoundary } from './LazyComponent';
+export { createLazyComponent } from './factory';
+export { preloadComponent, preloadComponents } from './utils';
+export type { LazyComponentProps, LazyComponentConfig } from './types';

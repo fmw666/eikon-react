@@ -131,6 +131,7 @@ npm run test
 
 ```bash
 npm run lint
+npm run lint -- --fix
 ```
 
 ### ☁️ One-Click Deploy

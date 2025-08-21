@@ -9,32 +9,15 @@
 // =================================================================================================
 
 // --- Core Libraries ---
-import React, { Suspense, lazy, Component } from 'react';
+import React, { Component } from 'react';
 import type { ReactNode } from 'react';
 
-// =================================================================================================
-// Types
-// =================================================================================================
-
-interface LazyComponentConfig {
-  component: () => Promise<{ default: React.ComponentType<any> }>;
-  fallback?: ReactNode;
-  preload?: boolean;
-  errorBoundary?: boolean;
-}
-
-interface LazyComponentProps {
-  [key: string]: any;
-}
+// --- Relative Imports ---
+import type { ErrorBoundaryState } from './types';
 
 // =================================================================================================
 // Error Boundary Component
 // =================================================================================================
-
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error?: Error;
-}
 
 class ErrorBoundary extends Component<
   { children: ReactNode; fallback?: ReactNode },
@@ -78,64 +61,7 @@ class ErrorBoundary extends Component<
 }
 
 // =================================================================================================
-// Lazy Component Factory
-// =================================================================================================
-
-/**
- * 创建懒加载组件
- */
-const createLazyComponent = (config: LazyComponentConfig): React.ComponentType<any> => {
-  const { component, fallback, preload = false, errorBoundary = true } = config;
-
-  // 创建懒加载组件
-  const LazyComponent = lazy(component);
-
-  // 预加载组件
-  if (preload) {
-    component();
-  }
-
-  // 返回包装后的组件
-  const WrappedComponent = React.forwardRef<any, LazyComponentProps>((props, ref) => {
-    const content = (
-      <Suspense fallback={fallback || <div>加载中...</div>}>
-        <LazyComponent {...props} ref={ref} />
-      </Suspense>
-    );
-
-    if (errorBoundary) {
-      return <ErrorBoundary fallback={fallback}>{content}</ErrorBoundary>;
-    }
-
-    return content;
-  });
-
-  WrappedComponent.displayName = 'LazyComponent';
-
-  return WrappedComponent;
-};
-
-// =================================================================================================
-// Utility Functions
-// =================================================================================================
-
-/**
- * 预加载组件
- */
-const preloadComponent = (component: () => Promise<{ default: React.ComponentType<any> }>) => {
-  return component();
-};
-
-/**
- * 预加载多个组件
- */
-const preloadComponents = (components: Array<() => Promise<{ default: React.ComponentType<any> }>>) => {
-  return Promise.all(components.map(component => component()));
-};
-
-// =================================================================================================
 // Exports
 // =================================================================================================
 
-export { createLazyComponent, ErrorBoundary, preloadComponent, preloadComponents };
-export type { LazyComponentConfig, LazyComponentProps };
+export { ErrorBoundary };
