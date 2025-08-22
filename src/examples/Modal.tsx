@@ -64,6 +64,7 @@ const ModalExample: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [sizeModalOpen, setSizeModalOpen] = useState(false);
   const [currentSize, setCurrentSize] = useState<ModalSize>('md');
+  const [testModalOpen, setTestModalOpen] = useState(false);
 
   const handleFileUpload = () => {
     if (!selectedFile) return;
@@ -94,6 +95,100 @@ const ModalExample: React.FC = () => {
     <div className={`space-y-8 transition-all duration-500 ease-out ${
       isDarkMode ? 'text-gray-200' : 'text-gray-800'
     }`}>
+      {/* 动画测试区域 */}
+      <section className={`rounded-none p-6 border-4 border-black transition-all duration-500 ease-out ${
+        isDarkMode ? 'bg-gray-800' : 'bg-white'
+      }`} style={{
+        boxShadow: '8px 8px 0px #000',
+        backfaceVisibility: 'hidden',
+        transform: 'translateZ(0)'
+      }}>
+        <h3 className={`text-2xl font-black mb-6 transition-all duration-500 ease-out ${
+          isDarkMode ? 'text-white' : 'text-gray-800'
+        }`} style={{
+          textShadow: isDarkMode ? '2px 2px 0px #374151' : '2px 2px 0px #fff',
+          fontFamily: 'Impact, Arial Black, sans-serif'
+        }}>
+          🎬 动画效果测试
+        </h3>
+        <div className="space-y-4">
+          <p className={`font-bold transition-all duration-500 ease-out ${
+            isDarkMode ? 'text-gray-300' : 'text-gray-600'
+          }`} style={{
+            textShadow: isDarkMode ? '1px 1px 0px #374151' : '1px 1px 0px #fff'
+          }}>
+            点击下面的按钮测试 Modal 的动画效果。观察背景遮罩、缩放、位移和透明度的变化。
+          </p>
+          <div className="flex gap-4">
+            <Button 
+              variant="primary" 
+              onClick={() => setTestModalOpen(true)}
+            >
+              <SparklesIcon className="w-5 h-5 mr-2" />
+              测试动画效果
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setTestModalOpen(true);
+                setTimeout(() => setTestModalOpen(false), 1000);
+                setTimeout(() => setTestModalOpen(true), 1500);
+              }}
+            >
+              <BoltIcon className="w-5 h-5 mr-2" />
+              连续测试动画
+            </Button>
+          </div>
+        </div>
+
+        <Modal
+          open={testModalOpen}
+          title="🎬 动画效果测试"
+          onClose={() => setTestModalOpen(false)}
+          actions={
+            <>
+              <Button variant="ghost" onClick={() => setTestModalOpen(false)}>
+                关闭
+              </Button>
+              <Button variant="primary" onClick={() => setTestModalOpen(false)}>
+                确定
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <SparklesIcon className="w-8 h-8 text-white" />
+              </div>
+              <h4 className="text-lg font-semibold text-gray-900 mb-2">动画效果演示</h4>
+              <p className="text-gray-600">
+                这个 Modal 展示了优化后的动画效果，包括：
+              </p>
+            </div>
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4">
+              <ul className="text-sm text-gray-700 space-y-2">
+                <li>✨ <strong>背景遮罩动画</strong>：从透明到半透明黑色</li>
+                <li>🎯 <strong>缩放动画</strong>：从 70% 缩放到 100%</li>
+                <li>📱 <strong>位移动画</strong>：从下方 12px 移动到原位</li>
+                <li>🌟 <strong>透明度动画</strong>：从透明到不透明</li>
+                <li>💫 <strong>弹性缓动</strong>：使用 cubic-bezier 实现弹跳效果</li>
+                <li>🎨 <strong>阴影动画</strong>：动态调整阴影深度</li>
+              </ul>
+            </div>
+            <p className="text-gray-600 text-sm text-center">
+              动画时长：300ms | 缓动函数：弹性缓动
+            </p>
+          </div>
+        </Modal>
+        
+        {/* 漫画装饰 - 放在底部 */}
+        <div className="flex justify-between items-center mt-6 pt-4 border-t-2 border-gray-300">
+          <div className="text-2xl">🎬</div>
+          <div className="text-2xl">✨</div>
+        </div>
+      </section>
+
       {/* 动漫风格标题 */}
       <div className={`text-center mb-8 transition-all duration-500 ease-out ${
         isDarkMode ? 'text-white' : 'text-gray-800'

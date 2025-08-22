@@ -24,6 +24,7 @@ import { useUser, useAuthInitialized, useAuthLoading } from '@/features/auth';
 // --- Relative Imports ---
 import { ROUTES } from './constants';
 
+// --- Type Imports ---
 import type { PrivateRouteProps } from './types';
 
 // =================================================================================================
