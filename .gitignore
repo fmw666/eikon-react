@@ -54,3 +54,4 @@ coverage
 # OS / misc
 *.pem
 *.local
+.git-commit-msg.tmp
