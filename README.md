@@ -1,198 +1,134 @@
+# EvoMap Frontend Kit
 
+> An AI-Coding-Agent-friendly React starter — `npx create-evomap-app` + a curated React 19 template, plus a portable `.agent/` protocol any agent (Cursor, Claude Code, Codex, …) can read.
 
-<p align="center">
-  <a href="./README.md"><img alt="README in English" src="https://img.shields.io/badge/English-d9d9d9?style=for-the-badge&color=0078D4"></a>
-  <a href="./README_CN.md"><img alt="简体中文版自述文件" src="https://img.shields.io/badge/简体中文-d9d9d9?style=for-the-badge&color=1AAD19"></a>
-</p>
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![React 19](https://img.shields.io/badge/React-19-20232a?logo=react&logoColor=61DAFB&labelColor=20232a)](https://react.dev)
+[![Tailwind CSS v4](https://img.shields.io/badge/Tailwind-v4-0ea5e9?logo=tailwindcss&logoColor=white&labelColor=0ea5e9)](https://tailwindcss.com)
+[![Vite 6](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=FFD62E&labelColor=646CFF)](https://vitejs.dev)
 
-AI-DevKit 是一个专为AI辅助编程设计的全栈项目模板，集成了React、TypeScript、Tailwind CSS等现代化技术栈。通过提供清晰的项目架构、标准化的开发规范和丰富的AI提示词模板，让开发者能够快速与AI协作，高效构建高质量的前端应用。无论是初学者还是经验丰富的开发者，都能基于此模板快速搭建项目骨架，专注于业务逻辑开发。
+## What this is
 
-AI-DevKit is a full-stack project template designed specifically for AI-assisted programming, integrating modern technologies like React, TypeScript, and Tailwind CSS. With its clear project architecture, standardized development practices, and comprehensive AI prompt templates, it enables developers to collaborate efficiently with AI and rapidly build high-quality frontend applications. Whether you're a beginner or an experienced developer, you can quickly scaffold your project foundation and focus on business logic development.
+This repository is **two things in one pnpm monorepo**:
 
-`DesignChat AI` 基于 Vibe Coding 最佳实践的一套代码模板
+| Package                                                  | Role                                                                                 |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [packages/create-evomap-app](packages/create-evomap-app) | The CLI published to npm as `create-evomap-app` (`npx create-evomap-app my-app`).    |
+| [packages/template-react](packages/template-react)       | The reference React 19 template that the CLI ships and scaffolds into your project. |
 
-| Node.js | NPM |
-| :-----  | :-- |
-| v22.14.0 | v11.2.0 |
+The template is **opinionated, AI-agent-aware, and feature-first** so that — humans or AI agents — anyone who edits a generated project starts from the same conventions instead of reinventing them.
 
-采用技术栈：
-
-xxx
-
-优势：xx
-
-目的是 1. 让不会前端的人能通过 ai 快速完成前端项目搭建；2. 给开发者提供一套一站式 AI 开发全栈平台
-
-## ✨ Features
-
-- 项目结构清晰，feature 结构划分，便于模块管理。按功能模块划分 (Feature-based Structure)
-- hook→store→service 高性能实践方案
-- 文档丰富
-- 代码规范整洁，利于阅读
-- supabase 初始化
-- 认证服务，原生集成 supabase 邮件服务
-- 支持 mock，构造测试数据
-- 基础框架 (Sidebar, Topbar, MainLayout)
-- 基础组件 Modal、Button
-- 多语言
-- 采用 i18n 和 zustand 简单高效的前端组件
-- tailwind 初始化
-- Sonnar 初始化
-- jest 初始化
-- test 集成
-- 简单配置即可启动
-- 示例代码
-
-## AI 管理
-
-- 多语言生成
-
-
-
-
-## 快速开始
-
-安装 docker
-
-启动命令 start.bat / start.sh
-
----
-
-## 🛠️ Tech Stack
-
-| Technology | Version | Description |
-|------|------|------|
-| ![React](https://img.shields.io/badge/React-18.2.0-20232a?logo=react&logoColor=61DAFB&labelColor=20232a) | 18.2.0 | UI library |
-| ![TypeScript](https://img.shields.io/badge/TypeScript-5.2.2-3178C6?logo=typescript&logoColor=white&labelColor=3178C6) | 5.2.2 | Type-safe JavaScript extension |
-| ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.1-0ea5e9?logo=tailwindcss&logoColor=white&labelColor=0ea5e9) | 3.4.1 | Utility-first CSS framework |
-| ![Vite](https://img.shields.io/badge/Vite-6.3.5-646CFF?logo=vite&logoColor=FFD62E&labelColor=646CFF) | 6.3.5 | Next-gen frontend build tool |
-| ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=3ECF8E&labelColor=222) | - | Open-source Firebase alternative |
-| ![Vercel](https://img.shields.io/badge/Vercel-Deploy-222222?logo=vercel&logoColor=white&labelColor=111111) | - | Frontend deployment platform |
-
-## 🚀 Quick Start
-
-💡 This project uses `supabase` for the backend. You need to create a `supabase` project and configure environment variables.
-
-### 🖥️ Local Development
-
-#### 1. Clone the repository
+## Quick start (consumers)
 
 ```bash
-git clone https://github.com/fmw666/DesignChat.git
-cd DesignChat
+npx create-evomap-app my-app
+# or
+pnpm create evomap-app my-app
 ```
 
-#### 2. Install dependencies
+The CLI is interactive and will ask:
+
+- Project name (positional arg lets you skip the prompt)
+- Whether to include **Supabase** (auth + db + storage scaffolding)
+- Whether to include **TanStack Query** (server-state)
+- Package manager (pnpm / npm / bun)
+- Install deps and `git init` now or later
+
+Non-interactive flags exist for CI scripting:
 
 ```bash
-npm install
+npx create-evomap-app my-app \
+  --yes \
+  --no-supabase --query \
+  --pm pnpm \
+  --no-install --no-git
 ```
 
-#### 3. Initialize Supabase project
+## What you get in a generated project
 
-- Log in to [Supabase](https://supabase.com/) and create a project.
-- Refer to the following docs to obtain various keys:
-  - **Database (db) key:** [See db key doc](./docs/supabase/db/README.md)
-  - **Auth key:** [See auth key doc](./docs/supabase/auth/README.md)
-  - **Storage key:** [See storage key doc](./docs/supabase/storage/README.md)
-- It is recommended to use the script to initialize all Supabase tables, auth, storage, etc. in one click.
-  - Run locally:
-    ```bash
-    npm install && npm run init
-    ```
-  - Run with Docker (no local Node required):
-    ```bash
-    docker run --rm -v %cd%:/app -w /app node:20 npm run init
-    ```
-- For script details and more usage, see [Init Script Guide](./scripts/README.md)
+- **React 19** + **TypeScript 5.6+**
+- **Vite 6** + **Tailwind CSS v4** (CSS-first config, no `tailwind.config.js`)
+- **animate-ui style** primitives in `src/shared/ui/` (`motion` + Radix)
+- **Feature-first architecture** with ESLint-enforced import boundaries
+- **Vitest** + **Testing Library** with `__tests__/` colocated per feature
+- **React Router v7**, **Zustand**, **React Hook Form** + **zod**, **i18next** (en/zh)
+- Optional **Supabase** (`@supabase/supabase-js`) and **TanStack Query**
+- **`.agent/` protocol** — rules and skills any AI coding agent can read directly:
 
-#### 4. Configure environment variables
+  ```
+  .agent/
+  ├── README.md
+  ├── rules/                 # hard constraints: architecture, React, Tailwind v4, …
+  └── skills/                # task playbooks: add-feature, add-page, write-test, …
+  ```
 
-> Obtain the required keys from your Supabase project
+  See [docs/agent-protocol.md](docs/agent-protocol.md) for the full specification.
+
+## Repository layout
+
+```
+.
+├── packages/
+│   ├── create-evomap-app/   # CLI source + e2e tests
+│   └── template-react/      # Canonical React 19 template
+├── docs/
+│   ├── architecture.md      # Why feature-first, how boundaries work
+│   └── agent-protocol.md    # The .agent/ specification
+├── package.json             # Workspace root
+└── pnpm-workspace.yaml
+```
+
+## Development (contributors)
+
+Requires Node ≥ 20.10 and pnpm ≥ 9.
 
 ```bash
-cp .env.example .env
-# Edit the .env file and fill in the required environment variables
+pnpm install                                  # install all workspaces
+pnpm --filter @evomap/template-react dev      # run the template locally
+pnpm --filter @evomap/template-react test     # template tests
+pnpm --filter @evomap/template-react lint     # template lint
+pnpm --filter @evomap/template-react build    # template prod build
+pnpm --filter create-evomap-app build         # build the CLI bundle + sync template payload
+pnpm cli                                      # build then run CLI from source
 ```
 
-#### 5. Start the development server
+### End-to-end validation
+
+The CLI ships with a self-contained e2e suite that simulates the real `npx`
+install path:
+
+1. Builds the CLI bundle and syncs the template payload.
+2. Runs `npm pack` to produce the exact tarball that `npm publish` would.
+3. For each scenario (`lean` / `default` / `full`) installs the tarball into a
+   throwaway sandbox so the binary is invoked the same way `npx` would invoke
+   it after a registry pull.
+4. Verifies the generated project's file tree, `package.json` deps, and the
+   contents of `src/app/providers.tsx` after feature stripping.
+5. In full mode, runs `pnpm install && pnpm typecheck && pnpm test && pnpm lint && pnpm build`
+   inside each generated project.
 
 ```bash
-npm run dev
+pnpm e2e:quick                       # ~20s, no install/build — just scaffolding
+pnpm e2e                             # ~2-5 min, full pipeline inside each scenario
+pnpm e2e -- --only lean              # run only the named scenario
+pnpm e2e -- --keep                   # keep the temp workspace on disk for inspection
 ```
 
-#### 6. Jest test
+The e2e runner lives at [packages/create-evomap-app/scripts/e2e.mjs](packages/create-evomap-app/scripts/e2e.mjs).
+
+Releasing the CLI (manual for now):
 
 ```bash
-npm run test
+pnpm --filter create-evomap-app build
+cd packages/create-evomap-app && npm publish --access public
 ```
 
-#### 7. Lint test
+## Documentation
 
-```bash
-npm run lint
-npm run lint -- --fix
-```
+- [docs/architecture.md](docs/architecture.md) — Feature-first design rationale + import boundary enforcement.
+- [docs/agent-protocol.md](docs/agent-protocol.md) — `.agent/rules` and `.agent/skills` schema and authoring guide.
+- [packages/template-react/.agent/README.md](packages/template-react/.agent/README.md) — Live `.agent/` README inside the template.
 
-### ☁️ One-Click Deploy
+## License
 
-| Method | Scenario & Description |
-|------|------|
-| [![Deploy with Vercel by clone](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ffmw666%2FDesignChat) | Clone this repo directly to your `Vercel` account, suitable for first-time deployment or full project copy |
-| [![Deploy with Vercel by import](https://vercel.com/button)](https://vercel.com/new/import?s=https%3A%2F%2Fgithub.com%2Ffmw666%2FDesignChat&teamSlug=maovos-projects) | Import this repo into your `Vercel` project, suitable for existing Vercel projects or team collaboration |
-
-Click the button above and follow these steps to deploy:
-
-1. Log in or register a `Vercel` account
-2. Import the GitHub repository
-3. Configure environment variables
-4. Click deploy
-
-## 📝 TODO
-
-> Items that are done but not yet removed are marked with ✅.
-
-### 🧩 Feature Design
-
-1. User agreement and privacy: Add user agreement and privacy content to the login dialog
-1. Model config info: Complete model info documentation
-1. Model config support: Support more model APIs
-1. Image-to-image: Optimize image-to-image experience, support model config
-1. Asset library refactor: Optimize asset library loading and interaction
-1. Image API management: Error code and message i18n management
-1. Model config linkage: Real-time effect on modelStore when config changes
-1. System prompt: Add system prompt feature for models
-1. Model testing: Support model testing feature
-1. Doubao API management: Separate ark/apiKey management for 3.0 and base models
-1. API proxy protocol: Use vite proxy in dev, direct API in prod
-
-### ⚡ Performance Optimization
-
-1. Merge API requests: Use Supabase Edge Functions to merge DB requests
-1. Bundle splitting: Fine-grained chunking with rollupOptions
-1. Image optimization: Thumbnails, lazy loading, progressive loading, preloading
-1. Code cleanup: Remove redundant code, optimize structure
-1. IndexedDB: Optimize query performance using the browser IndexedDB
-
-### 🎬 Animation & Theme
-
-1. Animation performance optimization
-1. Theme management: Global dark theme config, reduce style duplication
-
-### 🎈 Lint
-
-1. Handle `npm run lint` errors and warnings
-
-## 🤝 Contributing
-
-For those who want to contribute, please refer to our [Contribution Guide](./CONTRIBUTING.md).
-
-**Contributors**
-
-<a href="https://github.com/fmw666/DesignChat/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=fmw666/DesignChat" />
-</a>
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) for details
+MIT

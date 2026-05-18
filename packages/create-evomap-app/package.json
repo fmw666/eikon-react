@@ -1,0 +1,64 @@
+{
+  "name": "create-evomap-app",
+  "version": "2.0.0",
+  "description": "Scaffold a new React 19 + Tailwind v4 + animate-ui app with feature-first architecture and AI-agent rules.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "create-evomap-app": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "template",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node ./scripts/sync-template.mjs && tsup",
+    "start": "pnpm build && node ./dist/index.js",
+    "dev": "tsup --watch",
+    "lint": "eslint src --max-warnings 0",
+    "test": "vitest run",
+    "e2e": "node ./scripts/e2e.mjs",
+    "e2e:quick": "node ./scripts/e2e.mjs --quick",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.8.2",
+    "kleur": "^4.1.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@types/node": "^22.13.1",
+    "eslint": "^9.20.0",
+    "tsup": "^8.3.6",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.23.0",
+    "vitest": "^3.0.5"
+  },
+  "homepage": "https://github.com/evomap/frontend-kit#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/evomap/frontend-kit.git",
+    "directory": "packages/create-evomap-app"
+  },
+  "bugs": {
+    "url": "https://github.com/evomap/frontend-kit/issues"
+  },
+  "author": "EvoMap",
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "keywords": [
+    "react",
+    "tailwindcss",
+    "starter",
+    "scaffold",
+    "create-app",
+    "ai",
+    "feature-first"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

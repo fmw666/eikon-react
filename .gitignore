@@ -9,46 +9,48 @@ lerna-debug.log*
 
 # Dependencies
 node_modules
+.pnpm-store
+
+# Build artifacts
 dist
 dist-ssr
-*.local
+build
+out
+.next
+.nuxt
+*.tsbuildinfo
 
-# Editor directories and files
+# Caches
+.cache
+.parcel-cache
+.turbo
+.vite
+.eslintcache
+
+# Editor
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# Environment variables
+# Environment
 .env
 .env.*
 !.env.example
 
-# Build
-/build
-/dist
-/.next/
-/out/
-/.nuxt/
-.cache/
-.parcel-cache/
-.husky/
-
 # Testing
-/coverage
+coverage
 .nyc_output
-demo.py
 
-# Misc
+# Husky
+.husky/_
+
+# OS / misc
 *.pem
-.DS_Store
-Thumbs.db
-*.tsbuildinfo
-
-# Vitepress
-docs-site/.vitepress/cache
+*.local

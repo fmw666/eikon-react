@@ -1,0 +1,22 @@
+{
+  "home": {
+    "title": "Welcome to EvoMap App",
+    "subtitle": "An AI-Agent-friendly React starter with Tailwind v4 and animate-ui.",
+    "cta": "View the counter demo"
+  },
+  "counter": {
+    "title": "Counter demo",
+    "description": "Demonstrates a feature-first module with Zustand state, i18n and tests.",
+    "current": "Current value: {{value}}",
+    "increment": "Increment",
+    "decrement": "Decrement",
+    "reset": "Reset",
+    "toastIncreased": "Counter increased",
+    "toastReset": "Counter reset to zero"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has been moved.",
+    "back": "Go home"
+  }
+}
