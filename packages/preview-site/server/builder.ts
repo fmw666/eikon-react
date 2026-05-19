@@ -32,6 +32,22 @@ export const TEMPLATE_REACT_DIR = path.resolve(
 );
 const CACHE_ROOT = path.join(TEMPLATE_REACT_DIR, '.preview-cache');
 
+/**
+ * Recursive-rm options tuned for Windows. NTFS releases file handles
+ * asynchronously and antivirus / Windows Search / OneDrive routinely keep
+ * freshly-written files locked for tens of milliseconds after a build, which
+ * makes naive depth-first `rmdir` race with `ENOTEMPTY` on parent directories
+ * (the children's deletions haven't flushed yet). Node's built-in
+ * `maxRetries` / `retryDelay` retry exactly the error codes we hit
+ * (EBUSY/EMFILE/ENFILE/ENOTEMPTY/EPERM), so we don't need an ad-hoc wrapper.
+ */
+const RM_OPTS = {
+  recursive: true,
+  force: true,
+  maxRetries: 5,
+  retryDelay: 100,
+} as const;
+
 /** Default param values used for pre-warming and for filling in missing keys
  *  on incoming /api/build requests. Kept in lock-step with
  *  packages/preview-site/src/lib/params-schema.ts. */
@@ -146,7 +162,7 @@ export function clearAllErrors(): void {
 
 /** Test-only escape hatch; never call from production code paths. */
 export async function clearAllCache(): Promise<void> {
-  await rm(CACHE_ROOT, { recursive: true, force: true });
+  await rm(CACHE_ROOT, RM_OPTS);
   errors.clear();
   inflight.clear();
 }
@@ -228,14 +244,12 @@ async function evictCacheLru(): Promise<void> {
   await Promise.all(
     toRemove.map(async (name) => {
       try {
-        await rm(path.join(CACHE_ROOT, name), {
-          recursive: true,
-          force: true,
-        });
+        await rm(path.join(CACHE_ROOT, name), RM_OPTS);
         errors.delete(name);
       } catch {
-        // Best-effort: a directory might already be gone, or held open
-        // briefly by Vite on Windows. We'll retry on the next eviction.
+        // Best-effort: even with RM_OPTS retries, a directory might still be
+        // held open by Vite/AV on Windows past our retry budget. We'll pick
+        // it up on the next eviction pass.
       }
     })
   );
@@ -268,8 +282,10 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
 
   // Drop any half-built leftover so we always start from a clean tree. A
   // ready dist would've short-circuited in ensureBuild, so this branch only
-  // runs when the cache entry is missing or partial.
-  await rm(cacheDir, { recursive: true, force: true });
+  // runs when the cache entry is missing or partial. On Windows this is the
+  // hot path for ENOTEMPTY races; RM_OPTS gives us 5×100ms of retries which
+  // is enough to outlast AV/Search/OneDrive file-handle lag in practice.
+  await rm(cacheDir, RM_OPTS);
   await mkdir(cacheDir, { recursive: true });
 
   await copyTree(TEMPLATE_REACT_DIR, cacheDir, COPY_SKIP);
