@@ -273,7 +273,7 @@ export function PreviewFrame() {
           // running variant) without touching params or rebuilding.
           key={`${lastReadyHash}:${subUrl}:${reloadKey}`}
           src={iframeSrc}
-          title="EvoMap template preview"
+          title="Eikon template preview"
           style={{ width: '100%', height: '100%', border: 0 }}
         />
       )}

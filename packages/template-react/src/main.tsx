@@ -2,9 +2,9 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import App from '@/App';
-// @evomap:feature(i18n) begin
+// @eikon:feature(i18n) begin
 import { initI18n } from '@/shared/i18n';
-// @evomap:feature(i18n) end
+// @eikon:feature(i18n) end
 import '@/styles/index.css';
 
 const rootElement = document.getElementById('root');
@@ -20,7 +20,7 @@ const root = createRoot(rootElement);
  */
 const preconditions: Array<Promise<unknown>> = [];
 
-// @evomap:feature(i18n) begin
+// @eikon:feature(i18n) begin
 // Wait for the active locale bundle so users never see a flash of
 // fallback keys. On failure we still render rather than leave the
 // screen blank.
@@ -29,7 +29,7 @@ preconditions.push(
     console.error('[i18n] initialisation failed; rendering anyway:', err);
   })
 );
-// @evomap:feature(i18n) end
+// @eikon:feature(i18n) end
 
 void Promise.all(preconditions).then(() => {
   root.render(

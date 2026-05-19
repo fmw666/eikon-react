@@ -1,7 +1,7 @@
 import { Minus, Plus, RotateCcw } from 'lucide-react';
-// @evomap:feature(i18n) begin
+// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @evomap:feature(i18n) end
+// @eikon:feature(i18n) end
 
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
@@ -11,11 +11,11 @@ import { CounterDisplay } from '../components/CounterDisplay';
 import { useCounterStore } from '../stores/counterStore';
 
 export function CounterPage() {
-  // @evomap:feature(i18n) begin
+  // @eikon:feature(i18n) begin
   const { t } = useTranslation();
-  // @evomap:feature(i18n) end
+  // @eikon:feature(i18n) end
 
-  // @evomap:feature(i18n:fallback) begin
+  // @eikon:feature(i18n:fallback) begin
   // const t = (k: string, opts?: { value?: number }) =>
   //   k === 'counter.current'
   //     ? `Current value: ${opts?.value ?? 0}`
@@ -29,7 +29,7 @@ export function CounterPage() {
   //         'counter.toastIncreased': 'Counter increased',
   //         'counter.toastReset': 'Counter reset to zero',
   //       })[k] ?? k;
-  // @evomap:feature(i18n:fallback) end
+  // @eikon:feature(i18n:fallback) end
 
   const value = useCounterStore((s) => s.value);
   const increment = useCounterStore((s) => s.increment);

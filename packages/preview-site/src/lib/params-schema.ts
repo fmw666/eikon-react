@@ -1,5 +1,5 @@
 /**
- * Single source of truth for every parameter the EvoMap template playground
+ * Single source of truth for every parameter the Eikon React template playground
  * knows about. Three consumers read this list:
  *
  *  1. shell/ParamsPanel — turns each entry into an input control.

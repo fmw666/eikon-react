@@ -22,15 +22,15 @@ const navLinks = [
  */
 const LAYOUT_VARIANT_CLASS =
   [
-    // @evomap:variant(layout=stacked) begin
+    // @eikon:variant(layout=stacked) begin
     'layout-stacked',
-    // @evomap:variant(layout=stacked) end
-    // @evomap:variant(layout=sidebar) begin
+    // @eikon:variant(layout=stacked) end
+    // @eikon:variant(layout=sidebar) begin
     'layout-sidebar',
-    // @evomap:variant(layout=sidebar) end
-    // @evomap:variant(layout=topbar) begin
+    // @eikon:variant(layout=sidebar) end
+    // @eikon:variant(layout=topbar) begin
     'layout-topbar',
-    // @evomap:variant(layout=topbar) end
+    // @eikon:variant(layout=topbar) end
   ].at(0) ?? 'layout-stacked';
 
 export function RootLayout() {
@@ -39,7 +39,7 @@ export function RootLayout() {
       <header className="border-b border-[var(--color-border)] bg-[var(--color-card)]/70 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           <Link to="/" className="text-sm font-semibold tracking-tight">
-            EvoMap App
+            Eikon App
           </Link>
           <nav className="flex items-center gap-1">
             {navLinks.map((link) => (
@@ -74,7 +74,7 @@ export function RootLayout() {
         </Suspense>
       </main>
       <footer className="border-t border-[var(--color-border)] py-4 text-center text-xs text-[var(--color-muted-foreground)]">
-        Built with EvoMap starter
+        Built with Eikon
       </footer>
     </div>
   );

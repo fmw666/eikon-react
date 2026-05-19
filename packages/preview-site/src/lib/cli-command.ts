@@ -16,7 +16,7 @@ export interface BuildCliCommandOptions {
 }
 
 /**
- * Render a `create-evomap-app` invocation that reproduces the given state.
+ * Render a `create-eikon-react` invocation that reproduces the given state.
  *
  * Only params whose value differs from the schema default are emitted, so the
  * displayed command stays as short as possible — the CLI applies the same
@@ -28,7 +28,7 @@ export function buildCliCommand(
 ): string {
   const tokens: string[] = [];
   if (!opts.bare) tokens.push('npx');
-  tokens.push('create-evomap-app');
+  tokens.push('create-eikon-react');
   tokens.push(opts.projectName ?? PROJECT_NAME_PLACEHOLDER);
 
   for (const def of PARAMS) {

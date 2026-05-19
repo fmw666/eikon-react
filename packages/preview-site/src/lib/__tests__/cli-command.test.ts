@@ -10,36 +10,36 @@ import { defaultState } from '../params-schema';
 describe('buildCliCommand', () => {
   it('emits the binary + <proj_name> placeholder when state matches defaults', () => {
     const cmd = buildCliCommand(defaultState());
-    expect(cmd).toBe('npx create-evomap-app <proj_name>');
+    expect(cmd).toBe('npx create-eikon-react <proj_name>');
   });
 
   it('uses the custom project name when provided', () => {
     const cmd = buildCliCommand(defaultState(), { projectName: 'my-app-2' });
-    expect(cmd).toBe('npx create-evomap-app my-app-2');
+    expect(cmd).toBe('npx create-eikon-react my-app-2');
   });
 
   it('drops the `npx` prefix when bare=true', () => {
     const cmd = buildCliCommand(defaultState(), { bare: true });
-    expect(cmd).toBe('create-evomap-app <proj_name>');
+    expect(cmd).toBe('create-eikon-react <proj_name>');
   });
 
   it('emits `--<flag>` when a boolean default=false is enabled', () => {
     const state = { ...defaultState(), supabase: true };
     const cmd = buildCliCommand(state);
-    expect(cmd).toBe('npx create-evomap-app <proj_name> --supabase');
+    expect(cmd).toBe('npx create-eikon-react <proj_name> --supabase');
   });
 
   it('emits `--no-<flag>` when a boolean default=true is disabled', () => {
     const state = { ...defaultState(), query: false };
     const cmd = buildCliCommand(state);
-    expect(cmd).toBe('npx create-evomap-app <proj_name> --no-query');
+    expect(cmd).toBe('npx create-eikon-react <proj_name> --no-query');
   });
 
   it('emits `--<flag> <value>` for enum overrides only', () => {
     const state = { ...defaultState(), pm: 'bun', design: 'minimal' };
     const cmd = buildCliCommand(state);
     expect(cmd).toBe(
-      'npx create-evomap-app <proj_name> --pm bun --design minimal'
+      'npx create-eikon-react <proj_name> --pm bun --design minimal'
     );
   });
 
@@ -55,7 +55,7 @@ describe('buildCliCommand', () => {
     };
     const cmd = buildCliCommand(state);
     expect(cmd).toBe(
-      'npx create-evomap-app <proj_name> --supabase --no-install --pm npm --design brutalist --layout sidebar --ui radix'
+      'npx create-eikon-react <proj_name> --supabase --no-install --pm npm --design brutalist --layout sidebar --ui radix'
     );
   });
 });
@@ -65,7 +65,7 @@ describe('buildAgentInstructions', () => {
     const cmd = buildCliCommand(defaultState());
     const out = buildAgentInstructions(cmd);
     expect(out).toBe(
-      '`npx create-evomap-app <proj_name>`\n\n' + AGENT_NOTE
+      '`npx create-eikon-react <proj_name>`\n\n' + AGENT_NOTE
     );
   });
 

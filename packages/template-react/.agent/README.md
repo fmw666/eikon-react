@@ -63,7 +63,7 @@ Fields not listed here may be added by callers but should be ignored by parsers.
 - The CSS strategy is **Tailwind v4 CSS-first**: theme tokens live in `src/styles/index.css` under `@theme`; do not introduce a `tailwind.config.js`.
 - Tests live in `__tests__/` directories **inside** each feature (mirroring its source tree). Cross-cutting setup lives in the root `__tests__/setup.ts`.
 - Visible strings go through i18next (`useTranslation`); do not hard-code copy in components.
-- Optional modules are wrapped with comment markers of the form `// @evomap:feature(<name>) begin … // @evomap:feature(<name>) end`. The CLI uses these markers to strip code when a user opts a feature out; **do not remove these markers** unless intentionally removing the feature itself.
+- Optional modules are wrapped with comment markers of the form `// @eikon:feature(<name>) begin … // @eikon:feature(<name>) end`. The CLI uses these markers to strip code when a user opts a feature out; **do not remove these markers** unless intentionally removing the feature itself.
 
 ## Updating this protocol
 

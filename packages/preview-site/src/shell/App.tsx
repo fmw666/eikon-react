@@ -33,7 +33,7 @@ export default function App() {
   // layout's split was. (Persistence is intentionally NOT enabled — sizes
   // reset to the defaults below each session, which is what we want while
   // we still iterate on those defaults.)
-  const groupId = `evomap-${showFiles ? 'f' : ''}${showEditor ? 'e' : ''}p`;
+  const groupId = `eikon-${showFiles ? 'f' : ''}${showEditor ? 'e' : ''}p`;
 
   return (
     <div
@@ -61,7 +61,7 @@ export default function App() {
           fontFamily: 'system-ui, sans-serif',
         }}
       >
-        <strong>EvoMap Template Playground</strong>
+        <strong>Eikon Template Playground</strong>
         <ParamsPanel />
       </header>
 

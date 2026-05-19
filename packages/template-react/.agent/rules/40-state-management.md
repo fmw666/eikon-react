@@ -18,7 +18,7 @@ Does the state belong to a single component and not need to survive remounts?
   └── NO  ↓
 
 Is it server / remote data with fetching, caching, retries, mutations?
-  └── YES → TanStack Query (@evomap:feature(query))
+  └── YES → TanStack Query (@eikon:feature(query))
   └── NO  ↓
 
 Is it client-side, cross-feature, or cross-route?

@@ -15,7 +15,7 @@ Use when the user asks to add a reusable UI primitive (Dropdown, Tooltip, Accord
 1. **Check Radix.** If the primitive has accessibility semantics (menus, dialogs, popovers, tooltips, switches, tabs, accordions, etc.), it MUST be built on the corresponding `@radix-ui/react-*` package. Add the dependency:
 
    ```bash
-   pnpm --filter @evomap/template-react add @radix-ui/react-<name>
+   pnpm --filter @eikon/react add @radix-ui/react-<name>
    ```
 
 2. **Create `src/shared/ui/<name>.tsx`:**

@@ -1,2 +1,2 @@
-// @evomap:feature(supabase) file
+// @eikon:feature(supabase) file
 export { supabase } from './client';

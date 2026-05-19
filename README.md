@@ -1,6 +1,8 @@
-# EvoMap Frontend Kit
+# Eikon for React
 
-> An AI-Coding-Agent-friendly React starter — `npx create-evomap-app` + a curated React 19 template, plus a portable `.agent/` protocol any agent (Cursor, Claude Code, Codex, …) can read.
+> An AI-Coding-Agent-friendly React starter — `npx create-eikon-react` + a curated React 19 template, plus a portable `.agent/` protocol any agent (Cursor, Claude Code, Codex, …) can read.
+>
+> _Eikon_ (Ancient Greek **εἰκών**, "image / rendered form") — the word English `icon` came from. A React app, after all, is the eikon of its state.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![React 19](https://img.shields.io/badge/React-19-20232a?logo=react&logoColor=61DAFB&labelColor=20232a)](https://react.dev)
@@ -13,7 +15,7 @@ This repository is **two things in one pnpm monorepo**:
 
 | Package                                                  | Role                                                                                 |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| [packages/create-evomap-app](packages/create-evomap-app) | The CLI published to npm as `create-evomap-app` (`npx create-evomap-app my-app`).    |
+| [packages/create-eikon-react](packages/create-eikon-react) | The CLI published to npm as `create-eikon-react` (`npx create-eikon-react my-app`).    |
 | [packages/template-react](packages/template-react)       | The reference React 19 template that the CLI ships and scaffolds into your project. |
 
 The template is **opinionated, AI-agent-aware, and feature-first** so that — humans or AI agents — anyone who edits a generated project starts from the same conventions instead of reinventing them.
@@ -21,9 +23,9 @@ The template is **opinionated, AI-agent-aware, and feature-first** so that — h
 ## Quick start (consumers)
 
 ```bash
-npx create-evomap-app my-app
+npx create-eikon-react my-app
 # or
-pnpm create evomap-app my-app
+pnpm create eikon-react my-app
 ```
 
 The CLI is interactive and will ask:
@@ -37,7 +39,7 @@ The CLI is interactive and will ask:
 Non-interactive flags exist for CI scripting:
 
 ```bash
-npx create-evomap-app my-app \
+npx create-eikon-react my-app \
   --yes \
   --no-supabase --query \
   --pm pnpm \
@@ -69,7 +71,7 @@ npx create-evomap-app my-app \
 ```
 .
 ├── packages/
-│   ├── create-evomap-app/   # CLI source + e2e tests
+│   ├── create-eikon-react/   # CLI source + e2e tests
 │   └── template-react/      # Canonical React 19 template
 ├── docs/
 │   ├── architecture.md      # Why feature-first, how boundaries work
@@ -84,11 +86,11 @@ Requires Node ≥ 20.10 and pnpm ≥ 9.
 
 ```bash
 pnpm install                                  # install all workspaces
-pnpm --filter @evomap/template-react dev      # run the template locally
-pnpm --filter @evomap/template-react test     # template tests
-pnpm --filter @evomap/template-react lint     # template lint
-pnpm --filter @evomap/template-react build    # template prod build
-pnpm --filter create-evomap-app build         # build the CLI bundle + sync template payload
+pnpm --filter @eikon/react dev      # run the template locally
+pnpm --filter @eikon/react test     # template tests
+pnpm --filter @eikon/react lint     # template lint
+pnpm --filter @eikon/react build    # template prod build
+pnpm --filter create-eikon-react build         # build the CLI bundle + sync template payload
 pnpm cli                                      # build then run CLI from source
 ```
 
@@ -114,13 +116,13 @@ pnpm e2e -- --only lean              # run only the named scenario
 pnpm e2e -- --keep                   # keep the temp workspace on disk for inspection
 ```
 
-The e2e runner lives at [packages/create-evomap-app/scripts/e2e.mjs](packages/create-evomap-app/scripts/e2e.mjs).
+The e2e runner lives at [packages/create-eikon-react/scripts/e2e.mjs](packages/create-eikon-react/scripts/e2e.mjs).
 
 Releasing the CLI (manual for now):
 
 ```bash
-pnpm --filter create-evomap-app build
-cd packages/create-evomap-app && npm publish --access public
+pnpm --filter create-eikon-react build
+cd packages/create-eikon-react && npm publish --access public
 ```
 
 ## Documentation

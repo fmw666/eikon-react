@@ -85,7 +85,7 @@
 /* ----------------------------------------------------------------------------
  * Variant overlays.
  *
- * The blocks below are gated by `@evomap:variant(<axis>=<value>)` markers.
+ * The blocks below are gated by `@eikon:variant(<axis>=<value>)` markers.
  * strip-features keeps only the chosen block per axis when scaffolding into a
  * new project; in the unstripped template all blocks coexist (CSS rules
  * either apply to different selectors or are merged into a single @theme).
@@ -93,11 +93,11 @@
 
 /* --- design axis --------------------------------------------------------- */
 
-/* @evomap:variant(design=default) begin */
+/* @eikon:variant(design=default) begin */
 /* default keeps the base @theme above; nothing extra. */
-/* @evomap:variant(design=default) end */
+/* @eikon:variant(design=default) end */
 
-/* @evomap:variant(design=minimal) begin */
+/* @eikon:variant(design=minimal) begin */
 @theme {
   --color-primary: oklch(0.18 0.01 260);
   --color-primary-foreground: oklch(0.98 0 0);
@@ -106,9 +106,9 @@
   --radius-sm: 0rem;
   --font-sans: ui-serif, Georgia, 'Times New Roman', serif;
 }
-/* @evomap:variant(design=minimal) end */
+/* @eikon:variant(design=minimal) end */
 
-/* @evomap:variant(design=brutalist) begin */
+/* @eikon:variant(design=brutalist) begin */
 @theme {
   --color-background: oklch(0.95 0.18 95);
   --color-primary: oklch(0.55 0.25 350);
@@ -119,15 +119,15 @@
   --radius-sm: 0rem;
   --font-sans: 'Courier New', ui-monospace, monospace;
 }
-/* @evomap:variant(design=brutalist) end */
+/* @eikon:variant(design=brutalist) end */
 
 /* --- layout axis (CSS-only hooks; markup is shared in RootLayout) -------- */
 
-/* @evomap:variant(layout=stacked) begin */
+/* @eikon:variant(layout=stacked) begin */
 /* stacked keeps the default centered max-w-5xl flow; nothing extra. */
-/* @evomap:variant(layout=stacked) end */
+/* @eikon:variant(layout=stacked) end */
 
-/* @evomap:variant(layout=sidebar) begin */
+/* @eikon:variant(layout=sidebar) begin */
 .layout-sidebar > header {
   border-bottom-width: 0;
   border-right: 1px solid var(--color-border);
@@ -136,9 +136,9 @@
   max-width: none;
   padding-inline: 1rem;
 }
-/* @evomap:variant(layout=sidebar) end */
+/* @eikon:variant(layout=sidebar) end */
 
-/* @evomap:variant(layout=topbar) begin */
+/* @eikon:variant(layout=topbar) begin */
 .layout-topbar > header {
   border-bottom-width: 2px;
   background-color: var(--color-muted);
@@ -146,24 +146,24 @@
 .layout-topbar > main {
   max-width: 64rem;
 }
-/* @evomap:variant(layout=topbar) end */
+/* @eikon:variant(layout=topbar) end */
 
 /* --- ui axis (radius and shadow shape) ----------------------------------- */
 
-/* @evomap:variant(ui=animate-ui) begin */
+/* @eikon:variant(ui=animate-ui) begin */
 /* animate-ui keeps the motion-friendly defaults; nothing extra. */
-/* @evomap:variant(ui=animate-ui) end */
+/* @eikon:variant(ui=animate-ui) end */
 
-/* @evomap:variant(ui=radix) begin */
+/* @eikon:variant(ui=radix) begin */
 @theme {
   --radius-lg: 0.25rem;
   --radius-md: 0.125rem;
 }
-/* @evomap:variant(ui=radix) end */
+/* @eikon:variant(ui=radix) end */
 
-/* @evomap:variant(ui=shadcn-style) begin */
+/* @eikon:variant(ui=shadcn-style) begin */
 @theme {
   --radius-lg: 0.5rem;
   --radius-md: 0.375rem;
 }
-/* @evomap:variant(ui=shadcn-style) end */
+/* @eikon:variant(ui=shadcn-style) end */

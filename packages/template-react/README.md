@@ -1,18 +1,18 @@
-# EvoMap React Template
+# Eikon React Template
 
 React 19 + Tailwind CSS v4 + animate-ui starter with a feature-first architecture and a portable `.agent/` collaboration protocol that AI coding agents can read directly.
 
-This package is the canonical template consumed by `npx create-evomap-app`. It is also runnable standalone for template authoring and review.
+This package is the canonical template consumed by `npx create-eikon-react`. It is also runnable standalone for template authoring and review.
 
 ## Tech stack
 
 - **React 19** + **TypeScript 5.6+**
 - **Vite 6** + **Tailwind CSS v4** (CSS-first config via `@theme`)
 - **animate-ui style** components (`motion` + Radix primitives, copy-paste friendly)
-- **Zustand** state, **TanStack Query** async data (optional, `@evomap:feature(query)`)
+- **Zustand** state, **TanStack Query** async data (optional, `@eikon:feature(query)`)
 - **React Router v7**, **React Hook Form** + **zod**
 - **i18next** (en/zh) — included by default
-- **Supabase** client (optional, `@evomap:feature(supabase)`)
+- **Supabase** client (optional, `@eikon:feature(supabase)`)
 - **Vitest** + **Testing Library** with `__tests__/` colocated per feature
 - **ESLint 9 flat config** + **Prettier** with `import/no-restricted-paths` guarding feature boundaries
 

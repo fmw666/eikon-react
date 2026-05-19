@@ -1,26 +1,26 @@
 import { ArrowRight, Sparkles } from 'lucide-react';
-// @evomap:feature(i18n) begin
+// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @evomap:feature(i18n) end
+// @eikon:feature(i18n) end
 import { Link } from 'react-router-dom';
 
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 
 export function HomePage() {
-  // @evomap:feature(i18n) begin
+  // @eikon:feature(i18n) begin
   const { t } = useTranslation();
-  // @evomap:feature(i18n) end
+  // @eikon:feature(i18n) end
 
-  // @evomap:feature(i18n:fallback) begin
+  // @eikon:feature(i18n:fallback) begin
   // const t = (k: string) =>
   //   ({
-  //     'home.title': 'Welcome to EvoMap App',
+  //     'home.title': 'Welcome to Eikon App',
   //     'home.subtitle':
   //       'An AI-Agent-friendly React starter with Tailwind v4 and animate-ui.',
   //     'home.cta': 'View the counter demo',
   //   })[k] ?? k;
-  // @evomap:feature(i18n:fallback) end
+  // @eikon:feature(i18n:fallback) end
 
   return (
     <section className="flex flex-col items-center text-center">

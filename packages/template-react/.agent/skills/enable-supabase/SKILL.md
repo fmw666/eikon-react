@@ -12,7 +12,7 @@ Use when the user wants auth, database, or storage from Supabase. This skill ass
 
 ## Background
 
-Supabase is the **only** built-in backend in this template, and it is optional. Its scaffolding is wrapped with `@evomap:feature(supabase)` comment markers so `create-evomap-app` can strip it cleanly when not requested.
+Supabase is the **only** built-in backend in this template, and it is optional. Its scaffolding is wrapped with `@eikon:feature(supabase)` comment markers so `create-eikon-react` can strip it cleanly when not requested.
 
 ## Step list
 
@@ -24,13 +24,13 @@ Supabase is the **only** built-in backend in this template, and it is optional. 
    If they don't exist, the template was scaffolded without Supabase. Re-install the dependency:
 
    ```bash
-   pnpm --filter @evomap/template-react add @supabase/supabase-js
+   pnpm --filter @eikon/react add @supabase/supabase-js
    ```
 
    and recreate `src/shared/supabase/client.ts` from this template:
 
    ```ts
-   // @evomap:feature(supabase) file
+   // @eikon:feature(supabase) file
    import { createClient } from '@supabase/supabase-js';
    const url = import.meta.env.VITE_SUPABASE_URL;
    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -67,7 +67,7 @@ Supabase is the **only** built-in backend in this template, and it is optional. 
    }
    ```
 
-4. **Wrap calls in TanStack Query** (if the `@evomap:feature(query)` block is enabled):
+4. **Wrap calls in TanStack Query** (if the `@eikon:feature(query)` block is enabled):
 
    ```ts
    // src/features/<feature>/hooks/use<Thing>Query.ts
@@ -87,7 +87,7 @@ Supabase is the **only** built-in backend in this template, and it is optional. 
 5. **For auth flows**, add a `useSession` hook in `src/shared/supabase/` (it's cross-feature):
 
    ```ts
-   // @evomap:feature(supabase) file
+   // @eikon:feature(supabase) file
    import { useEffect, useState } from 'react';
    import type { Session } from '@supabase/supabase-js';
    import { supabase } from './client';
