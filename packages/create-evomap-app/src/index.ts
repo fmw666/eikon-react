@@ -20,7 +20,12 @@ import kleur from 'kleur';
 import { copyTemplate } from './copy-template.js';
 import { initGit } from './init-git.js';
 import { installDeps } from './install-deps.js';
-import { stripFeatures, type FeatureFlags } from './strip-features.js';
+import {
+  DEFAULT_VARIANTS,
+  stripFeatures,
+  type FeatureFlags,
+  type VariantSelections,
+} from './strip-features.js';
 import { isValidPackageName, toValidPackageName } from './validate.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,11 +33,24 @@ const __dirname = path.dirname(__filename);
 
 const TEMPLATE_DIR = path.resolve(__dirname, '..', 'template');
 
+/**
+ * Known values for each variant axis. Kept in lock-step with the playground
+ * schema at packages/preview-site/src/lib/params-schema.ts.
+ */
+const VARIANT_CHOICES = {
+  design: ['minimal', 'default', 'brutalist'] as const,
+  layout: ['sidebar', 'topbar', 'stacked'] as const,
+  ui: ['radix', 'shadcn-style', 'animate-ui'] as const,
+} satisfies Record<string, readonly string[]>;
+
+type VariantAxis = keyof typeof VARIANT_CHOICES;
+
 interface CliOptions {
   targetDir: string;
   projectName: string;
   packageManager: 'pnpm' | 'npm' | 'bun';
   features: FeatureFlags;
+  variants: VariantSelections;
   installDeps: boolean;
   initGit: boolean;
 }
@@ -73,6 +91,7 @@ async function run(rawArgv: string[]): Promise<void> {
   }
 
   const features = await resolveFeatures(argv);
+  const variants = await resolveVariants(argv);
   const packageManager = await resolvePackageManager(argv);
   const wantInstall = await resolveBoolean(
     argv,
@@ -92,6 +111,7 @@ async function run(rawArgv: string[]): Promise<void> {
     projectName,
     packageManager,
     features,
+    variants,
     installDeps: wantInstall,
     initGit: wantGit,
   };
@@ -183,6 +203,32 @@ async function resolveFeatures(argv: ParsedArgs): Promise<FeatureFlags> {
   return flags;
 }
 
+async function resolveVariants(argv: ParsedArgs): Promise<VariantSelections> {
+  const out: VariantSelections = { ...DEFAULT_VARIANTS };
+  for (const axis of Object.keys(VARIANT_CHOICES) as VariantAxis[]) {
+    const fromArgv = argv.variants?.[axis];
+    if (fromArgv !== undefined) {
+      out[axis] = fromArgv;
+      continue;
+    }
+    if (argv.yes) continue;
+    const choice = await select({
+      message: `Choose a ${axis} variant:`,
+      initialValue: out[axis] as string,
+      options: VARIANT_CHOICES[axis].map((value) => ({
+        value,
+        label: value === out[axis] ? `${value} (default)` : value,
+      })),
+    });
+    if (isCancel(choice)) {
+      cancel('Aborted.');
+      process.exit(1);
+    }
+    out[axis] = String(choice);
+  }
+  return out;
+}
+
 async function resolvePackageManager(
   argv: ParsedArgs
 ): Promise<'pnpm' | 'npm' | 'bun'> {
@@ -234,7 +280,7 @@ async function scaffold(opts: CliOptions): Promise<void> {
   s.stop('Template copied');
 
   s.start('Applying feature selection');
-  await stripFeatures(opts.targetDir, opts.features);
+  await stripFeatures(opts.targetDir, opts.features, opts.variants);
   s.stop('Feature selection applied');
 
   if (opts.initGit) {
@@ -273,6 +319,7 @@ interface ParsedArgs {
   install?: boolean;
   git?: boolean;
   pm?: 'pnpm' | 'npm' | 'bun';
+  variants?: Partial<Record<VariantAxis, string>>;
 }
 
 function parseArgs(argv: string[]): ParsedArgs {
@@ -294,11 +341,50 @@ function parseArgs(argv: string[]): ParsedArgs {
     } else if (a.startsWith('--pm=')) {
       const v = a.slice('--pm='.length);
       if (v === 'pnpm' || v === 'npm' || v === 'bun') out.pm = v;
+    } else if (tryParseVariant(a, argv, i, out)) {
+      // `tryParseVariant` consumes one or two argv positions and updates `out`.
+      if (a.indexOf('=') === -1) i += 1;
     } else if (!a.startsWith('-') && out.name === undefined) {
       out.name = a;
     }
   }
   return out;
+}
+
+/**
+ * Parse one of the variant flags (`--design / --layout / --ui`) in either
+ * `--flag value` or `--flag=value` form. Returns true if the token belonged to
+ * a known variant axis (and was therefore consumed) regardless of whether the
+ * value was valid; invalid values are silently ignored so unknown values still
+ * fall through to the interactive prompt or the default.
+ */
+function tryParseVariant(
+  token: string,
+  argv: string[],
+  i: number,
+  out: ParsedArgs
+): boolean {
+  const axes = Object.keys(VARIANT_CHOICES) as VariantAxis[];
+  for (const axis of axes) {
+    const longFlag = `--${axis}`;
+    let value: string | undefined;
+    if (token === longFlag) {
+      value = argv[i + 1];
+    } else if (token.startsWith(`${longFlag}=`)) {
+      value = token.slice(longFlag.length + 1);
+    } else {
+      continue;
+    }
+    if (
+      value !== undefined &&
+      (VARIANT_CHOICES[axis] as readonly string[]).includes(value)
+    ) {
+      out.variants ??= {};
+      out.variants[axis] = value;
+    }
+    return true;
+  }
+  return false;
 }
 
 run(process.argv.slice(2)).catch((err) => {

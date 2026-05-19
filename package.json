@@ -12,9 +12,12 @@
   "packageManager": "pnpm@9.12.0",
   "scripts": {
     "dev": "pnpm --filter @evomap/template-react dev",
+    "preview:dev": "pnpm --filter @evomap/preview-site dev",
+    "preview:build": "pnpm --filter @evomap/preview-site build",
     "build": "pnpm -r --filter=./packages/* build",
     "build:cli": "pnpm --filter create-evomap-app build",
     "build:template": "pnpm --filter @evomap/template-react build",
+    "build:preview": "pnpm --filter @evomap/preview-site build",
     "test": "pnpm -r --filter=./packages/* test",
     "e2e": "pnpm --filter create-evomap-app e2e",
     "e2e:quick": "pnpm --filter create-evomap-app e2e:quick",

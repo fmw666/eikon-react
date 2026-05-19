@@ -76,6 +76,44 @@ const SCENARIOS = [
       providersAbsent: [],
     },
   },
+  {
+    // Same baseline as default but exercises every variant axis so the new
+    // @evomap:variant(name=value) marker grammar is verified end-to-end.
+    id: 'variants',
+    projectName: 'evomap-e2e-variants',
+    flags: [
+      '--no-supabase',
+      '--query',
+      '--design',
+      'minimal',
+      '--layout',
+      'sidebar',
+      '--ui',
+      'radix',
+    ],
+    expect: {
+      filesPresent: ['src/features/counter/index.ts'],
+      filesAbsent: ['src/shared/supabase'],
+      depsPresent: ['@tanstack/react-query'],
+      depsAbsent: ['@supabase/supabase-js'],
+      providersContains: ['QueryClientProvider'],
+      providersAbsent: [],
+      // Strip-features must keep ONLY the chosen variant block in
+      // RootLayout.tsx. The 'layout-stacked' fallback string at the end of
+      // the `.at(0) ?? '…'` expression is intentional and survives stripping,
+      // so we only assert that other non-chosen variants are gone.
+      rootLayoutContains: ['layout-sidebar', '@evomap:variant(layout=sidebar)'],
+      rootLayoutAbsent: [
+        'layout-topbar',
+        '@evomap:variant(layout=topbar)',
+        '@evomap:variant(layout=stacked)',
+      ],
+      // The CSS file should keep the chosen design + ui blocks and drop the
+      // non-chosen ones (the brutalist / default design palettes etc.).
+      stylesContains: ['design=minimal', 'ui=radix', 'layout=sidebar'],
+      stylesAbsent: ['design=default', 'design=brutalist', 'ui=animate-ui', 'ui=shadcn-style'],
+    },
+  },
 ];
 
 const selected = args.only
@@ -252,6 +290,48 @@ async function verifyScenario(projectDir, expect) {
       throw new Error(
         `expected providers.tsx to NOT contain ${JSON.stringify(needle)}`
       );
+    }
+  }
+
+  if (expect.rootLayoutContains || expect.rootLayoutAbsent) {
+    const root = await readFile(
+      path.join(projectDir, 'src', 'app', 'layouts', 'RootLayout.tsx'),
+      'utf8'
+    );
+    for (const needle of expect.rootLayoutContains ?? []) {
+      if (!root.includes(needle)) {
+        throw new Error(
+          `expected RootLayout.tsx to contain ${JSON.stringify(needle)}`
+        );
+      }
+    }
+    for (const needle of expect.rootLayoutAbsent ?? []) {
+      if (root.includes(needle)) {
+        throw new Error(
+          `expected RootLayout.tsx to NOT contain ${JSON.stringify(needle)}`
+        );
+      }
+    }
+  }
+
+  if (expect.stylesContains || expect.stylesAbsent) {
+    const styles = await readFile(
+      path.join(projectDir, 'src', 'styles', 'index.css'),
+      'utf8'
+    );
+    for (const needle of expect.stylesContains ?? []) {
+      if (!styles.includes(needle)) {
+        throw new Error(
+          `expected styles/index.css to contain ${JSON.stringify(needle)}`
+        );
+      }
+    }
+    for (const needle of expect.stylesAbsent ?? []) {
+      if (styles.includes(needle)) {
+        throw new Error(
+          `expected styles/index.css to NOT contain ${JSON.stringify(needle)}`
+        );
+      }
     }
   }
 }

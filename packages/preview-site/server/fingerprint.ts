@@ -1,0 +1,88 @@
+import { createHash, type Hash } from 'node:crypto';
+import { readFile, readdir } from 'node:fs/promises';
+import path from 'node:path';
+
+/**
+ * "Template revision" — a short content hash of every file we copy into the
+ * per-variant build dir. Mixing this into the cache key gives us automatic
+ * invalidation: when a developer edits anything inside template-react/, the
+ * next /api/build call computes a different rev → different hash → cold
+ * rebuild, while previously-built dirs simply become orphans on disk.
+ *
+ * The result is cached in-memory; `invalidate()` should be called from the
+ * dev server's file watcher whenever a watched file changes.
+ */
+
+const FINGERPRINT_SKIP = new Set([
+  'node_modules',
+  'dist',
+  '.preview-cache',
+  '__tests__',
+  '.git',
+  '.turbo',
+  'coverage',
+  '.vite',
+]);
+
+let cached: string | null = null;
+let pending: Promise<string> | null = null;
+
+export function invalidateTemplateRev(): void {
+  cached = null;
+}
+
+/** Sync getter — returns null if the rev hasn't been computed yet. */
+export function peekTemplateRev(): string | null {
+  return cached;
+}
+
+export async function getTemplateRev(templateDir: string): Promise<string> {
+  if (cached) return cached;
+  if (pending) return pending;
+  pending = (async () => {
+    try {
+      const rev = await computeRev(templateDir);
+      cached = rev;
+      return rev;
+    } finally {
+      pending = null;
+    }
+  })();
+  return pending;
+}
+
+async function computeRev(dir: string): Promise<string> {
+  const hasher = createHash('sha256');
+  await walk(dir, dir, hasher);
+  return hasher.digest('hex').slice(0, 12);
+}
+
+async function walk(root: string, dir: string, hasher: Hash): Promise<void> {
+  let entries;
+  try {
+    entries = await readdir(dir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  // Sort for deterministic ordering across platforms/file systems.
+  entries.sort((a, b) => a.name.localeCompare(b.name));
+  for (const entry of entries) {
+    if (FINGERPRINT_SKIP.has(entry.name)) continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      await walk(root, full, hasher);
+    } else if (entry.isFile()) {
+      const rel = path.relative(root, full).replace(/\\/g, '/');
+      let buf: Buffer;
+      try {
+        buf = await readFile(full);
+      } catch {
+        continue;
+      }
+      hasher.update(rel);
+      hasher.update('\0');
+      hasher.update(buf);
+      hasher.update('\0');
+    }
+  }
+}

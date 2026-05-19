@@ -8,6 +8,19 @@ export interface FeatureFlags {
 }
 
 /**
+ * Variant selections — one value per axis (design / layout / ui). The schema
+ * is intentionally open (`Record<string, string>`) so new axes can be added
+ * here without touching strip-features beyond the marker grammar.
+ */
+export type VariantSelections = Record<string, string>;
+
+export const DEFAULT_VARIANTS: VariantSelections = {
+  design: 'default',
+  layout: 'stacked',
+  ui: 'animate-ui',
+};
+
+/**
  * Comment markers used inside template source files to delimit optional code.
  *
  *   // @evomap:feature(name) begin
@@ -28,6 +41,20 @@ const BLOCK_END_RE_SRC =
 const FILE_MARKER_RE =
   /^.*@evomap:feature\(([^)]+)\)\s*file.*$/m;
 
+/**
+ * Variant grammar — same comment shapes as features but with an `axis=value`
+ * payload. Examples:
+ *
+ *   // @evomap:variant(design=minimal) begin
+ *   …kept only when design === 'minimal'…
+ *   // @evomap:variant(design=minimal) end
+ *
+ *   // @evomap:variant(layout=sidebar) file
+ *   …whole file kept only when layout === 'sidebar'…
+ */
+const VARIANT_FILE_MARKER_RE =
+  /^.*@evomap:variant\(([^=)]+)=([^)]+)\)\s*file.*$/m;
+
 const PACKAGE_DEPS_BY_FEATURE: Record<string, string[]> = {
   supabase: ['@supabase/supabase-js'],
   query: ['@tanstack/react-query'],
@@ -36,26 +63,34 @@ const PACKAGE_DEPS_BY_FEATURE: Record<string, string[]> = {
 };
 
 /**
- * Walk the project tree and remove code/files corresponding to disabled features.
+ * Walk the project tree and remove code/files corresponding to disabled
+ * features and to non-chosen variants.
+ *
+ * `variants` is optional for backward compatibility (callers that only deal
+ * with feature flags can omit it); when not provided, no variant marker is
+ * stripped — the template behaves exactly as it did before variants existed.
  */
 export async function stripFeatures(
   root: string,
-  flags: FeatureFlags
+  flags: FeatureFlags,
+  variants: VariantSelections = {}
 ): Promise<void> {
   const disabled = new Set<string>();
   if (!flags.supabase) disabled.add('supabase');
   if (!flags.query) disabled.add('query');
   if (!flags.i18n) disabled.add('i18n'); // currently never disabled by the CLI
 
-  if (disabled.size === 0) return;
+  const hasVariants = Object.keys(variants).length > 0;
+  if (disabled.size === 0 && !hasVariants) return;
 
-  await walkAndStrip(root, disabled);
+  await walkAndStrip(root, disabled, variants);
   await pruneDependencies(root, disabled);
 }
 
 async function walkAndStrip(
   dir: string,
-  disabled: ReadonlySet<string>
+  disabled: ReadonlySet<string>,
+  variants: VariantSelections
 ): Promise<void> {
   const entries = await readdir(dir, { withFileTypes: true });
   for (const entry of entries) {
@@ -73,11 +108,11 @@ async function walkAndStrip(
         await rm(full, { recursive: true, force: true });
         continue;
       }
-      await walkAndStrip(full, disabled);
+      await walkAndStrip(full, disabled, variants);
       continue;
     }
     if (!entry.isFile()) continue;
-    await stripFile(full, disabled);
+    await stripFile(full, disabled, variants);
   }
 }
 
@@ -88,20 +123,37 @@ function isInsideSupabaseDir(p: string): boolean {
 
 async function stripFile(
   file: string,
-  disabled: ReadonlySet<string>
+  disabled: ReadonlySet<string>,
+  variants: VariantSelections
 ): Promise<void> {
   if (await isBinary(file)) return;
   const raw = await readFile(file, 'utf8');
 
+  // File ownership wins over block-level work: if the file is tied to a
+  // disabled feature or a non-chosen variant we can simply delete it.
   const fileMatch = raw.match(FILE_MARKER_RE);
   if (fileMatch && disabled.has(fileMatch[1]!)) {
     await rm(file, { force: true });
     return;
   }
 
+  const variantFileMatch = raw.match(VARIANT_FILE_MARKER_RE);
+  if (variantFileMatch) {
+    const axis = variantFileMatch[1]!;
+    const value = variantFileMatch[2]!;
+    const chosen = variants[axis];
+    if (chosen !== undefined && chosen !== value) {
+      await rm(file, { force: true });
+      return;
+    }
+  }
+
   let out = raw;
   for (const feature of disabled) {
     out = stripBlocksForFeature(out, feature);
+  }
+  for (const [axis, chosen] of Object.entries(variants)) {
+    out = stripBlocksForVariant(out, axis, chosen);
   }
 
   if (out !== raw) {
@@ -120,6 +172,35 @@ function stripBlocksForFeature(input: string, feature: string): string {
   const endPart = BLOCK_END_RE_SRC.replace('NAME', escaped);
   const re = new RegExp(beginPart + '[\\s\\S]*?' + endPart, 'g');
   return input.replace(re, '');
+}
+
+/**
+ * Drop every `@evomap:variant(<axis>=<other-value>)` block where the value
+ * does NOT match `keepValue`. Blocks for `keepValue` are left as-is (marker
+ * comments included), mirroring how stripBlocksForFeature treats kept
+ * features.
+ */
+function stripBlocksForVariant(
+  input: string,
+  axis: string,
+  keepValue: string
+): string {
+  const escAxis = axis.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // (\\S+?) captures the value for the begin marker. The matching end marker
+  // is enforced via a backreference so blocks for different values don't get
+  // accidentally fused.
+  const beginPart =
+    '[ \\t]*(?:\\/\\/|\\/\\*|\\{\\/\\*|#|<!--)\\s*@evomap:variant\\(' +
+    escAxis +
+    '=([^)]+)\\)\\s*begin\\s*(?:\\*\\/\\s*\\}?|-->)?[ \\t]*\\r?\\n?';
+  const endPart =
+    '[ \\t]*(?:\\/\\/|\\/\\*|\\{\\/\\*|#|<!--)\\s*@evomap:variant\\(' +
+    escAxis +
+    '=\\1\\)\\s*end\\s*(?:\\*\\/\\s*\\}?|-->)?[ \\t]*\\r?\\n?';
+  const re = new RegExp(beginPart + '[\\s\\S]*?' + endPart, 'g');
+  return input.replace(re, (match, value: string) =>
+    value === keepValue ? match : ''
+  );
 }
 
 async function isBinary(file: string): Promise<boolean> {
@@ -173,6 +254,6 @@ async function pruneDependencies(
 }
 
 // Re-export for potential reuse in tests.
-export { stripBlocksForFeature };
+export { stripBlocksForFeature, stripBlocksForVariant };
 // Reference exported helpers so unused-export lints don't trigger.
 export const __BLOCK_RE_FOR_TESTS = BLOCK_RE;

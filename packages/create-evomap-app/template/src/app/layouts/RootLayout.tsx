@@ -7,9 +7,34 @@ const navLinks = [
   { to: '/counter', label: 'Counter' },
 ];
 
+/**
+ * Layout-axis variant marker.
+ *
+ * strip-features collapses the array literal below down to exactly one entry
+ * (the chosen variant). In the unstripped template all three entries coexist
+ * and `.at(0)` returns the first ("stacked"), so the dev experience matches
+ * the schema default.
+ *
+ * The resulting class is attached to the root <div> so CSS rules in
+ * src/styles/index.css can tailor the look per variant without restructuring
+ * the JSX.
+ */
+const LAYOUT_VARIANT_CLASS =
+  [
+    // @evomap:variant(layout=stacked) begin
+    'layout-stacked',
+    // @evomap:variant(layout=stacked) end
+    // @evomap:variant(layout=sidebar) begin
+    'layout-sidebar',
+    // @evomap:variant(layout=sidebar) end
+    // @evomap:variant(layout=topbar) begin
+    'layout-topbar',
+    // @evomap:variant(layout=topbar) end
+  ].at(0) ?? 'layout-stacked';
+
 export function RootLayout() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className={cn('flex min-h-screen flex-col', LAYOUT_VARIANT_CLASS)}>
       <header className="border-b border-[var(--color-border)] bg-[var(--color-card)]/70 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           <Link to="/" className="text-sm font-semibold tracking-tight">

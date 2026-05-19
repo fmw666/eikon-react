@@ -9,7 +9,16 @@ import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
   {
-    ignores: ['dist', 'coverage', 'node_modules', '.vite'],
+    ignores: [
+      'dist',
+      'coverage',
+      'node_modules',
+      '.vite',
+      // On-demand build cache produced by packages/preview-site (see
+      // packages/preview-site/server/builder.ts). Contents are stripped
+      // copies of src/ and will routinely violate import/order etc.
+      '.preview-cache',
+    ],
   },
   {
     extends: [
