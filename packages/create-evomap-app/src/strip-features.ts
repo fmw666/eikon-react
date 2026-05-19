@@ -87,12 +87,20 @@ export async function stripFeatures(
   await pruneDependencies(root, disabled);
 }
 
+/**
+ * Cap on the per-directory leaf-file concurrency. The template is small
+ * (~60 files), so a single high cap (32) keeps the queue empty without
+ * risking too many open fds on machines with tight ulimits.
+ */
+const FILE_CONCURRENCY = 32;
+
 async function walkAndStrip(
   dir: string,
   disabled: ReadonlySet<string>,
   variants: VariantSelections
 ): Promise<void> {
   const entries = await readdir(dir, { withFileTypes: true });
+  const fileTasks: Array<() => Promise<void>> = [];
   for (const entry of entries) {
     const full = path.join(dir, entry.name);
     if (
@@ -108,12 +116,44 @@ async function walkAndStrip(
         await rm(full, { recursive: true, force: true });
         continue;
       }
+      // Directories still recurse sequentially — bounded depth in the
+      // template tree means there's nothing to gain from racing them,
+      // and serial recursion keeps fd usage predictable.
       await walkAndStrip(full, disabled, variants);
       continue;
     }
     if (!entry.isFile()) continue;
-    await stripFile(full, disabled, variants);
+    fileTasks.push(() => stripFile(full, disabled, variants));
   }
+  // Leaf-file work is independent and IO-bound (read → maybe write).
+  // Running them with a small concurrency bound trims wall-clock time
+  // noticeably on directories with many marker-bearing siblings (e.g.
+  // src/styles/, src/shared/ui/).
+  await runWithConcurrency(fileTasks, FILE_CONCURRENCY);
+}
+
+async function runWithConcurrency<T>(
+  tasks: ReadonlyArray<() => Promise<T>>,
+  limit: number
+): Promise<T[]> {
+  if (tasks.length <= 1) {
+    return tasks.length === 1 ? [await tasks[0]!()] : [];
+  }
+  const results: T[] = new Array(tasks.length);
+  let next = 0;
+  async function worker(): Promise<void> {
+    while (true) {
+      const i = next++;
+      if (i >= tasks.length) return;
+      results[i] = await tasks[i]!();
+    }
+  }
+  const workers = Array.from(
+    { length: Math.min(limit, tasks.length) },
+    () => worker()
+  );
+  await Promise.all(workers);
+  return results;
 }
 
 function isInsideSupabaseDir(p: string): boolean {
@@ -161,17 +201,57 @@ async function stripFile(
   }
 }
 
-function stripBlocksForFeature(input: string, feature: string): string {
-  // Build a regex that matches a begin marker for `feature`, the content, and
-  // its matching end marker (non-greedy so nested-by-different-feature works).
+/**
+ * Cache compiled regexes by feature name. The cost of `new RegExp(...)` is
+ * small in absolute terms, but `stripFeatures` calls this once per
+ * `(file × disabled-feature)` — without caching, a ~60 file template with
+ * one disabled feature recompiles the same regex 60 times. Module-level
+ * cache means one compile per feature per CLI run.
+ */
+const featureRegexCache = new Map<string, RegExp>();
+
+function regexForFeature(feature: string): RegExp {
+  let re = featureRegexCache.get(feature);
+  if (re) return re;
   const escaped = feature.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const beginPart =
     '[ \\t]*(?:\\/\\/|\\/\\*|\\{\\/\\*|#|<!--)\\s*@evomap:feature\\(' +
     escaped +
     '\\)\\s*begin\\s*(?:\\*\\/\\s*\\}?|-->)?[ \\t]*\\r?\\n?';
   const endPart = BLOCK_END_RE_SRC.replace('NAME', escaped);
-  const re = new RegExp(beginPart + '[\\s\\S]*?' + endPart, 'g');
-  return input.replace(re, '');
+  re = new RegExp(beginPart + '[\\s\\S]*?' + endPart, 'g');
+  featureRegexCache.set(feature, re);
+  return re;
+}
+
+function stripBlocksForFeature(input: string, feature: string): string {
+  // Stateful flag (`g`) means we must reset lastIndex between calls; using
+  // `String.prototype.replace` with a global regex already does the right
+  // thing (it ignores lastIndex), so caching the compiled regex is safe.
+  return input.replace(regexForFeature(feature), '');
+}
+
+/**
+ * Cache regex by axis name. The regex captures the value via a group, so
+ * a single compiled regex per axis serves every keepValue selection.
+ */
+const variantRegexCache = new Map<string, RegExp>();
+
+function regexForVariantAxis(axis: string): RegExp {
+  let re = variantRegexCache.get(axis);
+  if (re) return re;
+  const escAxis = axis.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const beginPart =
+    '[ \\t]*(?:\\/\\/|\\/\\*|\\{\\/\\*|#|<!--)\\s*@evomap:variant\\(' +
+    escAxis +
+    '=([^)]+)\\)\\s*begin\\s*(?:\\*\\/\\s*\\}?|-->)?[ \\t]*\\r?\\n?';
+  const endPart =
+    '[ \\t]*(?:\\/\\/|\\/\\*|\\{\\/\\*|#|<!--)\\s*@evomap:variant\\(' +
+    escAxis +
+    '=\\1\\)\\s*end\\s*(?:\\*\\/\\s*\\}?|-->)?[ \\t]*\\r?\\n?';
+  re = new RegExp(beginPart + '[\\s\\S]*?' + endPart, 'g');
+  variantRegexCache.set(axis, re);
+  return re;
 }
 
 /**
@@ -185,20 +265,7 @@ function stripBlocksForVariant(
   axis: string,
   keepValue: string
 ): string {
-  const escAxis = axis.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  // (\\S+?) captures the value for the begin marker. The matching end marker
-  // is enforced via a backreference so blocks for different values don't get
-  // accidentally fused.
-  const beginPart =
-    '[ \\t]*(?:\\/\\/|\\/\\*|\\{\\/\\*|#|<!--)\\s*@evomap:variant\\(' +
-    escAxis +
-    '=([^)]+)\\)\\s*begin\\s*(?:\\*\\/\\s*\\}?|-->)?[ \\t]*\\r?\\n?';
-  const endPart =
-    '[ \\t]*(?:\\/\\/|\\/\\*|\\{\\/\\*|#|<!--)\\s*@evomap:variant\\(' +
-    escAxis +
-    '=\\1\\)\\s*end\\s*(?:\\*\\/\\s*\\}?|-->)?[ \\t]*\\r?\\n?';
-  const re = new RegExp(beginPart + '[\\s\\S]*?' + endPart, 'g');
-  return input.replace(re, (match, value: string) =>
+  return input.replace(regexForVariantAxis(axis), (match, value: string) =>
     value === keepValue ? match : ''
   );
 }

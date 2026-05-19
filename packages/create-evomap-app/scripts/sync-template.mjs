@@ -3,7 +3,7 @@
 // .env.example to placeholder names; copy-template.ts restores them at scaffold
 // time).
 
-import { cp, mkdir, readdir, rename, rm, stat } from 'node:fs/promises';
+import { cp, mkdir, rename, rm, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -35,7 +35,15 @@ async function main() {
   await rm(DEST, { recursive: true, force: true });
   await mkdir(DEST, { recursive: true });
 
-  await copyTree(SRC, DEST);
+  // `fs.cp` with a filter is the fast path here: it's a single Node-level
+  // recursive copy with concurrent IO, whereas the previous hand-rolled
+  // version awaited each file in series. The filter sees absolute paths,
+  // so we test the basename for exclusion.
+  await cp(SRC, DEST, {
+    recursive: true,
+    filter: (source) => !EXCLUDE.has(path.basename(source)),
+  });
+
   await renameIfExists(path.join(DEST, '.gitignore'), path.join(DEST, '_gitignore'));
   await renameIfExists(
     path.join(DEST, '.env.example'),
@@ -43,21 +51,6 @@ async function main() {
   );
 
   console.log(`[sync-template] synced ${SRC} -> ${DEST}`);
-}
-
-async function copyTree(src, dest) {
-  await mkdir(dest, { recursive: true });
-  const entries = await readdir(src, { withFileTypes: true });
-  for (const entry of entries) {
-    if (EXCLUDE.has(entry.name)) continue;
-    const s = path.join(src, entry.name);
-    const d = path.join(dest, entry.name);
-    if (entry.isDirectory()) {
-      await copyTree(s, d);
-    } else if (entry.isFile() || entry.isSymbolicLink()) {
-      await cp(s, d);
-    }
-  }
 }
 
 async function renameIfExists(from, to) {
