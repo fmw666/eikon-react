@@ -19,6 +19,7 @@
     "build:template": "pnpm --filter @evomap/template-react build",
     "build:preview": "pnpm --filter @evomap/preview-site build",
     "test": "pnpm -r --filter=./packages/* test",
+    "typecheck": "pnpm -r --filter=./packages/* --if-present typecheck",
     "e2e": "pnpm --filter create-evomap-app e2e",
     "e2e:quick": "pnpm --filter create-evomap-app e2e:quick",
     "lint": "pnpm -r --filter=./packages/* lint",
