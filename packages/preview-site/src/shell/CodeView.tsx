@@ -113,17 +113,28 @@ export function CodeView() {
       { signal: ctrl.signal }
     )
       .then(async (r) => {
-        if (!r.ok) {
-          throw new Error(
-            r.status === 404
-              ? 'File not present in this variant.'
-              : `Failed to load file (${r.status})`
-          );
+        if (r.status === 404) {
+          // The currently-open file no longer exists in this variant
+          // (typically because the user just toggled off a param that
+          // included it). Showing a stale error pane feels broken — the
+          // user's mental model is "I closed that feature, so its files
+          // should disappear too". Collapse the editor instead.
+          return { kind: 'gone' as const };
         }
-        return (await r.json()) as FileResponse;
+        if (!r.ok) {
+          throw new Error(`Failed to load file (${r.status})`);
+        }
+        return {
+          kind: 'ok' as const,
+          file: (await r.json()) as FileResponse,
+        };
       })
-      .then((f) => {
-        setFile(f);
+      .then((res) => {
+        if (res.kind === 'gone') {
+          closeFile();
+          return;
+        }
+        setFile(res.file);
         setError(null);
       })
       .catch((e: unknown) => {
@@ -133,7 +144,7 @@ export function CodeView() {
       })
       .finally(() => setLoading(false));
     return () => ctrl.abort();
-  }, [hash, selectedFile]);
+  }, [hash, selectedFile, closeFile]);
 
   // Language packs load on-demand; opening the editor pays for at most
   // one pack at a time instead of all five up-front.
