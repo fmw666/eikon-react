@@ -23,6 +23,10 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 
 // --- Absolute Imports ---
 import { cn } from '@/shared/lib/cn';
+// @eikon:feature(i18n) begin
+import { LanguageSwitcher } from '@/shared/ui/language-switcher';
+// @eikon:feature(i18n) end
+import { ThemeToggle } from '@/shared/ui/theme-toggle';
 
 // =================================================================================================
 // Types
@@ -88,11 +92,19 @@ function RootLayout() {
   return (
     <div className={cn('flex min-h-screen flex-col', LAYOUT_VARIANT_CLASS)}>
       <header className="border-b border-[var(--color-border)] bg-[var(--color-card)]/70 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
+        {/*
+          3-column grid pattern: brand (left, 1fr) | nav (auto, centered) |
+          actions (right, 1fr). The matching 1fr columns on either side force
+          the auto-sized <nav> into the exact horizontal centre of the header,
+          independent of how long the brand or actions get. Drop additional
+          icon buttons (notifications, avatar, settings, ...) into the right
+          cell — the nav stays centred without any extra math.
+        */}
+        <div className="mx-auto grid h-14 max-w-5xl grid-cols-[1fr_auto_1fr] items-center px-4">
           <Link to="/" className="text-sm font-semibold tracking-tight">
             Eikon App
           </Link>
-          <nav className="flex items-center gap-1">
+          <nav className="flex items-center justify-self-center gap-1">
             {navLinks.map((link) => (
               <NavLink
                 key={link.to}
@@ -111,6 +123,12 @@ function RootLayout() {
               </NavLink>
             ))}
           </nav>
+          <div className="flex items-center justify-self-end gap-1">
+            {/* @eikon:feature(i18n) begin */}
+            <LanguageSwitcher />
+            {/* @eikon:feature(i18n) end */}
+            <ThemeToggle />
+          </div>
         </div>
       </header>
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
