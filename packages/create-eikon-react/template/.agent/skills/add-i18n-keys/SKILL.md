@@ -62,6 +62,45 @@ Use whenever new user-visible copy enters the codebase. Per [rules/60-i18n.md](.
    t('counter.items', { count: n });
    ```
 
+## `@eikon:feature(i18n)` markers
+
+The i18n integration itself is an optional feature (the CLI's `--no-i18n` strips it). Two marker forms appear in source — both wrap content with `// @eikon:feature(<name>) begin` / `// @eikon:feature(<name>) end` lines, plus a `// @eikon:feature(i18n) file` form for file-level gating.
+
+- `@eikon:feature(i18n)` — **removed when stripped**. Wraps the `useTranslation` import and the `const { t } = useTranslation();` line. After the strip there is no `t` in scope unless the matching `i18n:fallback` block is also present.
+- `@eikon:feature(i18n:fallback)` — **uncommented when stripped**. Wraps a block of *commented-out* fallback code that defines a local `t` function. When `--no-i18n` runs, the strip removes the leading `//` from every line inside the block, turning it into a working hard-coded `t` shim. The visible JSX never changes.
+
+The canonical shape (copy from [src/features/home/pages/HomePage.tsx](../../../src/features/home/pages/HomePage.tsx)):
+
+```tsx
+// @eikon:feature(i18n) begin
+import { useTranslation } from 'react-i18next';
+// @eikon:feature(i18n) end
+
+function MyPage() {
+  // @eikon:feature(i18n) begin
+  const { t } = useTranslation();
+  // @eikon:feature(i18n) end
+
+  // @eikon:feature(i18n:fallback) begin
+  // const t = (k: string) =>
+  //   ({
+  //     'myFeature.title': 'My title',
+  //     'myFeature.body': 'Body copy here',
+  //   })[k] ?? k;
+  // @eikon:feature(i18n:fallback) end
+
+  return <h1>{t('myFeature.title')}</h1>;
+}
+```
+
+Rules when adding new copy to a component that already has the markers:
+
+- Add the new key + value to the commented-out fallback object so the stripped variant still renders something sensible.
+- Match the same English copy the locale `en.json` uses (or a sensible default for non-English-default keys).
+- If the component does not yet have the fallback block, add both blocks together — never add the `useTranslation` block without the fallback in a component that needs to render text.
+
+When `--no-i18n` is NOT a concern for your component (e.g. internal devtools, error overlays), you may omit the fallback block; just include the bare `useTranslation` markers so a future strip still compiles. If the file is *entirely* i18n-only (like `src/shared/i18n/index.ts`), use `// @eikon:feature(i18n) file` as the very first line of the file — the strip removes the file altogether.
+
 ## Completion checklist
 
 - [ ] Key added to **every** locale file.

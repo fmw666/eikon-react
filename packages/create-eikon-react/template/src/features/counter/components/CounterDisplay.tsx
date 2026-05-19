@@ -1,13 +1,36 @@
+/**
+ * @file CounterDisplay.tsx
+ * @description Animated numeric display used by the counter demo.
+ *
+ * Slides the digit up on increment and down on decrement via
+ * AnimatePresence; falls back to a plain `<span>` under
+ * prefers-reduced-motion.
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Third-party Libraries ---
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 
+// --- Absolute Imports ---
 import { cn } from '@/shared/lib/cn';
+
+// =================================================================================================
+// Types
+// =================================================================================================
 
 interface CounterDisplayProps {
   value: number;
   className?: string;
 }
 
-export function CounterDisplay({ value, className }: CounterDisplayProps) {
+// =================================================================================================
+// Component
+// =================================================================================================
+
+function CounterDisplay({ value, className }: CounterDisplayProps) {
   const reduceMotion = useReducedMotion();
 
   return (
@@ -21,10 +44,7 @@ export function CounterDisplay({ value, className }: CounterDisplayProps) {
       {reduceMotion ? (
         // Reduced-motion path: no enter/exit transitions, no
         // AnimatePresence layout work — a plain span is enough.
-        <span
-          key={value}
-          className="text-3xl font-semibold tabular-nums"
-        >
+        <span key={value} className="text-3xl font-semibold tabular-nums">
           {value}
         </span>
       ) : (
@@ -44,3 +64,10 @@ export function CounterDisplay({ value, className }: CounterDisplayProps) {
     </div>
   );
 }
+
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export { CounterDisplay };
+export type { CounterDisplayProps };

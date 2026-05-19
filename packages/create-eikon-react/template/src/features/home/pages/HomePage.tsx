@@ -1,13 +1,38 @@
-import { ArrowRight, Sparkles } from 'lucide-react';
+/**
+ * @file HomePage.tsx
+ * @description Marketing landing page for the template — surfaces the
+ * project conventions (feature-first, .agent protocol, modern tooling)
+ * and routes to the demos.
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Core-related Libraries ---
 // @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
 // @eikon:feature(i18n) end
 import { Link } from 'react-router-dom';
 
-import { Button } from '@/shared/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
+// --- Third-party Libraries ---
+import { ArrowRight, Sparkles } from 'lucide-react';
 
-export function HomePage() {
+// --- Absolute Imports ---
+import { Button } from '@/shared/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/shared/ui/card';
+
+// =================================================================================================
+// Component
+// =================================================================================================
+
+function HomePage() {
   // @eikon:feature(i18n) begin
   const { t } = useTranslation();
   // @eikon:feature(i18n) end
@@ -43,11 +68,7 @@ export function HomePage() {
           </Link>
         </Button>
         <Button asChild size="lg" variant="outline">
-          <a
-            href="https://github.com/"
-            target="_blank"
-            rel="noreferrer noopener"
-          >
+          <a href="https://github.com/" target="_blank" rel="noreferrer noopener">
             GitHub
           </a>
         </Button>
@@ -91,3 +112,9 @@ export function HomePage() {
     </section>
   );
 }
+
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export { HomePage };

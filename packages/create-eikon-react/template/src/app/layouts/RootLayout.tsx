@@ -1,11 +1,49 @@
+/**
+ * @file RootLayout.tsx
+ * @description Top-level layout for every route in the app.
+ *
+ * Owns the header / navigation, the shared <Suspense> boundary for
+ * lazy-loaded routes, and the footer. Variant-aware: an
+ * `@eikon:variant(layout=*)` block at the top of the file collapses
+ * to exactly one of stacked / sidebar / topbar at CLI strip time.
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Core Libraries ---
 import { Suspense } from 'react';
+
+// --- Core-related Libraries ---
+// @eikon:feature(i18n) begin
+import { useTranslation } from 'react-i18next';
+// @eikon:feature(i18n) end
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
+// --- Absolute Imports ---
 import { cn } from '@/shared/lib/cn';
 
-const navLinks = [
-  { to: '/', label: 'Home', end: true },
-  { to: '/counter', label: 'Counter' },
+// =================================================================================================
+// Types
+// =================================================================================================
+
+interface NavLinkSpec {
+  to: string;
+  /** i18n key for the label. Falls back to literal English when i18n is stripped. */
+  key: string;
+  fallback: string;
+  end?: boolean;
+}
+
+// =================================================================================================
+// Constants
+// =================================================================================================
+
+const navLinks: NavLinkSpec[] = [
+  { to: '/', key: 'nav.home', fallback: 'Home', end: true },
+  { to: '/counter', key: 'nav.counter', fallback: 'Counter' },
+  { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks' },
 ];
 
 /**
@@ -33,7 +71,20 @@ const LAYOUT_VARIANT_CLASS =
     // @eikon:variant(layout=topbar) end
   ].at(0) ?? 'layout-stacked';
 
-export function RootLayout() {
+// =================================================================================================
+// Component
+// =================================================================================================
+
+function RootLayout() {
+  // @eikon:feature(i18n) begin
+  const { t } = useTranslation();
+  // @eikon:feature(i18n) end
+
+  // @eikon:feature(i18n:fallback) begin
+  // const t = (_k: string, opts?: { defaultValue?: string }) =>
+  //   opts?.defaultValue ?? _k;
+  // @eikon:feature(i18n:fallback) end
+
   return (
     <div className={cn('flex min-h-screen flex-col', LAYOUT_VARIANT_CLASS)}>
       <header className="border-b border-[var(--color-border)] bg-[var(--color-card)]/70 backdrop-blur">
@@ -56,7 +107,7 @@ export function RootLayout() {
                   )
                 }
               >
-                {link.label}
+                {t(link.key, { defaultValue: link.fallback })}
               </NavLink>
             ))}
           </nav>
@@ -88,3 +139,9 @@ function RouteFallback() {
     />
   );
 }
+
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export { RootLayout };

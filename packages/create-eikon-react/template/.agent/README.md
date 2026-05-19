@@ -23,13 +23,14 @@ Humans editing this project should also follow these rules — they encode the t
 │   ├── 60-i18n.md
 │   └── 70-commit-style.md
 └── skills/                      <- task playbooks, invoke when the task matches
-    ├── add-feature/SKILL.md
+    ├── add-feature/SKILL.md              <- pure-client feature or fixed-backend feature
+    ├── add-data-feature/SKILL.md         <- feature with swappable Mock+Supabase backends (canonical: tasks)
     ├── add-page/SKILL.md
     ├── add-animate-ui-component/SKILL.md
-    ├── add-zustand-store/SKILL.md
+    ├── add-zustand-store/SKILL.md        <- both flavours: hook (create()) and vanilla (createStore())
     ├── add-i18n-keys/SKILL.md
     ├── write-component-test/SKILL.md
-    └── enable-supabase/SKILL.md
+    └── enable-supabase/SKILL.md          <- path A: factory + Mock impl; path B: direct TanStack Query
 ```
 
 ## How an agent should use this directory
@@ -60,10 +61,21 @@ Fields not listed here may be added by callers but should be ignored by parsers.
 ## Conventions referenced repeatedly
 
 - The repository uses **feature-first** architecture under `src/features/<name>/`. Cross-feature imports may only target a feature's barrel `index.ts`.
+- Two feature shapes are supported (00-architecture.md and add-feature/SKILL.md cover the choice):
+  - **Pure-client** (`counter`, `home`): `stores/` (plural, optional) + `pages/` + `components/`.
+  - **Data layer** (`tasks`): `store/` (singular vanilla zustand) + `selectors/` + `services/{interfaces,implementations,factory,facade}` for swappable Mock + Supabase backends.
 - The CSS strategy is **Tailwind v4 CSS-first**: theme tokens live in `src/styles/index.css` under `@theme`; do not introduce a `tailwind.config.js`.
-- Tests live in `__tests__/` directories **inside** each feature (mirroring its source tree). Cross-cutting setup lives in the root `__tests__/setup.ts`.
+- Tests live in `__tests__/` directories **inside** each feature (mirroring its source tree). Cross-cutting setup lives in the root `__tests__/setup.ts`. Tests that transitively load `@/shared/supabase` must mock it before import.
 - Visible strings go through i18next (`useTranslation`); do not hard-code copy in components.
-- Optional modules are wrapped with comment markers of the form `// @eikon:feature(<name>) begin … // @eikon:feature(<name>) end`. The CLI uses these markers to strip code when a user opts a feature out; **do not remove these markers** unless intentionally removing the feature itself.
+- Every `.ts` / `.tsx` source file opens with the v1 file banner: `/** @file ... @description ... */` JSDoc header, `// ===` section separators (Imports / Types / Component / Exports etc.) and `// --- Group ---` import sub-headers. See `rules/10-react-conventions.md`.
+- Optional modules are wrapped with comment markers:
+  - `// @eikon:feature(<name>) begin … // @eikon:feature(<name>) end` — removed when the feature is stripped. Can appear anywhere in the file.
+  - `// @eikon:feature(<name>) file` — the entire file is removed when the feature is stripped. **Must be on the very first line of the file** (leading whitespace is fine). Anywhere else and the marker is treated as inert prose, so documentation files like this one can quote the literal safely.
+  - `// @eikon:feature(<name>:fallback) begin … end` — wraps a block of commented-out fallback code that gets uncommented when the feature is stripped (used for i18n shims).
+  - `// @eikon:variant(<axis>=<value>) begin … end` — keeps only the chosen value when scaffolding; non-chosen blocks are removed.
+  - `// @eikon:variant(<axis>=<value>) file` — same as the feature file marker, including the first-line constraint.
+
+  **Do not remove these markers** unless intentionally removing the feature itself.
 
 ## Updating this protocol
 

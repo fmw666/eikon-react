@@ -32,22 +32,48 @@ Use when the user asks to "add a page" or "create a new route" that belongs to a
    }
    ```
 
-3. **Register the route in `src/features/<feature>/routes.tsx`:**
+3. **Register the route in `src/features/<feature>/routes.tsx`.** Lazy-load every page — the app's shared `<Suspense>` boundary provides the fallback. Because pages use **named** exports, the dynamic import needs the `then((m) => ({ default: m.<Page> }))` shape:
 
    ```tsx
+   /**
+    * @file routes.tsx
+    * @description Route declarations for the <Feature> feature.
+    */
+
+   // =================================================================================================
+   // Imports
+   // =================================================================================================
+
+   // --- Core Libraries ---
+   import { lazy } from 'react';
+
+   // --- Core-related Libraries ---
    import { Route } from 'react-router-dom';
-   import { <ExistingPage> } from './pages/<ExistingPage>';
-   import { <PageName> } from './pages/<PageName>';
+
+   // =================================================================================================
+   // Lazy pages
+   // =================================================================================================
+
+   const <ExistingPage> = lazy(() =>
+     import('./pages/<ExistingPage>').then((m) => ({ default: m.<ExistingPage> })),
+   );
+   const <PageName> = lazy(() =>
+     import('./pages/<PageName>').then((m) => ({ default: m.<PageName> })),
+   );
+
+   // =================================================================================================
+   // Exports
+   // =================================================================================================
 
    export const <feature>Routes = (
      <>
-       <Route path="/<existing>" element={<ExistingPage />} />
-       <Route path="/<new-path>" element={<PageName />} />
+       <Route path="/<existing>" element={<<ExistingPage> />} />
+       <Route path="/<new-path>" element={<<PageName> />} />
      </>
    );
    ```
 
-   If `routes.tsx` previously exported a single `<Route>`, wrap multiple routes in a `<>` fragment.
+   If `routes.tsx` previously exported a single `<Route>`, wrap multiple routes in a `<>` fragment. If `lazy()` wasn't used before, convert all existing routes in the same edit — mixing eager and lazy loading inside one feature defeats the splitting.
 
 4. **Add a navigation entry** (if the page should be reachable from the header). Edit [src/app/layouts/RootLayout.tsx](../../../src/app/layouts/RootLayout.tsx)'s `navLinks` array.
 
@@ -88,3 +114,5 @@ Use when the user asks to "add a page" or "create a new route" that belongs to a
 
 - Don't put the route declaration directly in `src/app/router.tsx`. The feature owns its routes.
 - Don't create a new feature just for one page — extend an existing one if it fits.
+- Don't use a default export on the page just to make `lazy()` simpler. Named exports survive grep/IDE refactors; the `then((m) => ({ default: m.X }))` shim is the standard cost.
+- Don't add a per-page `<Suspense>`. The app shell already wraps lazy pages in one fallback.

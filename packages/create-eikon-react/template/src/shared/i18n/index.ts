@@ -1,12 +1,37 @@
 // @eikon:feature(i18n) file
+/**
+ * @file index.ts
+ * @description Lazy i18next bootstrap.
+ *
+ * Each supported language ships in its own chunk and is fetched on
+ * demand; the active language is pre-loaded before `initI18n()`
+ * resolves so first paint never shows the raw translation keys.
+ *
+ * Adding a new language is a 3-step change documented inline at
+ * `loadLocale`.
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Third-party Libraries ---
 import i18n from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
+
+// =================================================================================================
+// Types
+// =================================================================================================
 
 const SUPPORTED_LANGS = ['en', 'zh'] as const;
 type SupportedLang = (typeof SUPPORTED_LANGS)[number];
 
 const FALLBACK_LANG: SupportedLang = 'en';
+
+// =================================================================================================
+// Helpers
+// =================================================================================================
 
 /**
  * Lazy-load a locale's translation bundle.
@@ -34,6 +59,10 @@ function isSupported(lng: string): lng is SupportedLang {
   return (SUPPORTED_LANGS as readonly string[]).includes(lng);
 }
 
+// =================================================================================================
+// Bootstrap
+// =================================================================================================
+
 /**
  * Initialise i18next once with the user's active language pre-loaded,
  * and register a `languageChanged` handler that lazily fetches the
@@ -46,7 +75,8 @@ function isSupported(lng: string): lng is SupportedLang {
  * Safe to call multiple times; the second call returns the same promise.
  */
 let initPromise: Promise<typeof i18n> | null = null;
-export function initI18n(): Promise<typeof i18n> {
+
+function initI18n(): Promise<typeof i18n> {
   if (initPromise) return initPromise;
 
   initPromise = (async () => {
@@ -66,13 +96,7 @@ export function initI18n(): Promise<typeof i18n> {
         },
       });
 
-    // Hydrate the active language before returning so first paint has
-    // its translations. `i18n.language` is set by the detector inside
-    // init(); fall back to the supported fallback if detection produced
-    // something unsupported.
-    const active = isSupported(i18n.language)
-      ? i18n.language
-      : FALLBACK_LANG;
+    const active = isSupported(i18n.language) ? i18n.language : FALLBACK_LANG;
     const bundle = await loadLocale(active);
     i18n.addResourceBundle(active, 'translation', bundle);
 
@@ -90,4 +114,9 @@ export function initI18n(): Promise<typeof i18n> {
   return initPromise;
 }
 
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export { initI18n };
 export default i18n;

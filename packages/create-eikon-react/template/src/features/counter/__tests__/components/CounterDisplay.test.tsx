@@ -1,7 +1,22 @@
+/**
+ * @file CounterDisplay.test.tsx
+ * @description Component tests for <CounterDisplay />.
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Third-party Libraries ---
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
+// --- Relative Imports ---
 import { CounterDisplay } from '../../components/CounterDisplay';
+
+// =================================================================================================
+// Tests
+// =================================================================================================
 
 describe('<CounterDisplay />', () => {
   it('renders the current value', () => {

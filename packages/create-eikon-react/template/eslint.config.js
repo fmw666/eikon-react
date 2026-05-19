@@ -60,6 +60,13 @@ export default tseslint.config(
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
+      // Source files follow the v1 banner-comment style with three
+      // sub-sections inside the external group (Core / Core-related /
+      // Third-party). `always-and-inside-groups` keeps the top-level
+      // builtin→external→internal→relative ordering AND tolerates
+      // blank lines + custom ordering inside each group so the banners
+      // stay legible. Alphabetisation is intentionally NOT enforced
+      // here for the same reason.
       'import/order': [
         'error',
         {
@@ -67,15 +74,12 @@ export default tseslint.config(
             'builtin',
             'external',
             'internal',
-            'parent',
-            'sibling',
-            'index',
-            'type',
+            ['parent', 'sibling', 'index'],
           ],
-          'newlines-between': 'always',
-          alphabetize: { order: 'asc', caseInsensitive: true },
+          'newlines-between': 'always-and-inside-groups',
           pathGroups: [
             { pattern: '@/**', group: 'internal', position: 'before' },
+            { pattern: '@test/**', group: 'internal', position: 'before' },
           ],
         },
       ],

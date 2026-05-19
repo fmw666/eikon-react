@@ -1,16 +1,44 @@
-import { Minus, Plus, RotateCcw } from 'lucide-react';
+/**
+ * @file CounterPage.tsx
+ * @description Route-level component for `/counter`.
+ *
+ * Wires the counter store actions to buttons and toasts. Demonstrates
+ * the simpler shape pure-client features use — direct store reads,
+ * no service/selector layer.
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Core-related Libraries ---
 // @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
 // @eikon:feature(i18n) end
 
+// --- Third-party Libraries ---
+import { Minus, Plus, RotateCcw } from 'lucide-react';
+
+// --- Absolute Imports ---
 import { Button } from '@/shared/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/shared/ui/card';
 import { toast } from '@/shared/ui/toaster';
 
+// --- Relative Imports ---
 import { CounterDisplay } from '../components/CounterDisplay';
 import { useCounterStore } from '../stores/counterStore';
 
-export function CounterPage() {
+// =================================================================================================
+// Component
+// =================================================================================================
+
+function CounterPage() {
   // @eikon:feature(i18n) begin
   const { t } = useTranslation();
   // @eikon:feature(i18n) end
@@ -76,3 +104,9 @@ export function CounterPage() {
     </Card>
   );
 }
+
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export { CounterPage };

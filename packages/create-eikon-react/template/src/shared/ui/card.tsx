@@ -1,17 +1,41 @@
+/**
+ * @file card.tsx
+ * @description Card primitive + structural helpers (Header / Title / Description / Content / Footer).
+ *
+ * The root `<Card>` is a `motion.div`; when `hoverable` is set it lifts
+ * subtly on hover, honouring `prefers-reduced-motion`.
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Core Libraries ---
+import * as React from 'react';
+
+// --- Third-party Libraries ---
 import {
   motion,
   useReducedMotion,
   type HTMLMotionProps,
 } from 'motion/react';
-import * as React from 'react';
 
+// --- Absolute Imports ---
 import { cn } from '@/shared/lib/cn';
 
-export interface CardProps extends HTMLMotionProps<'div'> {
+// =================================================================================================
+// Types
+// =================================================================================================
+
+interface CardProps extends HTMLMotionProps<'div'> {
   hoverable?: boolean;
 }
 
-export const Card = React.forwardRef<HTMLDivElement, CardProps>(
+// =================================================================================================
+// Components
+// =================================================================================================
+
+const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, hoverable = false, ...props }, ref) => {
     const reduceMotion = useReducedMotion();
     const wantsHover = hoverable && !reduceMotion;
@@ -31,26 +55,31 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
 );
 Card.displayName = 'Card';
 
-export function CardHeader({
+function CardHeader({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('flex flex-col gap-1.5 p-6', className)} {...props} />;
+  return (
+    <div className={cn('flex flex-col gap-1.5 p-6', className)} {...props} />
+  );
 }
 
-export function CardTitle({
+function CardTitle({
   className,
   ...props
 }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3
-      className={cn('text-lg font-semibold leading-none tracking-tight', className)}
+      className={cn(
+        'text-lg font-semibold leading-none tracking-tight',
+        className
+      )}
       {...props}
     />
   );
 }
 
-export function CardDescription({
+function CardDescription({
   className,
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement>) {
@@ -62,14 +91,14 @@ export function CardDescription({
   );
 }
 
-export function CardContent({
+function CardContent({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={cn('p-6 pt-0', className)} {...props} />;
 }
 
-export function CardFooter({
+function CardFooter({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
@@ -77,3 +106,17 @@ export function CardFooter({
     <div className={cn('flex items-center p-6 pt-0', className)} {...props} />
   );
 }
+
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+};
+export type { CardProps };
