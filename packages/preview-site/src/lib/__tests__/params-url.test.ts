@@ -25,7 +25,7 @@ describe('serializeToQuery', () => {
       supabase: true,
       query: false,
       pm: 'bun',
-      design: 'minimal',
+      design: 'linear',
     };
     const round = mergeWithDefaults(parseFromQuery(serializeToQuery(state)));
     expect(round).toEqual(state);
@@ -34,8 +34,8 @@ describe('serializeToQuery', () => {
 
 describe('parseFromQuery', () => {
   it('ignores unknown keys', () => {
-    const out = parseFromQuery('supabase=on&unknown=42&design=minimal');
-    expect(out).toEqual({ supabase: true, design: 'minimal' });
+    const out = parseFromQuery('supabase=on&unknown=42&design=linear');
+    expect(out).toEqual({ supabase: true, design: 'linear' });
   });
 
   it('drops invalid enum values rather than crashing', () => {
@@ -51,7 +51,7 @@ describe('parseFromQuery', () => {
 
 describe('mergeWithDefaults', () => {
   it('fills in missing params from the schema defaults', () => {
-    const out = mergeWithDefaults({ design: 'brutalist' });
-    expect(out).toEqual({ ...defaultState(), design: 'brutalist' });
+    const out = mergeWithDefaults({ design: 'anthropic' });
+    expect(out).toEqual({ ...defaultState(), design: 'anthropic' });
   });
 });

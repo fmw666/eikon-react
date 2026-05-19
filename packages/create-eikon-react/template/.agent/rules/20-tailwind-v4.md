@@ -24,6 +24,14 @@ severity: must
 
 - Dark mode is class-based and toggled by adding `dark` to `<html>`. The variant is declared with `@variant dark (&:where(.dark, .dark *))` in `index.css`.
 - Override tokens for dark mode by setting the same `--color-*` variables inside `.dark { ... }`. Components reference tokens (`bg-[var(--color-background)]`), so dark mode is automatic.
+- The light/dark/system runtime switch lives in [src/shared/theme/themeStore.ts](../../src/shared/theme/themeStore.ts). It owns the `<html>` class toggle, `localStorage['theme']`, and the `prefers-color-scheme` listener. Don't add another path that mutates the same DOM class.
+
+## Design presets (`design` variant axis)
+
+- The template ships six scaffold-time design presets, each modelled after a publicly-documented design system so users immediately recognise the look: `default` (neutral baseline), `apple` (Apple HIG / systemBlue + SF Pro), `linear` ([linear.app/brand](https://linear.app/brand) lavender-blue + Inter), `anthropic` ([Anthropic brand](https://github.com/anthropics/skills/blob/main/skills/brand-guidelines/SKILL.md) Crail orange + Lora serif), `vercel` ([Geist](https://vercel.com/geist/colors) monochrome ink), and `notion` (warm gray + blue). Each is a pair of CSS blocks in [`src/styles/index.css`](../../src/styles/index.css), wrapped in `@eikon:variant(design=<name>) begin/end` markers. The CLI's `--design <name>` flag keeps only the chosen pair and strips the rest.
+- **Every preset MUST ship both halves**: an `@theme { ... }` block overriding light-mode tokens AND a `.dark { ... }` block overriding dark-mode tokens. Skipping the `.dark` half causes the base `.dark` block earlier in the file to leak through, silently reverting `--color-primary` (and friends) to the default palette.
+- Adding a new preset, switching the default, or tweaking tokens are all covered step-by-step in [skills/customize-design/SKILL.md](../skills/customize-design/SKILL.md) — read it before editing `index.css`.
+- The known-value list lives in three places that MUST stay in lock-step: the CSS markers, `VARIANT_CHOICES.design` in [`packages/create-eikon-react/src/index.ts`](../../../create-eikon-react/src/index.ts), and `design.values` in [`packages/preview-site/src/lib/params-schema.ts`](../../../preview-site/src/lib/params-schema.ts).
 
 ## Variant-rich components (`cva`)
 

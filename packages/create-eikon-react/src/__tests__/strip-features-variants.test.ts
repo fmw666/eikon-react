@@ -10,40 +10,44 @@ import {
 } from '../strip-features.js';
 
 describe('stripBlocksForVariant', () => {
+  // Mechanism-level test: stripBlocksForVariant doesn't validate values
+  // against any real `VARIANT_CHOICES` set, so we use synthetic axis values
+  // ('foo' / 'bar' / 'baz') to keep these tests visibly decoupled from the
+  // actual design / ui / layout preset names defined in src/index.ts.
   it('keeps only the chosen variant block and drops the others', () => {
     const input = [
       'before',
-      '// @eikon:variant(design=minimal) begin',
-      'apply-minimal-css',
-      '// @eikon:variant(design=minimal) end',
-      '// @eikon:variant(design=default) begin',
-      'apply-default-css',
-      '// @eikon:variant(design=default) end',
-      '// @eikon:variant(design=brutalist) begin',
-      'apply-brutalist-css',
-      '// @eikon:variant(design=brutalist) end',
+      '// @eikon:variant(design=foo) begin',
+      'apply-foo-css',
+      '// @eikon:variant(design=foo) end',
+      '// @eikon:variant(design=bar) begin',
+      'apply-bar-css',
+      '// @eikon:variant(design=bar) end',
+      '// @eikon:variant(design=baz) begin',
+      'apply-baz-css',
+      '// @eikon:variant(design=baz) end',
       'after',
     ].join('\n');
 
-    const out = stripBlocksForVariant(input, 'design', 'minimal');
-    expect(out).toContain('apply-minimal-css');
-    expect(out).not.toContain('apply-default-css');
-    expect(out).not.toContain('apply-brutalist-css');
+    const out = stripBlocksForVariant(input, 'design', 'foo');
+    expect(out).toContain('apply-foo-css');
+    expect(out).not.toContain('apply-bar-css');
+    expect(out).not.toContain('apply-baz-css');
     expect(out).toContain('before');
     expect(out).toContain('after');
   });
 
   it('does not touch blocks for a different axis', () => {
     const input = [
-      '// @eikon:variant(design=minimal) begin',
+      '// @eikon:variant(design=foo) begin',
       'design-block',
-      '// @eikon:variant(design=minimal) end',
+      '// @eikon:variant(design=foo) end',
       '// @eikon:variant(layout=sidebar) begin',
       'layout-block',
       '// @eikon:variant(layout=sidebar) end',
     ].join('\n');
 
-    const out = stripBlocksForVariant(input, 'design', 'default');
+    const out = stripBlocksForVariant(input, 'design', 'bar');
     expect(out).not.toContain('design-block');
     expect(out).toContain('layout-block');
     expect(out).toContain('@eikon:variant(layout=sidebar)');
@@ -132,15 +136,15 @@ describe('stripFeatures with variants (file-level)', () => {
     await writeFile(
       filePath,
       [
-        '/* @eikon:variant(design=minimal) begin */',
+        '/* @eikon:variant(design=foo) begin */',
         '.a { color: red; }',
-        '/* @eikon:variant(design=minimal) end */',
-        '/* @eikon:variant(design=default) begin */',
+        '/* @eikon:variant(design=foo) end */',
+        '/* @eikon:variant(design=bar) begin */',
         '.b { color: blue; }',
-        '/* @eikon:variant(design=default) end */',
-        '/* @eikon:variant(design=brutalist) begin */',
+        '/* @eikon:variant(design=bar) end */',
+        '/* @eikon:variant(design=baz) begin */',
         '.c { color: hotpink; }',
-        '/* @eikon:variant(design=brutalist) end */',
+        '/* @eikon:variant(design=baz) end */',
       ].join('\n'),
       'utf8'
     );
@@ -148,7 +152,7 @@ describe('stripFeatures with variants (file-level)', () => {
     await stripFeatures(
       tmp,
       { supabase: false, query: true, i18n: true },
-      { design: 'default' }
+      { design: 'bar' }
     );
 
     const after = await readFile(filePath, 'utf8');
@@ -160,9 +164,9 @@ describe('stripFeatures with variants (file-level)', () => {
   it('is backward compatible: omitting variants leaves variant markers untouched', async () => {
     const filePath = path.join(tmp, 'styles.css');
     const original = [
-      '/* @eikon:variant(design=minimal) begin */',
+      '/* @eikon:variant(design=foo) begin */',
       '.a {}',
-      '/* @eikon:variant(design=minimal) end */',
+      '/* @eikon:variant(design=foo) end */',
     ].join('\n');
     await writeFile(filePath, original, 'utf8');
 

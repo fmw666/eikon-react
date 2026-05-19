@@ -52,11 +52,13 @@ const FILE_MARKER_RE =
 
 /**
  * Variant grammar — same comment shapes as features but with an `axis=value`
- * payload. Examples:
+ * payload. Examples (axis/value names below are illustrative; this module
+ * is unaware of which axis/value pairs are valid — that knowledge lives in
+ * `VARIANT_CHOICES` in `index.ts`):
  *
- *   // @eikon:variant(design=minimal) begin
- *   …kept only when design === 'minimal'…
- *   // @eikon:variant(design=minimal) end
+ *   // @eikon:variant(design=<value>) begin
+ *   …kept only when design === '<value>'…
+ *   // @eikon:variant(design=<value>) end
  *
  *   // @eikon:variant(layout=sidebar) file
  *   …whole file kept only when layout === 'sidebar'…

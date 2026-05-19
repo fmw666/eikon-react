@@ -97,29 +97,33 @@ describe('strip block regex caching', () => {
 });
 
 describe('stripBlocksForVariant regex caching', () => {
+  // The axis name + value pairs below are intentionally synthetic ('foo' /
+  // 'bar') so this mechanism-level test is obviously decoupled from
+  // `VARIANT_CHOICES` in src/index.ts. stripBlocksForVariant doesn't validate
+  // values, it just matches marker pairs by string equality.
   const sample = [
-    '// @eikon:variant(design=minimal) begin',
-    'const x = "minimal";',
-    '// @eikon:variant(design=minimal) end',
-    '// @eikon:variant(design=brutalist) begin',
-    'const x = "brutalist";',
-    '// @eikon:variant(design=brutalist) end',
+    '// @eikon:variant(design=foo) begin',
+    'const x = "foo";',
+    '// @eikon:variant(design=foo) end',
+    '// @eikon:variant(design=bar) begin',
+    'const x = "bar";',
+    '// @eikon:variant(design=bar) end',
   ].join('\n');
 
   it('keeps the chosen value across repeated calls', () => {
-    const a = stripBlocksForVariant(sample, 'design', 'minimal');
-    const b = stripBlocksForVariant(sample, 'design', 'minimal');
+    const a = stripBlocksForVariant(sample, 'design', 'foo');
+    const b = stripBlocksForVariant(sample, 'design', 'foo');
     expect(a).toBe(b);
-    expect(a).toContain('const x = "minimal";');
-    expect(a).not.toContain('const x = "brutalist";');
+    expect(a).toContain('const x = "foo";');
+    expect(a).not.toContain('const x = "bar";');
   });
 
   it('flips correctly between different keepValues on the same axis', () => {
-    const m = stripBlocksForVariant(sample, 'design', 'minimal');
-    const b = stripBlocksForVariant(sample, 'design', 'brutalist');
-    expect(m).toContain('"minimal"');
-    expect(m).not.toContain('"brutalist"');
-    expect(b).toContain('"brutalist"');
-    expect(b).not.toContain('"minimal"');
+    const m = stripBlocksForVariant(sample, 'design', 'foo');
+    const b = stripBlocksForVariant(sample, 'design', 'bar');
+    expect(m).toContain('"foo"');
+    expect(m).not.toContain('"bar"');
+    expect(b).toContain('"bar"');
+    expect(b).not.toContain('"foo"');
   });
 });

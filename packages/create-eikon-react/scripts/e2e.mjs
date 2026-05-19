@@ -85,7 +85,7 @@ const SCENARIOS = [
       '--no-supabase',
       '--query',
       '--design',
-      'minimal',
+      'linear',
       '--layout',
       'sidebar',
       '--ui',
@@ -109,9 +109,18 @@ const SCENARIOS = [
         '@eikon:variant(layout=stacked)',
       ],
       // The CSS file should keep the chosen design + ui blocks and drop the
-      // non-chosen ones (the brutalist / default design palettes etc.).
-      stylesContains: ['design=minimal', 'ui=radix', 'layout=sidebar'],
-      stylesAbsent: ['design=default', 'design=brutalist', 'ui=animate-ui', 'ui=shadcn-style'],
+      // non-chosen ones (the default / apple / anthropic / vercel / notion
+      // design palettes etc.).
+      stylesContains: ['design=linear', 'ui=radix', 'layout=sidebar'],
+      stylesAbsent: [
+        'design=default',
+        'design=apple',
+        'design=anthropic',
+        'design=vercel',
+        'design=notion',
+        'ui=animate-ui',
+        'ui=shadcn-style',
+      ],
     },
   },
 ];

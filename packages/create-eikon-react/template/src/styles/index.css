@@ -89,37 +89,268 @@
  * strip-features keeps only the chosen block per axis when scaffolding into a
  * new project; in the unstripped template all blocks coexist (CSS rules
  * either apply to different selectors or are merged into a single @theme).
+ *
+ * Each `design=...` block ships **both** an `@theme` override for light mode
+ * AND a `.dark` override for dark mode — otherwise the base `.dark { ... }`
+ * block above would punch through the preset and revert primary/accent back
+ * to the default palette. Adding a new preset means filling in both halves.
  * --------------------------------------------------------------------------*/
 
-/* --- design axis --------------------------------------------------------- */
+/* --- design axis ---------------------------------------------------------
+ * Each preset below is modelled after a real, publicly-documented design
+ * system. Colour anchors are taken from the linked brand/HIG sources; values
+ * are translated into OKLCH so the perceptual lightness channel makes
+ * contrast ratios easy to reason about (see customize-design SKILL.md).
+ * ----------------------------------------------------------------------- */
 
 /* @eikon:variant(design=default) begin */
-/* default keeps the base @theme above; nothing extra. */
+/* default keeps the base @theme + base .dark above; nothing extra.
+ * A neutral, brand-agnostic violet — good baseline when you don't want to
+ * commit to a brand voice yet. */
 /* @eikon:variant(design=default) end */
 
-/* @eikon:variant(design=minimal) begin */
+/* @eikon:variant(design=apple) begin */
+/* Apple Human Interface Guidelines — systemBlue (#007AFF) + SF Pro.
+ * Source: https://developer.apple.com/design/human-interface-guidelines/color
+ *         https://developer.apple.com/documentation/uikit/uicolor/systembue
+ * Soft system grays, generous-but-not-huge corner radii, native SF stack. */
 @theme {
-  --color-primary: oklch(0.18 0.01 260);
-  --color-primary-foreground: oklch(0.98 0 0);
-  --radius-lg: 0.25rem;
-  --radius-md: 0.125rem;
-  --radius-sm: 0rem;
-  --font-sans: ui-serif, Georgia, 'Times New Roman', serif;
+  --color-background: oklch(0.99 0.002 240);
+  --color-foreground: oklch(0.2 0.005 240);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.2 0.005 240);
+  --color-muted: oklch(0.96 0.002 240);
+  --color-muted-foreground: oklch(0.55 0.01 240);
+  --color-border: oklch(0.9 0.005 240);
+  --color-input: oklch(0.9 0.005 240);
+  --color-primary: oklch(0.6 0.22 256);
+  --color-primary-foreground: oklch(1 0 0);
+  --color-secondary: oklch(0.96 0.002 240);
+  --color-secondary-foreground: oklch(0.2 0.005 240);
+  --color-accent: oklch(0.94 0.02 256);
+  --color-accent-foreground: oklch(0.2 0.005 240);
+  --color-ring: oklch(0.6 0.22 256);
+  --color-destructive: oklch(0.6 0.21 25);
+  --color-destructive-foreground: oklch(1 0 0);
+  --radius-lg: 0.875rem;
+  --radius-md: 0.625rem;
+  --radius-sm: 0.375rem;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
+    'Helvetica Neue', system-ui, sans-serif;
 }
-/* @eikon:variant(design=minimal) end */
+.dark {
+  --color-background: oklch(0.16 0.005 240);
+  --color-foreground: oklch(0.97 0 0);
+  --color-card: oklch(0.2 0.005 240);
+  --color-card-foreground: oklch(0.97 0 0);
+  --color-muted: oklch(0.24 0.005 240);
+  --color-muted-foreground: oklch(0.72 0.01 240);
+  --color-border: oklch(0.28 0.005 240);
+  --color-input: oklch(0.28 0.005 240);
+  --color-primary: oklch(0.72 0.18 256);
+  --color-primary-foreground: oklch(0.16 0.005 240);
+  --color-secondary: oklch(0.24 0.005 240);
+  --color-secondary-foreground: oklch(0.97 0 0);
+  --color-accent: oklch(0.28 0.04 256);
+  --color-accent-foreground: oklch(0.97 0 0);
+  --color-ring: oklch(0.72 0.18 256);
+}
+/* @eikon:variant(design=apple) end */
 
-/* @eikon:variant(design=brutalist) begin */
+/* @eikon:variant(design=linear) begin */
+/* Linear.app brand — Lavender-Blue #5E6AD2 on Mercury White #F4F5F8 /
+ * Nordic Gray #222326, Inter typography, compact radii.
+ * Source: https://linear.app/brand   https://developers.linear.app/brand
+ * Dark mode primary uses #828FFF "Lavender Hover" so the accent stays
+ * visible on the dark surface. */
 @theme {
-  --color-background: oklch(0.95 0.18 95);
-  --color-primary: oklch(0.55 0.25 350);
-  --color-primary-foreground: oklch(0.1 0 0);
-  --color-border: oklch(0.1 0 0);
-  --radius-lg: 0rem;
-  --radius-md: 0rem;
-  --radius-sm: 0rem;
-  --font-sans: 'Courier New', ui-monospace, monospace;
+  --color-background: oklch(0.97 0.005 264);
+  --color-foreground: oklch(0.25 0.005 264);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.25 0.005 264);
+  --color-muted: oklch(0.94 0.005 264);
+  --color-muted-foreground: oklch(0.5 0.01 264);
+  --color-border: oklch(0.88 0.005 264);
+  --color-input: oklch(0.88 0.005 264);
+  --color-primary: oklch(0.53 0.17 282);
+  --color-primary-foreground: oklch(0.98 0 0);
+  --color-secondary: oklch(0.94 0.005 264);
+  --color-secondary-foreground: oklch(0.25 0.005 264);
+  --color-accent: oklch(0.92 0.04 282);
+  --color-accent-foreground: oklch(0.25 0.005 264);
+  --color-ring: oklch(0.53 0.17 282);
+  --radius-lg: 0.5rem;
+  --radius-md: 0.375rem;
+  --radius-sm: 0.25rem;
+  --font-sans:
+    'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', system-ui, sans-serif;
 }
-/* @eikon:variant(design=brutalist) end */
+.dark {
+  --color-background: oklch(0.18 0.005 264);
+  --color-foreground: oklch(0.95 0.005 264);
+  --color-card: oklch(0.21 0.005 264);
+  --color-card-foreground: oklch(0.95 0.005 264);
+  --color-muted: oklch(0.24 0.005 264);
+  --color-muted-foreground: oklch(0.7 0.01 264);
+  --color-border: oklch(0.28 0.005 264);
+  --color-input: oklch(0.28 0.005 264);
+  --color-primary: oklch(0.69 0.18 280);
+  --color-primary-foreground: oklch(0.18 0.005 264);
+  --color-secondary: oklch(0.24 0.005 264);
+  --color-secondary-foreground: oklch(0.95 0.005 264);
+  --color-accent: oklch(0.28 0.05 280);
+  --color-accent-foreground: oklch(0.95 0.005 264);
+  --color-ring: oklch(0.69 0.18 280);
+}
+/* @eikon:variant(design=linear) end */
+
+/* @eikon:variant(design=anthropic) begin */
+/* Anthropic / Claude brand — Crail Orange #d97757 on warm cream #faf9f5,
+ * near-black #141413 text, Lora body / Poppins headings.
+ * Source: https://github.com/anthropics/skills/blob/main/skills/brand-guidelines/SKILL.md
+ *         https://www.designmd.co/d/anthropic
+ * Earthy, humanist palette — communicates "trustworthy + approachable"
+ * rather than typical tech blue. */
+@theme {
+  --color-background: oklch(0.98 0.006 90);
+  --color-foreground: oklch(0.2 0 90);
+  --color-card: oklch(1 0.002 90);
+  --color-card-foreground: oklch(0.2 0 90);
+  --color-muted: oklch(0.94 0.012 90);
+  --color-muted-foreground: oklch(0.5 0.012 90);
+  --color-border: oklch(0.9 0.012 90);
+  --color-input: oklch(0.9 0.012 90);
+  --color-primary: oklch(0.66 0.14 40);
+  --color-primary-foreground: oklch(0.98 0.006 90);
+  --color-secondary: oklch(0.94 0.012 90);
+  --color-secondary-foreground: oklch(0.2 0 90);
+  --color-accent: oklch(0.92 0.03 40);
+  --color-accent-foreground: oklch(0.2 0 90);
+  --color-ring: oklch(0.66 0.14 40);
+  --color-destructive: oklch(0.55 0.2 25);
+  --color-destructive-foreground: oklch(0.98 0 0);
+  --radius-lg: 0.625rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.375rem;
+  --font-sans:
+    Lora, 'Iowan Old Style', 'Apple Garamond', Georgia, ui-serif, serif;
+}
+.dark {
+  --color-background: oklch(0.2 0 90);
+  --color-foreground: oklch(0.94 0.006 90);
+  --color-card: oklch(0.23 0 90);
+  --color-card-foreground: oklch(0.94 0.006 90);
+  --color-muted: oklch(0.27 0.005 90);
+  --color-muted-foreground: oklch(0.72 0.01 90);
+  --color-border: oklch(0.32 0.005 90);
+  --color-input: oklch(0.32 0.005 90);
+  --color-primary: oklch(0.74 0.14 40);
+  --color-primary-foreground: oklch(0.2 0 90);
+  --color-secondary: oklch(0.27 0.005 90);
+  --color-secondary-foreground: oklch(0.94 0.006 90);
+  --color-accent: oklch(0.32 0.04 40);
+  --color-accent-foreground: oklch(0.94 0.006 90);
+  --color-ring: oklch(0.74 0.14 40);
+}
+/* @eikon:variant(design=anthropic) end */
+
+/* @eikon:variant(design=vercel) begin */
+/* Vercel Geist — strict monochrome, ink-on-white (and inverse in dark).
+ * Primary IS the ink: black surfaces / white text and vice-versa. The
+ * iconic #0070F3 blue is reserved for focus rings and links only —
+ * never as a button fill (per Geist's "accent is so sparing the system
+ * could work without it" philosophy).
+ * Source: https://vercel.com/geist/colors */
+@theme {
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.09 0 0);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.09 0 0);
+  --color-muted: oklch(0.97 0 0);
+  --color-muted-foreground: oklch(0.53 0 0);
+  --color-border: oklch(0.92 0 0);
+  --color-input: oklch(0.92 0 0);
+  --color-primary: oklch(0.09 0 0);
+  --color-primary-foreground: oklch(1 0 0);
+  --color-secondary: oklch(0.97 0 0);
+  --color-secondary-foreground: oklch(0.09 0 0);
+  --color-accent: oklch(0.95 0 0);
+  --color-accent-foreground: oklch(0.09 0 0);
+  --color-ring: oklch(0.58 0.23 257);
+  --radius-lg: 0.375rem;
+  --radius-md: 0.25rem;
+  --radius-sm: 0.125rem;
+  --font-sans:
+    'Geist', 'Geist Sans', ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.dark {
+  --color-background: oklch(0.09 0 0);
+  --color-foreground: oklch(0.98 0 0);
+  --color-card: oklch(0.12 0 0);
+  --color-card-foreground: oklch(0.98 0 0);
+  --color-muted: oklch(0.18 0 0);
+  --color-muted-foreground: oklch(0.65 0 0);
+  --color-border: oklch(0.22 0 0);
+  --color-input: oklch(0.22 0 0);
+  --color-primary: oklch(0.98 0 0);
+  --color-primary-foreground: oklch(0.09 0 0);
+  --color-secondary: oklch(0.18 0 0);
+  --color-secondary-foreground: oklch(0.98 0 0);
+  --color-accent: oklch(0.22 0 0);
+  --color-accent-foreground: oklch(0.98 0 0);
+  --color-ring: oklch(0.7 0.2 257);
+}
+/* @eikon:variant(design=vercel) end */
+
+/* @eikon:variant(design=notion) begin */
+/* Notion-style — warm-tinted neutrals with a confident blue accent
+ * (#2eaadc-ish), Inter typography, compact radii. Suits document-heavy /
+ * dashboard surfaces.
+ * Reference: https://www.notion.so + community palette write-ups. */
+@theme {
+  --color-background: oklch(0.99 0.003 80);
+  --color-foreground: oklch(0.27 0.005 60);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.27 0.005 60);
+  --color-muted: oklch(0.96 0.004 80);
+  --color-muted-foreground: oklch(0.52 0.008 60);
+  --color-border: oklch(0.91 0.005 60);
+  --color-input: oklch(0.91 0.005 60);
+  --color-primary: oklch(0.68 0.13 220);
+  --color-primary-foreground: oklch(0.98 0 0);
+  --color-secondary: oklch(0.96 0.004 80);
+  --color-secondary-foreground: oklch(0.27 0.005 60);
+  --color-accent: oklch(0.94 0.02 220);
+  --color-accent-foreground: oklch(0.27 0.005 60);
+  --color-ring: oklch(0.68 0.13 220);
+  --radius-lg: 0.375rem;
+  --radius-md: 0.25rem;
+  --radius-sm: 0.125rem;
+  --font-sans:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica,
+    'Apple Color Emoji', Arial, sans-serif;
+}
+.dark {
+  --color-background: oklch(0.21 0.003 60);
+  --color-foreground: oklch(0.96 0.003 60);
+  --color-card: oklch(0.24 0.003 60);
+  --color-card-foreground: oklch(0.96 0.003 60);
+  --color-muted: oklch(0.27 0.003 60);
+  --color-muted-foreground: oklch(0.72 0.005 60);
+  --color-border: oklch(0.32 0.003 60);
+  --color-input: oklch(0.32 0.003 60);
+  --color-primary: oklch(0.78 0.13 220);
+  --color-primary-foreground: oklch(0.21 0.003 60);
+  --color-secondary: oklch(0.27 0.003 60);
+  --color-secondary-foreground: oklch(0.96 0.003 60);
+  --color-accent: oklch(0.32 0.04 220);
+  --color-accent-foreground: oklch(0.96 0.003 60);
+  --color-ring: oklch(0.78 0.13 220);
+}
+/* @eikon:variant(design=notion) end */
 
 /* --- layout axis -----------------------------------------------------------
  * Each layout (stacked / sidebar / topbar-sidebar / centered) is its own

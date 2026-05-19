@@ -36,10 +36,10 @@ describe('buildCliCommand', () => {
   });
 
   it('emits `--<flag> <value>` for enum overrides only', () => {
-    const state = { ...defaultState(), pm: 'bun', design: 'minimal' };
+    const state = { ...defaultState(), pm: 'bun', design: 'linear' };
     const cmd = buildCliCommand(state);
     expect(cmd).toBe(
-      'npx create-eikon-react <proj_name> --pm bun --design minimal'
+      'npx create-eikon-react <proj_name> --pm bun --design linear'
     );
   });
 
@@ -48,13 +48,13 @@ describe('buildCliCommand', () => {
       ...defaultState(),
       supabase: true,
       pm: 'npm',
-      design: 'brutalist',
+      design: 'anthropic',
       layout: 'sidebar',
       ui: 'radix',
     };
     const cmd = buildCliCommand(state);
     expect(cmd).toBe(
-      'npx create-eikon-react <proj_name> --supabase --pm npm --design brutalist --layout sidebar --ui radix'
+      'npx create-eikon-react <proj_name> --supabase --pm npm --design anthropic --layout sidebar --ui radix'
     );
   });
 });

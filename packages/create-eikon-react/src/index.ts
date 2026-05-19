@@ -39,7 +39,14 @@ const TEMPLATE_DIR = path.resolve(__dirname, '..', 'template');
  * schema at packages/preview-site/src/lib/params-schema.ts.
  */
 const VARIANT_CHOICES = {
-  design: ['minimal', 'default', 'brutalist'] as const,
+  design: [
+    'default',
+    'apple',
+    'linear',
+    'anthropic',
+    'vercel',
+    'notion',
+  ] as const,
   layout: ['stacked', 'sidebar', 'topbar-sidebar', 'centered'] as const,
   ui: ['radix', 'shadcn-style', 'animate-ui'] as const,
 } satisfies Record<string, readonly string[]>;

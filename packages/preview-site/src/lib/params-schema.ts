@@ -68,11 +68,26 @@ export const PARAMS = [
   {
     id: 'design',
     kind: 'enum',
-    values: ['minimal', 'default', 'brutalist'],
+    values: [
+      'default',
+      'apple',
+      'linear',
+      'anthropic',
+      'vercel',
+      'notion',
+    ],
     default: 'default',
     cliFlag: 'design',
     label: 'Design',
     axis: 'design',
+    valueLabels: {
+      default: 'Default (neutral violet)',
+      apple: 'Apple HIG (systemBlue + SF Pro)',
+      linear: 'Linear (lavender-blue + Inter)',
+      anthropic: 'Anthropic (Claude orange + serif)',
+      vercel: 'Vercel Geist (mono ink)',
+      notion: 'Notion (warm gray + blue)',
+    },
   },
   {
     id: 'layout',
