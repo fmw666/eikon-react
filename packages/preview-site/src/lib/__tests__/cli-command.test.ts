@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildCliCommand } from '../cli-command';
+import {
+  AGENT_NOTE,
+  buildAgentInstructions,
+  buildCliCommand,
+} from '../cli-command';
 import { defaultState } from '../params-schema';
 
 describe('buildCliCommand', () => {
-  it('emits only the binary + project name when state matches defaults', () => {
+  it('emits the binary + <proj_name> placeholder when state matches defaults', () => {
     const cmd = buildCliCommand(defaultState());
-    expect(cmd).toBe('npx create-evomap-app my-app');
+    expect(cmd).toBe('npx create-evomap-app <proj_name>');
   });
 
   it('uses the custom project name when provided', () => {
@@ -16,26 +20,26 @@ describe('buildCliCommand', () => {
 
   it('drops the `npx` prefix when bare=true', () => {
     const cmd = buildCliCommand(defaultState(), { bare: true });
-    expect(cmd).toBe('create-evomap-app my-app');
+    expect(cmd).toBe('create-evomap-app <proj_name>');
   });
 
   it('emits `--<flag>` when a boolean default=false is enabled', () => {
     const state = { ...defaultState(), supabase: true };
     const cmd = buildCliCommand(state);
-    expect(cmd).toBe('npx create-evomap-app my-app --supabase');
+    expect(cmd).toBe('npx create-evomap-app <proj_name> --supabase');
   });
 
   it('emits `--no-<flag>` when a boolean default=true is disabled', () => {
     const state = { ...defaultState(), query: false };
     const cmd = buildCliCommand(state);
-    expect(cmd).toBe('npx create-evomap-app my-app --no-query');
+    expect(cmd).toBe('npx create-evomap-app <proj_name> --no-query');
   });
 
   it('emits `--<flag> <value>` for enum overrides only', () => {
     const state = { ...defaultState(), pm: 'bun', design: 'minimal' };
     const cmd = buildCliCommand(state);
     expect(cmd).toBe(
-      'npx create-evomap-app my-app --pm bun --design minimal'
+      'npx create-evomap-app <proj_name> --pm bun --design minimal'
     );
   });
 
@@ -51,7 +55,31 @@ describe('buildCliCommand', () => {
     };
     const cmd = buildCliCommand(state);
     expect(cmd).toBe(
-      'npx create-evomap-app my-app --supabase --no-install --pm npm --design brutalist --layout sidebar --ui radix'
+      'npx create-evomap-app <proj_name> --supabase --no-install --pm npm --design brutalist --layout sidebar --ui radix'
     );
+  });
+});
+
+describe('buildAgentInstructions', () => {
+  it('wraps the command in backticks and appends the agent note', () => {
+    const cmd = buildCliCommand(defaultState());
+    const out = buildAgentInstructions(cmd);
+    expect(out).toBe(
+      '`npx create-evomap-app <proj_name>`\n\n' + AGENT_NOTE
+    );
+  });
+
+  it('preserves any flags emitted by the command', () => {
+    const state = { ...defaultState(), supabase: true, install: false };
+    const cmd = buildCliCommand(state);
+    const out = buildAgentInstructions(cmd);
+    expect(out.startsWith('`' + cmd + '`')).toBe(true);
+    expect(out).toContain('--supabase');
+    expect(out).toContain('--no-install');
+  });
+
+  it('reminds the agent to relocate .agent/rules and .agent/skills', () => {
+    expect(AGENT_NOTE).toContain('.agent/rules/');
+    expect(AGENT_NOTE).toContain('.agent/skills/');
   });
 });

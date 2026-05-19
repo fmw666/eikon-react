@@ -1,19 +1,19 @@
 import { useState } from 'react';
 
-import { buildCliCommand } from '@/lib/cli-command';
+import { buildAgentInstructions, buildCliCommand } from '@/lib/cli-command';
 
 import { useShellStore } from './store';
 
 export function CommandBar() {
   const state = useShellStore((s) => s.state);
-  const [projectName, setProjectName] = useState('my-app');
   const [copied, setCopied] = useState(false);
 
-  const command = buildCliCommand(state, { projectName });
+  const command = buildCliCommand(state);
+  const clipboardText = buildAgentInstructions(command);
 
   async function copy() {
     try {
-      await navigator.clipboard.writeText(command);
+      await navigator.clipboard.writeText(clipboardText);
       setCopied(true);
       setTimeout(() => setCopied(false), 1200);
     } catch {
@@ -25,41 +25,35 @@ export function CommandBar() {
     <div
       style={{
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         gap: 8,
         padding: 8,
-        flexWrap: 'wrap',
       }}
     >
-      <label style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-        Project name:
-        <input
-          type="text"
-          value={projectName}
-          onChange={(e) => setProjectName(e.target.value)}
-          style={{ minWidth: 140 }}
-        />
-      </label>
-
-      <code
+      <pre
         aria-label="cli-command"
         style={{
           flex: 1,
           minWidth: 200,
-          padding: '6px 8px',
+          margin: 0,
+          padding: '8px 10px',
           background: '#f4f4f4',
           color: '#111',
           fontFamily:
             'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
           fontSize: 12,
-          overflowX: 'auto',
-          whiteSpace: 'nowrap',
+          lineHeight: 1.5,
+          borderRadius: 4,
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+          maxHeight: 240,
+          overflowY: 'auto',
         }}
       >
-        {command}
-      </code>
+        {clipboardText}
+      </pre>
 
-      <button type="button" onClick={copy}>
+      <button type="button" onClick={copy} style={{ flexShrink: 0 }}>
         {copied ? 'Copied!' : 'Copy'}
       </button>
     </div>
