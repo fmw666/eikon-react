@@ -26,9 +26,30 @@ const FINGERPRINT_SKIP = new Set([
 
 let cached: string | null = null;
 let pending: Promise<string> | null = null;
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+const INVALIDATE_DEBOUNCE_MS = 80;
 
 export function invalidateTemplateRev(): void {
   cached = null;
+}
+
+/**
+ * Coalesce a burst of file-watcher events into a single invalidation. When
+ * a developer saves multiple files quickly (e.g. format-on-save touching
+ * ~10 files in one IDE action), this turns N invalidations into 1.
+ *
+ * Callers (typically the dev-server watcher) can pass an optional callback
+ * that runs ONCE per coalesced burst — handy for things like clearing the
+ * per-hash file-tree cache or wiping stale error entries.
+ */
+export function scheduleInvalidateTemplateRev(onFlush?: () => void): void {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    debounceTimer = null;
+    invalidateTemplateRev();
+    onFlush?.();
+  }, INVALIDATE_DEBOUNCE_MS);
 }
 
 /** Sync getter — returns null if the rev hasn't been computed yet. */

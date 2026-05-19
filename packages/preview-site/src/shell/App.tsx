@@ -1,13 +1,19 @@
-import { type CSSProperties } from 'react';
+import { lazy, Suspense, type CSSProperties } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 
-import { CodeView } from './CodeView';
 import { CommandBar } from './CommandBar';
 import { FileExplorer } from './FileExplorer';
 import { ParamsPanel } from './ParamsPanel';
 import { PreviewFrame } from './PreviewFrame';
-import { useSyncStateToUrl, useUiStore } from './store';
+import { UrlSync, useUiStore } from './store';
 import { Toolbar } from './Toolbar';
+
+// CodeView pulls in CodeMirror + a language pack (lazy-loaded inside the
+// component itself). The editor panel is closed by default, so deferring
+// the whole module via React.lazy keeps the cold bundle smaller.
+const CodeView = lazy(() =>
+  import('./CodeView').then((m) => ({ default: m.CodeView }))
+);
 
 /**
  * Three-pane layout, all but the preview optional:
@@ -19,7 +25,6 @@ import { Toolbar } from './Toolbar';
  * collapsed (zero-overhead common case).
  */
 export default function App() {
-  useSyncStateToUrl();
   const showFiles = useUiStore((s) => s.showFiles);
   const showEditor = useUiStore((s) => s.showEditor);
 
@@ -40,6 +45,13 @@ export default function App() {
         background: '#1e1e1e',
       }}
     >
+      {/*
+        UrlSync is the ONLY component that subscribes to the full param
+        state. Keeping it as a sibling leaf (returns null) means the rest
+        of the shell (Toolbar, FileExplorer, CodeView, …) is not forced
+        to re-render every time the user toggles a checkbox.
+      */}
+      <UrlSync />
       <header
         style={{
           borderBottom: '1px solid #2d2d30',
@@ -89,7 +101,9 @@ export default function App() {
                 defaultSize={showFiles ? '35%' : '45%'}
                 minSize="20%"
               >
-                <CodeView />
+                <Suspense fallback={<EditorFallback />}>
+                  <CodeView />
+                </Suspense>
               </Panel>
               <Separator style={separatorStyle} />
             </>
@@ -119,3 +133,20 @@ const separatorStyle: CSSProperties = {
   background: '#2d2d30',
   cursor: 'col-resize',
 };
+
+function EditorFallback() {
+  return (
+    <div
+      style={{
+        height: '100%',
+        background: '#1e1e1e',
+        color: '#6b7280',
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: 12,
+        padding: 12,
+      }}
+    >
+      Loading editor…
+    </div>
+  );
+}

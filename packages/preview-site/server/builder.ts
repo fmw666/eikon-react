@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { copyFile, mkdir, readdir, rm } from 'node:fs/promises';
+import { copyFile, mkdir, readdir, rm, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -64,6 +64,20 @@ export interface BuildState {
 const inflight = new Map<string, Promise<void>>();
 const errors = new Map<string, string>();
 
+/**
+ * Caps on retained build state. The cache lives on disk (every entry is a
+ * full template tree + a Vite dist), so an unbounded cache will OOM the
+ * dev process after a few hours of editing (each template edit produces a
+ * new templateRev → new hash → new dir, and the old dirs were orphaned).
+ *
+ * The numbers below are conservative; bump if you hit cache misses while
+ * cycling through variants on the same template revision.
+ */
+const MAX_CACHED_HASHES = 8;
+const MAX_RETAINED_ERRORS = 32;
+
+let evictionInflight: Promise<void> | null = null;
+
 export function getCacheDir(hash: string): string {
   return path.join(CACHE_ROOT, hash);
 }
@@ -104,9 +118,13 @@ export async function ensureBuild(inputs: BuildInputs): Promise<BuildState> {
       .catch((e) => {
         const msg = e instanceof Error ? (e.stack ?? e.message) : String(e);
         errors.set(hash, msg);
+        capErrors();
       })
       .finally(() => {
         inflight.delete(hash);
+        // Schedule LRU eviction off the request path; serialised so multiple
+        // overlapping builds don't trip over each other on the filesystem.
+        scheduleEviction();
       });
     inflight.set(hash, promise);
   }
@@ -118,11 +136,87 @@ export function clearError(hash: string): void {
   errors.delete(hash);
 }
 
+/**
+ * Drop all known build errors. Called from the dev-server file watcher when
+ * the template changes, so that fixing a bug in source automatically
+ * "unblocks" any variant that previously errored — without the user having
+ * to manually refresh or POST /api/clear-cache.
+ */
+export function clearAllErrors(): void {
+  errors.clear();
+}
+
 /** Test-only escape hatch; never call from production code paths. */
 export async function clearAllCache(): Promise<void> {
   await rm(CACHE_ROOT, { recursive: true, force: true });
   errors.clear();
   inflight.clear();
+}
+
+function capErrors(): void {
+  if (errors.size <= MAX_RETAINED_ERRORS) return;
+  // Map preserves insertion order, so the oldest entries appear first.
+  const drop = errors.size - MAX_RETAINED_ERRORS;
+  let i = 0;
+  for (const key of errors.keys()) {
+    if (i++ >= drop) break;
+    errors.delete(key);
+  }
+}
+
+function scheduleEviction(): void {
+  if (evictionInflight) return;
+  evictionInflight = evictCacheLru().finally(() => {
+    evictionInflight = null;
+  });
+}
+
+/**
+ * Keep at most `MAX_CACHED_HASHES` per-variant cache directories on disk,
+ * dropping the oldest by mtime. We never delete a directory whose hash is
+ * still being built (inflight) to avoid yanking files out from under Vite.
+ */
+async function evictCacheLru(): Promise<void> {
+  let entries: string[];
+  try {
+    entries = await readdir(CACHE_ROOT);
+  } catch {
+    return;
+  }
+  const stats = await Promise.all(
+    entries.map(async (name) => {
+      try {
+        const st = await stat(path.join(CACHE_ROOT, name));
+        return st.isDirectory() ? { name, mtime: st.mtimeMs } : null;
+      } catch {
+        return null;
+      }
+    })
+  );
+  const dirs = stats.filter(
+    (d): d is { name: string; mtime: number } => d !== null
+  );
+  if (dirs.length <= MAX_CACHED_HASHES) return;
+
+  dirs.sort((a, b) => b.mtime - a.mtime);
+  const toRemove = dirs
+    .slice(MAX_CACHED_HASHES)
+    .filter((d) => !inflight.has(d.name));
+
+  await Promise.all(
+    toRemove.map(async (d) => {
+      try {
+        await rm(path.join(CACHE_ROOT, d.name), {
+          recursive: true,
+          force: true,
+        });
+        errors.delete(d.name);
+      } catch {
+        // Best-effort: a directory might already be gone, or held open
+        // briefly by Vite on Windows. We'll retry on the next eviction.
+      }
+    })
+  );
 }
 
 async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {

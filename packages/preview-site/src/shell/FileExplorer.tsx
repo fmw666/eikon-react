@@ -1,5 +1,5 @@
 import { Icon } from '@iconify/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Tree, type NodeApi, type NodeRendererProps } from 'react-arborist';
 
 import { getFileIcon, getFolderIcon } from './fileIcons';
@@ -90,7 +90,17 @@ function Chevron({ open }: { open: boolean }) {
   );
 }
 
-function Row({ node, style, dragHandle }: NodeRendererProps<FileNode>) {
+/**
+ * Row is wrapped in `memo` because react-arborist re-renders the whole
+ * row list on every tree-level state change (selection move, expand,
+ * resize). Without memo, scrolling a moderately-sized tree (~200 nodes)
+ * re-allocates ~200 indent-guide spans + ~200 SVG sub-trees per frame.
+ */
+const Row = memo(function Row({
+  node,
+  style,
+  dragHandle,
+}: NodeRendererProps<FileNode>) {
   const [hover, setHover] = useState(false);
   const isFolder = node.data.type === 'dir';
   const iconName = isFolder
@@ -188,7 +198,7 @@ function Row({ node, style, dragHandle }: NodeRendererProps<FileNode>) {
       </span>
     </div>
   );
-}
+});
 
 export function FileExplorer() {
   const hash = useUiStore((s) => s.currentHash);
@@ -225,13 +235,36 @@ export function FileExplorer() {
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
+    // Coalesce ResizeObserver bursts (dragging the panel separator can
+    // fire 60+ events/s) into one rAF-bounded setState. react-arborist
+    // re-virtualises the whole list on width/height change, so this is
+    // worth the few lines.
+    let raf = 0;
     const obs = new ResizeObserver(() => {
-      const rect = el.getBoundingClientRect();
-      setSize({ w: rect.width, h: rect.height });
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const rect = el.getBoundingClientRect();
+        setSize((prev) =>
+          prev.w === rect.width && prev.h === rect.height
+            ? prev
+            : { w: rect.width, h: rect.height }
+        );
+      });
     });
     obs.observe(el);
-    return () => obs.disconnect();
+    return () => {
+      obs.disconnect();
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, []);
+
+  const handleActivate = useCallback(
+    (n: NodeApi<FileNode>) => {
+      if (n.data.type === 'file') openFile(n.data.id);
+    },
+    [openFile]
+  );
 
   const initialOpenState = useMemo(() => {
     if (!tree || !selectedFile) return undefined;
@@ -319,9 +352,7 @@ export function FileExplorer() {
             disableDrop
             disableEdit
             disableMultiSelection
-            onActivate={(n: NodeApi<FileNode>) => {
-              if (n.data.type === 'file') openFile(n.data.id);
-            }}
+            onActivate={handleActivate}
           >
             {Row}
           </Tree>

@@ -7,6 +7,7 @@ import { type Connect, type Plugin } from 'vite';
 
 import {
   clearAllCache,
+  clearAllErrors,
   DEFAULT_INPUTS,
   ensureBuild,
   getCacheDir,
@@ -15,7 +16,10 @@ import {
   getError,
   TEMPLATE_REACT_DIR,
 } from './builder';
-import { getTemplateRev, invalidateTemplateRev } from './fingerprint';
+import {
+  getTemplateRev,
+  scheduleInvalidateTemplateRev,
+} from './fingerprint';
 import { type BuildInputs } from './hash';
 
 interface BuildRequestBody {
@@ -83,6 +87,24 @@ interface FileNode {
   name: string;
   type: 'dir' | 'file';
   children?: FileNode[];
+}
+
+/**
+ * /api/files response cache. Trees are deterministic per cache directory,
+ * and a cache directory only changes when its hash changes (new build) or
+ * gets evicted — both already drive an `invalidate` (template change) or
+ * are externally observable. We keep the cache tiny since each entry is
+ * just a JS object graph.
+ */
+const treeCache = new Map<string, FileNode[]>();
+const TREE_CACHE_MAX = 16;
+
+function rememberTree(hash: string, tree: FileNode[]): void {
+  treeCache.set(hash, tree);
+  if (treeCache.size > TREE_CACHE_MAX) {
+    const oldest = treeCache.keys().next().value as string | undefined;
+    if (oldest) treeCache.delete(oldest);
+  }
 }
 
 async function readTree(rootDir: string, dir: string): Promise<FileNode[]> {
@@ -215,7 +237,17 @@ export function previewBuildPlugin(): Plugin {
           norm === TEMPLATE_REACT_DIR ||
           norm.startsWith(TEMPLATE_REACT_DIR + path.sep)
         ) {
-          invalidateTemplateRev();
+          // Debounced + coalesced: format-on-save touching N files only
+          // results in one invalidation, one tree-cache wipe, one error
+          // map clear. The flush callback runs after the debounce window,
+          // so we don't pay the cost N times for a single editor action.
+          scheduleInvalidateTemplateRev(() => {
+            treeCache.clear();
+            // Clearing errors here lets a previously-broken variant
+            // self-heal as soon as the source is fixed — the next build
+            // request hits a clean slate instead of the cached error.
+            clearAllErrors();
+          });
         }
       };
       server.watcher.on('change', handleTemplateChange);
@@ -290,6 +322,11 @@ export function previewBuildPlugin(): Plugin {
           res.end('hash query param required');
           return;
         }
+        const cached = treeCache.get(hash);
+        if (cached) {
+          sendJson(res, { hash, tree: cached });
+          return;
+        }
         const cacheDir = getCacheDir(hash);
         if (!existsSync(cacheDir)) {
           res.statusCode = 404;
@@ -298,6 +335,7 @@ export function previewBuildPlugin(): Plugin {
         }
         try {
           const tree = await readTree(cacheDir, cacheDir);
+          rememberTree(hash, tree);
           sendJson(res, { hash, tree });
         } catch (e) {
           res.statusCode = 500;

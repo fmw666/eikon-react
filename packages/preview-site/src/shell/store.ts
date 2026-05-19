@@ -15,8 +15,12 @@ export const useShellStore = createParamsStore(
 /**
  * Mirror store changes back into the parent window's URL bar (without adding
  * history entries). Lets users share/bookmark a configuration.
+ *
+ * NOTE: Mounted as a `null`-returning sibling (see `<UrlSync />`) so it can
+ * subscribe to the entire `state` without forcing the rest of the shell
+ * to re-render every time the user toggles a checkbox.
  */
-export function useSyncStateToUrl(): void {
+function useSyncStateToUrl(): void {
   const state = useShellStore((s) => s.state);
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -25,6 +29,14 @@ export function useSyncStateToUrl(): void {
     if (window.location.search === `?${qs}`) return;
     window.history.replaceState(null, '', next);
   }, [state]);
+}
+
+/**
+ * Isolation wrapper for `useSyncStateToUrl`. Render once at the App root.
+ */
+export function UrlSync(): null {
+  useSyncStateToUrl();
+  return null;
 }
 
 // ---------------------------------------------------------------------------

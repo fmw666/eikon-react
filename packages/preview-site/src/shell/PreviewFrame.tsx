@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-
-import { type ParamState } from '@/lib/params-schema';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 import { useShellStore, useUiStore } from './store';
 
@@ -18,16 +17,6 @@ interface BuildInputs {
   design: string;
   layout: string;
   ui: string;
-}
-
-function toBuildInputs(state: ParamState): BuildInputs {
-  return {
-    supabase: !!state.supabase,
-    query: !!state.query,
-    design: String(state.design),
-    layout: String(state.layout),
-    ui: String(state.ui),
-  };
 }
 
 function describeVariant(inputs: BuildInputs): string {
@@ -62,7 +51,36 @@ function readIframeSubUrl(iframe: HTMLIFrameElement | null): string {
 }
 
 const REV_POLL_INTERVAL_MS = 2000;
-const BUILD_POLL_INTERVAL_MS = 500;
+const BUILD_POLL_INITIAL_MS = 200;
+const BUILD_POLL_MIN_MS = 500;
+const BUILD_POLL_MAX_MS = 4000;
+
+function isDocumentVisible(): boolean {
+  return (
+    typeof document === 'undefined' || document.visibilityState !== 'hidden'
+  );
+}
+
+/**
+ * Resolve when the tab becomes visible again. Used to gate background
+ * polling so a backgrounded preview tab stops hammering the dev server
+ * (we observed ~18k /api/template-rev fetches over a 10h dev session).
+ */
+function waitForVisible(): Promise<void> {
+  return new Promise((resolve) => {
+    if (isDocumentVisible()) {
+      resolve();
+      return;
+    }
+    const onChange = (): void => {
+      if (isDocumentVisible()) {
+        document.removeEventListener('visibilitychange', onChange);
+        resolve();
+      }
+    };
+    document.addEventListener('visibilitychange', onChange);
+  });
+}
 
 /**
  * Centre stage iframe with on-demand template builds.
@@ -77,7 +95,21 @@ const BUILD_POLL_INTERVAL_MS = 500;
  *     re-mounts the iframe with the same params + same sub-route.
  */
 export function PreviewFrame() {
-  const state = useShellStore((s) => s.state);
+  // Subscribe to ONLY the 5 fields that actually go into the build hash.
+  // Toggling `install` / `git` / `pm` mutates the URL & CLI snippet but
+  // must NOT re-trigger a build effect.
+  const buildInputs = useShellStore(
+    useShallow<unknown, BuildInputs>((s) => {
+      const st = (s as { state: Record<string, unknown> }).state;
+      return {
+        supabase: !!st.supabase,
+        query: !!st.query,
+        design: String(st.design),
+        layout: String(st.layout),
+        ui: String(st.ui),
+      };
+    })
+  );
   const setCurrentHash = useUiStore((s) => s.setCurrentHash);
   const reloadKey = useUiStore((s) => s.reloadKey);
   const [build, setBuild] = useState<BuildState | null>(null);
@@ -91,10 +123,16 @@ export function PreviewFrame() {
   useEffect(() => {
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
+    let ctrl: AbortController | null = null;
 
     async function poll(): Promise<void> {
+      // Hidden tabs don't need to know about template changes — pause
+      // until the user comes back.
+      await waitForVisible();
+      if (cancelled) return;
+      ctrl = new AbortController();
       try {
-        const r = await fetch('/api/template-rev');
+        const r = await fetch('/api/template-rev', { signal: ctrl.signal });
         if (cancelled) return;
         const j = (await r.json()) as { rev?: string };
         if (j.rev) {
@@ -113,20 +151,21 @@ export function PreviewFrame() {
     return () => {
       cancelled = true;
       if (timer) clearTimeout(timer);
+      ctrl?.abort();
     };
   }, []);
 
   // ---- Build orchestration ----------------------------------------------
   //
-  // We re-run on both `state` and `templateRev`: param changes are the
-  // obvious driver, and templateRev changes act as a "the underlying source
-  // changed, please rebuild with my current params" signal from the watcher.
+  // We re-run on `buildInputs` (hash-affecting params only) and `templateRev`
+  // (the watcher's "source changed, rebuild" signal). Tooling params like
+  // `install` / `git` / `pm` deliberately don't drive this effect.
   useEffect(() => {
     const seq = ++requestSeq.current;
     let cancelled = false;
     let pollTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const inputs = toBuildInputs(state);
+    let pollDelay = BUILD_POLL_MIN_MS;
+    const ctrl = new AbortController();
 
     function adopt(next: BuildState): void {
       setBuild(next);
@@ -142,17 +181,21 @@ export function PreviewFrame() {
     }
 
     async function pollUntilDone(hash: string): Promise<void> {
+      await waitForVisible();
+      if (cancelled || seq !== requestSeq.current) return;
       const r = await fetch(
-        `/api/build-status?hash=${encodeURIComponent(hash)}`
+        `/api/build-status?hash=${encodeURIComponent(hash)}`,
+        { signal: ctrl.signal }
       );
       if (cancelled || seq !== requestSeq.current) return;
       const next = (await r.json()) as BuildState;
       adopt(next);
       if (next.status === 'building') {
-        pollTimer = setTimeout(
-          () => void pollUntilDone(hash),
-          BUILD_POLL_INTERVAL_MS
-        );
+        // Exponential backoff capped at BUILD_POLL_MAX_MS — most cold
+        // builds finish well before the cap; the cap exists so a stuck
+        // build doesn't burn a constant 500ms interval forever.
+        pollTimer = setTimeout(() => void pollUntilDone(hash), pollDelay);
+        pollDelay = Math.min(Math.round(pollDelay * 1.5), BUILD_POLL_MAX_MS);
       }
     }
 
@@ -160,7 +203,8 @@ export function PreviewFrame() {
       const r = await fetch('/api/build', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(inputs),
+        body: JSON.stringify(buildInputs),
+        signal: ctrl.signal,
       });
       if (cancelled || seq !== requestSeq.current) return;
       const initial = (await r.json()) as BuildState;
@@ -168,16 +212,14 @@ export function PreviewFrame() {
       if (initial.status === 'building') {
         pollTimer = setTimeout(
           () => void pollUntilDone(initial.hash),
-          // Faster first poll — most cold builds finish in ~3s; we don't
-          // want users staring at a stale "building" badge after the
-          // server has already flipped to ready.
-          200
+          BUILD_POLL_INITIAL_MS
         );
       }
     }
 
     void go().catch((e: unknown) => {
       if (cancelled || seq !== requestSeq.current) return;
+      if ((e as { name?: string })?.name === 'AbortError') return;
       setBuild({
         hash: '',
         status: 'error',
@@ -188,15 +230,16 @@ export function PreviewFrame() {
     return () => {
       cancelled = true;
       if (pollTimer) clearTimeout(pollTimer);
+      ctrl.abort();
     };
     // `setCurrentHash` is stable across renders (zustand setter); omitting
     // intentionally to keep the build effect from re-running on store init.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state, templateRev]);
+  }, [buildInputs, templateRev]);
 
   const isBuilding = build?.status === 'building';
   const isError = build?.status === 'error';
-  const variantLabel = describeVariant(toBuildInputs(state));
+  const variantLabel = useMemo(() => describeVariant(buildInputs), [buildInputs]);
 
   // The iframe's src is set ONCE per (hash, subUrl) pair via React's `key`
   // remount mechanism. We deliberately don't bind it as a controlled prop —

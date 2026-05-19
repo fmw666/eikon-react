@@ -1,8 +1,3 @@
-import { css } from '@codemirror/lang-css';
-import { html } from '@codemirror/lang-html';
-import { javascript } from '@codemirror/lang-javascript';
-import { json } from '@codemirror/lang-json';
-import { markdown } from '@codemirror/lang-markdown';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import CodeMirror, { type Extension } from '@uiw/react-codemirror';
 import { useEffect, useMemo, useState } from 'react';
@@ -17,32 +12,68 @@ interface FileResponse {
 }
 
 /**
- * Pick a CodeMirror language extension based on the file extension. Falls
- * back to no extension (CodeMirror renders plain text) for unrecognised
- * formats, which is fine for .env, LICENSE, .gitignore etc.
+ * Static, module-level so it isn't re-allocated every render. Identity
+ * stability matters here: CodeMirror's React wrapper diffs config objects
+ * to decide whether to re-create the editor state.
  */
-function languageFor(filePath: string): Extension | null {
+const BASIC_SETUP = {
+  lineNumbers: true,
+  foldGutter: true,
+  highlightActiveLine: false,
+  highlightActiveLineGutter: false,
+} as const;
+
+/**
+ * Load a CodeMirror language pack lazily, keyed by file extension.
+ *
+ * Importing all five packs eagerly used to add ~hundreds of KB to the
+ * shell's initial JS bundle even though the editor panel is closed by
+ * default. With dynamic import, opening a `.tsx` file only pays for the
+ * JS pack (which then also serves all `.ts/.js/.jsx/.mjs/.cjs` siblings).
+ *
+ * Returns `null` for unrecognised extensions — CodeMirror renders those
+ * as plain text, which is fine for .env / LICENSE / .gitignore etc.
+ */
+async function loadLanguageFor(
+  filePath: string
+): Promise<Extension | null> {
   const ext = filePath.slice(filePath.lastIndexOf('.')).toLowerCase();
   switch (ext) {
-    case '.ts':
+    case '.ts': {
+      const { javascript } = await import('@codemirror/lang-javascript');
       return javascript({ typescript: true, jsx: false });
-    case '.tsx':
+    }
+    case '.tsx': {
+      const { javascript } = await import('@codemirror/lang-javascript');
       return javascript({ typescript: true, jsx: true });
+    }
     case '.js':
     case '.mjs':
-    case '.cjs':
+    case '.cjs': {
+      const { javascript } = await import('@codemirror/lang-javascript');
       return javascript({ jsx: false });
-    case '.jsx':
+    }
+    case '.jsx': {
+      const { javascript } = await import('@codemirror/lang-javascript');
       return javascript({ jsx: true });
-    case '.json':
+    }
+    case '.json': {
+      const { json } = await import('@codemirror/lang-json');
       return json();
-    case '.css':
+    }
+    case '.css': {
+      const { css } = await import('@codemirror/lang-css');
       return css();
-    case '.html':
+    }
+    case '.html': {
+      const { html } = await import('@codemirror/lang-html');
       return html();
+    }
     case '.md':
-    case '.mdx':
+    case '.mdx': {
+      const { markdown } = await import('@codemirror/lang-markdown');
       return markdown();
+    }
     default:
       return null;
   }
@@ -65,6 +96,7 @@ export function CodeView() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [justCopied, setJustCopied] = useState(false);
+  const [languageExt, setLanguageExt] = useState<Extension | null>(null);
 
   useEffect(() => {
     if (!hash || !selectedFile) {
@@ -103,11 +135,26 @@ export function CodeView() {
     return () => ctrl.abort();
   }, [hash, selectedFile]);
 
-  const extensions = useMemo(() => {
-    if (!selectedFile) return [];
-    const lang = languageFor(selectedFile);
-    return lang ? [lang] : [];
+  // Language packs load on-demand; opening the editor pays for at most
+  // one pack at a time instead of all five up-front.
+  useEffect(() => {
+    if (!selectedFile) {
+      setLanguageExt(null);
+      return;
+    }
+    let cancelled = false;
+    void loadLanguageFor(selectedFile).then((ext) => {
+      if (!cancelled) setLanguageExt(ext);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [selectedFile]);
+
+  const extensions = useMemo(
+    () => (languageExt ? [languageExt] : []),
+    [languageExt]
+  );
 
   const headerName = selectedFile ?? '(no file open)';
 
@@ -226,12 +273,7 @@ export function CodeView() {
             theme={vscodeDark}
             extensions={extensions}
             readOnly
-            basicSetup={{
-              lineNumbers: true,
-              foldGutter: true,
-              highlightActiveLine: false,
-              highlightActiveLineGutter: false,
-            }}
+            basicSetup={BASIC_SETUP}
             style={{ fontSize: 12, height: '100%' }}
           />
         )}
