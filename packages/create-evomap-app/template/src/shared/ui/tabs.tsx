@@ -1,5 +1,5 @@
 import * as TabsPrimitive from '@radix-ui/react-tabs';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import * as React from 'react';
 
 import { cn } from '@/shared/lib/cn';
@@ -48,15 +48,20 @@ export const TabsTrigger = React.forwardRef<
 TabsTrigger.displayName = 'TabsTrigger';
 
 function Indicator({ layoutId }: { layoutId: string }) {
-  // Render a layoutId-shared motion box that animates between active triggers.
-  // We render it conditionally via data-state of the parent in CSS:
-  // It's still safe to render always; framer-motion will pick the active one
-  // based on data-state via aria.
+  // Shared layoutId animates the indicator between active triggers.
+  // When the user prefers reduced motion we drop the layoutId so each
+  // trigger gets a static positioned indicator (visually correct,
+  // no cross-fade / slide between tabs).
+  const reduceMotion = useReducedMotion();
   return (
     <motion.span
-      layoutId={layoutId}
+      layoutId={reduceMotion ? undefined : layoutId}
       className="absolute inset-0 rounded-sm bg-[var(--color-background)] shadow-sm data-[inactive=true]:hidden"
-      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+      transition={
+        reduceMotion
+          ? { duration: 0 }
+          : { type: 'spring', stiffness: 380, damping: 30 }
+      }
       aria-hidden
       data-inactive
     />

@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 
 import { cn } from '@/shared/lib/cn';
 
@@ -8,6 +8,8 @@ interface CounterDisplayProps {
 }
 
 export function CounterDisplay({ value, className }: CounterDisplayProps) {
+  const reduceMotion = useReducedMotion();
+
   return (
     <div
       className={cn(
@@ -16,18 +18,29 @@ export function CounterDisplay({ value, className }: CounterDisplayProps) {
       )}
       aria-live="polite"
     >
-      <AnimatePresence mode="popLayout">
-        <motion.span
+      {reduceMotion ? (
+        // Reduced-motion path: no enter/exit transitions, no
+        // AnimatePresence layout work — a plain span is enough.
+        <span
           key={value}
-          initial={{ y: 24, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -24, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 380, damping: 28 }}
           className="text-3xl font-semibold tabular-nums"
         >
           {value}
-        </motion.span>
-      </AnimatePresence>
+        </span>
+      ) : (
+        <AnimatePresence mode="popLayout">
+          <motion.span
+            key={value}
+            initial={{ y: 24, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -24, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+            className="text-3xl font-semibold tabular-nums"
+          >
+            {value}
+          </motion.span>
+        </AnimatePresence>
+      )}
     </div>
   );
 }

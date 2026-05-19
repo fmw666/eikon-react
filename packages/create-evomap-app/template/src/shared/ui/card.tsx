@@ -1,4 +1,8 @@
-import { motion, type HTMLMotionProps } from 'motion/react';
+import {
+  motion,
+  useReducedMotion,
+  type HTMLMotionProps,
+} from 'motion/react';
 import * as React from 'react';
 
 import { cn } from '@/shared/lib/cn';
@@ -8,18 +12,22 @@ export interface CardProps extends HTMLMotionProps<'div'> {
 }
 
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, hoverable = false, ...props }, ref) => (
-    <motion.div
-      ref={ref}
-      whileHover={hoverable ? { y: -2 } : undefined}
-      transition={{ type: 'spring', stiffness: 300, damping: 24 }}
-      className={cn(
-        'rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-card-foreground)] shadow-sm',
-        className
-      )}
-      {...props}
-    />
-  )
+  ({ className, hoverable = false, ...props }, ref) => {
+    const reduceMotion = useReducedMotion();
+    const wantsHover = hoverable && !reduceMotion;
+    return (
+      <motion.div
+        ref={ref}
+        whileHover={wantsHover ? { y: -2 } : undefined}
+        transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+        className={cn(
+          'rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-card-foreground)] shadow-sm',
+          className
+        )}
+        {...props}
+      />
+    );
+  }
 );
 Card.displayName = 'Card';
 

@@ -1,6 +1,10 @@
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { motion, type HTMLMotionProps } from 'motion/react';
+import {
+  motion,
+  useReducedMotion,
+  type HTMLMotionProps,
+} from 'motion/react';
 import * as React from 'react';
 
 import { cn } from '@/shared/lib/cn';
@@ -50,6 +54,10 @@ export interface ButtonProps
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, children, ...props }, ref) => {
+    // Honour OS-level prefers-reduced-motion: skip the hover-lift and
+    // tap-shrink animations entirely (CSS hover styles still apply).
+    const reduceMotion = useReducedMotion();
+
     if (asChild) {
       return (
         <Slot
@@ -65,8 +73,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <motion.button
         ref={ref}
-        whileTap={{ scale: 0.97 }}
-        whileHover={{ y: -1 }}
+        whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+        whileHover={reduceMotion ? undefined : { y: -1 }}
         transition={{ type: 'spring', stiffness: 400, damping: 22 }}
         className={cn(buttonVariants({ variant, size }), className)}
         {...props}
