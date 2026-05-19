@@ -40,7 +40,10 @@ src/features/<feature>/
 │   └── <feature>Service.ts                        # facade — `export const <feature>Service = factory.get()`
 ├── components/                                    # task cards, forms, screens, …
 ├── pages/                                         # IndexPage / NewPage / DetailsPage
-├── routes.tsx                                     # lazy-loaded routes
+├── i18n/                                          # per-feature translation namespace
+│   ├── en.json
+│   └── zh.json
+├── routes.tsx                                     # lazy-loaded routes; prefetch ns
 ├── index.ts                                       # PUBLIC API barrel
 └── __tests__/
     ├── store/<feature>Store.test.ts
@@ -228,12 +231,26 @@ The store calls `<feature>Service.*` directly — never the factory, never an im
 
 ### 9. Write the routes and pages
 
-`routes.tsx` — lazy-load every page (the router's shared `<Suspense>` boundary provides the fallback):
+`routes.tsx` — lazy-load every page (the router's shared `<Suspense>`
+boundary provides the fallback). Every `lazy()` block ALSO prefetches
+the feature's i18n namespace in parallel so the bundle and the
+translations land at the same time:
 
 ```tsx
-const <Feature>IndexPage = lazy(() =>
-  import('./pages/<Feature>IndexPage').then((m) => ({ default: m.<Feature>IndexPage })),
-);
+// --- Absolute Imports ---
+// @eikon:feature(i18n) begin
+import { loadNamespace } from '@/shared/i18n';
+// @eikon:feature(i18n) end
+
+const <Feature>IndexPage = lazy(async () => {
+  const [mod] = await Promise.all([
+    import('./pages/<Feature>IndexPage'),
+    // @eikon:feature(i18n) begin
+    loadNamespace('<feature>'),
+    // @eikon:feature(i18n) end
+  ]);
+  return { default: mod.<Feature>IndexPage };
+});
 // … same for NewPage / DetailsPage
 
 export const <feature>Routes = (
@@ -245,11 +262,25 @@ export const <feature>Routes = (
 );
 ```
 
+`loadNamespace` is idempotent: the second visit reuses the cached
+bundle, so calling it from every page in the feature is the right
+default.
+
 In the pages:
 
-- IndexPage calls `useTaskActions().initialize()` from a `useEffect`, then reads `useTasks()` / `useTaskLoading()` / `useTaskError()` from the selectors barrel.
-- DetailsPage prefers `useTaskById(id)` (memoized in-store lookup) and falls back to `useTaskActions().getTaskById(id)` when the user lands via deep link.
-- NewPage owns transient form state via `useState` (per [rules/40-state-management.md](../../rules/40-state-management.md): form state stays out of stores). Submits via `useTaskActions().addTask`.
+- IndexPage calls `useTaskActions().initialize()` from a `useEffect`,
+  then reads `useTasks()` / `useTaskLoading()` / `useTaskError()`
+  from the selectors barrel.
+- DetailsPage prefers `useTaskById(id)` (memoized in-store lookup)
+  and falls back to `useTaskActions().getTaskById(id)` when the user
+  lands via deep link.
+- NewPage owns transient form state via `useState` (per
+  [rules/40-state-management.md](../../rules/40-state-management.md):
+  form state stays out of stores). Submits via
+  `useTaskActions().addTask`.
+- Every page binds i18n through the feature ns:
+  `const { t } = useTranslation('<feature>');` and uses unprefixed
+  keys like `t('index.title')`.
 
 ### 10. Write the public barrel
 
@@ -281,7 +312,27 @@ Add to [src/app/router.tsx](../../../src/app/router.tsx) and (if it should appea
 
 ### 12. Add i18n keys
 
-For every locale under `src/shared/i18n/locales/`, add a `<feature>: { … }` namespace covering every key the new pages, components, and the screen layout use. Also add the `nav.<feature>` key if you added a nav link.
+Create `src/features/<feature>/i18n/en.json` and
+`src/features/<feature>/i18n/zh.json` — one bundle per locale,
+covering every key the new pages, components and screen layout use.
+**Keys are NOT prefixed with `<feature>.`** — the namespace already
+is the feature directory. Typical shape:
+
+```jsonc
+// src/features/<feature>/i18n/en.json
+{
+  "index":   { "title": "…", "new": "…", "loading": "…", "empty": "…" },
+  "new":     { "title": "…", "back": "…", "created": "…", "error": "…",
+               "form": { "title": "…", "description": "…", "submit": "…", "submitting": "…" } },
+  "details": { "title": "…", "back": "…", "loading": "…", "notFound": "…",
+               "notFoundDescription": "…", "createdAt": "…", "id": "…" },
+  "status":  { "pending": "…", "in_progress": "…", "completed": "…" },
+  "layout":  { "notice": "…", "mode": "…", "modeMock": "…", "modeSupabase": "…" }
+}
+```
+
+If you added a nav link, also add `nav.<feature>` to every locale's
+`src/shared/i18n/locales/<lng>/common.json`.
 
 ### 13. Add tests
 
@@ -313,7 +364,11 @@ All three must pass with zero warnings.
 - [ ] The store calls only the facade (`<feature>Service`), never the factory or an impl.
 - [ ] UI code (pages, components) imports from `selectors/` only, never the store directly, never the service directly.
 - [ ] `index.ts` exports the public surface: routes, store (for tests), selectors, service facade, types.
-- [ ] i18n keys exist in every locale file, including `nav.<feature>` if applicable.
+- [ ] `i18n/{en,zh}.json` exists inside the feature folder with the
+      same unprefixed key set, and `routes.tsx` prefetches the
+      namespace via `loadNamespace('<feature>')` next to each
+      `lazy()` import. `nav.<feature>` exists in every locale's
+      `common.json` if applicable.
 - [ ] Store and Mock service have isolated tests with `@/shared/supabase` mocked.
 - [ ] Every file has the v1 banner.
 - [ ] Lint / typecheck / test all green.
@@ -324,4 +379,9 @@ All three must pass with zero warnings.
 - Don't read the factory or an impl from outside `services/`. The facade is the only public service symbol.
 - Don't sync the store back from supabase via realtime — the swappable-backends pattern keeps the store as a write-through cache: every write goes service first, then mutates the store on resolution. Realtime sync needs a different pattern (and conflicts with the Mock impl).
 - Don't skip the latency simulation in the Mock impl. Without it, loading states become invisible in the demo.
-- Don't hard-code i18n keys in the form `tasks.status.${status}` without enumerating the possible status values somewhere — locale linters can't verify dynamic interpolation. The status type acting as the source of truth is acceptable, but document it inline.
+- Don't hard-code i18n keys in the form `status.${status}` without
+  enumerating the possible status values somewhere — locale linters
+  can't verify dynamic interpolation. The status type acting as the
+  source of truth is acceptable, but document it inline. (Inside the
+  feature ns the key is unprefixed; the v1 codebase wrote
+  `tasks.status.<x>` from the default ns — that shape is gone now.)

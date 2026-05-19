@@ -20,7 +20,7 @@ severity: must
 - Helpers: **@testing-library/react**, **@testing-library/user-event**, **@testing-library/jest-dom** (extended matchers).
 - Global setup lives in [__tests__/setup.ts](../../__tests__/setup.ts) and:
   - Registers `jest-dom` matchers and autoclean (`afterEach(cleanup)`).
-  - Eagerly initialises i18next with both shipped locales (`en` + `zh`) so any component test that renders a `useTranslation()` consumer just works — no need to wrap with a provider in each file.
+  - Eagerly initialises i18next: every shipped locale × every feature namespace (`common` + each `src/features/*/i18n/<lng>.json`) is bundled synchronously via `import.meta.glob({ eager: true })` and registered before the first test runs. `useSuspense: false` keeps tests synchronous — `useTranslation('tasks')` etc. just works without `act(...)` wrappers or per-test providers.
 - Two vitest configs:
   - [`vitest.config.ts`](../../vitest.config.ts) — happy-dom, includes `src/**/__tests__/**`, `__tests__/**`; EXCLUDES `__tests__/browser/**`.
   - [`vitest.browser.config.ts`](../../vitest.browser.config.ts) — Chromium via Playwright, includes ONLY `__tests__/browser/**`.

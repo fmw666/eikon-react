@@ -49,6 +49,9 @@ Examples:
    ├── stores/             # plural — pure-client shape
    ├── services/           # only if you have backend calls (with TanStack Query)
    ├── pages/
+   ├── i18n/               # per-feature translation namespace
+   │   ├── en.json
+   │   └── zh.json
    ├── routes.tsx
    ├── types.ts            # only if you have shared types
    ├── index.ts
@@ -59,6 +62,9 @@ Examples:
    ```
 
    Omit subdirectories that aren't needed yet (no empty folders).
+   `i18n/` is required as soon as the feature renders any visible
+   copy — leave it out only if every component the feature exports
+   is text-free.
 
 3. **Define the public API in `index.ts` first.** Decide what the feature is willing to be consumed under. A typical first version:
 
@@ -75,7 +81,9 @@ Examples:
    export { <name>Routes } from './routes';
    ```
 
-4. **Write `routes.tsx`** with lazy-loaded route(s):
+4. **Write `routes.tsx`** with lazy-loaded route(s). Prefetch the
+   feature's i18n namespace IN PARALLEL with the page chunk so both
+   land at the same time — no flash of fallback keys:
 
    ```tsx
    /**
@@ -93,13 +101,24 @@ Examples:
    // --- Core-related Libraries ---
    import { Route } from 'react-router-dom';
 
+   // --- Absolute Imports ---
+   // @eikon:feature(i18n) begin
+   import { loadNamespace } from '@/shared/i18n';
+   // @eikon:feature(i18n) end
+
    // =================================================================================================
    // Lazy pages
    // =================================================================================================
 
-   const <Page> = lazy(() =>
-     import('./pages/<Page>').then((m) => ({ default: m.<Page> })),
-   );
+   const <Page> = lazy(async () => {
+     const [mod] = await Promise.all([
+       import('./pages/<Page>'),
+       // @eikon:feature(i18n) begin
+       loadNamespace('<name>'),
+       // @eikon:feature(i18n) end
+     ]);
+     return { default: mod.<Page> };
+   });
 
    // =================================================================================================
    // Exports
@@ -108,7 +127,11 @@ Examples:
    export const <name>Routes = <Route path="/<path>" element={<<Page> />} />;
    ```
 
-5. **Implement the page** under `pages/<Page>.tsx` with the v1 file banner (see [rules/10-react-conventions.md](../../rules/10-react-conventions.md)). Wire i18n via `useTranslation()` (see `60-i18n.md`); never hard-code copy.
+5. **Implement the page** under `pages/<Page>.tsx` with the v1 file
+   banner (see [rules/10-react-conventions.md](../../rules/10-react-conventions.md)).
+   Wire i18n via `useTranslation('<name>')` bound to the feature's
+   namespace (see `60-i18n.md`); never hard-code copy. Inside that
+   namespace use unprefixed keys: `t('title')`, not `t('<name>.title')`.
 
 6. **If the feature has state**, add a Zustand store under `stores/<name>Store.ts` (see [add-zustand-store/SKILL.md](../add-zustand-store/SKILL.md), pure-client variant).
 
@@ -122,7 +145,13 @@ Examples:
 
    If the feature has a navigation entry, also update the layout (e.g. [src/app/layouts/RootLayout.tsx](../../../src/app/layouts/RootLayout.tsx)'s `navLinks` array).
 
-8. **Add translation keys.** In every file under `src/shared/i18n/locales/`, add a `<name>: { … }` namespace with at least every key the new page uses.
+8. **Add translation keys.** Create `src/features/<name>/i18n/en.json`
+   and `src/features/<name>/i18n/zh.json` — the namespace name IS the
+   feature directory, so the JSON should NOT carry a `<name>.` prefix
+   on its keys. Every locale file must contain the same key set.
+   See [add-i18n-keys/SKILL.md](../add-i18n-keys/SKILL.md). If the
+   feature gets a navigation entry, also add the `nav.<name>` key to
+   `src/shared/i18n/locales/<lng>/common.json`.
 
 9. **Write tests.** At minimum:
    - One test per non-trivial function in `stores/` or `services/`.
@@ -153,7 +182,11 @@ Then consume `useXQuery()` from the page. Don't introduce the `interfaces/implem
 - [ ] `index.ts` exports exactly the symbols intended for external use.
 - [ ] Route is registered in `src/app/router.tsx`.
 - [ ] No file outside this feature imports from inside it except via `@/features/<name>`.
-- [ ] i18n keys exist in every locale file.
+- [ ] `i18n/{en,zh}.json` exist inside the feature folder with the
+      same set of unprefixed keys, and `routes.tsx` prefetches the
+      namespace via `loadNamespace('<name>')`. `nav.<name>` exists in
+      every locale's `common.json` if the feature appears in the
+      header.
 - [ ] Every new file has the v1 file header (`@file` / `@description`) and the standard `// ===` section separators.
 - [ ] `pnpm lint`, `pnpm typecheck`, and `pnpm test` all pass.
 

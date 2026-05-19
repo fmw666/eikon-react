@@ -14,17 +14,19 @@ Use when the user asks to "add a page" or "create a new route" that belongs to a
 
 1. **Identify the host feature.** A page lives inside the feature it conceptually belongs to. Avoid creating "misc" or "shared" feature dumping grounds.
 
-2. **Create `src/features/<feature>/pages/<PageName>.tsx`:**
+2. **Create `src/features/<feature>/pages/<PageName>.tsx`.** Bind
+   `useTranslation` to the host feature's namespace; keys are
+   unprefixed inside that ns:
 
    ```tsx
    import { useTranslation } from 'react-i18next';
 
    export function <PageName>() {
-     const { t } = useTranslation();
+     const { t } = useTranslation('<feature>');
      return (
        <section className="space-y-4">
          <h1 className="text-2xl font-semibold tracking-tight">
-           {t('<feature>.<pageKey>.title')}
+           {t('<pageKey>.title')}
          </h1>
          {/* page body */}
        </section>
@@ -32,7 +34,13 @@ Use when the user asks to "add a page" or "create a new route" that belongs to a
    }
    ```
 
-3. **Register the route in `src/features/<feature>/routes.tsx`.** Lazy-load every page — the app's shared `<Suspense>` boundary provides the fallback. Because pages use **named** exports, the dynamic import needs the `then((m) => ({ default: m.<Page> }))` shape:
+3. **Register the route in `src/features/<feature>/routes.tsx`.**
+   Lazy-load every page — the app's shared `<Suspense>` boundary
+   provides the fallback. Pages use named exports, so the dynamic
+   import either uses the `then((m) => ({ default: m.X }))` shim or
+   the `async` form below. Prefetch the host feature's i18n namespace
+   in parallel so cold navigation doesn't pay two sequential round
+   trips:
 
    ```tsx
    /**
@@ -50,16 +58,33 @@ Use when the user asks to "add a page" or "create a new route" that belongs to a
    // --- Core-related Libraries ---
    import { Route } from 'react-router-dom';
 
+   // --- Absolute Imports ---
+   // @eikon:feature(i18n) begin
+   import { loadNamespace } from '@/shared/i18n';
+   // @eikon:feature(i18n) end
+
    // =================================================================================================
    // Lazy pages
    // =================================================================================================
 
-   const <ExistingPage> = lazy(() =>
-     import('./pages/<ExistingPage>').then((m) => ({ default: m.<ExistingPage> })),
-   );
-   const <PageName> = lazy(() =>
-     import('./pages/<PageName>').then((m) => ({ default: m.<PageName> })),
-   );
+   const <ExistingPage> = lazy(async () => {
+     const [mod] = await Promise.all([
+       import('./pages/<ExistingPage>'),
+       // @eikon:feature(i18n) begin
+       loadNamespace('<feature>'),
+       // @eikon:feature(i18n) end
+     ]);
+     return { default: mod.<ExistingPage> };
+   });
+   const <PageName> = lazy(async () => {
+     const [mod] = await Promise.all([
+       import('./pages/<PageName>'),
+       // @eikon:feature(i18n) begin
+       loadNamespace('<feature>'),
+       // @eikon:feature(i18n) end
+     ]);
+     return { default: mod.<PageName> };
+   });
 
    // =================================================================================================
    // Exports
@@ -73,11 +98,25 @@ Use when the user asks to "add a page" or "create a new route" that belongs to a
    );
    ```
 
-   If `routes.tsx` previously exported a single `<Route>`, wrap multiple routes in a `<>` fragment. If `lazy()` wasn't used before, convert all existing routes in the same edit — mixing eager and lazy loading inside one feature defeats the splitting.
+   If `routes.tsx` previously exported a single `<Route>`, wrap
+   multiple routes in a `<>` fragment. If `lazy()` wasn't used
+   before, convert all existing routes in the same edit — mixing
+   eager and lazy loading inside one feature defeats the splitting.
+   `loadNamespace` is cheap when the namespace is already cached
+   (no-op promise), so calling it from every page in the feature is
+   safe.
 
-4. **Add a navigation entry** (if the page should be reachable from the header). Edit [src/app/layouts/RootLayout.tsx](../../../src/app/layouts/RootLayout.tsx)'s `navLinks` array.
+4. **Add a navigation entry** (if the page should be reachable from
+   the header). Edit
+   [src/app/layouts/RootLayout.tsx](../../../src/app/layouts/RootLayout.tsx)'s
+   `navLinks` array, and add the `nav.<key>` translation in every
+   locale's `src/shared/i18n/locales/<lng>/common.json`.
 
-5. **Add i18n keys.** For every locale in `src/shared/i18n/locales/`, add the `<feature>.<pageKey>.*` group.
+5. **Add i18n keys** to the host feature's namespace at
+   `src/features/<feature>/i18n/{en,zh}.json` — under the
+   `<pageKey>.*` group. Keys are unprefixed (the namespace IS the
+   feature). See
+   [add-i18n-keys/SKILL.md](../add-i18n-keys/SKILL.md).
 
 6. **Add a smoke test** under `src/features/<feature>/__tests__/pages/<PageName>.test.tsx`:
 
@@ -107,7 +146,11 @@ Use when the user asks to "add a page" or "create a new route" that belongs to a
 - [ ] Page component is in `pages/`, exported as a named export.
 - [ ] Route registered inside the feature's `routes.tsx`.
 - [ ] Path is unique across the app router (no collision with existing routes).
-- [ ] i18n keys exist in every locale.
+- [ ] i18n keys exist in every locale's host-feature namespace
+      (`src/features/<feature>/i18n/{en,zh}.json`); `nav.<key>`
+      exists in `common.json` if the page appears in the header.
+- [ ] `routes.tsx` prefetches the host feature's namespace via
+      `loadNamespace('<feature>')` next to each `lazy()` import.
 - [ ] Smoke test asserts at least the heading or a stable element.
 
 ## Don't

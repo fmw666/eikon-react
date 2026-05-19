@@ -56,20 +56,23 @@ const STATUS_CLASS: Record<TaskStatus, string> = {
 
 function TaskDetailsPage() {
   // @eikon:feature(i18n) begin
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation('tasks');
   // @eikon:feature(i18n) end
 
   // @eikon:feature(i18n:fallback) begin
   // const t = (k: string) =>
   //   ({
-  //     'tasks.details.title': 'Task details',
-  //     'tasks.details.back': 'Back to list',
-  //     'tasks.details.loading': 'Loading task…',
-  //     'tasks.details.notFound': 'Task not found',
-  //     'tasks.details.notFoundDescription':
+  //     'details.title': 'Task details',
+  //     'details.back': 'Back to list',
+  //     'details.loading': 'Loading task…',
+  //     'details.notFound': 'Task not found',
+  //     'details.notFoundDescription':
   //       'It may have been deleted or the link is stale.',
-  //     'tasks.details.createdAt': 'Created',
-  //     'tasks.details.id': 'ID',
+  //     'details.createdAt': 'Created',
+  //     'details.id': 'ID',
+  //     'status.pending': 'Pending',
+  //     'status.in_progress': 'In progress',
+  //     'status.completed': 'Completed',
   //   })[k] ?? k;
   // const i18n = { language: 'en' as string };
   // @eikon:feature(i18n:fallback) end
@@ -118,21 +121,21 @@ function TaskDetailsPage() {
 
   return (
     <TasksScreen
-      title={t('tasks.details.title')}
-      actionLabel={t('tasks.details.back')}
+      title={t('details.title')}
+      actionLabel={t('details.back')}
       onAction={() => navigate('/tasks')}
     >
       {isFetching ? (
         <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
           <Loader2 className="h-4 w-4 animate-spin" />
-          {t('tasks.details.loading')}
+          {t('details.loading')}
         </div>
       ) : !task ? (
         <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
           <AlertTriangle className="h-10 w-10 text-[var(--color-muted-foreground)]/60" />
-          <h3 className="text-lg font-medium">{t('tasks.details.notFound')}</h3>
+          <h3 className="text-lg font-medium">{t('details.notFound')}</h3>
           <p className="text-sm text-[var(--color-muted-foreground)]">
-            {t('tasks.details.notFoundDescription')}
+            {t('details.notFoundDescription')}
           </p>
         </div>
       ) : (
@@ -146,15 +149,15 @@ function TaskDetailsPage() {
                   STATUS_CLASS[task.status]
                 )}
               >
-                {t(`tasks.status.${task.status}`)}
+                {t(`status.${task.status}`)}
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[var(--color-muted-foreground)]">
               <span>
-                {t('tasks.details.id')}: <span className="font-mono">{task.id}</span>
+                {t('details.id')}: <span className="font-mono">{task.id}</span>
               </span>
               <span>
-                {t('tasks.details.createdAt')}:{' '}
+                {t('details.createdAt')}:{' '}
                 {new Date(task.createdAt).toLocaleString(i18n.language)}
               </span>
             </div>

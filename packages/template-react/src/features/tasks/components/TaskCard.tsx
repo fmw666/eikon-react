@@ -51,15 +51,15 @@ const STATUS_CLASS: Record<TaskStatus, string> = {
 
 function TaskCard({ task, onClick, className }: TaskCardProps) {
   // @eikon:feature(i18n) begin
-  const { t } = useTranslation();
+  const { t } = useTranslation('tasks');
   // @eikon:feature(i18n) end
 
   // @eikon:feature(i18n:fallback) begin
   // const t = (k: string) =>
   //   ({
-  //     'tasks.status.pending': 'Pending',
-  //     'tasks.status.in_progress': 'In progress',
-  //     'tasks.status.completed': 'Completed',
+  //     'status.pending': 'Pending',
+  //     'status.in_progress': 'In progress',
+  //     'status.completed': 'Completed',
   //   })[k] ?? k;
   // @eikon:feature(i18n:fallback) end
 
@@ -91,7 +91,7 @@ function TaskCard({ task, onClick, className }: TaskCardProps) {
               STATUS_CLASS[task.status]
             )}
           >
-            {t(`tasks.status.${task.status}`)}
+            {t(`status.${task.status}`)}
           </span>
         </div>
       </CardHeader>

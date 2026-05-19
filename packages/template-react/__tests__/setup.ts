@@ -2,15 +2,22 @@
  * @file setup.ts
  * @description Vitest setup file (registered via vitest.config).
  *
- * Adds jest-dom matchers, eagerly initialises i18next with both shipped
- * locale bundles loaded synchronously (so component tests that render
- * `useTranslation()` consumers don't have to wait on dynamic imports nor
- * emit the "no i18next instance" warning), and runs `cleanup()` after
- * every test so Testing Library doesn't leak DOM nodes between cases.
+ * Adds jest-dom matchers, eagerly initialises i18next with every
+ * shipped locale namespace pre-registered (so component tests that
+ * render `useTranslation('tasks')` etc. don't have to wait on
+ * dynamic imports nor suspend mid-test), and runs `cleanup()` after
+ * every test so Testing Library doesn't leak DOM nodes between
+ * cases.
  *
- * Tests that need a different i18n state can call `i18n.changeLanguage()`
- * inside their own `beforeEach`. Tests that don't care about i18n are
- * unaffected — the init is a one-time, no-network setup.
+ * Production wires lazy namespaces through i18next-resources-to-backend;
+ * we deliberately skip that here — `useSuspense: false` plus
+ * synchronously-registered bundles keeps tests synchronous and
+ * exempt from `act(...)` boilerplate around Suspense.
+ *
+ * Tests that need a different i18n state can call
+ * `i18n.changeLanguage()` inside their own `beforeEach`. Tests that
+ * don't care about i18n are unaffected — the init is a one-time,
+ * no-network setup.
  */
 
 // =================================================================================================
@@ -25,9 +32,62 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { afterEach, beforeAll } from 'vitest';
 
-// --- Absolute Imports ---
-import en from '@/shared/i18n/locales/en.json';
-import zh from '@/shared/i18n/locales/zh.json';
+// =================================================================================================
+// Bundle discovery
+// =================================================================================================
+
+/**
+ * Eager glob — every locale JSON in the project is bundled into this
+ * test setup at compile time, so no async resolver is needed. Each
+ * key looks like:
+ *
+ *   /src/shared/i18n/locales/<lng>/common.json
+ *   /src/features/<feature>/i18n/<lng>.json
+ *
+ * We normalise both shapes into `(lng, ns, bundle)` triples and feed
+ * them straight to i18next via `resources`.
+ */
+type EagerBundleMap = Record<string, { default: Record<string, unknown> }>;
+
+const sharedBundles = import.meta.glob(
+  '/src/shared/i18n/locales/*/*.json',
+  { eager: true }
+) as EagerBundleMap;
+
+const featureBundles = import.meta.glob(
+  '/src/features/*/i18n/*.json',
+  { eager: true }
+) as EagerBundleMap;
+
+function buildResources(): Record<string, Record<string, Record<string, unknown>>> {
+  const resources: Record<
+    string,
+    Record<string, Record<string, unknown>>
+  > = {};
+
+  for (const [filePath, mod] of Object.entries(sharedBundles)) {
+    const match = filePath.match(
+      /\/src\/shared\/i18n\/locales\/([^/]+)\/([^/]+)\.json$/
+    );
+    if (!match) continue;
+    const [, lng, ns] = match;
+    resources[lng!] ??= {};
+    resources[lng!]![ns!] = mod.default;
+  }
+
+  for (const [filePath, mod] of Object.entries(featureBundles)) {
+    const match = filePath.match(
+      /\/src\/features\/([^/]+)\/i18n\/([^/]+)\.json$/
+    );
+    if (!match) continue;
+    const [, feature, lng] = match;
+    resources[lng!] ??= {};
+    // The namespace name IS the feature directory name.
+    resources[lng!]![feature!] = mod.default;
+  }
+
+  return resources;
+}
 
 // =================================================================================================
 // i18n bootstrap (sync)
@@ -39,11 +99,13 @@ beforeAll(async () => {
     lng: 'en',
     fallbackLng: 'en',
     supportedLngs: ['en', 'zh'],
+    defaultNS: 'common',
+    fallbackNS: 'common',
     interpolation: { escapeValue: false },
-    resources: {
-      en: { translation: en },
-      zh: { translation: zh },
-    },
+    resources: buildResources(),
+    // Tests stay synchronous: missing keys fall back to the key
+    // string instead of suspending the render.
+    react: { useSuspense: false },
   });
 });
 

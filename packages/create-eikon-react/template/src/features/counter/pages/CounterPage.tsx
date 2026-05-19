@@ -40,22 +40,22 @@ import { useCounterStore } from '../stores/counterStore';
 
 function CounterPage() {
   // @eikon:feature(i18n) begin
-  const { t } = useTranslation();
+  const { t } = useTranslation('counter');
   // @eikon:feature(i18n) end
 
   // @eikon:feature(i18n:fallback) begin
   // const t = (k: string, opts?: { value?: number }) =>
-  //   k === 'counter.current'
+  //   k === 'current'
   //     ? `Current value: ${opts?.value ?? 0}`
   //     : ({
-  //         'counter.title': 'Counter demo',
-  //         'counter.description':
+  //         title: 'Counter demo',
+  //         description:
   //           'Demonstrates a feature-first module with Zustand state and tests.',
-  //         'counter.increment': 'Increment',
-  //         'counter.decrement': 'Decrement',
-  //         'counter.reset': 'Reset',
-  //         'counter.toastIncreased': 'Counter increased',
-  //         'counter.toastReset': 'Counter reset to zero',
+  //         increment: 'Increment',
+  //         decrement: 'Decrement',
+  //         reset: 'Reset',
+  //         toastIncreased: 'Counter increased',
+  //         toastReset: 'Counter reset to zero',
   //       })[k] ?? k;
   // @eikon:feature(i18n:fallback) end
 
@@ -67,37 +67,37 @@ function CounterPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('counter.title')}</CardTitle>
-        <CardDescription>{t('counter.description')}</CardDescription>
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-6">
         <CounterDisplay value={value} />
         <p className="text-sm text-[var(--color-muted-foreground)]">
-          {t('counter.current', { value })}
+          {t('current', { value })}
         </p>
         <div className="flex flex-wrap items-center justify-center gap-2">
           <Button
             onClick={() => {
               increment();
-              toast.success(t('counter.toastIncreased'));
+              toast.success(t('toastIncreased'));
             }}
           >
             <Plus className="h-4 w-4" />
-            {t('counter.increment')}
+            {t('increment')}
           </Button>
           <Button variant="secondary" onClick={decrement} disabled={value === 0}>
             <Minus className="h-4 w-4" />
-            {t('counter.decrement')}
+            {t('decrement')}
           </Button>
           <Button
             variant="outline"
             onClick={() => {
               reset();
-              toast(t('counter.toastReset'));
+              toast(t('toastReset'));
             }}
           >
             <RotateCcw className="h-4 w-4" />
-            {t('counter.reset')}
+            {t('reset')}
           </Button>
         </div>
       </CardContent>

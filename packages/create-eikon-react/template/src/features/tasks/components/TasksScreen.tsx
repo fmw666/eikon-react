@@ -50,24 +50,24 @@ function TasksScreen({
   className,
 }: TasksScreenProps) {
   // @eikon:feature(i18n) begin
-  const { t } = useTranslation();
+  const { t } = useTranslation('tasks');
   // @eikon:feature(i18n) end
 
   // @eikon:feature(i18n:fallback) begin
   // const t = (k: string) =>
   //   ({
-  //     'tasks.layout.notice':
+  //     'layout.notice':
   //       'This demo simulates latency. State resets when you refresh.',
-  //     'tasks.layout.mode': 'Service mode:',
-  //     'tasks.layout.modeMock': 'Mock',
-  //     'tasks.layout.modeSupabase': 'Supabase',
+  //     'layout.mode': 'Service mode:',
+  //     'layout.modeMock': 'Mock',
+  //     'layout.modeSupabase': 'Supabase',
   //   })[k] ?? k;
   // @eikon:feature(i18n:fallback) end
 
   const isOnline = !serviceConfig.useMock;
   const modeLabel = isOnline
-    ? t('tasks.layout.modeSupabase')
-    : t('tasks.layout.modeMock');
+    ? t('layout.modeSupabase')
+    : t('layout.modeMock');
 
   return (
     <section className={cn('mx-auto w-full max-w-2xl', className)}>
@@ -79,9 +79,9 @@ function TasksScreen({
       </div>
 
       <div className="mb-6 rounded-md border border-amber-300/60 bg-amber-50 px-3 py-2 text-amber-900 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-200">
-        <p className="text-sm font-medium">{t('tasks.layout.notice')}</p>
+        <p className="text-sm font-medium">{t('layout.notice')}</p>
         <div className="mt-1 flex items-center gap-2 text-sm">
-          <span>{t('tasks.layout.mode')}</span>
+          <span>{t('layout.mode')}</span>
           <span
             className={cn(
               'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',

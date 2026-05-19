@@ -60,16 +60,16 @@ function TaskForm({
   isSubmitting = false,
 }: TaskFormProps) {
   // @eikon:feature(i18n) begin
-  const { t } = useTranslation();
+  const { t } = useTranslation('tasks');
   // @eikon:feature(i18n) end
 
   // @eikon:feature(i18n:fallback) begin
   // const t = (k: string) =>
   //   ({
-  //     'tasks.new.form.title': 'Title',
-  //     'tasks.new.form.description': 'Description',
-  //     'tasks.new.form.submit': 'Create task',
-  //     'tasks.new.form.submitting': 'Creating…',
+  //     'new.form.title': 'Title',
+  //     'new.form.description': 'Description',
+  //     'new.form.submit': 'Create task',
+  //     'new.form.submitting': 'Creating…',
   //   })[k] ?? k;
   // @eikon:feature(i18n:fallback) end
 
@@ -86,7 +86,7 @@ function TaskForm({
           htmlFor="task-title"
           className="block text-sm font-medium text-[var(--color-foreground)]"
         >
-          {t('tasks.new.form.title')}
+          {t('new.form.title')}
         </label>
         <input
           id="task-title"
@@ -104,7 +104,7 @@ function TaskForm({
           htmlFor="task-description"
           className="block text-sm font-medium text-[var(--color-foreground)]"
         >
-          {t('tasks.new.form.description')}
+          {t('new.form.description')}
         </label>
         <textarea
           id="task-description"
@@ -120,8 +120,8 @@ function TaskForm({
       <Button type="submit" disabled={isSubmitting} className="rounded-full">
         {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
         {isSubmitting
-          ? t('tasks.new.form.submitting')
-          : t('tasks.new.form.submit')}
+          ? t('new.form.submitting')
+          : t('new.form.submit')}
       </Button>
     </form>
   );

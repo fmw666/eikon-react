@@ -39,11 +39,12 @@ src/
 │       │   ├── factory/<feature>ServiceFactory.ts
 │       │   └── <feature>Service.ts               # exported facade — call serviceFactory inside
 │       ├── pages/                # Route-level components belonging to this feature
-│       ├── routes.tsx            # Optional: <Route> declarations for this feature
+│       ├── i18n/                 # Per-feature translation namespace (en.json, zh.json)
+│       ├── routes.tsx            # Optional: <Route> declarations + loadNamespace() prefetch
 │       ├── types.ts              # Feature-scoped TypeScript types
 │       ├── index.ts              # PUBLIC API barrel — the only file external code may import
 │       └── __tests__/            # Tests mirroring this feature's source layout
-├── shared/                       # Cross-feature: ui, lib, hooks, services/config, i18n, etc.
+├── shared/                       # Cross-feature: ui, lib, hooks, services/config, i18n bootstrap, etc.
 │   └── services/
 │       └── config/serviceConfig.ts  # Global toggle: useMock (Mock impl) vs real backend
 └── styles/                       # Tailwind v4 entry + global CSS

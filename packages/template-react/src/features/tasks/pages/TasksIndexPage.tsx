@@ -40,16 +40,16 @@ import {
 
 function TasksIndexPage() {
   // @eikon:feature(i18n) begin
-  const { t } = useTranslation();
+  const { t } = useTranslation('tasks');
   // @eikon:feature(i18n) end
 
   // @eikon:feature(i18n:fallback) begin
   // const t = (k: string) =>
   //   ({
-  //     'tasks.index.title': 'Tasks',
-  //     'tasks.index.new': 'New task',
-  //     'tasks.index.loading': 'Loading tasks…',
-  //     'tasks.index.empty': 'No tasks yet — create the first one.',
+  //     'index.title': 'Tasks',
+  //     'index.new': 'New task',
+  //     'index.loading': 'Loading tasks…',
+  //     'index.empty': 'No tasks yet — create the first one.',
   //   })[k] ?? k;
   // @eikon:feature(i18n:fallback) end
 
@@ -66,20 +66,20 @@ function TasksIndexPage() {
 
   return (
     <TasksScreen
-      title={t('tasks.index.title')}
-      actionLabel={t('tasks.index.new')}
+      title={t('index.title')}
+      actionLabel={t('index.new')}
       onAction={() => navigate('/tasks/new')}
     >
       {!isInitialized || isLoading ? (
         <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
           <Loader2 className="h-4 w-4 animate-spin" />
-          {t('tasks.index.loading')}
+          {t('index.loading')}
         </div>
       ) : error ? (
         <p className="text-sm text-[var(--color-destructive)]">{error}</p>
       ) : tasks.length === 0 ? (
         <p className="text-sm text-[var(--color-muted-foreground)]">
-          {t('tasks.index.empty')}
+          {t('index.empty')}
         </p>
       ) : (
         <ul className="flex flex-col gap-2">

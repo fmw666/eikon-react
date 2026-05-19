@@ -4,6 +4,10 @@
  *
  * Lazy-loaded so the counter page lands in its own chunk; the router's
  * shared <Suspense> boundary (see RootLayout) provides the fallback.
+ *
+ * The page chunk and the `counter` i18n namespace are fetched in
+ * parallel inside `lazy()` so the user never sees a flash of fallback
+ * keys when navigating into `/counter`.
  */
 
 // =================================================================================================
@@ -16,13 +20,24 @@ import { lazy } from 'react';
 // --- Core-related Libraries ---
 import { Route } from 'react-router-dom';
 
+// --- Absolute Imports ---
+// @eikon:feature(i18n) begin
+import { loadNamespace } from '@/shared/i18n';
+// @eikon:feature(i18n) end
+
 // =================================================================================================
 // Lazy pages
 // =================================================================================================
 
-const CounterPage = lazy(() =>
-  import('./pages/CounterPage').then((m) => ({ default: m.CounterPage }))
-);
+const CounterPage = lazy(async () => {
+  const [mod] = await Promise.all([
+    import('./pages/CounterPage'),
+    // @eikon:feature(i18n) begin
+    loadNamespace('counter'),
+    // @eikon:feature(i18n) end
+  ]);
+  return { default: mod.CounterPage };
+});
 
 // =================================================================================================
 // Exports

@@ -35,16 +35,16 @@ import { useTaskActions } from '../selectors';
 
 function TaskNewPage() {
   // @eikon:feature(i18n) begin
-  const { t } = useTranslation();
+  const { t } = useTranslation('tasks');
   // @eikon:feature(i18n) end
 
   // @eikon:feature(i18n:fallback) begin
   // const t = (k: string) =>
   //   ({
-  //     'tasks.new.title': 'New task',
-  //     'tasks.new.back': 'Back to list',
-  //     'tasks.new.created': 'Task created',
-  //     'tasks.new.error': 'Failed to create task',
+  //     'new.title': 'New task',
+  //     'new.back': 'Back to list',
+  //     'new.created': 'Task created',
+  //     'new.error': 'Failed to create task',
   //   })[k] ?? k;
   // @eikon:feature(i18n:fallback) end
 
@@ -59,10 +59,10 @@ function TaskNewPage() {
     setIsSubmitting(true);
     try {
       await addTask({ title, description });
-      toast.success(t('tasks.new.created'));
+      toast.success(t('new.created'));
       navigate('/tasks');
     } catch (e) {
-      toast.error(t('tasks.new.error'), {
+      toast.error(t('new.error'), {
         description: e instanceof Error ? e.message : String(e),
       });
     } finally {
@@ -72,8 +72,8 @@ function TaskNewPage() {
 
   return (
     <TasksScreen
-      title={t('tasks.new.title')}
-      actionLabel={t('tasks.new.back')}
+      title={t('new.title')}
+      actionLabel={t('new.back')}
       onAction={() => navigate('/tasks')}
     >
       <TaskForm

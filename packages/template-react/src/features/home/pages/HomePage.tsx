@@ -34,16 +34,19 @@ import {
 
 function HomePage() {
   // @eikon:feature(i18n) begin
-  const { t } = useTranslation();
+  // Bind to the per-feature namespace; the bundle is fetched lazily
+  // via routes.tsx's `loadNamespace('home')` call (in parallel with
+  // the page chunk), so by the time we render it's resident.
+  const { t } = useTranslation('home');
   // @eikon:feature(i18n) end
 
   // @eikon:feature(i18n:fallback) begin
   // const t = (k: string) =>
   //   ({
-  //     'home.title': 'Welcome to Eikon App',
-  //     'home.subtitle':
+  //     title: 'Welcome to Eikon App',
+  //     subtitle:
   //       'An AI-Agent-friendly React starter with Tailwind v4 and animate-ui.',
-  //     'home.cta': 'View the counter demo',
+  //     cta: 'View the counter demo',
   //   })[k] ?? k;
   // @eikon:feature(i18n:fallback) end
 
@@ -54,16 +57,16 @@ function HomePage() {
         React 19 · Tailwind v4 · animate-ui
       </span>
       <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-        {t('home.title')}
+        {t('title')}
       </h1>
       <p className="mt-4 max-w-2xl text-base text-[var(--color-muted-foreground)]">
-        {t('home.subtitle')}
+        {t('subtitle')}
       </p>
 
       <div className="mt-8 flex items-center gap-3">
         <Button asChild size="lg">
           <Link to="/counter">
-            {t('home.cta')}
+            {t('cta')}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
