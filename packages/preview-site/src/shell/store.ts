@@ -41,6 +41,10 @@ export interface UiStore {
   /** Hash of the most recently READY preview build. The explorer & code view
    *  read against this so the tree always matches what's running in iframe. */
   currentHash: string | null;
+  /** Monotonically increasing counter. Bumping it forces PreviewFrame to
+   *  remount the iframe — a cheap "reload the page in the preview" action
+   *  that doesn't require the user to focus the iframe and hit Ctrl+R. */
+  reloadKey: number;
   toggleFiles: () => void;
   toggleEditor: () => void;
   setShowFiles: (v: boolean) => void;
@@ -48,6 +52,7 @@ export interface UiStore {
   openFile: (relPath: string) => void;
   closeFile: () => void;
   setCurrentHash: (hash: string | null) => void;
+  reloadPreview: () => void;
 }
 
 export const useUiStore = create<UiStore>((set) => ({
@@ -55,6 +60,7 @@ export const useUiStore = create<UiStore>((set) => ({
   showEditor: false,
   selectedFile: null,
   currentHash: null,
+  reloadKey: 0,
   // Files is the "parent" panel — the editor is meaningless without a way to
   // pick which file to open, so closing Files also collapses Editor, and
   // re-opening Files restores Editor iff there's a file still selected from
@@ -83,4 +89,5 @@ export const useUiStore = create<UiStore>((set) => ({
   // panel and reclaiming the space for the preview.
   closeFile: () => set({ selectedFile: null, showEditor: false }),
   setCurrentHash: (currentHash) => set({ currentHash }),
+  reloadPreview: () => set((s) => ({ reloadKey: s.reloadKey + 1 })),
 }));

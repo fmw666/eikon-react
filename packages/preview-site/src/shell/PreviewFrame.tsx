@@ -79,6 +79,7 @@ const BUILD_POLL_INTERVAL_MS = 500;
 export function PreviewFrame() {
   const state = useShellStore((s) => s.state);
   const setCurrentHash = useUiStore((s) => s.setCurrentHash);
+  const reloadKey = useUiStore((s) => s.reloadKey);
   const [build, setBuild] = useState<BuildState | null>(null);
   const [lastReadyHash, setLastReadyHash] = useState<string | null>(null);
   const [subUrl, setSubUrl] = useState<string>('');
@@ -217,7 +218,10 @@ export function PreviewFrame() {
       {iframeSrc && (
         <iframe
           ref={iframeRef}
-          key={`${lastReadyHash}:${subUrl}`}
+          // Including `reloadKey` in the key lets the Toolbar's Reload
+          // button force a full iframe remount (cheap full refresh of the
+          // running variant) without touching params or rebuilding.
+          key={`${lastReadyHash}:${subUrl}:${reloadKey}`}
           src={iframeSrc}
           title="EvoMap template preview"
           style={{ width: '100%', height: '100%', border: 0 }}
