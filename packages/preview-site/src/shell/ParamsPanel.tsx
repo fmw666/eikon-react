@@ -80,7 +80,7 @@ function EnumControl({
       <select value={value} onChange={(e) => onChange(e.target.value)}>
         {def.values.map((v) => (
           <option key={v} value={v}>
-            {v}
+            {def.valueLabels?.[v] ?? v}
           </option>
         ))}
       </select>

@@ -121,32 +121,12 @@
 }
 /* @eikon:variant(design=brutalist) end */
 
-/* --- layout axis (CSS-only hooks; markup is shared in RootLayout) -------- */
-
-/* @eikon:variant(layout=stacked) begin */
-/* stacked keeps the default centered max-w-5xl flow; nothing extra. */
-/* @eikon:variant(layout=stacked) end */
-
-/* @eikon:variant(layout=sidebar) begin */
-.layout-sidebar > header {
-  border-bottom-width: 0;
-  border-right: 1px solid var(--color-border);
-}
-.layout-sidebar > header > div {
-  max-width: none;
-  padding-inline: 1rem;
-}
-/* @eikon:variant(layout=sidebar) end */
-
-/* @eikon:variant(layout=topbar) begin */
-.layout-topbar > header {
-  border-bottom-width: 2px;
-  background-color: var(--color-muted);
-}
-.layout-topbar > main {
-  max-width: 64rem;
-}
-/* @eikon:variant(layout=topbar) end */
+/* --- layout axis -----------------------------------------------------------
+ * Each layout (stacked / sidebar / topbar-sidebar / centered) is its own
+ * top-level component file under src/app/layouts/, so layout-specific
+ * styling lives in Tailwind classes inside that component — no axis-keyed
+ * CSS hooks are needed here. Keeping this comment as a sign-post for
+ * anyone hunting for the layout axis. */
 
 /* --- ui axis (radius and shadow shape) ----------------------------------- */
 

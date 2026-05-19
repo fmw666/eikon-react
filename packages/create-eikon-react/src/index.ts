@@ -40,7 +40,7 @@ const TEMPLATE_DIR = path.resolve(__dirname, '..', 'template');
  */
 const VARIANT_CHOICES = {
   design: ['minimal', 'default', 'brutalist'] as const,
-  layout: ['sidebar', 'topbar', 'stacked'] as const,
+  layout: ['stacked', 'sidebar', 'topbar-sidebar', 'centered'] as const,
   ui: ['radix', 'shadcn-style', 'animate-ui'] as const,
 } satisfies Record<string, readonly string[]>;
 

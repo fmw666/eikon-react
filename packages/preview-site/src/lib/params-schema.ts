@@ -28,6 +28,13 @@ export type EnumParam = {
   readonly cliFlag: string;
   readonly label: string;
   readonly axis: 'tooling' | 'design' | 'layout' | 'ui';
+  /**
+   * Optional friendlier labels keyed by `value`. The CLI / URL / build hash
+   * always use the raw `value` (kept stable across UI redesigns); the UI
+   * just renders `valueLabels?.[v] ?? v` so we can polish the dropdown
+   * without churning the schema's contract.
+   */
+  readonly valueLabels?: Readonly<Record<string, string>>;
 };
 
 export type ParamDef = BooleanParam | EnumParam;
@@ -70,11 +77,17 @@ export const PARAMS = [
   {
     id: 'layout',
     kind: 'enum',
-    values: ['sidebar', 'topbar', 'stacked'],
+    values: ['stacked', 'sidebar', 'topbar-sidebar', 'centered'],
     default: 'stacked',
     cliFlag: 'layout',
     label: 'Layout',
     axis: 'layout',
+    valueLabels: {
+      stacked: 'Stacked (centered)',
+      sidebar: 'Left sidebar',
+      'topbar-sidebar': 'Top + sidebar',
+      centered: 'Centered card',
+    },
   },
   {
     id: 'ui',
