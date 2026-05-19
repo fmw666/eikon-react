@@ -1,8 +1,8 @@
 {
-  "name": "@evomap/preview-site",
+  "name": "@eikon/preview",
   "private": true,
   "version": "0.1.0",
-  "description": "Interactive playground for the EvoMap template — pick CLI params, see a live preview, copy the command.",
+  "description": "Interactive playground for the Eikon React template — pick CLI params, see a live preview, copy the command.",
   "type": "module",
   "scripts": {
     "dev": "vite",

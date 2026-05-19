@@ -218,7 +218,7 @@ const WATCH_SUBPATHS = [
 
 export function previewBuildPlugin(): Plugin {
   return {
-    name: 'evomap-preview-build',
+    name: 'eikon-preview-build',
     configureServer(server) {
       // -- File watcher -------------------------------------------------
       //

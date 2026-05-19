@@ -1,8 +1,0 @@
-# App
-VITE_APP_NAME="EvoMap App"
-
-# Supabase (only required if you enabled the Supabase feature)
-# @evomap:feature(supabase) begin
-VITE_SUPABASE_URL=""
-VITE_SUPABASE_ANON_KEY=""
-# @evomap:feature(supabase) end

@@ -1,0 +1,8 @@
+# App
+VITE_APP_NAME="Eikon App"
+
+# Supabase (only required if you enabled the Supabase feature)
+# @eikon:feature(supabase) begin
+VITE_SUPABASE_URL=""
+VITE_SUPABASE_ANON_KEY=""
+# @eikon:feature(supabase) end

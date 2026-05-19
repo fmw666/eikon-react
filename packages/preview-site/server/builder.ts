@@ -9,7 +9,7 @@ import {
   stripFeatures,
   type FeatureFlags,
   type VariantSelections,
-} from '../../create-evomap-app/src/strip-features';
+} from '../../create-eikon-react/src/strip-features';
 
 import { getTemplateRev } from './fingerprint';
 import { hashBuildInputs, type BuildInputs } from './hash';
