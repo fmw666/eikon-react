@@ -30,7 +30,34 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { afterEach, beforeAll } from 'vitest';
+import { afterEach, beforeAll, vi } from 'vitest';
+
+// =================================================================================================
+// JSDOM polyfills
+// =================================================================================================
+
+/**
+ * jsdom ships without `matchMedia`. Anything that probes the user's
+ * preferred colour scheme — notably the shared theme store — would
+ * crash on import otherwise. Always-`false` is the safest default: it
+ * pins the resolved theme to `light` unless a test explicitly overrides
+ * `window.matchMedia` to a different stub.
+ */
+if (
+  typeof window !== 'undefined' &&
+  typeof window.matchMedia !== 'function'
+) {
+  window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }));
+}
 
 // =================================================================================================
 // Bundle discovery

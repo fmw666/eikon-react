@@ -4,6 +4,19 @@
     "counter": "Counter",
     "tasks": "Tasks"
   },
+  "actions": {
+    "toggleTheme": "Toggle theme",
+    "switchLanguage": "Switch language"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "en": "English",
+    "zh": "中文"
+  },
   "notFound": {
     "code": "404",
     "title": "Page not found",

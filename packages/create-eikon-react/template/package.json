@@ -4,19 +4,28 @@
   "version": "2.0.0",
   "description": "React 19 + Tailwind v4 + animate-ui feature-first starter template (consumed by create-eikon-react).",
   "type": "module",
+  "engines": {
+    "node": ">=20.10.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.12.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "build:check": "tsc -b --noEmit && vite build",
     "preview": "vite preview",
     "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"__tests__/**/*.{ts,tsx}\"",
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:structure": "vitest run __tests__/structure",
     "test:browser": "vitest run --config vitest.browser.config.ts",
-    "test:browser:setup": "playwright install chromium"
+    "test:browser:setup": "playwright install chromium",
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run test",
+    "ci": "pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run build"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",
