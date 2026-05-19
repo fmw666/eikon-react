@@ -57,6 +57,7 @@ export const DEFAULT_INPUTS: BuildInputs = {
   design: 'default',
   layout: 'stacked',
   ui: 'animate-ui',
+  toast: 'default',
 };
 
 // The skip list is the single CLI-authored source of truth. By reusing it
@@ -299,6 +300,7 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
     design: inputs.design,
     layout: inputs.layout,
     ui: inputs.ui,
+    toast: inputs.toast,
   };
   await stripFeatures(cacheDir, flags, variants);
 

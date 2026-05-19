@@ -12,6 +12,7 @@ export interface BuildInputs {
   design: string;
   layout: string;
   ui: string;
+  toast: string;
 }
 
 /**
@@ -32,6 +33,7 @@ export function hashBuildInputs(
     design: String(inputs.design),
     layout: String(inputs.layout),
     ui: String(inputs.ui),
+    toast: String(inputs.toast),
   };
   return createHash('sha256')
     .update(JSON.stringify(ordered))

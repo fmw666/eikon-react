@@ -37,18 +37,25 @@ system so users immediately recognise the look. Anchor colours below
 are the **brand-source values**; the actual `index.css` blocks
 translate them to OKLCH for perceptual-uniform contrast checking.
 
-| value       | Inspired by                  | Anchor palette                          | Typography                | Vibe                                |
-| ----------- | ---------------------------- | --------------------------------------- | ------------------------- | ----------------------------------- |
-| `default`   | (none — neutral baseline)    | violet `#7B5BD9`-ish on white           | system-ui                 | Brand-agnostic; safe start.         |
-| `apple`     | Apple HIG / iOS 17+          | `#007AFF` systemBlue on `#FAFAFA`       | SF Pro / -apple-system    | Friendly, generous radii, native.   |
-| `linear`    | [linear.app/brand]           | `#5E6AD2` lavender-blue on `#F4F5F8`    | Inter Variable            | Crisp, productivity tool, compact.  |
-| `anthropic` | [Anthropic brand guidelines] | `#d97757` Crail orange on `#faf9f5`     | Lora (body) / Poppins (h) | Warm, humanist, editorial, serif.   |
-| `vercel`    | [Vercel Geist]               | Ink `#000` / `#FFF` + `#0070F3` accent  | Geist Sans                | Strict monochrome, "less is more".  |
-| `notion`    | Notion editor                | warm gray + `#2eaadc` blue              | Inter                     | Document-heavy, dashboard-friendly. |
+| value       | Inspired by                  | Anchor palette                          | Typography                | Density (`--spacing` / base text)         | Vibe                                |
+| ----------- | ---------------------------- | --------------------------------------- | ------------------------- | ----------------------------------------- | ----------------------------------- |
+| `default`   | (none — neutral baseline)    | violet `#7B5BD9`-ish on white           | system-ui                 | Tailwind defaults (0.25rem / 16px)        | Brand-agnostic; safe start.         |
+| `apple`     | Apple HIG / iOS 17+          | `#007AFF` systemBlue on `#FAFAFA`       | SF Pro / -apple-system    | Spacious (0.27rem) · 17px body            | Friendly, generous radii, native.   |
+| `linear`    | [linear.app/brand]           | `#5E6AD2` lavender-blue on `#F4F5F8`    | Inter Variable            | Tight (0.22rem) · 15px body               | Crisp, productivity tool, compact.  |
+| `anthropic` | [Anthropic brand guidelines] | `#d97757` Crail orange on `#faf9f5`     | Lora serif (body)         | Editorial (0.28rem) · 17px body / 1.7 LH  | Warm, humanist, editorial, serif.   |
+| `vercel`    | [Vercel Geist]               | Ink `#000` / `#FFF` + `#0070F3` accent  | Geist Sans + Geist Mono   | Tight (0.22rem) · 14px body · 1px ring sh.| Strict monochrome, "less is more".  |
+| `notion`    | Notion editor                | warm gray + `#2eaadc` blue              | Inter                     | Standard (0.25rem) · 16px / 1.6 LH        | Document-heavy, dashboard-friendly. |
 
 [linear.app/brand]: https://linear.app/brand
 [Anthropic brand guidelines]: https://github.com/anthropics/skills/blob/main/skills/brand-guidelines/SKILL.md
 [Vercel Geist]: https://vercel.com/geist/colors
+
+What "density" means here: each preset overrides `--spacing` (Tailwind
+v4's base step, consumed by EVERY `p-N` / `gap-N` / `m-N` / `size-*`
+utility) plus the `--text-*` / `--text-*--line-height` family. Because
+the utilities are token-driven, **components don't change between
+presets** — a `<div className="p-6 text-sm">` automatically reads tighter
+under `vercel` and more spacious under `apple`.
 
 Switch the project to one of these at scaffold time:
 
@@ -64,33 +71,56 @@ Or pick one interactively in the playground (`pnpm preview:dev` → Design dropd
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │ src/styles/index.css        ← ONE FILE, the only place tokens    │
-│ ├── @theme  { … }           ← light-mode defaults                │
-│ ├── .dark   { … }           ← dark-mode defaults                 │
-│ ├── @eikon:variant(design=default)   ← presets, each pair        │
-│ ├── @eikon:variant(design=apple)     │ of @theme + .dark         │
-│ ├── @eikon:variant(design=linear)    │ overrides                 │
-│ ├── @eikon:variant(design=anthropic) │                           │
-│ ├── @eikon:variant(design=vercel)    │                           │
+│ ├── @theme  { … }           ← base tokens (colours, radii, fonts)│
+│ ├── .dark   { … }           ← dark-mode colour overrides         │
+│ ├── @eikon:variant(design=default)   ← presets, each pair of     │
+│ ├── @eikon:variant(design=apple)     │ @theme + .dark overrides; │
+│ ├── @eikon:variant(design=linear)    │ each @theme adds typo-    │
+│ ├── @eikon:variant(design=anthropic) │ graphy / density / shadow │
+│ ├── @eikon:variant(design=vercel)    │ tokens on top of palette  │
 │ └── @eikon:variant(design=notion)    ┘                           │
 └──────────────────────────────────────────────────────────────────┘
         │                                          │
         ▼                                          ▼
  src/shared/theme/themeStore.ts            src/shared/ui/*.tsx
    (light | dark | system,                  bg-[var(--color-primary)]
-    cycles + persists)                      text-[var(--color-foreground)]
-                                            border-[var(--color-border)]
+    cycles + persists)                      text-sm   ← reads --text-sm
+                                            font-medium ← reads --font-weight-medium
+                                            p-6 / gap-2 ← reads --spacing
+                                            shadow-md   ← reads --shadow-md
 ```
 
-Three immutable rules:
+Token namespaces (Tailwind v4 CSS-first config) consumed by utilities:
 
-1. **Components never hard-code colours.** Always reach for
-   `bg-[var(--color-xxx)]`, `text-[var(--color-xxx)]`, etc. If the
-   token doesn't exist, add it to `@theme` first.
+| Namespace             | Drives utility                           | Source of truth in this template               |
+| --------------------- | ---------------------------------------- | ---------------------------------------------- |
+| `--color-*`           | `bg-* / text-* / border-* / ring-*`      | base `@theme` + every preset's `@theme` + `.dark` |
+| `--radius-*`          | `rounded-*`                              | base `@theme` + every preset's `@theme`        |
+| `--font-{sans,serif,mono}` | `font-sans / font-serif / font-mono` | base `@theme` (preset overrides per brand)     |
+| `--font-weight-*`     | `font-medium / font-semibold / ...`      | preset `@theme` (Tailwind defaults otherwise)  |
+| `--text-*`            | `text-xs / text-sm / text-base / ...`    | preset `@theme` (Tailwind defaults otherwise)  |
+| `--text-*--line-height` | line-height paired to each `text-*` size | preset `@theme`                              |
+| `--leading-*`         | `leading-tight / leading-relaxed / ...`  | preset `@theme` (selective overrides)          |
+| `--tracking-*`        | `tracking-tight / tracking-wide / ...`   | preset `@theme` (selective overrides)          |
+| `--spacing`           | EVERY `p-N / m-N / gap-N / size-*`       | preset `@theme` (per-density)                  |
+| `--shadow-*`          | `shadow-sm / shadow-md / shadow-lg`      | preset `@theme` (per brand shadow personality) |
+
+Four immutable rules:
+
+1. **Components never hard-code colours, sizes, spacings, or shadows.**
+   Always reach for utilities (`bg-[var(--color-xxx)]`, `text-sm`,
+   `p-6`, `shadow-md`, etc.). If a token doesn't exist, add it to
+   `@theme` first; never use arbitrary values like `text-[15px]`.
 2. **Every preset MUST ship both halves** — an `@theme` block AND a
    `.dark` block — otherwise the base `.dark` from earlier in the
    same file will punch through the preset's `--color-primary` and
    silently revert it.
-3. **Don't touch `themeStore.ts`** unless you are changing the
+3. **Typography / spacing / shadow tokens are optional per preset.**
+   Override only what makes the preset's brand voice distinct
+   (`apple` widens spacing + larger body; `vercel` tightens both).
+   Omitted tokens fall back to Tailwind v4 defaults — that's exactly
+   what `default` does intentionally.
+4. **Don't touch `themeStore.ts`** unless you are changing the
    `light / dark / system` mechanism itself. The store handles class
    toggling, localStorage, and `prefers-color-scheme`; presets and
    token tweaks never need it.
@@ -140,6 +170,13 @@ Tokens you almost never need to touch:
 - `--font-sans` — only change if the brand owns a typeface.
 - `--radius-sm / --radius-md / --radius-lg` — only change to express
   a brand voice (e.g. `vercel` = near-zero, `apple` = generous round).
+- `--spacing` — only change to express a density voice; `apple`
+  loosens to `0.27rem`, `linear` / `vercel` tighten to `0.22rem`.
+  Don't fiddle here for "make this one card tighter" — that's a
+  local `gap-1` / `p-3` decision, not a global step.
+- `--text-base` / `--text-*--line-height` — only override when the
+  brand has a clear body-size opinion (Vercel's docs are 14px,
+  iOS body is 17px). Avoid changing for one-off pages.
 
 ---
 
@@ -211,7 +248,10 @@ block at the end of the **design axis** section (after `notion`):
 
 ```css
 /* @eikon:variant(design=cyberpunk) begin */
+/* Cyberpunk-style — neon magenta primary on near-black, mono typeface.
+ * Source: <add the brand reference URL you copied colours from> */
 @theme {
+  /* --- palette (required) --- */
   --color-primary: oklch(0.7 0.27 320);          /* neon magenta */
   --color-primary-foreground: oklch(0.1 0 0);
   --color-secondary: oklch(0.18 0.04 280);
@@ -219,10 +259,31 @@ block at the end of the **design axis** section (after `notion`):
   --color-accent: oklch(0.85 0.2 180);           /* electric cyan */
   --color-accent-foreground: oklch(0.1 0 0);
   --color-ring: oklch(0.7 0.27 320);
+
+  /* --- radii (optional — express brand voice) --- */
   --radius-lg: 0.25rem;
   --radius-md: 0.125rem;
   --radius-sm: 0rem;
+
+  /* --- typography (optional) --- */
   --font-sans: 'JetBrains Mono', ui-monospace, monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* --- density + type scale (optional — only if the preset's brand
+   * has an explicit density / body-size opinion). All values you omit
+   * fall back to Tailwind v4 defaults. */
+  --spacing: 0.22rem;
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.35rem;
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.15rem;
+  --tracking-tight: -0.014em;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* --- shadows (optional) --- */
+  --shadow-sm: 0 0 0 1px oklch(0.7 0.27 320 / 0.4);
+  --shadow-md: 0 0 12px -2px oklch(0.7 0.27 320 / 0.5);
 }
 .dark {
   --color-background: oklch(0.12 0.04 280);
@@ -246,8 +307,9 @@ Checklist for the preset itself:
 
 - [ ] Block is wrapped in the exact marker `@eikon:variant(design=<name>) begin/end` so `strip-features` can find it.
 - [ ] Contains BOTH an `@theme { ... }` block (light) and a `.dark { ... }` block (dark). Skipping the dark block is the #1 mistake — the base `.dark` will leak through.
-- [ ] Override at least: `--color-primary`, `--color-primary-foreground`, `--color-ring`, `--color-accent`. Override more (`--color-background`, `--color-card`, `--color-border`, `--font-sans`, `--radius-*`) only when the preset's identity demands it.
-- [ ] All values use `oklch(...)`. Don't mix in `#hex` / `rgb(...)` / `hsl(...)` — the codebase only uses OKLCH in `index.css` and we want to keep grep clean.
+- [ ] **Palette (required)**: Override at least `--color-primary`, `--color-primary-foreground`, `--color-ring`, `--color-accent`. Override more (`--color-background`, `--color-card`, `--color-border`) when the preset's identity demands it.
+- [ ] **Typography / density / shadow (optional)**: Override `--spacing`, `--text-base` (+ `--text-base--line-height`), `--font-weight-medium / -semibold`, `--tracking-tight`, `--shadow-sm / -md / -lg` to express density and typographic rhythm. Omit any that match the default — Tailwind v4 fallbacks will take over.
+- [ ] All colour values use `oklch(...)`. Don't mix in `#hex` / `rgb(...)` / `hsl(...)` — the codebase only uses OKLCH in `index.css` and we want to keep grep clean.
 - [ ] Pass the **contrast cheatsheet** (see below).
 
 ### Step 2 — register in the CLI

@@ -27,7 +27,7 @@ export type EnumParam = {
   readonly default: string;
   readonly cliFlag: string;
   readonly label: string;
-  readonly axis: 'tooling' | 'design' | 'layout' | 'ui';
+  readonly axis: 'tooling' | 'design' | 'layout' | 'ui' | 'toast';
   /**
    * Optional friendlier labels keyed by `value`. The CLI / URL / build hash
    * always use the raw `value` (kept stable across UI redesigns); the UI
@@ -112,6 +112,32 @@ export const PARAMS = [
     cliFlag: 'ui',
     label: 'UI lib',
     axis: 'ui',
+  },
+  {
+    id: 'toast',
+    kind: 'enum',
+    values: [
+      'default',
+      'minimal',
+      'apple',
+      'glass',
+      'terminal',
+      'floating-bar',
+      'stacked-cards',
+    ],
+    default: 'default',
+    cliFlag: 'toast',
+    label: 'Toast',
+    axis: 'toast',
+    valueLabels: {
+      default: 'Default (top-right, richColors)',
+      minimal: 'Minimal (bottom-center, no chrome)',
+      apple: 'Apple banner (top-center, frosted)',
+      glass: 'Glassmorphism (top-right, blur)',
+      terminal: 'Terminal (bottom-left, mono)',
+      'floating-bar': 'Floating bar (bottom-center)',
+      'stacked-cards': 'Stacked cards (bottom-right, expand)',
+    },
   },
 ] as const satisfies readonly ParamDef[];
 

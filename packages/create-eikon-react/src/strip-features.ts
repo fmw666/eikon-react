@@ -18,6 +18,7 @@ export const DEFAULT_VARIANTS: VariantSelections = {
   design: 'default',
   layout: 'stacked',
   ui: 'animate-ui',
+  toast: 'default',
 };
 
 /**

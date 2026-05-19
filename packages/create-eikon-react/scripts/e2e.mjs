@@ -90,28 +90,70 @@ const SCENARIOS = [
       'sidebar',
       '--ui',
       'radix',
+      '--toast',
+      'minimal',
     ],
     expect: {
-      filesPresent: ['src/features/counter/index.ts'],
-      filesAbsent: ['src/shared/supabase'],
+      filesPresent: [
+        'src/features/counter/index.ts',
+        // The chosen toast preset's sibling file must survive whole-file
+        // stripping (it carries an `@eikon:variant(toast=minimal) file` marker).
+        'src/shared/ui/toaster/minimal-toaster.tsx',
+      ],
+      filesAbsent: [
+        'src/shared/supabase',
+        // Every non-chosen toast preset's sibling file is removed by its
+        // own first-line `@eikon:variant(toast=X) file` marker.
+        'src/shared/ui/toaster/default-toaster.tsx',
+        'src/shared/ui/toaster/apple-toaster.tsx',
+        'src/shared/ui/toaster/glass-toaster.tsx',
+        'src/shared/ui/toaster/terminal-toaster.tsx',
+        'src/shared/ui/toaster/floating-bar-toaster.tsx',
+        'src/shared/ui/toaster/stacked-cards-toaster.tsx',
+      ],
       depsPresent: ['@tanstack/react-query'],
       depsAbsent: ['@supabase/supabase-js'],
       providersContains: ['QueryClientProvider'],
       providersAbsent: [],
       // Strip-features must keep ONLY the chosen variant block in
-      // RootLayout.tsx. The 'layout-stacked' fallback string at the end of
-      // the `.at(0) ?? '…'` expression is intentional and survives stripping,
-      // so we only assert that other non-chosen variants are gone.
-      rootLayoutContains: ['layout-sidebar', '@eikon:variant(layout=sidebar)'],
-      rootLayoutAbsent: [
-        'layout-topbar',
-        '@eikon:variant(layout=topbar)',
-        '@eikon:variant(layout=stacked)',
+      // RootLayout.tsx. The dispatcher imports each sibling layout by
+      // PascalCase name (SidebarRootLayout / StackedRootLayout / …), so
+      // the surviving import is the most precise post-strip witness.
+      rootLayoutContains: [
+        'SidebarRootLayout',
+        '@eikon:variant(layout=sidebar)',
       ],
-      // The CSS file should keep the chosen design + ui blocks and drop the
-      // non-chosen ones (the default / apple / anthropic / vercel / notion
-      // design palettes etc.).
-      stylesContains: ['design=linear', 'ui=radix', 'layout=sidebar'],
+      rootLayoutAbsent: [
+        'StackedRootLayout',
+        'TopbarSidebarRootLayout',
+        'CenteredRootLayout',
+        '@eikon:variant(layout=stacked)',
+        '@eikon:variant(layout=topbar-sidebar)',
+        '@eikon:variant(layout=centered)',
+      ],
+      // The dispatcher at toaster.tsx must keep ONLY the chosen preset's
+      // import + array entry, and the unchosen marker blocks must be gone
+      // entirely (so typecheck doesn't trip over missing sibling files).
+      toasterContains: [
+        '@eikon:variant(toast=minimal)',
+        './toaster/minimal-toaster',
+      ],
+      toasterAbsent: [
+        '@eikon:variant(toast=default)',
+        '@eikon:variant(toast=apple)',
+        '@eikon:variant(toast=glass)',
+        '@eikon:variant(toast=terminal)',
+        '@eikon:variant(toast=floating-bar)',
+        '@eikon:variant(toast=stacked-cards)',
+        './toaster/default-toaster',
+        './toaster/apple-toaster',
+        './toaster/glass-toaster',
+      ],
+      // The CSS file should keep the chosen design + ui blocks and drop
+      // the non-chosen ones (the default / apple / anthropic / vercel /
+      // notion design palettes etc.). The CSS file has no `layout=` or
+      // `toast=` markers — those axes live in JSX / TSX files instead.
+      stylesContains: ['design=linear', 'ui=radix'],
       stylesAbsent: [
         'design=default',
         'design=apple',
@@ -339,6 +381,27 @@ async function verifyScenario(projectDir, expect) {
       if (styles.includes(needle)) {
         throw new Error(
           `expected styles/index.css to NOT contain ${JSON.stringify(needle)}`
+        );
+      }
+    }
+  }
+
+  if (expect.toasterContains || expect.toasterAbsent) {
+    const toaster = await readFile(
+      path.join(projectDir, 'src', 'shared', 'ui', 'toaster.tsx'),
+      'utf8'
+    );
+    for (const needle of expect.toasterContains ?? []) {
+      if (!toaster.includes(needle)) {
+        throw new Error(
+          `expected toaster.tsx to contain ${JSON.stringify(needle)}`
+        );
+      }
+    }
+    for (const needle of expect.toasterAbsent ?? []) {
+      if (toaster.includes(needle)) {
+        throw new Error(
+          `expected toaster.tsx to NOT contain ${JSON.stringify(needle)}`
         );
       }
     }

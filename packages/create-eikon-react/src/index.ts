@@ -49,6 +49,15 @@ const VARIANT_CHOICES = {
   ] as const,
   layout: ['stacked', 'sidebar', 'topbar-sidebar', 'centered'] as const,
   ui: ['radix', 'shadcn-style', 'animate-ui'] as const,
+  toast: [
+    'default',
+    'minimal',
+    'apple',
+    'glass',
+    'terminal',
+    'floating-bar',
+    'stacked-cards',
+  ] as const,
 } satisfies Record<string, readonly string[]>;
 
 type VariantAxis = keyof typeof VARIANT_CHOICES;

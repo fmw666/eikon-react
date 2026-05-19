@@ -19,6 +19,7 @@ interface BuildInputs {
   design: string;
   layout: string;
   ui: string;
+  toast: string;
 }
 
 function describeVariant(inputs: BuildInputs): string {
@@ -26,6 +27,7 @@ function describeVariant(inputs: BuildInputs): string {
     `design=${inputs.design}`,
     `layout=${inputs.layout}`,
     `ui=${inputs.ui}`,
+    `toast=${inputs.toast}`,
     inputs.supabase ? 'supabase' : null,
     inputs.query ? 'query' : null,
   ]
@@ -109,11 +111,12 @@ function selectBuildInputs(s: ParamsStore): BuildInputs {
     design: String(s.state.design),
     layout: String(s.state.layout),
     ui: String(s.state.ui),
+    toast: String(s.state.toast),
   };
 }
 
 export function PreviewFrame() {
-  // Subscribe to ONLY the 5 fields that actually go into the build hash.
+  // Subscribe to ONLY the 6 fields that actually go into the build hash.
   // Toggling `pm` mutates the CLI snippet but must NOT re-trigger a build
   // effect — the package manager only matters at scaffold time.
   const buildInputs = useShellStore(useShallow(selectBuildInputs));

@@ -2,7 +2,26 @@
 
 /* ----------------------------------------------------------------------------
  * Theme tokens (Tailwind v4 CSS-first config).
- * Edit these variables to customize the default look-and-feel.
+ *
+ * Token namespaces consumed by Tailwind v4 utilities:
+ *   --color-*         → bg-*, text-*, border-* utilities (palette below)
+ *   --radius-*        → rounded-* utilities
+ *   --font-*          → font-sans / font-serif / font-mono utilities
+ *   --font-weight-*   → font-normal / font-medium / font-semibold / font-bold
+ *   --text-*          → text-xs / text-sm / text-base / text-lg / ... (font-size)
+ *   --text-*--line-height → paired line-height for each text-* utility
+ *   --leading-*       → leading-tight / leading-normal / leading-relaxed
+ *   --tracking-*      → tracking-tight / tracking-normal / tracking-wide
+ *   --spacing         → base step for ALL p-N / m-N / gap-N / size-* utilities
+ *   --shadow-*        → shadow-sm / shadow-md / shadow-lg
+ *
+ * Strategy: the base @theme below stays minimal (colour palette + radii +
+ * font-sans). Each design preset further down then overrides typography,
+ * density, and shadow tokens to express its design language — e.g. `apple`
+ * widens spacing and uses SF Pro at 17px; `vercel` tightens spacing and
+ * drops base font-size to 14px; `anthropic` increases line-height for
+ * editorial readability. Tokens not overridden by a preset fall back to
+ * Tailwind v4's defaults, which is the sane behaviour for `default`.
  * --------------------------------------------------------------------------*/
 @theme {
   --color-background: oklch(1 0 0);
@@ -37,6 +56,11 @@
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
     Arial, sans-serif;
+  --font-serif:
+    ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
 }
 
 /* Dark mode tokens are activated via the `.dark` class on <html>. */
@@ -113,7 +137,12 @@
 /* Apple Human Interface Guidelines — systemBlue (#007AFF) + SF Pro.
  * Source: https://developer.apple.com/design/human-interface-guidelines/color
  *         https://developer.apple.com/documentation/uikit/uicolor/systembue
- * Soft system grays, generous-but-not-huge corner radii, native SF stack. */
+ * Soft system grays, generous-but-not-huge corner radii, native SF stack.
+ *
+ * Typography & density:
+ *   - 17px base body (iOS body), 15px secondary, generous spacing step.
+ *   - SF text is hinted to read tightly; -0.022em tracking matches HIG.
+ *   - Shadows are very low contrast (HIG prefers blur over darkness). */
 @theme {
   --color-background: oklch(0.99 0.002 240);
   --color-foreground: oklch(0.2 0.005 240);
@@ -138,6 +167,31 @@
   --font-sans:
     -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
     'Helvetica Neue', system-ui, sans-serif;
+  --font-mono:
+    'SF Mono', ui-monospace, Menlo, Monaco, 'Cascadia Mono', monospace;
+
+  --spacing: 0.27rem;
+
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.05rem;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.4rem;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.6rem;
+  --text-lg: 1.1875rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.875rem;
+  --text-2xl: 1.625rem;
+  --text-2xl--line-height: 2rem;
+
+  --font-weight-medium: 510;
+  --font-weight-semibold: 600;
+  --tracking-tight: -0.022em;
+
+  --shadow-sm: 0 1px 2px 0 oklch(0 0 0 / 0.04);
+  --shadow-md: 0 4px 10px -2px oklch(0 0 0 / 0.06);
+  --shadow-lg: 0 12px 28px -6px oklch(0 0 0 / 0.1);
 }
 .dark {
   --color-background: oklch(0.16 0.005 240);
@@ -163,7 +217,13 @@
  * Nordic Gray #222326, Inter typography, compact radii.
  * Source: https://linear.app/brand   https://developers.linear.app/brand
  * Dark mode primary uses #828FFF "Lavender Hover" so the accent stays
- * visible on the dark surface. */
+ * visible on the dark surface.
+ *
+ * Typography & density:
+ *   - 15px base body, 13px secondary, tight spacing step → high info
+ *     density typical of productivity tools.
+ *   - Linear's signature "hairline" shadow uses a single solid 1px offset
+ *     instead of a blur, giving a sharper, more architectural feel. */
 @theme {
   --color-background: oklch(0.97 0.005 264);
   --color-foreground: oklch(0.25 0.005 264);
@@ -186,6 +246,29 @@
   --font-sans:
     'Inter Variable', Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont,
     'Segoe UI', system-ui, sans-serif;
+
+  --spacing: 0.22rem;
+
+  --text-xs: 0.6875rem;
+  --text-xs--line-height: 0.95rem;
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.15rem;
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.35rem;
+  --text-lg: 1.0625rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.65rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.9rem;
+
+  --font-weight-medium: 510;
+  --font-weight-semibold: 590;
+  --tracking-tight: -0.011em;
+
+  --shadow-sm: 0 1px 0 0 oklch(0.4 0.01 264 / 0.05);
+  --shadow-md: 0 2px 4px -1px oklch(0.4 0.01 264 / 0.08);
+  --shadow-lg: 0 8px 20px -4px oklch(0.4 0.01 264 / 0.12);
 }
 .dark {
   --color-background: oklch(0.18 0.005 264);
@@ -212,7 +295,17 @@
  * Source: https://github.com/anthropics/skills/blob/main/skills/brand-guidelines/SKILL.md
  *         https://www.designmd.co/d/anthropic
  * Earthy, humanist palette — communicates "trustworthy + approachable"
- * rather than typical tech blue. */
+ * rather than typical tech blue.
+ *
+ * Typography & density:
+ *   - 17px serif body with editorial line-height (~1.65 effective) for
+ *     long-form readability — much closer to a longform article than a
+ *     tech dashboard.
+ *   - `font-sans` is mapped to Lora (a serif) so the existing components
+ *     that opt for `font-sans` automatically pick up the editorial voice.
+ *     `font-serif` and `font-mono` remain available for explicit choices.
+ *   - Tracking is zero — serif text reads worse when artificially tight.
+ *   - Shadows are warm-tinted to match the cream surface. */
 @theme {
   --color-background: oklch(0.98 0.006 90);
   --color-foreground: oklch(0.2 0 90);
@@ -236,6 +329,33 @@
   --radius-sm: 0.375rem;
   --font-sans:
     Lora, 'Iowan Old Style', 'Apple Garamond', Georgia, ui-serif, serif;
+  --font-serif:
+    Lora, 'Iowan Old Style', 'Apple Garamond', Georgia, ui-serif, serif;
+
+  --spacing: 0.28rem;
+
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.25rem;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.5rem;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.8rem;
+  --text-lg: 1.1875rem;
+  --text-lg--line-height: 1.95rem;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 2.05rem;
+  --text-2xl: 1.625rem;
+  --text-2xl--line-height: 2.2rem;
+
+  --leading-relaxed: 1.75;
+  --leading-loose: 2;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --tracking-tight: 0em;
+
+  --shadow-sm: 0 1px 2px 0 oklch(0.2 0 90 / 0.05);
+  --shadow-md: 0 4px 10px -2px oklch(0.2 0 90 / 0.08);
+  --shadow-lg: 0 12px 28px -6px oklch(0.2 0 90 / 0.1);
 }
 .dark {
   --color-background: oklch(0.2 0 90);
@@ -262,7 +382,15 @@
  * iconic #0070F3 blue is reserved for focus rings and links only —
  * never as a button fill (per Geist's "accent is so sparing the system
  * could work without it" philosophy).
- * Source: https://vercel.com/geist/colors */
+ * Source: https://vercel.com/geist/colors
+ *
+ * Typography & density:
+ *   - 14px body, 13px secondary, tight spacing step — the dense, scannable
+ *     rhythm of Vercel docs and dashboards.
+ *   - Geist Mono is provided so `font-mono` utilities pick up the brand
+ *     monospace (used in code blocks, kbd, command palette).
+ *   - Geist's signature shadow is a 0-blur 1px ring (visible "outline"
+ *     rather than a soft drop). */
 @theme {
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.09 0 0);
@@ -285,6 +413,32 @@
   --font-sans:
     'Geist', 'Geist Sans', ui-sans-serif, system-ui, -apple-system,
     BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:
+    'Geist Mono', 'GeistMono', ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, monospace;
+
+  --spacing: 0.22rem;
+
+  --text-xs: 0.6875rem;
+  --text-xs--line-height: 0.95rem;
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.15rem;
+  --text-base: 0.875rem;
+  --text-base--line-height: 1.3rem;
+  --text-lg: 1rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.1875rem;
+  --text-xl--line-height: 1.65rem;
+  --text-2xl: 1.4375rem;
+  --text-2xl--line-height: 1.85rem;
+
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --tracking-tight: -0.014em;
+
+  --shadow-sm: 0 0 0 1px oklch(0 0 0 / 0.06);
+  --shadow-md: 0 0 0 1px oklch(0 0 0 / 0.08), 0 2px 8px -2px oklch(0 0 0 / 0.06);
+  --shadow-lg: 0 0 0 1px oklch(0 0 0 / 0.08), 0 10px 24px -6px oklch(0 0 0 / 0.1);
 }
 .dark {
   --color-background: oklch(0.09 0 0);
@@ -309,7 +463,15 @@
 /* Notion-style — warm-tinted neutrals with a confident blue accent
  * (#2eaadc-ish), Inter typography, compact radii. Suits document-heavy /
  * dashboard surfaces.
- * Reference: https://www.notion.so + community palette write-ups. */
+ * Reference: https://www.notion.so + community palette write-ups.
+ *
+ * Typography & density:
+ *   - 16px body with comfortable 1.6 line-height — Notion's editor
+ *     baseline; readable for long blocks of running text without feeling
+ *     stretched.
+ *   - Standard 0.25rem spacing step (Tailwind default) — Notion is dense
+ *     but not as tight as Vercel/Linear.
+ *   - Shadows are soft and warm-tinted to match the cream-leaning whites. */
 @theme {
   --color-background: oklch(0.99 0.003 80);
   --color-foreground: oklch(0.27 0.005 60);
@@ -332,6 +494,30 @@
   --font-sans:
     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica,
     'Apple Color Emoji', Arial, sans-serif;
+
+  --spacing: 0.25rem;
+
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.4rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.65rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.8rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.85rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+
+  --leading-relaxed: 1.7;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --tracking-tight: -0.01em;
+
+  --shadow-sm: 0 1px 2px 0 oklch(0.4 0.005 60 / 0.04);
+  --shadow-md: 0 4px 8px -2px oklch(0.4 0.005 60 / 0.06);
+  --shadow-lg: 0 10px 24px -6px oklch(0.4 0.005 60 / 0.08);
 }
 .dark {
   --color-background: oklch(0.21 0.003 60);

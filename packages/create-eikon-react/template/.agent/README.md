@@ -32,6 +32,7 @@ Humans editing this project should also follow these rules — they encode the t
     ├── add-i18n-keys/SKILL.md
     ├── add-locale/SKILL.md                <- register a new BCP 47 language across every feature ns
     ├── customize-design/SKILL.md          <- tweak tokens / switch design preset / add a new --design value
+    ├── customize-toast/SKILL.md           <- tweak / switch / add a toast preset (sibling + dispatcher pattern)
     ├── write-component-test/SKILL.md
     └── enable-supabase/SKILL.md          <- path A: factory + Mock impl; path B: direct TanStack Query
 ```
