@@ -1,7 +1,7 @@
 ---
 id: add-feature
 title: Add a new feature module
-description: End-to-end playbook for scaffolding a new feature under src/features/ with its store, components, route, public barrel, and tests.
+description: Pick the right feature shape (pure-client vs data-layer) and scaffold its directory, public barrel, route, and tests.
 keywords: [feature, scaffold, module, new]
 applies_to: ["src/features/**"]
 ---
@@ -14,7 +14,29 @@ Use this skill whenever the user asks for "a new feature", "a new page with its 
 
 The codebase is feature-first (see [.agent/rules/00-architecture.md](../../rules/00-architecture.md)). Every feature owns its components, state, services, route, and tests. Cross-feature imports must go through `features/<name>/index.ts`.
 
-## Step list
+There are **two supported feature shapes**. Pick one BEFORE scaffolding — switching later requires a non-trivial rename.
+
+## Step 0 — pick the shape
+
+```
+Does the feature need data from a backend (Supabase / REST / GraphQL)?
+  └── NO  → Pure-client feature. Follow steps 1–11 below.
+  └── YES ↓
+
+Does the feature need to swap between Mock and real backend at runtime
+(demos with no env vars vs production with Supabase)?
+  └── YES → Use the **add-data-feature** skill instead.
+            See ../add-data-feature/SKILL.md
+  └── NO  → Use TanStack Query for the data layer; follow steps 1–11 below
+            and add a thin `services/<feature>Api.ts` + `hooks/use<X>Query.ts`.
+```
+
+Examples:
+- `counter`, `home`, `settings` (UI toggles) → pure-client.
+- `tasks`, `users`, `comments` (with Mock + Supabase) → use **add-data-feature**.
+- `analytics-dashboard` (fixed Supabase backend, no Mock needed) → pure-client shape + TanStack Query.
+
+## Step list — pure-client feature
 
 1. **Confirm the feature name.** Use kebab-case for the directory (`user-profile`), camelCase for symbols (`useUserProfileStore`). Avoid generic names like `common`, `utils`, `core`.
 
@@ -23,12 +45,12 @@ The codebase is feature-first (see [.agent/rules/00-architecture.md](../../rules
    ```
    src/features/<name>/
    ├── components/
-   ├── hooks/
-   ├── stores/
-   ├── services/
+   ├── hooks/              # only if you have feature-scoped use* hooks
+   ├── stores/             # plural — pure-client shape
+   ├── services/           # only if you have backend calls (with TanStack Query)
    ├── pages/
    ├── routes.tsx
-   ├── types.ts
+   ├── types.ts            # only if you have shared types
    ├── index.ts
    └── __tests__/
        ├── components/
@@ -41,25 +63,54 @@ The codebase is feature-first (see [.agent/rules/00-architecture.md](../../rules
 3. **Define the public API in `index.ts` first.** Decide what the feature is willing to be consumed under. A typical first version:
 
    ```ts
+   /**
+    * @file index.ts
+    * @description Public API barrel for the <Name> feature.
+    */
+
+   // =================================================================================================
+   // Exports
+   // =================================================================================================
+
    export { <name>Routes } from './routes';
    ```
 
-4. **Write `routes.tsx`** with one or more `<Route>` elements:
+4. **Write `routes.tsx`** with lazy-loaded route(s):
 
    ```tsx
-   import { Route } from 'react-router-dom';
-   import { MyPage } from './pages/MyPage';
+   /**
+    * @file routes.tsx
+    * @description Route declarations for the <Name> feature.
+    */
 
-   export const <name>Routes = (
-     <>
-       <Route path="/<path>" element={<MyPage />} />
-     </>
+   // =================================================================================================
+   // Imports
+   // =================================================================================================
+
+   // --- Core Libraries ---
+   import { lazy } from 'react';
+
+   // --- Core-related Libraries ---
+   import { Route } from 'react-router-dom';
+
+   // =================================================================================================
+   // Lazy pages
+   // =================================================================================================
+
+   const <Page> = lazy(() =>
+     import('./pages/<Page>').then((m) => ({ default: m.<Page> })),
    );
+
+   // =================================================================================================
+   // Exports
+   // =================================================================================================
+
+   export const <name>Routes = <Route path="/<path>" element={<<Page> />} />;
    ```
 
-5. **Implement the page** under `pages/MyPage.tsx`. Wire i18n via `useTranslation()` (see `60-i18n.md`); never hard-code copy.
+5. **Implement the page** under `pages/<Page>.tsx` with the v1 file banner (see [rules/10-react-conventions.md](../../rules/10-react-conventions.md)). Wire i18n via `useTranslation()` (see `60-i18n.md`); never hard-code copy.
 
-6. **If the feature has state**, add a Zustand store under `stores/<name>Store.ts` (see [add-zustand-store/SKILL.md](../add-zustand-store/SKILL.md)).
+6. **If the feature has state**, add a Zustand store under `stores/<name>Store.ts` (see [add-zustand-store/SKILL.md](../add-zustand-store/SKILL.md), pure-client variant).
 
 7. **Register the feature in the app router.** In [src/app/router.tsx](../../../src/app/router.tsx):
 
@@ -69,7 +120,7 @@ The codebase is feature-first (see [.agent/rules/00-architecture.md](../../rules
    {<name>Routes}
    ```
 
-   If the feature has a navigation entry, also update the layout (e.g. [src/app/layouts/RootLayout.tsx](../../../src/app/layouts/RootLayout.tsx)).
+   If the feature has a navigation entry, also update the layout (e.g. [src/app/layouts/RootLayout.tsx](../../../src/app/layouts/RootLayout.tsx)'s `navLinks` array).
 
 8. **Add translation keys.** In every file under `src/shared/i18n/locales/`, add a `<name>: { … }` namespace with at least every key the new page uses.
 
@@ -77,19 +128,39 @@ The codebase is feature-first (see [.agent/rules/00-architecture.md](../../rules
    - One test per non-trivial function in `stores/` or `services/`.
    - One render test per page asserting the user-facing contract.
 
-10. **Verify boundaries.** Run `pnpm lint` and `pnpm typecheck`. ESLint's `import/no-restricted-paths` will catch accidental cross-feature imports.
+10. **Apply the v1 file banner** to every new `.ts` / `.tsx` file you created (file header, `// ===` section separators, `// --- Group ---` import sub-headers). See [rules/10-react-conventions.md](../../rules/10-react-conventions.md).
+
+11. **Verify boundaries.** Run `pnpm lint`, `pnpm typecheck`, `pnpm test`. ESLint's `import/no-restricted-paths` will catch accidental cross-feature imports.
+
+## When the feature has a fixed backend (no Mock needed)
+
+Add to the pure-client shape:
+
+```
+src/features/<name>/
+├── services/
+│   └── <name>Api.ts          # thin async functions that call supabase/fetch
+└── hooks/
+    └── use<X>Query.ts        # TanStack Query wrapper
+```
+
+Then consume `useXQuery()` from the page. Don't introduce the `interfaces/implementations/factory/` subfolders — that's the swappable-backends pattern and adds boilerplate the feature doesn't need.
 
 ## Completion checklist
 
+- [ ] Picked the right shape in step 0.
 - [ ] Directory created with only the subdirectories actually needed.
 - [ ] `index.ts` exports exactly the symbols intended for external use.
 - [ ] Route is registered in `src/app/router.tsx`.
 - [ ] No file outside this feature imports from inside it except via `@/features/<name>`.
 - [ ] i18n keys exist in every locale file.
+- [ ] Every new file has the v1 file header (`@file` / `@description`) and the standard `// ===` section separators.
 - [ ] `pnpm lint`, `pnpm typecheck`, and `pnpm test` all pass.
 
 ## Common mistakes
 
+- Picking the swappable-backends shape "to be safe" when the feature has no Mock requirement — that's a lot of boilerplate (5+ extra files) for no gain. Use TanStack Query directly.
+- Picking the pure-client shape when the feature needs Mock+Supabase — refactoring later requires renaming `stores/` → `store/` and splitting the file into selectors + service.
 - Importing another feature's component directly (`@/features/foo/components/Bar`). Use that feature's `index.ts` barrel.
 - Putting cross-feature helpers in this feature's `hooks/` or `services/`. Promote them to `src/shared/`.
 - Hard-coding visible strings instead of using `t('<name>.key')`.

@@ -14,25 +14,45 @@ This codebase is **feature-first**. Each user-facing capability lives in its own
 
 ```
 src/
-├── app/                # Application shell: providers, router, layouts, global pages
+├── app/                          # Application shell: providers, router, layouts, global pages
 │   ├── layouts/
-│   ├── pages/          # Only for shell-owned pages (e.g. NotFound, ErrorBoundary)
+│   ├── pages/                    # Only for shell-owned pages (e.g. NotFound, ErrorBoundary)
 │   ├── providers.tsx
 │   └── router.tsx
 ├── features/
 │   └── <feature>/
-│       ├── components/ # Components used only inside this feature
-│       ├── hooks/      # Feature-scoped use* hooks
-│       ├── stores/     # Zustand stores owned by this feature
-│       ├── services/   # API / data access (calls supabase, fetch, etc.)
-│       ├── pages/      # Route-level components belonging to this feature
-│       ├── routes.tsx  # Optional: <Route> declarations for this feature
-│       ├── types.ts    # Feature-scoped TypeScript types
-│       ├── index.ts    # PUBLIC API barrel — the only file external code may import
-│       └── __tests__/  # Tests mirroring this feature's source layout
-├── shared/             # Cross-feature: ui, lib, hooks, stores, services, i18n, etc.
-└── styles/             # Tailwind v4 entry + global CSS
+│       ├── components/           # Components used only inside this feature
+│       ├── hooks/                # Feature-scoped use* hooks
+│       ├── store/                # ONE Zustand store per feature (vanilla + subscribeWithSelector)
+│       │   └── <feature>Store.ts
+│       ├── selectors/            # Read-side / write-side hooks built on the store
+│       │   ├── basic.ts          #   - thin slice subscriptions
+│       │   ├── computed.ts       #   - derived data
+│       │   ├── memoized.ts       #   - id-keyed lookups, expensive derivations
+│       │   ├── actions.ts        #   - useXActions() bundle of write ops
+│       │   └── index.ts
+│       ├── services/             # API / data access — interface + dual impl + factory
+│       │   ├── interfaces/I<Feature>Service.ts
+│       │   ├── implementations/
+│       │   │   ├── Mock<Feature>Service.ts
+│       │   │   └── Supabase<Feature>Service.ts   # @eikon:feature(supabase) file
+│       │   ├── factory/<feature>ServiceFactory.ts
+│       │   └── <feature>Service.ts               # exported facade — call serviceFactory inside
+│       ├── pages/                # Route-level components belonging to this feature
+│       ├── routes.tsx            # Optional: <Route> declarations for this feature
+│       ├── types.ts              # Feature-scoped TypeScript types
+│       ├── index.ts              # PUBLIC API barrel — the only file external code may import
+│       └── __tests__/            # Tests mirroring this feature's source layout
+├── shared/                       # Cross-feature: ui, lib, hooks, services/config, i18n, etc.
+│   └── services/
+│       └── config/serviceConfig.ts  # Global toggle: useMock (Mock impl) vs real backend
+└── styles/                       # Tailwind v4 entry + global CSS
 ```
+
+The expanded `store / selectors / services` shape exists for any feature that
+swaps between **Mock** and a real backend (Supabase, REST, …). For pure-client
+features with no data layer (e.g. `counter`) the simpler `stores/<x>Store.ts`
+shape from the legacy template is still accepted.
 
 ## Import boundary rules
 
@@ -52,13 +72,32 @@ If an agent finds itself wanting to violate these boundaries, the correct move i
 
 `features/<name>/index.ts` re-exports exactly the symbols this feature is willing to be consumed under. Everything else is private. Adding a new export is an intentional API change — review it as such.
 
-A minimal `index.ts` example:
+A minimal `index.ts` example for a pure-client feature (`counter`):
 
 ```ts
 export { counterRoutes } from './routes';
 export { useCounterStore } from './stores/counterStore';
 export type { CounterState } from './stores/counterStore';
 ```
+
+A full `index.ts` for a data-layer feature (`tasks`):
+
+```ts
+export { tasksRoutes } from './routes';
+export { tasksStore } from './store/tasksStore';
+export {
+  useTasks,
+  useTaskLoading,
+  useTaskInitialized,
+  useTaskCountByStatus,
+  useTaskActions,
+} from './selectors';
+export { tasksService } from './services/tasksService';
+export type { Task, TaskStatus, CreateTaskInput } from './types';
+```
+
+External callers should only ever read this barrel — internal subpaths are
+enforced as private by `eslint-plugin-import`.
 
 ## When to create a new feature vs. extending shared/
 
