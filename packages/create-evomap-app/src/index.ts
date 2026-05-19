@@ -20,6 +20,7 @@ import kleur from 'kleur';
 import { copyTemplate } from './copy-template.js';
 import { initGit } from './init-git.js';
 import { installDeps } from './install-deps.js';
+import { resolveProjectTarget } from './resolve-target.js';
 import {
   DEFAULT_VARIANTS,
   stripFeatures,
@@ -69,23 +70,32 @@ async function run(rawArgv: string[]): Promise<void> {
     process.exit(1);
   }
 
-  const projectName = await promptProjectName(argv.name, argv.yes);
-  const targetDir = path.resolve(process.cwd(), projectName);
+  const rawName = await promptProjectName(argv.name, argv.yes);
+  const { targetDir, projectName } = resolveProjectTarget(
+    rawName,
+    process.cwd()
+  );
+  const intoCwd = targetDir === path.resolve(process.cwd());
 
   if (existsSync(targetDir)) {
     const entries = await readdir(targetDir);
     if (entries.length > 0) {
-      if (argv.yes) {
+      // `--yes .` is a legitimate "scaffold into this (non-empty) directory"
+      // request; only abort non-interactively when the target is a *different*
+      // non-empty directory.
+      if (argv.yes && !intoCwd) {
         cancel(`Aborted: target directory ${targetDir} is not empty.`);
         process.exit(1);
       }
-      const ok = await confirm({
-        message: `${kleur.yellow(targetDir)} is not empty. Continue and merge into it?`,
-        initialValue: false,
-      });
-      if (isCancel(ok) || !ok) {
-        cancel('Aborted: target directory is not empty.');
-        process.exit(1);
+      if (!argv.yes) {
+        const ok = await confirm({
+          message: `${kleur.yellow(targetDir)} is not empty. Continue and merge into it?`,
+          initialValue: false,
+        });
+        if (isCancel(ok) || !ok) {
+          cancel('Aborted: target directory is not empty.');
+          process.exit(1);
+        }
       }
     }
   }
@@ -118,20 +128,22 @@ async function run(rawArgv: string[]): Promise<void> {
 
   await scaffold(opts);
 
-  const cwdRel = path.relative(process.cwd(), opts.targetDir) || '.';
-  const nextSteps = [
-    `${kleur.gray('1.')} ${kleur.cyan(`cd ${cwdRel}`)}`,
-    opts.installDeps
-      ? null
-      : `${kleur.gray('2.')} ${kleur.cyan(`${opts.packageManager} install`)}`,
-    `${kleur.gray(opts.installDeps ? '2.' : '3.')} ${kleur.cyan(
-      `${opts.packageManager} dev`
-    )}`,
-  ]
-    .filter(Boolean)
-    .join('\n');
+  const cwdRel = path.relative(process.cwd(), opts.targetDir);
+  const steps: string[] = [];
+  let stepNum = 1;
+  if (cwdRel !== '') {
+    steps.push(`${kleur.gray(`${stepNum++}.`)} ${kleur.cyan(`cd ${cwdRel}`)}`);
+  }
+  if (!opts.installDeps) {
+    steps.push(
+      `${kleur.gray(`${stepNum++}.`)} ${kleur.cyan(`${opts.packageManager} install`)}`
+    );
+  }
+  steps.push(
+    `${kleur.gray(`${stepNum++}.`)} ${kleur.cyan(`${opts.packageManager} dev`)}`
+  );
 
-  note(nextSteps, 'Next steps');
+  note(steps.join('\n'), 'Next steps');
   outro(kleur.green('Done.') + ' Happy hacking!');
 }
 
@@ -140,16 +152,20 @@ async function promptProjectName(
   yes: boolean
 ): Promise<string> {
   if (fromArgv) {
+    // `.` / `./` are passed through unchanged; resolveProjectTarget() turns
+    // them into "scaffold into cwd" with a derived package name.
+    if (isCwdShortcut(fromArgv)) return fromArgv;
     if (isValidPackageName(fromArgv)) return fromArgv;
     return toValidPackageName(fromArgv);
   }
   if (yes) return 'my-evomap-app';
   const name = await text({
-    message: 'Project name (will also be the directory name):',
+    message: 'Project name (or "." to use the current directory):',
     placeholder: 'my-evomap-app',
     initialValue: 'my-evomap-app',
     validate(value) {
       if (!value) return 'Required.';
+      if (isCwdShortcut(value)) return undefined;
       if (!isValidPackageName(value))
         return 'Must be a valid npm package name (lowercase, dashes, no spaces).';
       return undefined;
@@ -160,6 +176,10 @@ async function promptProjectName(
     process.exit(1);
   }
   return name;
+}
+
+function isCwdShortcut(value: string): boolean {
+  return value === '.' || value === './';
 }
 
 async function resolveFeatures(argv: ParsedArgs): Promise<FeatureFlags> {

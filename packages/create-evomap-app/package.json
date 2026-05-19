@@ -1,6 +1,6 @@
 {
   "name": "create-evomap-app",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Scaffold a new React 19 + Tailwind v4 + animate-ui app with feature-first architecture and AI-agent rules.",
   "license": "MIT",
   "type": "module",
