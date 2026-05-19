@@ -19,6 +19,8 @@ const EXCLUDE = new Set([
   '.vite',
   'coverage',
   '.turbo',
+  // Local build cache produced by packages/preview-site. Never publish.
+  '.preview-cache',
 ]);
 
 async function main() {

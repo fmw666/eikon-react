@@ -14,6 +14,9 @@ const SKIP_NAMES = new Set([
   '.vite',
   '.turbo',
   '.tsbuildinfo',
+  // Defensive: if a stale `.preview-cache/` ever slips into the published
+  // tarball, still don't pour it into the user's scaffolded project.
+  '.preview-cache',
 ]);
 
 /**

@@ -22,9 +22,19 @@ interface AppProvidersProps {
   children: ReactNode;
 }
 
+/**
+ * Strip any trailing slash so react-router accepts the value (it errors on
+ * '/foo/'). When the app is served at the site root (the common case) Vite
+ * sets BASE_URL to '/', so basename ends up as '' which BrowserRouter treats
+ * as the root. When the app is served under a sub-path — e.g. the preview
+ * playground mounts each variant at `/preview/<hash>/` — that prefix is
+ * preserved so internal links resolve correctly.
+ */
+const ROUTER_BASENAME = import.meta.env.BASE_URL.replace(/\/$/, '');
+
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={ROUTER_BASENAME}>
       {/* @evomap:feature(query) begin */}
       <QueryClientProvider client={queryClient}>
         {/* @evomap:feature(query) end */}
