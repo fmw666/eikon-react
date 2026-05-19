@@ -114,8 +114,8 @@ function selectBuildInputs(s: ParamsStore): BuildInputs {
 
 export function PreviewFrame() {
   // Subscribe to ONLY the 5 fields that actually go into the build hash.
-  // Toggling `install` / `git` / `pm` mutates the URL & CLI snippet but
-  // must NOT re-trigger a build effect.
+  // Toggling `pm` mutates the CLI snippet but must NOT re-trigger a build
+  // effect — the package manager only matters at scaffold time.
   const buildInputs = useShellStore(useShallow(selectBuildInputs));
   const setCurrentHash = useUiStore((s) => s.setCurrentHash);
   const reloadKey = useUiStore((s) => s.reloadKey);
@@ -166,7 +166,8 @@ export function PreviewFrame() {
   //
   // We re-run on `buildInputs` (hash-affecting params only) and `templateRev`
   // (the watcher's "source changed, rebuild" signal). Tooling params like
-  // `install` / `git` / `pm` deliberately don't drive this effect.
+  // `pm` deliberately don't drive this effect — they only change the
+  // suggested CLI command, not the rendered project.
   useEffect(() => {
     const seq = ++requestSeq.current;
     let cancelled = false;

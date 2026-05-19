@@ -2,9 +2,9 @@ import { createHash } from 'node:crypto';
 
 /**
  * Inputs that actually affect the built preview bundle. We deliberately
- * exclude tooling-only flags (pm / install / git) because they have no effect
- * on the generated dist/, so two configs that differ only on those flags
- * should share a cache entry.
+ * exclude tooling-only flags (e.g. `pm`) because they have no effect on the
+ * generated dist/, so two configs that differ only on those flags should
+ * share a cache entry.
  */
 export interface BuildInputs {
   supabase: boolean;

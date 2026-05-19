@@ -17,7 +17,7 @@ export type BooleanParam = {
   readonly cliFlag: string;
   readonly label: string;
   /** Axis the param belongs to — used to group controls in the UI. */
-  readonly axis: 'feature' | 'tooling';
+  readonly axis: 'feature';
 };
 
 export type EnumParam = {
@@ -48,22 +48,6 @@ export const PARAMS = [
     cliFlag: 'query',
     label: 'TanStack Query',
     axis: 'feature',
-  },
-  {
-    id: 'install',
-    kind: 'boolean',
-    default: true,
-    cliFlag: 'install',
-    label: 'Install deps',
-    axis: 'tooling',
-  },
-  {
-    id: 'git',
-    kind: 'boolean',
-    default: true,
-    cliFlag: 'git',
-    label: 'git init',
-    axis: 'tooling',
   },
   {
     id: 'pm',

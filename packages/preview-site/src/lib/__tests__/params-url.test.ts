@@ -13,7 +13,6 @@ describe('serializeToQuery', () => {
     const sp = new URLSearchParams(qs);
     expect(sp.get('supabase')).toBe('off');
     expect(sp.get('query')).toBe('on');
-    expect(sp.get('install')).toBe('on');
     expect(sp.get('pm')).toBe('pnpm');
     expect(sp.get('design')).toBe('default');
     expect(sp.get('layout')).toBe('stacked');

@@ -47,7 +47,6 @@ describe('buildCliCommand', () => {
     const state = {
       ...defaultState(),
       supabase: true,
-      install: false,
       pm: 'npm',
       design: 'brutalist',
       layout: 'sidebar',
@@ -55,7 +54,7 @@ describe('buildCliCommand', () => {
     };
     const cmd = buildCliCommand(state);
     expect(cmd).toBe(
-      'npx create-eikon-react <proj_name> --supabase --no-install --pm npm --design brutalist --layout sidebar --ui radix'
+      'npx create-eikon-react <proj_name> --supabase --pm npm --design brutalist --layout sidebar --ui radix'
     );
   });
 });
@@ -70,12 +69,12 @@ describe('buildAgentInstructions', () => {
   });
 
   it('preserves any flags emitted by the command', () => {
-    const state = { ...defaultState(), supabase: true, install: false };
+    const state = { ...defaultState(), supabase: true, query: false };
     const cmd = buildCliCommand(state);
     const out = buildAgentInstructions(cmd);
     expect(out.startsWith('`' + cmd + '`')).toBe(true);
     expect(out).toContain('--supabase');
-    expect(out).toContain('--no-install');
+    expect(out).toContain('--no-query');
   });
 
   it('reminds the agent to relocate .agent/rules and .agent/skills', () => {
