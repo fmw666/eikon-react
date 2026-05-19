@@ -1,6 +1,21 @@
+/**
+ * @file counterStore.test.ts
+ * @description Tests for the counter store's pure logic.
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Third-party Libraries ---
 import { beforeEach, describe, expect, it } from 'vitest';
 
+// --- Relative Imports ---
 import { useCounterStore } from '../../stores/counterStore';
+
+// =================================================================================================
+// Tests
+// =================================================================================================
 
 describe('counterStore', () => {
   beforeEach(() => {

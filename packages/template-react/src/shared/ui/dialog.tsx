@@ -1,9 +1,30 @@
+/**
+ * @file dialog.tsx
+ * @description Animated Dialog primitive that wraps @radix-ui/react-dialog
+ * with motion/react enter/exit transitions.
+ *
+ * Key design choice: we do NOT use `forceMount` to keep the dialog
+ * subtree alive forever — see the comment inside `DialogContent`.
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Core Libraries ---
+import * as React from 'react';
+
+// --- Third-party Libraries ---
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import * as React from 'react';
 
+// --- Absolute Imports ---
 import { cn } from '@/shared/lib/cn';
+
+// =================================================================================================
+// Open-state context
+// =================================================================================================
 
 /**
  * Internal context that exposes the Radix Root's `open` state to descendant
@@ -19,12 +40,14 @@ const DialogContext = React.createContext<DialogContextValue | null>(null);
 function useDialogOpen(): boolean {
   const ctx = React.useContext(DialogContext);
   if (!ctx) {
-    throw new Error(
-      'Dialog subcomponents must be rendered inside <Dialog>.'
-    );
+    throw new Error('Dialog subcomponents must be rendered inside <Dialog>.');
   }
   return ctx.open;
 }
+
+// =================================================================================================
+// Root
+// =================================================================================================
 
 type DialogProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root>;
 
@@ -34,7 +57,7 @@ type DialogProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root>;
  * additionally publishes the resolved `open` value via context for our
  * `DialogContent` exit-animation logic.
  */
-export function Dialog({
+function Dialog({
   open: openProp,
   defaultOpen,
   onOpenChange,
@@ -65,9 +88,13 @@ export function Dialog({
   );
 }
 
-export const DialogTrigger = DialogPrimitive.Trigger;
-export const DialogPortal = DialogPrimitive.Portal;
-export const DialogClose = DialogPrimitive.Close;
+const DialogTrigger = DialogPrimitive.Trigger;
+const DialogPortal = DialogPrimitive.Portal;
+const DialogClose = DialogPrimitive.Close;
+
+// =================================================================================================
+// Motion presets
+// =================================================================================================
 
 const overlayMotion = {
   initial: { opacity: 0 },
@@ -84,6 +111,22 @@ const contentMotion = {
 };
 
 /**
+ * Reduced-motion fallback: present the dialog instantly with no animation.
+ * AnimatePresence still controls mount/unmount, so users get the same
+ * conditional-render semantics — just without the visual transition.
+ */
+const STATIC_MOTION = {
+  initial: false as const,
+  animate: { opacity: 1 },
+  exit: { opacity: 1 },
+  transition: { duration: 0 },
+};
+
+// =================================================================================================
+// Content
+// =================================================================================================
+
+/**
  * Dialog body. Conditionally rendered based on the dialog's open state so
  * the portal subtree fully unmounts on close — this is the standard
  * Radix-with-Framer-Motion pattern.
@@ -94,7 +137,7 @@ const contentMotion = {
  * want for a UI that's closed >99% of the time. AnimatePresence gives
  * us the exit animation without `forceMount`.
  */
-export function DialogContent({
+function DialogContent({
   className,
   children,
   ...props
@@ -139,26 +182,20 @@ export function DialogContent({
   );
 }
 
-/**
- * Reduced-motion fallback: present the dialog instantly with no animation.
- * AnimatePresence still controls mount/unmount, so users get the same
- * conditional-render semantics — just without the visual transition.
- */
-const STATIC_MOTION = {
-  initial: false as const,
-  animate: { opacity: 1 },
-  exit: { opacity: 1 },
-  transition: { duration: 0 },
-};
+// =================================================================================================
+// Structural helpers
+// =================================================================================================
 
-export function DialogHeader({
+function DialogHeader({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('mb-4 flex flex-col gap-1.5', className)} {...props} />;
+  return (
+    <div className={cn('mb-4 flex flex-col gap-1.5', className)} {...props} />
+  );
 }
 
-export function DialogFooter({
+function DialogFooter({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
@@ -173,19 +210,22 @@ export function DialogFooter({
   );
 }
 
-export const DialogTitle = React.forwardRef<
+const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-lg font-semibold leading-none tracking-tight', className)}
+    className={cn(
+      'text-lg font-semibold leading-none tracking-tight',
+      className
+    )}
     {...props}
   />
 ));
 DialogTitle.displayName = 'DialogTitle';
 
-export const DialogDescription = React.forwardRef<
+const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
@@ -196,3 +236,19 @@ export const DialogDescription = React.forwardRef<
   />
 ));
 DialogDescription.displayName = 'DialogDescription';
+
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+};

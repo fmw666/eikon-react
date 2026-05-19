@@ -1,12 +1,38 @@
-import * as TabsPrimitive from '@radix-ui/react-tabs';
-import { motion, useReducedMotion } from 'motion/react';
+/**
+ * @file tabs.tsx
+ * @description Animated Tabs primitive built on @radix-ui/react-tabs +
+ * motion/react shared-layout indicator.
+ *
+ * The active indicator uses `layoutId` so it cross-fades / slides
+ * between triggers; under prefers-reduced-motion the layoutId is
+ * dropped to disable the morph entirely.
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Core Libraries ---
 import * as React from 'react';
 
+// --- Third-party Libraries ---
+import * as TabsPrimitive from '@radix-ui/react-tabs';
+import { motion, useReducedMotion } from 'motion/react';
+
+// --- Absolute Imports ---
 import { cn } from '@/shared/lib/cn';
 
-export const Tabs = TabsPrimitive.Root;
+// =================================================================================================
+// Root
+// =================================================================================================
 
-export const TabsList = React.forwardRef<
+const Tabs = TabsPrimitive.Root;
+
+// =================================================================================================
+// List
+// =================================================================================================
+
+const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
 >(({ className, ...props }, ref) => (
@@ -21,30 +47,39 @@ export const TabsList = React.forwardRef<
 ));
 TabsList.displayName = 'TabsList';
 
+// =================================================================================================
+// Trigger
+// =================================================================================================
+
 interface TabsTriggerProps
   extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> {
   layoutId?: string;
 }
 
-export const TabsTrigger = React.forwardRef<
+const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
   TabsTriggerProps
->(({ className, children, layoutId = 'tabs-active-indicator', ...props }, ref) => (
-  <TabsPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      'relative inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1 text-sm font-medium transition-colors',
-      'data-[state=active]:text-[var(--color-foreground)]',
-      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]',
-      'disabled:pointer-events-none disabled:opacity-50',
-      className
-    )}
-    {...props}
-  >
-    <Indicator layoutId={layoutId} />
-    <span className="relative z-10">{children}</span>
-  </TabsPrimitive.Trigger>
-));
+>(
+  (
+    { className, children, layoutId = 'tabs-active-indicator', ...props },
+    ref
+  ) => (
+    <TabsPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        'relative inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1 text-sm font-medium transition-colors',
+        'data-[state=active]:text-[var(--color-foreground)]',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]',
+        'disabled:pointer-events-none disabled:opacity-50',
+        className
+      )}
+      {...props}
+    >
+      <Indicator layoutId={layoutId} />
+      <span className="relative z-10">{children}</span>
+    </TabsPrimitive.Trigger>
+  )
+);
 TabsTrigger.displayName = 'TabsTrigger';
 
 function Indicator({ layoutId }: { layoutId: string }) {
@@ -68,7 +103,11 @@ function Indicator({ layoutId }: { layoutId: string }) {
   );
 }
 
-export const TabsContent = React.forwardRef<
+// =================================================================================================
+// Content
+// =================================================================================================
+
+const TabsContent = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
 >(({ className, ...props }, ref) => (
@@ -82,3 +121,10 @@ export const TabsContent = React.forwardRef<
   />
 ));
 TabsContent.displayName = 'TabsContent';
+
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export { Tabs, TabsContent, TabsList, TabsTrigger };
+export type { TabsTriggerProps };

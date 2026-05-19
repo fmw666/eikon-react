@@ -1,0 +1,135 @@
+/**
+ * @file TaskForm.tsx
+ * @description Controlled title + description form used by TaskNewPage.
+ *
+ * Stateless: the parent owns the values and submission state. That
+ * keeps the form trivially testable and reusable for edit flows later.
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Core Libraries ---
+import { type FormEvent } from 'react';
+
+// --- Core-related Libraries ---
+// @eikon:feature(i18n) begin
+import { useTranslation } from 'react-i18next';
+// @eikon:feature(i18n) end
+
+// --- Third-party Libraries ---
+import { Loader2 } from 'lucide-react';
+
+// --- Absolute Imports ---
+import { Button } from '@/shared/ui/button';
+
+// =================================================================================================
+// Types
+// =================================================================================================
+
+interface TaskFormProps {
+  title: string;
+  description: string;
+  onTitleChange: (value: string) => void;
+  onDescriptionChange: (value: string) => void;
+  onSubmit: () => void;
+  isSubmitting?: boolean;
+}
+
+// =================================================================================================
+// Constants
+// =================================================================================================
+
+const INPUT_CLASS =
+  'w-full rounded-md border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-sm ' +
+  'text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)] ' +
+  'transition-shadow focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)] ' +
+  'disabled:cursor-not-allowed disabled:opacity-60';
+
+// =================================================================================================
+// Component
+// =================================================================================================
+
+function TaskForm({
+  title,
+  description,
+  onTitleChange,
+  onDescriptionChange,
+  onSubmit,
+  isSubmitting = false,
+}: TaskFormProps) {
+  // @eikon:feature(i18n) begin
+  const { t } = useTranslation();
+  // @eikon:feature(i18n) end
+
+  // @eikon:feature(i18n:fallback) begin
+  // const t = (k: string) =>
+  //   ({
+  //     'tasks.new.form.title': 'Title',
+  //     'tasks.new.form.description': 'Description',
+  //     'tasks.new.form.submit': 'Create task',
+  //     'tasks.new.form.submitting': 'Creating…',
+  //   })[k] ?? k;
+  // @eikon:feature(i18n:fallback) end
+
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (isSubmitting) return;
+    onSubmit();
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-1.5">
+        <label
+          htmlFor="task-title"
+          className="block text-sm font-medium text-[var(--color-foreground)]"
+        >
+          {t('tasks.new.form.title')}
+        </label>
+        <input
+          id="task-title"
+          name="title"
+          required
+          value={title}
+          disabled={isSubmitting}
+          onChange={(e) => onTitleChange(e.target.value)}
+          className={INPUT_CLASS}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <label
+          htmlFor="task-description"
+          className="block text-sm font-medium text-[var(--color-foreground)]"
+        >
+          {t('tasks.new.form.description')}
+        </label>
+        <textarea
+          id="task-description"
+          name="description"
+          rows={4}
+          value={description}
+          disabled={isSubmitting}
+          onChange={(e) => onDescriptionChange(e.target.value)}
+          className={INPUT_CLASS}
+        />
+      </div>
+
+      <Button type="submit" disabled={isSubmitting} className="rounded-full">
+        {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+        {isSubmitting
+          ? t('tasks.new.form.submitting')
+          : t('tasks.new.form.submit')}
+      </Button>
+    </form>
+  );
+}
+
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export { TaskForm };
+export type { TaskFormProps };

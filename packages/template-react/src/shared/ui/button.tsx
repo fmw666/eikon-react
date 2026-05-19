@@ -1,3 +1,22 @@
+/**
+ * @file button.tsx
+ * @description Animated primary Button primitive backed by class-variance-authority.
+ *
+ * Combines:
+ *   - Radix Slot (so `asChild` lets the consumer render a different DOM
+ *     element while inheriting all styling).
+ *   - motion/react for the subtle tap-shrink + hover-lift micro-interaction.
+ *   - `useReducedMotion` to opt out for users with prefers-reduced-motion.
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Core Libraries ---
+import * as React from 'react';
+
+// --- Third-party Libraries ---
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import {
@@ -5,9 +24,13 @@ import {
   useReducedMotion,
   type HTMLMotionProps,
 } from 'motion/react';
-import * as React from 'react';
 
+// --- Absolute Imports ---
 import { cn } from '@/shared/lib/cn';
+
+// =================================================================================================
+// Variants
+// =================================================================================================
 
 const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ' +
@@ -43,16 +66,24 @@ const buttonVariants = cva(
   }
 );
 
+// =================================================================================================
+// Types
+// =================================================================================================
+
 type MotionButtonBaseProps = Omit<HTMLMotionProps<'button'>, 'children'>;
 
-export interface ButtonProps
+interface ButtonProps
   extends MotionButtonBaseProps,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   children?: React.ReactNode;
 }
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+// =================================================================================================
+// Component
+// =================================================================================================
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, children, ...props }, ref) => {
     // Honour OS-level prefers-reduced-motion: skip the hover-lift and
     // tap-shrink animations entirely (CSS hover styles still apply).
@@ -87,5 +118,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 Button.displayName = 'Button';
 
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export { Button };
 // eslint-disable-next-line react-refresh/only-export-components
 export { buttonVariants };
+export type { ButtonProps };

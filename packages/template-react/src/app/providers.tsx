@@ -1,10 +1,34 @@
+/**
+ * @file providers.tsx
+ * @description App-level provider stack.
+ *
+ * Wraps the children with the router (BrowserRouter), optional
+ * TanStack Query provider, and the global toast renderer. Add new
+ * providers HERE rather than in `main.tsx` so the provider order is
+ * a single review point.
+ */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
+
+// --- Core Libraries ---
+import { type ReactNode } from 'react';
+
+// --- Core-related Libraries ---
+import { BrowserRouter } from 'react-router-dom';
+
+// --- Third-party Libraries ---
 // @eikon:feature(query) begin
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // @eikon:feature(query) end
-import { type ReactNode } from 'react';
-import { BrowserRouter } from 'react-router-dom';
 
+// --- Absolute Imports ---
 import { Toaster } from '@/shared/ui/toaster';
+
+// =================================================================================================
+// Constants
+// =================================================================================================
 
 // @eikon:feature(query) begin
 const queryClient = new QueryClient({
@@ -18,10 +42,6 @@ const queryClient = new QueryClient({
 });
 // @eikon:feature(query) end
 
-interface AppProvidersProps {
-  children: ReactNode;
-}
-
 /**
  * Strip any trailing slash so react-router accepts the value (it errors on
  * '/foo/'). When the app is served at the site root (the common case) Vite
@@ -32,7 +52,19 @@ interface AppProvidersProps {
  */
 const ROUTER_BASENAME = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-export function AppProviders({ children }: AppProvidersProps) {
+// =================================================================================================
+// Types
+// =================================================================================================
+
+interface AppProvidersProps {
+  children: ReactNode;
+}
+
+// =================================================================================================
+// Component
+// =================================================================================================
+
+function AppProviders({ children }: AppProvidersProps) {
   return (
     <BrowserRouter basename={ROUTER_BASENAME}>
       {/* @eikon:feature(query) begin */}
@@ -46,3 +78,9 @@ export function AppProviders({ children }: AppProvidersProps) {
     </BrowserRouter>
   );
 }
+
+// =================================================================================================
+// Exports
+// =================================================================================================
+
+export { AppProviders };
