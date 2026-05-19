@@ -171,6 +171,33 @@ function scheduleEviction(): void {
   });
 }
 
+export interface DirStat {
+  readonly name: string;
+  readonly mtime: number;
+}
+
+/**
+ * Pure: decide which cache directories to evict given the current set on
+ * disk. Kept side-effect-free so the LRU policy can be unit-tested in
+ * isolation from the filesystem.
+ *
+ * Returns the names of directories that should be removed, sorted oldest
+ * first. Anything in `keep` is preserved even if it would otherwise be
+ * evicted by age (used to protect inflight builds from having their tree
+ * yanked out from under Vite).
+ */
+export function selectHashesToEvict(
+  dirs: ReadonlyArray<DirStat>,
+  max: number,
+  keep: ReadonlySet<string>
+): string[] {
+  if (dirs.length <= max) return [];
+  // Sort newest-first; everything beyond the first `max` is a candidate.
+  const sorted = [...dirs].sort((a, b) => b.mtime - a.mtime);
+  const candidates = sorted.slice(max);
+  return candidates.filter((d) => !keep.has(d.name)).map((d) => d.name);
+}
+
 /**
  * Keep at most `MAX_CACHED_HASHES` per-variant cache directories on disk,
  * dropping the oldest by mtime. We never delete a directory whose hash is
@@ -193,24 +220,21 @@ async function evictCacheLru(): Promise<void> {
       }
     })
   );
-  const dirs = stats.filter(
-    (d): d is { name: string; mtime: number } => d !== null
+  const dirs = stats.filter((d): d is DirStat => d !== null);
+  const toRemove = selectHashesToEvict(
+    dirs,
+    MAX_CACHED_HASHES,
+    new Set(inflight.keys())
   );
-  if (dirs.length <= MAX_CACHED_HASHES) return;
-
-  dirs.sort((a, b) => b.mtime - a.mtime);
-  const toRemove = dirs
-    .slice(MAX_CACHED_HASHES)
-    .filter((d) => !inflight.has(d.name));
 
   await Promise.all(
-    toRemove.map(async (d) => {
+    toRemove.map(async (name) => {
       try {
-        await rm(path.join(CACHE_ROOT, d.name), {
+        await rm(path.join(CACHE_ROOT, name), {
           recursive: true,
           force: true,
         });
-        errors.delete(d.name);
+        errors.delete(name);
       } catch {
         // Best-effort: a directory might already be gone, or held open
         // briefly by Vite on Windows. We'll retry on the next eviction.
@@ -218,6 +242,28 @@ async function evictCacheLru(): Promise<void> {
     })
   );
 }
+
+/**
+ * Test-only escape hatch for the error map. The error cap is enforced by
+ * a non-exported `capErrors()`; this lets tests prime the map and assert
+ * the cap is honoured without going through the build flow.
+ *
+ * @internal — do NOT import from production code paths.
+ */
+export const __testHooks = {
+  capErrors,
+  setError(hash: string, msg: string): void {
+    errors.set(hash, msg);
+  },
+  countErrors(): number {
+    return errors.size;
+  },
+  clearErrors(): void {
+    errors.clear();
+  },
+  MAX_RETAINED_ERRORS,
+  MAX_CACHED_HASHES,
+};
 
 async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
   const cacheDir = getCacheDir(hash);

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
+import { type ParamsStore } from '@/lib/params-store';
+
 import { useShellStore, useUiStore } from './store';
 
 type BuildStatus = 'ready' | 'building' | 'error';
@@ -94,22 +96,27 @@ function waitForVisible(): Promise<void> {
  *     editing template-react/src bumps the rev, which forces a rebuild and
  *     re-mounts the iframe with the same params + same sub-route.
  */
+/**
+ * Project a `ParamsStore` snapshot down to ONLY the fields that contribute
+ * to the build hash. Lifted out of the component so the function identity
+ * is stable across renders (a fresh closure would defeat the point of
+ * `useShallow` — it compares the *returned* shape).
+ */
+function selectBuildInputs(s: ParamsStore): BuildInputs {
+  return {
+    supabase: !!s.state.supabase,
+    query: !!s.state.query,
+    design: String(s.state.design),
+    layout: String(s.state.layout),
+    ui: String(s.state.ui),
+  };
+}
+
 export function PreviewFrame() {
   // Subscribe to ONLY the 5 fields that actually go into the build hash.
   // Toggling `install` / `git` / `pm` mutates the URL & CLI snippet but
   // must NOT re-trigger a build effect.
-  const buildInputs = useShellStore(
-    useShallow<unknown, BuildInputs>((s) => {
-      const st = (s as { state: Record<string, unknown> }).state;
-      return {
-        supabase: !!st.supabase,
-        query: !!st.query,
-        design: String(st.design),
-        layout: String(st.layout),
-        ui: String(st.ui),
-      };
-    })
-  );
+  const buildInputs = useShellStore(useShallow(selectBuildInputs));
   const setCurrentHash = useUiStore((s) => s.setCurrentHash);
   const reloadKey = useUiStore((s) => s.reloadKey);
   const [build, setBuild] = useState<BuildState | null>(null);
