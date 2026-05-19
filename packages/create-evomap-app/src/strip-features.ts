@@ -321,6 +321,6 @@ async function pruneDependencies(
 }
 
 // Re-export for potential reuse in tests.
-export { stripBlocksForFeature, stripBlocksForVariant };
+export { stripBlocksForFeature, stripBlocksForVariant, runWithConcurrency };
 // Reference exported helpers so unused-export lints don't trigger.
 export const __BLOCK_RE_FOR_TESTS = BLOCK_RE;
