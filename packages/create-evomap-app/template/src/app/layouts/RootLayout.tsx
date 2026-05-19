@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
 import { cn } from '@/shared/lib/cn';
@@ -62,11 +63,28 @@ export function RootLayout() {
         </div>
       </header>
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
-        <Outlet />
+        {/*
+          Shared Suspense boundary for every lazy-loaded page in the app.
+          Keep the fallback intentionally lightweight — it appears for
+          the few hundred ms it takes to fetch the page's chunk and
+          shouldn't introduce its own layout shift.
+        */}
+        <Suspense fallback={<RouteFallback />}>
+          <Outlet />
+        </Suspense>
       </main>
       <footer className="border-t border-[var(--color-border)] py-4 text-center text-xs text-[var(--color-muted-foreground)]">
         Built with EvoMap starter
       </footer>
     </div>
+  );
+}
+
+function RouteFallback() {
+  return (
+    <div
+      aria-hidden="true"
+      className="h-32 w-full animate-pulse rounded-md bg-[var(--color-muted)]/40"
+    />
   );
 }
