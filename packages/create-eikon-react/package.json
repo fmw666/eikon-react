@@ -38,14 +38,14 @@
     "typescript-eslint": "^8.23.0",
     "vitest": "^3.0.5"
   },
-  "homepage": "https://github.com/fmw666/AI-DevKit#readme",
+  "homepage": "https://github.com/fmw666/eikon-react#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fmw666/AI-DevKit.git",
+    "url": "git+https://github.com/fmw666/eikon-react.git",
     "directory": "packages/create-eikon-react"
   },
   "bugs": {
-    "url": "https://github.com/fmw666/AI-DevKit/issues"
+    "url": "https://github.com/fmw666/eikon-react/issues"
   },
   "author": "Eikon",
   "engines": {

@@ -18,7 +18,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * packages/preview-site/server → packages/preview-site → packages → ai-devkit.
+ * packages/preview-site/server → packages/preview-site → packages → <monorepo root>.
  * The cache lives INSIDE template-react so that Node's package resolution
  * automatically walks up to template-react/node_modules when vite runs — no
  * symlink trickery required.

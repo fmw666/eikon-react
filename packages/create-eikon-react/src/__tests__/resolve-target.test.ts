@@ -20,10 +20,10 @@ describe('resolveProjectTarget', () => {
   });
 
   it('normalizes a cwd basename that is not a valid npm package name', () => {
-    const cwd = path.resolve('/tmp/AI-Devkit');
+    const cwd = path.resolve('/tmp/Eikon-React');
     const result = resolveProjectTarget('.', cwd);
     expect(result.targetDir).toBe(cwd);
-    expect(result.projectName).toBe('ai-devkit');
+    expect(result.projectName).toBe('eikon-react');
   });
 
   it('falls back to "app" when the cwd basename normalizes to empty', () => {
