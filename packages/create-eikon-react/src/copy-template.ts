@@ -1,23 +1,13 @@
 import { cp, readFile, rename, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import { TEMPLATE_COPY_SKIP } from './skip-list.js';
+
 interface CopyOptions {
   src: string;
   dest: string;
   projectName: string;
 }
-
-const SKIP_NAMES = new Set([
-  'node_modules',
-  'dist',
-  'coverage',
-  '.vite',
-  '.turbo',
-  '.tsbuildinfo',
-  // Defensive: if a stale `.preview-cache/` ever slips into the published
-  // tarball, still don't pour it into the user's scaffolded project.
-  '.preview-cache',
-]);
 
 /**
  * Copy the template tree to `dest`, then:
@@ -34,7 +24,7 @@ export async function copyTemplate(opts: CopyOptions): Promise<void> {
     recursive: true,
     filter: (source) => {
       const base = path.basename(source);
-      return !SKIP_NAMES.has(base);
+      return !TEMPLATE_COPY_SKIP.has(base);
     },
   });
 

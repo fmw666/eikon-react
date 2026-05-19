@@ -27,7 +27,8 @@ export const DEFAULT_VARIANTS: VariantSelections = {
  *   …code…
  *   // @eikon:feature(name) end
  *
- * Or for whole-file ownership:
+ * Or for whole-file ownership (MUST be the very first line of the file — see
+ * FILE_MARKER_RE below):
  *
  *   // @eikon:feature(name) file
  *
@@ -38,8 +39,16 @@ const BLOCK_RE =
   /[ \t]*(?:\/\/|\/\*|\{\/\*|#|<!--)\s*@eikon:feature\(([^)]+)\)\s*begin\s*(?:\*\/\s*\}?|-->)?[ \t]*\r?\n?/g;
 const BLOCK_END_RE_SRC =
   '[ \\t]*(?:\\/\\/|\\/\\*|\\{\\/\\*|#|<!--)\\s*@eikon:feature\\(NAME\\)\\s*end\\s*(?:\\*\\/\\s*\\}?|-->)?[ \\t]*\\r?\\n?';
+// File-level markers are only honoured on the FIRST LINE of the file. This is
+// the convention used by every real consumer in the template (see
+// `src/shared/supabase/client.ts:1`, `src/shared/i18n/index.ts:1`, …) and the
+// constraint is load-bearing: without it, any documentation file that quotes
+// the marker as a literal — like `.agent/skills/enable-supabase/SKILL.md` —
+// gets silently deleted whenever the corresponding feature is stripped.
+// The regex is intentionally NOT multiline (`m` flag) so `^` anchors to
+// string start, not line start.
 const FILE_MARKER_RE =
-  /^.*@eikon:feature\(([^)]+)\)\s*file.*$/m;
+  /^[ \t]*(?:\/\/|\/\*|\{\/\*|#|<!--)\s*@eikon:feature\(([^)]+)\)\s*file[^\n]*/;
 
 /**
  * Variant grammar — same comment shapes as features but with an `axis=value`
@@ -51,9 +60,11 @@ const FILE_MARKER_RE =
  *
  *   // @eikon:variant(layout=sidebar) file
  *   …whole file kept only when layout === 'sidebar'…
+ *
+ * Same first-line constraint as FILE_MARKER_RE — see comment above for why.
  */
 const VARIANT_FILE_MARKER_RE =
-  /^.*@eikon:variant\(([^=)]+)=([^)]+)\)\s*file.*$/m;
+  /^[ \t]*(?:\/\/|\/\*|\{\/\*|#|<!--)\s*@eikon:variant\(([^=)]+)=([^)]+)\)\s*file[^\n]*/;
 
 const PACKAGE_DEPS_BY_FEATURE: Record<string, string[]> = {
   supabase: ['@supabase/supabase-js'],

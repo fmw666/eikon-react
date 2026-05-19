@@ -2,6 +2,8 @@ import { createHash, type Hash } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
+import { TEMPLATE_COPY_SKIP } from '../../create-eikon-react/src/skip-list';
+
 /**
  * "Template revision" — a short content hash of every file we copy into the
  * per-variant build dir. Mixing this into the cache key gives us automatic
@@ -13,16 +15,11 @@ import path from 'node:path';
  * dev server's file watcher whenever a watched file changes.
  */
 
-const FINGERPRINT_SKIP = new Set([
-  'node_modules',
-  'dist',
-  '.preview-cache',
-  '__tests__',
-  '.git',
-  '.turbo',
-  'coverage',
-  '.vite',
-]);
+// MUST hash exactly the same entries the builder copies, otherwise editing
+// a watched file would either leave a stale cacheDir on disk (wrong
+// fingerprint → no rebuild) or burn rebuilds for changes the build doesn't
+// actually see. We literally reuse the CLI's skip set so the two cannot drift.
+const FINGERPRINT_SKIP = TEMPLATE_COPY_SKIP;
 
 let cached: string | null = null;
 let pending: Promise<string> | null = null;

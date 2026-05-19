@@ -5,6 +5,8 @@ import path from 'node:path';
 
 import { type Connect, type Plugin } from 'vite';
 
+import { TEMPLATE_COPY_SKIP } from '../../create-eikon-react/src/skip-list';
+
 import {
   clearAllCache,
   clearAllErrors,
@@ -63,19 +65,13 @@ function sendJson(res: ServerResponse, body: unknown): void {
   res.end(JSON.stringify(body));
 }
 
-/**
- * Folders we never expose through /api/files — they're either build output,
- * dependency caches, or the orphaned per-variant build trees themselves.
- */
-const FILES_SKIP = new Set([
-  'node_modules',
-  'dist',
-  '.preview-cache',
-  '.git',
-  '.turbo',
-  'coverage',
-  '.vite',
-]);
+// /api/files reads the cacheDir, which already excludes everything in
+// TEMPLATE_COPY_SKIP at copy time. Vite's `viteBuild()` then deposits a
+// fresh `dist/` (and occasionally `.vite/`) inside cacheDir — those names
+// ALSO live in TEMPLATE_COPY_SKIP, which is exactly why reusing the same
+// set here scrubs them in one move and keeps "what the user sees in the
+// preview tree" identical to "what the user has on disk after the CLI".
+const FILES_SKIP = TEMPLATE_COPY_SKIP;
 
 /** Cap individual file responses so we don't OOM the browser on something
  *  weird like a bundled binary that slipped past the extension filter. */

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 import { build as viteBuild } from 'vite';
 
+import { TEMPLATE_COPY_SKIP } from '../../create-eikon-react/src/skip-list';
 import {
   stripFeatures,
   type FeatureFlags,
@@ -42,16 +43,13 @@ export const DEFAULT_INPUTS: BuildInputs = {
   ui: 'animate-ui',
 };
 
-const COPY_SKIP = new Set([
-  'node_modules',
-  'dist',
-  '.preview-cache',
-  '__tests__',
-  '.git',
-  '.turbo',
-  'coverage',
-  '.vite',
-]);
+// The skip list is the single CLI-authored source of truth. By reusing it
+// we guarantee the playground's file tree mirrors what `create-eikon-react`
+// hands the user — minus the same handful of caches and build artefacts.
+// In particular: `__tests__/`, `.agent/`, every `*.config.*`, and every
+// tsconfig flow through to the cacheDir untouched, which is also what the
+// user gets after `pnpm create eikon-react`.
+const COPY_SKIP = TEMPLATE_COPY_SKIP;
 
 export type BuildStatus = 'ready' | 'building' | 'error';
 
