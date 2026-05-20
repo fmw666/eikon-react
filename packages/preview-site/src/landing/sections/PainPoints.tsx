@@ -2,11 +2,11 @@
  * @file PainPoints.tsx
  * @description 4-up "problem → solution" card grid.
  *
- * Each card uses an Aceternity-style "spotlight hover": as the cursor
- * moves over the card, a small brand-tinted radial gradient follows it,
- * subtly lighting up the card without producing any visible glow until
- * the cursor enters. Implemented with two CSS vars updated on
- * `mousemove`, zero React state.
+ * Quiet supporting section. Previously each card carried an
+ * Aceternity-style mousemove spotlight (radial gradient following
+ * the cursor); we removed it so this section doesn't compete with
+ * the PlaygroundSection above for "look here" energy. Cards now
+ * change only border-colour on hover.
  *
  * The icons are loaded from `lucide:` via Iconify — chosen because
  * lucide ships consistent stroke widths and is already a transitive
@@ -14,7 +14,7 @@
  */
 
 import { Icon } from '@iconify/react';
-import { useCallback, type CSSProperties, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 
 import { useI18n, type I18nKey } from '../theme/i18n';
 
@@ -51,7 +51,7 @@ export function PainPoints() {
   const { t } = useI18n();
   return (
     <section
-      className="mx-auto w-full max-w-7xl px-6 py-28 sm:py-32"
+      className="mx-auto w-full max-w-7xl px-6 py-20 sm:py-24"
       aria-labelledby="pain-title"
     >
       <div className="mb-12 text-center">
@@ -95,44 +95,17 @@ function PainCard({
   title: string;
   desc: string;
 }) {
-  // Spotlight: update --sx/--sy via the host element's style on every
-  // mousemove. The pseudo-overlay below reads these vars in a radial
-  // gradient, so the highlight follows the cursor at GPU speed without
-  // re-rendering React.
-  const onMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
-    const rect = el.getBoundingClientRect();
-    el.style.setProperty('--sx', `${e.clientX - rect.left}px`);
-    el.style.setProperty('--sy', `${e.clientY - rect.top}px`);
-  }, []);
-
   return (
-    <div
-      onMouseMove={onMouseMove}
-      style={{ '--sx': '50%', '--sy': '50%' } as CSSProperties}
-      className="group relative overflow-hidden rounded-2xl border border-[var(--border-1)] bg-[var(--surface-1)] p-6 transition hover:border-[var(--border-2)]"
-    >
-      {/* Spotlight overlay */}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{
-          background:
-            'radial-gradient(220px at var(--sx) var(--sy), rgba(139, 92, 246, 0.12), transparent 70%)',
-        }}
-      />
-
-      <div className="relative">
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--border-1)] bg-[var(--surface-2)] text-brand-400">
-          {icon}
-        </span>
-        <h3 className="mt-4 text-base font-semibold text-[var(--fg-1)]">
-          {title}
-        </h3>
-        <p className="mt-2 text-sm leading-relaxed text-[var(--fg-3)]">
-          {desc}
-        </p>
-      </div>
+    <div className="rounded-2xl border border-[var(--border-1)] bg-[var(--surface-1)] p-6 transition-colors duration-200 hover:border-[var(--border-2)]">
+      <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--border-1)] bg-[var(--surface-2)] text-[var(--fg-3)]">
+        {icon}
+      </span>
+      <h3 className="mt-4 text-base font-semibold text-[var(--fg-1)]">
+        {title}
+      </h3>
+      <p className="mt-2 text-sm leading-relaxed text-[var(--fg-3)]">
+        {desc}
+      </p>
     </div>
   );
 }

@@ -37,13 +37,19 @@ interface MockupProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
 
 // =============================================================================
 // Brand palette — keep in one spot so re-skinning is a single diff.
+//
+// Cool slate (Tailwind slate-200…slate-500 range). These are SVG-internal
+// hex strings rather than `var(--color-brand-*)` because SVG attribute
+// values don't resolve CSS custom properties in older Safari/Firefox
+// kernels, and the mockups need to render identically everywhere they
+// appear (landing card, screenshots, share previews, etc.).
 // =============================================================================
 
 const BRAND = {
-  active: '#a78bfa',
-  activeStrong: '#8b5cf6',
-  activeSoft: 'rgba(139, 92, 246, 0.20)',
-  glow: 'rgba(167, 139, 250, 0.55)',
+  active: '#cbd5e1',
+  activeStrong: '#94a3b8',
+  activeSoft: 'rgba(148, 163, 184, 0.18)',
+  glow: 'rgba(203, 213, 225, 0.40)',
 };
 
 const NEUTRAL = {
@@ -80,7 +86,57 @@ export function LaptopMockup({ active, className, ...rest }: MockupProps) {
           <stop offset="0%" stopColor={BRAND.active} />
           <stop offset="100%" stopColor={BRAND.activeStrong} />
         </linearGradient>
+
+        {/* "Powered on" inner backlight — a soft radial wash painted
+            on top of the screen content. Brightens the centre of
+            the display the way an LCD's backlight bleeds when the
+            panel is lit, fading to nothing well before reaching the
+            bezel so the content underneath stays readable. */}
+        <radialGradient
+          id="mock-web-screen-bloom"
+          cx="0.5"
+          cy="0.42"
+          r="0.65"
+        >
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.12" />
+          <stop offset="55%" stopColor="#ffffff" stopOpacity="0.04" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </radialGradient>
+
+        {/* Outer halo blur — used by the rect painted *behind* the
+            laptop body so a softened brand-tinted bloom appears to
+            leak out of the screen and onto the desk surface around
+            it. Filter region is generous (-30%/-30% to 130%/130%)
+            so the blur isn't clipped at the rectangle's bounds. */}
+        <filter
+          id="mock-web-halo-blur"
+          x="-30%"
+          y="-30%"
+          width="160%"
+          height="160%"
+        >
+          <feGaussianBlur stdDeviation="6" />
+        </filter>
       </defs>
+
+      {/* Outer screen halo — sits BEHIND the bezel so the blur
+          spills outside the laptop's silhouette only. Only mounted
+          when the card is the active selection; the
+          `eikon-screen-glow` class fades it in with the bootup
+          keyframe. */}
+      {active && (
+        <rect
+          className="eikon-screen-glow"
+          x="20"
+          y="-2"
+          width="360"
+          height="220"
+          rx="14"
+          fill={BRAND.active}
+          opacity="0.14"
+          filter="url(#mock-web-halo-blur)"
+        />
+      )}
 
       {/* Outer screen body */}
       <rect
@@ -170,6 +226,22 @@ export function LaptopMockup({ active, className, ...rest }: MockupProps) {
         <rect x="276" y="160" width="36" height="6" rx="1" fill={NEUTRAL.faint} />
       </g>
 
+      {/* Inner screen backlight bloom — painted ON TOP of the
+          content so the whole display "lights up", not just the
+          background. Clipped to the screen rect's bounds via the
+          same coordinates as the display surface above. */}
+      {active && (
+        <rect
+          className="eikon-screen-glow"
+          x="38"
+          y="16"
+          width="324"
+          height="184"
+          rx="4"
+          fill="url(#mock-web-screen-bloom)"
+        />
+      )}
+
       {/* Active screen ring */}
       {active && (
         <rect
@@ -216,7 +288,48 @@ export function MonitorMockup({ active, className, ...rest }: MockupProps) {
           <stop offset="0%" stopColor="#10101a" />
           <stop offset="100%" stopColor="#0a0a12" />
         </linearGradient>
+
+        {/* Inner backlight bloom — see `mock-web-screen-bloom` for
+            the full rationale. Cx/Cy nudged slightly upward so the
+            wash centres above the editor's status bar (the focal
+            content row), not on the empty bottom area. */}
+        <radialGradient
+          id="mock-desk-screen-bloom"
+          cx="0.5"
+          cy="0.38"
+          r="0.7"
+        >
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.10" />
+          <stop offset="55%" stopColor="#ffffff" stopOpacity="0.03" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </radialGradient>
+
+        {/* Outer halo blur for the monitor surround. */}
+        <filter
+          id="mock-desk-halo-blur"
+          x="-30%"
+          y="-30%"
+          width="160%"
+          height="160%"
+        >
+          <feGaussianBlur stdDeviation="6" />
+        </filter>
       </defs>
+
+      {/* Outer screen halo — sits behind the monitor body. */}
+      {active && (
+        <rect
+          className="eikon-screen-glow"
+          x="30"
+          y="-4"
+          width="340"
+          height="214"
+          rx="14"
+          fill={BRAND.active}
+          opacity="0.14"
+          filter="url(#mock-desk-halo-blur)"
+        />
+      )}
 
       {/* Monitor body */}
       <rect
@@ -269,18 +382,21 @@ export function MonitorMockup({ active, className, ...rest }: MockupProps) {
         />
       ))}
 
-      {/* Code lines — each row is a sequence of coloured tokens */}
+      {/* Code lines — each row is a sequence of "syntax-highlighted"
+          tokens. We use three slate tints (300 / 400 / 500) instead
+          of literal keyword-purple / string-cyan / number-amber so
+          the editor reads as a styled mono surface, not a rainbow. */}
       <g>
         {/* Line 1 - import */}
-        <rect x="76" y="55" width="30" height="3" rx="0.5" fill="#c084fc" />
+        <rect x="76" y="55" width="30" height="3" rx="0.5" fill="#94a3b8" />
         <rect x="110" y="55" width="60" height="3" rx="0.5" fill={NEUTRAL.text} />
-        <rect x="174" y="55" width="40" height="3" rx="0.5" fill="#94a3b8" />
+        <rect x="174" y="55" width="40" height="3" rx="0.5" fill="#64748b" />
 
         {/* Line 2 - blank-ish */}
 
         {/* Line 3 - keyword + identifier */}
-        <rect x="76" y="77" width="36" height="3" rx="0.5" fill="#c084fc" />
-        <rect x="116" y="77" width="50" height="3" rx="0.5" fill="#7dd3fc" />
+        <rect x="76" y="77" width="36" height="3" rx="0.5" fill="#94a3b8" />
+        <rect x="116" y="77" width="50" height="3" rx="0.5" fill="#cbd5e1" />
         <rect x="170" y="77" width="20" height="3" rx="0.5" fill={NEUTRAL.text} />
 
         {/* Line 4 - active line (brand-coloured when card is active) */}
@@ -291,25 +407,25 @@ export function MonitorMockup({ active, className, ...rest }: MockupProps) {
           width="80"
           height="3"
           rx="0.5"
-          fill={active ? BRAND.active : '#a78bfa'}
-          opacity={active ? 1 : 0.5}
+          fill={active ? BRAND.active : '#64748b'}
+          opacity={active ? 1 : 0.6}
         />
-        <rect x="214" y="88" width="30" height="3" rx="0.5" fill="#fbbf24" />
+        <rect x="214" y="88" width="30" height="3" rx="0.5" fill="#cbd5e1" />
 
         {/* Line 5 */}
-        <rect x="86" y="99" width="56" height="3" rx="0.5" fill="#7dd3fc" />
+        <rect x="86" y="99" width="56" height="3" rx="0.5" fill="#cbd5e1" />
         <rect x="146" y="99" width="34" height="3" rx="0.5" fill={NEUTRAL.text} />
-        <rect x="184" y="99" width="50" height="3" rx="0.5" fill="#fbbf24" />
+        <rect x="184" y="99" width="50" height="3" rx="0.5" fill="#64748b" />
 
         {/* Line 6 */}
         <rect x="86" y="110" width="44" height="3" rx="0.5" fill="#94a3b8" />
 
         {/* Line 7 */}
-        <rect x="76" y="121" width="20" height="3" rx="0.5" fill="#c084fc" />
+        <rect x="76" y="121" width="20" height="3" rx="0.5" fill="#94a3b8" />
         <rect x="100" y="121" width="64" height="3" rx="0.5" fill={NEUTRAL.text} />
 
         {/* Line 8 */}
-        <rect x="86" y="132" width="50" height="3" rx="0.5" fill="#7dd3fc" />
+        <rect x="86" y="132" width="50" height="3" rx="0.5" fill="#cbd5e1" />
         <rect x="140" y="132" width="38" height="3" rx="0.5" fill={NEUTRAL.text} />
 
         {/* Line 9 */}
@@ -335,9 +451,26 @@ export function MonitorMockup({ active, className, ...rest }: MockupProps) {
 
       {/* Bottom status / terminal strip */}
       <rect x="48" y="170" width="304" height="22" fill="#0a0a12" />
-      <rect x="56" y="178" width="6" height="3" rx="0.5" fill="#10b981" />
+      {/* Status indicator — was a vivid green "running" dot; toned
+          down to slate so the editor footer stays monochrome. */}
+      <rect x="56" y="178" width="6" height="3" rx="0.5" fill="#cbd5e1" />
       <rect x="68" y="178" width="90" height="3" rx="0.5" fill={NEUTRAL.textDim} />
       <rect x="166" y="178" width="60" height="3" rx="0.5" fill={NEUTRAL.text} />
+
+      {/* Inner screen backlight bloom — painted over the editor
+          content so the whole display reads as "lit up", not just
+          its background. */}
+      {active && (
+        <rect
+          className="eikon-screen-glow"
+          x="48"
+          y="14"
+          width="304"
+          height="178"
+          rx="3"
+          fill="url(#mock-desk-screen-bloom)"
+        />
+      )}
 
       {/* Active screen ring */}
       {active && (
@@ -391,28 +524,65 @@ export function PhonesMockup({ active, className, ...rest }: MockupProps) {
       {...rest}
     >
       <defs>
+        {/* Phone wallpapers — was a violet-indigo night gradient.
+            Now uses dark slate stops so the phones harmonise with
+            the rest of the mono palette. The two gradients keep
+            their slight value variance so back/front phones still
+            read as two separate devices. */}
         <linearGradient id="mock-mob-wall1" x1="0.2" y1="0" x2="0.8" y2="1">
-          <stop offset="0%" stopColor="#2e1065" />
-          <stop offset="50%" stopColor="#1e1b4b" />
-          <stop offset="100%" stopColor="#0a0a1f" />
+          <stop offset="0%" stopColor="#1e293b" />
+          <stop offset="50%" stopColor="#0f172a" />
+          <stop offset="100%" stopColor="#020617" />
         </linearGradient>
         <linearGradient id="mock-mob-wall2" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#1e1b4b" />
-          <stop offset="100%" stopColor="#0c0c1c" />
+          <stop offset="0%" stopColor="#172033" />
+          <stop offset="100%" stopColor="#0a0d18" />
         </linearGradient>
+
+        {/* Inner backlight bloom for each phone — see Laptop's
+            `mock-web-screen-bloom` for the full rationale. Shared
+            by both phones because at this scale the centre offset
+            doesn't differ enough between lock-screen and home-grid
+            to warrant two separate gradients. */}
+        <radialGradient
+          id="mock-mob-screen-bloom"
+          cx="0.5"
+          cy="0.42"
+          r="0.7"
+        >
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.14" />
+          <stop offset="55%" stopColor="#ffffff" stopOpacity="0.04" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </radialGradient>
+
+        {/* Outer halo blur for the phone surround. Phones are
+            smaller targets than the laptop/monitor, so we use a
+            slightly tighter blur (stdDev 5 vs. 6) — keeps the
+            spill from washing across the gap between the two
+            handsets, which would read as "one big blob" rather
+            than two lit devices. */}
+        <filter
+          id="mock-mob-halo-blur"
+          x="-30%"
+          y="-30%"
+          width="160%"
+          height="160%"
+        >
+          <feGaussianBlur stdDeviation="5" />
+        </filter>
       </defs>
 
       {/* Back phone — slightly rotated, partially hidden behind the front phone.
         Shows a lockscreen with time. */}
       <g transform="translate(218 12) rotate(6 60 110)">
-        <Phone wallFill="url(#mock-mob-wall1)">
+        <Phone wallFill="url(#mock-mob-wall1)" active={active}>
           <PhoneLockscreenChildren active={active} />
         </Phone>
       </g>
 
       {/* Front phone — straight, dominant. Shows the home grid. */}
       <g transform="translate(98 16) rotate(-3 60 110)">
-        <Phone wallFill="url(#mock-mob-wall2)">
+        <Phone wallFill="url(#mock-mob-wall2)" active={active}>
           <PhoneHomescreenChildren active={active} />
         </Phone>
       </g>
@@ -424,16 +594,47 @@ export function PhonesMockup({ active, className, ...rest }: MockupProps) {
  * Shared phone chassis — rounded rectangle with bezel, dynamic island,
  * status bar bones, and the home indicator. Children render the
  * screen-specific content (lockscreen vs. home grid).
+ *
+ * When `active` is true the phone gets two "powered on" overlays:
+ *
+ *   - An outer halo (Gaussian-blurred slate rect behind the bezel)
+ *     that lets light appear to spill out of the screen onto the
+ *     surrounding canvas.
+ *   - An inner backlight bloom (soft radial wash painted on top of
+ *     the wallpaper + content) so the whole display reads as lit,
+ *     not just its frame.
+ *
+ * Both overlays share the `eikon-screen-glow` class which fades
+ * them in over 500ms with a small overshoot — the "click — lit up"
+ * power-on cue when the visitor selects the Mobile target card.
  */
 function Phone({
   children,
   wallFill,
+  active,
 }: {
   children: ReactNode;
   wallFill: string;
+  active: boolean;
 }) {
   return (
     <g>
+      {/* Outer screen halo — behind the bezel so the blur spills
+          outside the phone's silhouette only. */}
+      {active && (
+        <rect
+          className="eikon-screen-glow"
+          x="-8"
+          y="-8"
+          width="136"
+          height="236"
+          rx="24"
+          fill={BRAND.active}
+          opacity="0.14"
+          filter="url(#mock-mob-halo-blur)"
+        />
+      )}
+
       {/* Bezel */}
       <rect
         x="0"
@@ -464,6 +665,23 @@ function Phone({
         fill="#e5e7eb"
         opacity="0.7"
       />
+
+      {/* Inner backlight bloom — painted last so it sits ON TOP of
+          the lockscreen / home-grid content the children rendered.
+          The whole display, including icons + widget cards, gets
+          the soft glow wash. */}
+      {active && (
+        <rect
+          className="eikon-screen-glow"
+          x="6"
+          y="6"
+          width="108"
+          height="208"
+          rx="14"
+          fill="url(#mock-mob-screen-bloom)"
+          pointerEvents="none"
+        />
+      )}
     </g>
   );
 }
@@ -527,25 +745,32 @@ function PhoneLockscreenChildren({ active }: { active: boolean }) {
  * read as "your app", and pulses softly when the card is active.
  */
 function PhoneHomescreenChildren({ active }: { active: boolean }) {
-  // App icon palette: a mix of muted tones so the brand-coloured "your
-  // app" icon stands out without being the only thing visible.
+  // App icon palette: monochromatic slate at four lightness stops,
+  // cycled so the grid has visual variety without painting any one
+  // tile in a saturated colour. Reads as "muted UI placeholders"
+  // (intentional, on-brand) rather than a real iOS rainbow.
+  //
+  // The "your app" hero slot uses a lighter slate (BRAND.active)
+  // plus a ring stroke when active, so it remains clearly
+  // distinguishable against this darker palette without us needing
+  // to drop a coloured pop in.
   const palette = [
-    '#ef4444',
-    '#f97316',
-    '#eab308',
-    '#10b981',
-    '#06b6d4',
-    '#3b82f6',
-    '#a855f7',
-    '#ec4899',
-    '#22c55e',
-    '#0ea5e9',
-    '#f59e0b',
-    '#8b5cf6',
-    '#84cc16',
-    '#14b8a6',
-    '#d946ef',
-    '#fb7185',
+    '#475569',
+    '#334155',
+    '#64748b',
+    '#3f3f46',
+    '#52525b',
+    '#475569',
+    '#3f3f46',
+    '#334155',
+    '#64748b',
+    '#475569',
+    '#334155',
+    '#52525b',
+    '#3f3f46',
+    '#475569',
+    '#334155',
+    '#64748b',
   ];
   const ROWS = 4;
   const COLS = 4;
@@ -574,7 +799,7 @@ function PhoneHomescreenChildren({ active }: { active: boolean }) {
               width={CELL}
               height={CELL}
               rx="6"
-              fill={isHero ? BRAND.activeStrong : palette[i % palette.length]}
+              fill={isHero ? BRAND.active : palette[i % palette.length]}
               opacity={isHero ? (active ? 1 : 0.85) : 0.7}
             />
             {isHero && active && (

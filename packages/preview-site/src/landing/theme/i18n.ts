@@ -73,6 +73,7 @@ const DICT = {
     'platform.mobile.title': 'Mobile',
     'platform.mobile.desc': 'Capacitor · iOS & Android',
 
+    'playground.eyebrow': '在线试玩',
     'params.title': '配置你的技术栈',
     'params.subtitle': '所有选项都会即时反映到下方预览与命令中',
     'params.section.product': '产品形态',
@@ -214,6 +215,7 @@ const DICT = {
     'platform.mobile.title': 'Mobile',
     'platform.mobile.desc': 'Capacitor · iOS & Android',
 
+    'playground.eyebrow': 'Live playground',
     'params.title': 'Configure your stack',
     'params.subtitle':
       'Every choice updates the preview and the command in real time',

@@ -99,8 +99,21 @@ export function CtaButton(props: CtaButtonProps) {
   // outline (width / offset / colour) and shadow via Tailwind classes
   // only, so per-variant `hover:*` modifiers can override the resting
   // state without losing to a higher-priority inline style.
+  //
+  // `eikon-shimmer-hover` adds an extra diagonal light streak that
+  // crosses the button on hover (800ms sweep). It composes cleanly
+  // with the existing word-reveal + halo-tightening hover cues
+  // because all three target different visual layers:
+  //
+  //   - shimmer  → an inset ::before with mix-blend plus-lighter
+  //   - reveal   → child <span> translateY
+  //   - halo     → outline-offset / outline-width
+  //
+  // So enabling the streak doesn't fight the other two for the same
+  // pixels and adds a "the button has weight" feeling without
+  // re-tuning the existing animation.
   const blockClasses = [
-    'group/cta relative inline-flex items-center gap-2',
+    'eikon-shimmer-hover group/cta relative inline-flex items-center gap-2',
     'rounded-[6px] px-5 py-2.5',
     'text-[11px] font-bold uppercase leading-none tracking-[0.14em]',
     'no-underline cursor-pointer select-none',

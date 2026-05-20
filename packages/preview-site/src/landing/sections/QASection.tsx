@@ -70,7 +70,7 @@ export function QASection() {
 
   return (
     <section
-      className="mx-auto w-full max-w-6xl px-6 py-32 sm:py-40"
+      className="mx-auto w-full max-w-6xl px-6 py-20 sm:py-24"
       aria-labelledby="qa-title"
     >
       <div className="grid grid-cols-1 gap-x-20 gap-y-14 lg:grid-cols-[1.5fr_1fr]">
@@ -90,7 +90,7 @@ export function QASection() {
 
           <h2
             id="qa-title"
-            className="mt-5 max-w-[14ch] text-4xl font-semibold leading-[1.05] tracking-tight text-[var(--fg-1)] sm:text-5xl"
+            className="mt-5 max-w-[14ch] text-3xl font-semibold leading-[1.05] tracking-tight text-[var(--fg-1)] sm:text-4xl"
           >
             {t('qa.title')}
           </h2>
@@ -156,16 +156,15 @@ function QAItem({
 }) {
   return (
     <li className="group/qa relative border-b border-[var(--border-1)] last:border-b-0">
-      {/* Active-state left rail. Positioned outside the button so
-          the rail sits flush with the answer copy below, anchoring
-          the entire open block — not just the question row. */}
+      {/* Active-state left rail. Quiet 1-pixel marker — was a brand
+          line with a soft halo, dropped the halo so this section
+          stays calm relative to the playground section's accent
+          chrome above. */}
       <span
         aria-hidden="true"
         className={
-          'pointer-events-none absolute left-0 top-0 bottom-0 w-px bg-brand-500 transition-opacity duration-300 ' +
-          (isOpen
-            ? 'opacity-100 shadow-[0_0_10px_var(--accent-glow)]'
-            : 'opacity-0')
+          'pointer-events-none absolute left-0 top-0 bottom-0 w-px bg-[var(--fg-3)] transition-opacity duration-300 ' +
+          (isOpen ? 'opacity-100' : 'opacity-0')
         }
       />
 

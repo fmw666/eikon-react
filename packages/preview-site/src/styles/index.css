@@ -8,21 +8,28 @@
  * via `:root` vs `.dark` selectors so a single `class="dark"` toggle on
  * <html> drives the entire palette without re-running JS.
  *
- * Brand: violet-500 (#8b5cf6). Picked once, used in CTAs, focus rings,
- * platform-picker selected state, and prompt code accents.
+ * Brand: cool slate (OKLCH hue 235, low chroma 0.04–0.07). Picked for a
+ * minimal, designed feel — sophisticated enough to differentiate from
+ * the neutral foreground/border ramps, restrained enough to read as
+ * "ink" rather than "tinted UI". Used in CTAs, focus rings, platform-
+ * picker selected state, and prompt code accents.
+ *
+ * If you want pure monochrome instead, drop every `0.0X` chroma here
+ * to `0` (hue becomes irrelevant) — none of the consuming code needs
+ * to change, the ramp just collapses to neutral gray.
  * =========================================================================== */
 
 @theme {
-  --color-brand-50: oklch(0.97 0.02 290);
-  --color-brand-100: oklch(0.94 0.04 290);
-  --color-brand-200: oklch(0.88 0.08 290);
-  --color-brand-300: oklch(0.8 0.13 290);
-  --color-brand-400: oklch(0.71 0.18 290);
-  --color-brand-500: oklch(0.62 0.22 290);
-  --color-brand-600: oklch(0.55 0.24 290);
-  --color-brand-700: oklch(0.47 0.22 290);
-  --color-brand-800: oklch(0.39 0.18 290);
-  --color-brand-900: oklch(0.3 0.13 290);
+  --color-brand-50: oklch(0.98 0.005 235);
+  --color-brand-100: oklch(0.95 0.012 235);
+  --color-brand-200: oklch(0.9 0.02 235);
+  --color-brand-300: oklch(0.85 0.04 235);
+  --color-brand-400: oklch(0.75 0.05 235);
+  --color-brand-500: oklch(0.65 0.06 235);
+  --color-brand-600: oklch(0.55 0.06 235);
+  --color-brand-700: oklch(0.45 0.05 235);
+  --color-brand-800: oklch(0.35 0.04 235);
+  --color-brand-900: oklch(0.27 0.03 235);
 
   --font-sans:
     'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
@@ -51,7 +58,9 @@
   --fg-2: #334155;
   --fg-3: #64748b;
   --fg-4: #94a3b8;
-  --accent-glow: rgba(139, 92, 246, 0.15);
+  /* Subtle slate glow (slate-500 at low alpha). Reads as "this element
+     emits a tiny halo" without painting it any specific colour. */
+  --accent-glow: rgba(100, 116, 139, 0.18);
 }
 
 .dark {
@@ -66,7 +75,9 @@
   --fg-2: #d4d4d8;
   --fg-3: #a1a1aa;
   --fg-4: #71717a;
-  --accent-glow: rgba(139, 92, 246, 0.25);
+  /* Dark-mode glow uses a lighter slate so it actually shows up against
+     the near-black surfaces. Still alpha-driven so it composites cheaply. */
+  --accent-glow: rgba(203, 213, 225, 0.22);
 }
 
 @theme inline {
@@ -238,15 +249,19 @@ body {
 
 .eikon-active-border {
   border: 1px solid transparent;
+  /* Single-hue slate gradient: three lightness stops along the same
+     cool hue. Sliding it horizontally reads as a soft "ink shimmer"
+     instead of the previous rainbow — keeps the active card alive
+     without painting it in a saturated colour. */
   background:
     linear-gradient(var(--surface-1), var(--surface-1)) padding-box,
     linear-gradient(
         90deg,
-        #a78bfa,
-        #c084fc,
-        #ec4899,
-        #8b5cf6,
-        #a78bfa
+        var(--color-brand-700),
+        var(--color-brand-300),
+        var(--color-brand-500),
+        var(--color-brand-300),
+        var(--color-brand-700)
       )
       border-box;
   background-size:
@@ -256,6 +271,285 @@ body {
     0 0,
     0 0;
   animation: eikon-gradient-shift 5s linear infinite;
+}
+
+/* ------------------------------------------------------------------
+ * eikon-conic-border — rotating conic gradient frame
+ *
+ * The "signature" animation on the home page: the playground frame's
+ * border is a 1px ring that slowly rotates its bright spot once
+ * every 12 seconds, giving the focal section a quiet "this is
+ * alive" pulse without painting it any specific colour.
+ *
+ * Technique:
+ *
+ *   1. `@property --eikon-angle` registers the custom property as a
+ *      first-class CSS angle. Without this, browsers treat custom
+ *      properties as opaque strings and refuse to interpolate them
+ *      smoothly — the conic gradient would snap rather than rotate.
+ *      `@property` is supported in Chrome 85+, Safari 16.4+,
+ *      Firefox 128+; on older runtimes the angle simply stays at
+ *      its `initial-value` and we degrade to a static gradient ring.
+ *
+ *   2. Two backgrounds layered via `background-clip`: the
+ *      `padding-box` layer paints the inner surface; the
+ *      `border-box` layer paints the conic gradient that bleeds
+ *      through the 1px transparent border. The conic uses
+ *      `from var(--eikon-angle)`, so animating that variable
+ *      rotates the bright spot around the rectangle's perimeter.
+ *
+ *   3. Three slate stops at increasing lightness create a single
+ *      "bright crest" that sweeps around the frame. Pure mono — no
+ *      coloured rainbow, on-brand with the rest of the page.
+ *
+ *  ┌── prefers-reduced-motion ───────────────────────────────────┐
+ *  │ Disabled entirely so visitors who turned motion off get a   │
+ *  │ static brand ring (still visually present, just not        │
+ *  │ animated).                                                 │
+ *  └─────────────────────────────────────────────────────────────┘
+ * ------------------------------------------------------------------ */
+
+@property --eikon-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes eikon-conic-spin {
+  to {
+    --eikon-angle: 360deg;
+  }
+}
+
+.eikon-conic-border {
+  position: relative;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface-1), var(--surface-1)) padding-box,
+    conic-gradient(
+        from var(--eikon-angle),
+        var(--color-brand-700) 0deg,
+        var(--color-brand-300) 90deg,
+        var(--color-brand-500) 180deg,
+        var(--color-brand-300) 270deg,
+        var(--color-brand-700) 360deg
+      )
+      border-box;
+  animation: eikon-conic-spin 12s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-conic-border {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-grid-drift — slowly drifting dot/grid background.
+ *
+ * Pairs with any element that already paints a repeating background
+ * image (e.g. radial-dots, mesh grid). The animation translates
+ * `background-position` along the diagonal by exactly one tile, so
+ * the pattern always re-aligns on a tile boundary — the eye reads
+ * the motion as a slow scroll, never as "the dots are spasming".
+ *
+ * The tile size is parameterised via `--eikon-grid-step` (defaults
+ * to 14px to match the radial dot grids used inside the playground
+ * section). Consumers using bigger tiles (e.g. Hero's 40px line
+ * grid) override it inline.
+ *
+ * `background-position` is GPU-cheap (it just nudges the texture
+ * sample origin; the bitmap itself is rasterised once). Use this
+ * generously without worrying about performance.
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-grid-drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: var(--eikon-grid-step, 14px)
+      var(--eikon-grid-step, 14px);
+  }
+}
+
+.eikon-grid-drift {
+  animation: eikon-grid-drift 18s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-grid-drift {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-shimmer-hover — diagonal light sweep on hover
+ *
+ * A single bright streak crosses the element from left to right
+ * over 800ms when the host element (or its `group` parent) is
+ * hovered. At rest the streak sits off-canvas (left), so there's
+ * zero visual overhead unless the visitor actually points at the
+ * element.
+ *
+ * Implementation notes:
+ *
+ *   - The streak is a linear-gradient on the element's *own*
+ *     ::before pseudo, not a separate DOM node, so we don't bloat
+ *     React trees per card.
+ *   - `pointer-events: none` keeps the streak from intercepting
+ *     clicks. `mix-blend-mode: plus-lighter` makes it composite
+ *     additively, so it brightens whatever the underlying card's
+ *     colour is, regardless of light/dark mode.
+ *   - The host must be `position: relative` + `overflow: hidden`.
+ *     We don't enforce those in the utility (it'd interfere with
+ *     elements that already need a specific position); component
+ *     code adds them where appropriate.
+ *   - For elements where the streak should run when an *ancestor*
+ *     is hovered (e.g. a card whose hover affects multiple
+ *     children), wrap the parent in `group` and use the
+ *     `[.group:hover_&]::before` selector — see component code.
+ * ------------------------------------------------------------------ */
+
+.eikon-shimmer-hover {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.eikon-shimmer-hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(203, 213, 225, 0.18) 48%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(203, 213, 225, 0.18) 52%,
+    transparent 70%
+  );
+  transform: translateX(-110%);
+  transition: transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  mix-blend-mode: plus-lighter;
+  z-index: 1;
+}
+
+.eikon-shimmer-hover:hover::before,
+.group:hover .eikon-shimmer-hover::before {
+  transform: translateX(110%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-shimmer-hover::before {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-screen-bootup — "the device just powered on" animation
+ *
+ * Applied to the inner-glow + outer-halo overlays that wrap each
+ * device mockup's screen rectangle in the PlatformPicker. When a
+ * card becomes the active selection, React mounts the glow nodes
+ * and this keyframe runs once: opacity ramps from 0 to a small
+ * overshoot (~1.05) at the 30% mark, then settles to 1.0.
+ *
+ * Why the overshoot:
+ *
+ *   A flat 0→1 linear fade reads as "this UI element appeared".
+ *   A tiny overshoot reads as a CRT/OLED powering up — the panel
+ *   briefly brightens past steady-state before locking in. That
+ *   second reading is the whole point of the effect: visitors
+ *   should feel a "click—lit up" beat the instant they pick a
+ *   target, not just see a colour change.
+ *
+ * Why forwards fill-mode (via the keyframe ending at 100%):
+ *
+ *   Without it, the glow elements would snap back to opacity 0
+ *   after the animation completes. With it, they stay lit for as
+ *   long as the card remains active. When the visitor picks a
+ *   different card, React unmounts the glow nodes entirely — the
+ *   screen goes dark instantly, which is the right "power-off"
+ *   read (no fade-out needed; flipping between cards then feels
+ *   like flipping a physical switch).
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-screen-bootup {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 1.05;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.eikon-screen-glow {
+  animation: eikon-screen-bootup 500ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-screen-glow {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-cursor-breath — terminal cursor with a "breathing" cadence
+ *
+ * Used by the Hero's decorative terminal teaser (`npx create-eikon-
+ * react .`) to give the trailing block cursor a calm, sine-like
+ * pulse instead of the harsh square-wave blink of a classic VT.
+ *
+ * Rhythm:
+ *
+ *   0%   opacity 0.25   ← "exhale" — cursor is barely visible
+ *   50%  opacity 1.00   ← "inhale" — cursor is fully present
+ *   100% opacity 0.25
+ *
+ *   Total period 1.4s, `ease-in-out` so the transitions in and
+ *   out of full opacity slow down — the bar lingers at both ends,
+ *   which is what makes the rhythm read as breathing rather than a
+ *   linear sawtooth fade.
+ *
+ * Why not a hard blink:
+ *
+ *   The terminal teaser sits in the Hero corner as a decoration,
+ *   not as a real input. A hard 1/0 blink (the classic terminal
+ *   look) is mechanical and reads as "waiting for keystrokes" —
+ *   it would grab attention away from the slogan. A breathing
+ *   cursor reads as "this thing is alive but at rest", which is
+ *   the right cue for a decorative teaser.
+ *
+ * The `0.25` floor (rather than 0) keeps the cursor *always*
+ * visible, just dimmer at the exhale — accessibility win for
+ * users who'd otherwise lose the cursor between full-off frames.
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-cursor-breath {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.eikon-cursor-breath {
+  animation: eikon-cursor-breath 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-cursor-breath {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 /* Soft pulse for the "SELECTED" badge dot and the active mockup's

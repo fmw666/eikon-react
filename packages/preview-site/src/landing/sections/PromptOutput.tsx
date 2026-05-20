@@ -200,12 +200,21 @@ function CopyButton({
         ? labels.failed
         : labels.copy;
 
+  // `eikon-shimmer-hover` adds a diagonal light streak across the
+  // button on hover. We skip it for the `copied` / `failed` states
+  // because those are status flashes — the visitor isn't pointing at
+  // the button to copy again, they're reading the outcome, and a
+  // light sweep crossing a green/red status pill would read as a
+  // glitch rather than a polish cue.
+  const showShimmer = state === 'idle';
+
   return (
     <button
       type="button"
       onClick={onCopy}
       aria-live="polite"
       className={
+        (showShimmer ? 'eikon-shimmer-hover ' : '') +
         'inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition ' +
         (state === 'copied'
           ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'

@@ -34,6 +34,8 @@
  *   stops the visitor's eye competing between three pulsing layers.
  */
 
+import type { CSSProperties } from 'react';
+
 import { CtaButton } from '../components/CtaButton';
 import { useI18n } from '../theme/i18n';
 
@@ -66,19 +68,28 @@ export function Hero({
           to nothing well before it reaches the rest of the text.
           Acts as a "kerning mark" — present enough to give the eye
           something to anchor on, gone before it competes with the
-          slogan. */}
+          slogan.
+
+          `eikon-grid-drift` adds a slow background-position drift
+          along the diagonal — the grid never reads as moving on a
+          quick glance, but on any pause >2s the visitor's eye
+          catches the lines crawling. Adds "alive" without painting
+          the hero in extra colour or motion. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.55] dark:opacity-[0.35]"
-        style={{
-          backgroundImage:
-            'linear-gradient(to right, var(--border-1) 1px, transparent 1px), linear-gradient(to bottom, var(--border-1) 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
-          maskImage:
-            'radial-gradient(ellipse 18% 26% at 8% 18%, black 15%, transparent 60%)',
-          WebkitMaskImage:
-            'radial-gradient(ellipse 18% 26% at 8% 18%, black 15%, transparent 60%)',
-        }}
+        className="eikon-grid-drift pointer-events-none absolute inset-0 -z-10 opacity-[0.55] dark:opacity-[0.35]"
+        style={
+          {
+            backgroundImage:
+              'linear-gradient(to right, var(--border-1) 1px, transparent 1px), linear-gradient(to bottom, var(--border-1) 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+            maskImage:
+              'radial-gradient(ellipse 18% 26% at 8% 18%, black 15%, transparent 60%)',
+            WebkitMaskImage:
+              'radial-gradient(ellipse 18% 26% at 8% 18%, black 15%, transparent 60%)',
+            '--eikon-grid-step': '40px',
+          } as CSSProperties
+        }
       />
 
       {/* Content — single left-aligned text column with a free-floating
@@ -171,7 +182,7 @@ export function Hero({
           <button
             type="button"
             onClick={onFindIt}
-            className="group inline-flex items-center gap-2 rounded-xl border border-[var(--border-1)] bg-[var(--surface-1)]/80 px-4 py-3 text-sm text-[var(--fg-2)] backdrop-blur transition hover:border-brand-500/40 hover:bg-[var(--surface-2)] hover:text-[var(--fg-1)]"
+            className="eikon-shimmer-hover group inline-flex items-center gap-2 rounded-xl border border-[var(--border-1)] bg-[var(--surface-1)]/80 px-4 py-3 text-sm text-[var(--fg-2)] backdrop-blur transition hover:border-brand-500/40 hover:bg-[var(--surface-2)] hover:text-[var(--fg-1)]"
             aria-label={t('hero.findIt')}
           >
             <span className="font-mono">{t('hero.findIt')}</span>
@@ -206,7 +217,7 @@ function GithubIcon({ className }: { className: string }) {
  *                    values rather than theme tokens because the dots
  *                    should read as "this is a terminal" regardless of
  *                    light/dark mode.
- *   $ <command>    ← prompt sigil in brand violet + the actual
+ *   $ <command>    ← prompt sigil in brand slate + the actual
  *                    command in the standard mono token, no syntax
  *                    highlighting (a single `npx` line doesn't need it
  *                    and any colour beyond the sigil would compete
@@ -224,7 +235,7 @@ function GithubIcon({ className }: { className: string }) {
 function TerminalCard({ command }: { command: string }) {
   return (
     <div
-      className="flex items-center gap-3 rounded-xl border border-[var(--border-1)] bg-[var(--surface-2)]/85 px-4 py-3 shadow-lg shadow-black/5 backdrop-blur dark:shadow-black/40"
+      className="eikon-shimmer-hover flex items-center gap-3 rounded-xl border border-[var(--border-1)] bg-[var(--surface-2)]/85 px-4 py-3 shadow-lg shadow-black/5 backdrop-blur dark:shadow-black/40"
       role="img"
       aria-label={`Terminal: ${command}`}
     >
@@ -236,9 +247,15 @@ function TerminalCard({ command }: { command: string }) {
       <code className="whitespace-nowrap font-mono text-sm text-[var(--fg-2)]">
         <span className="text-brand-500">$ </span>
         {command}
+        {/* Trailing block cursor — the `eikon-cursor-breath` class
+            gives it a calm 1.4s ease-in-out pulse so the bar feels
+            "alive but at rest" rather than mechanically blinking.
+            Decorative; not a real text input cursor (the whole
+            card is `role="img"` above), so the rhythm is set to a
+            breath, not the VT-classic 1Hz square wave. */}
         <span
           aria-hidden="true"
-          className="ml-0.5 inline-block h-[1em] w-[0.55em] translate-y-[2px] bg-[var(--fg-3)]"
+          className="eikon-cursor-breath ml-0.5 inline-block h-[1em] w-[0.55em] translate-y-[2px] bg-[var(--fg-3)]"
         />
       </code>
     </div>

@@ -168,9 +168,9 @@ export function Toolbar() {
               aria-pressed={active}
               style={{
                 background: active
-                  ? 'rgb(139 92 246 / 0.18)'
+                  ? 'rgb(148 163 184 / 0.15)'
                   : 'transparent',
-                color: active ? 'var(--color-brand-400, #c4b5fd)' : 'var(--fg-2)',
+                color: active ? 'var(--color-brand-300, #cbd5e1)' : 'var(--fg-2)',
                 border: 'none',
                 borderLeft: idx === 0 ? 'none' : '1px solid var(--border-1)',
                 padding: '3px 10px',
@@ -293,9 +293,11 @@ function ToggleButton({
       onClick={onClick}
       title={title}
       style={{
-        background: active ? 'rgb(139 92 246 / 0.18)' : 'transparent',
-        color: active ? 'var(--color-brand-400, #c4b5fd)' : 'var(--fg-2)',
-        border: '1px solid ' + (active ? 'rgb(139 92 246 / 0.45)' : 'var(--border-1)'),
+        background: active ? 'rgb(148 163 184 / 0.15)' : 'transparent',
+        color: active ? 'var(--color-brand-300, #cbd5e1)' : 'var(--fg-2)',
+        border:
+          '1px solid ' +
+          (active ? 'rgb(148 163 184 / 0.40)' : 'var(--border-1)'),
         borderRadius: 4,
         padding: '3px 10px',
         fontSize: 12,
