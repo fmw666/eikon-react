@@ -85,7 +85,57 @@
   --scrollbar-track: transparent;
   --scrollbar-thumb-radius: 8px;
   --scrollbar-thumb-border: 3px;
+
+  /* @eikon:variant(platform=mobile) begin */
+  /* Mobile touch-target floor (not a Tailwind namespace). Apple HIG
+   * recommends 44pt; Android Material recommends 48dp. We pick 44px
+   * as a portable lower bound — design presets that want a denser
+   * mobile feel can override per-preset. Mobile layouts apply this via
+   * `min-h-[var(--touch-target-min,44px)]`; layouts that ship to
+   * non-mobile platforms keep the Tailwind fallback (`44px`), so
+   * stripping this token on `--platform web` / `desktop` is safe. */
+  --touch-target-min: 44px;
+  /* @eikon:variant(platform=mobile) end */
 }
+
+/* @eikon:variant(platform=mobile) begin */
+/* ----------------------------------------------------------------------------
+ * Safe-area utilities (mobile-only).
+ *
+ * `viewport-fit=cover` in index.html unlocks `env(safe-area-inset-*)`. The
+ * mobile RootLayout variants apply these directly via Tailwind's arbitrary
+ * value syntax (`pt-[env(safe-area-inset-top)]`); the helper classes below
+ * exist as a friendlier shorthand for ad-hoc page-level padding (e.g. a
+ * sticky CTA at the bottom of an onboarding screen).
+ *
+ * Defining these at the @utility tier (Tailwind v4) makes them available
+ * with the standard variant chain — e.g. `md:safe-pt`, `dark:safe-pt`.
+ *
+ * Stripped from `--platform web` / `desktop` scaffolds — the few platform-
+ * agnostic layouts that actually reach for safe-area insets (Centered)
+ * use `env(...)` inline so they don't depend on these utility classes.
+ * --------------------------------------------------------------------------*/
+@utility safe-pt {
+  padding-top: env(safe-area-inset-top);
+}
+@utility safe-pb {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility safe-pl {
+  padding-left: env(safe-area-inset-left);
+}
+@utility safe-pr {
+  padding-right: env(safe-area-inset-right);
+}
+@utility safe-px {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+@utility safe-py {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+/* @eikon:variant(platform=mobile) end */
 
 /* Dark mode tokens are activated via the `.dark` class on <html>. */
 @variant dark (&:where(.dark, .dark *));

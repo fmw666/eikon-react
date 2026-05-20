@@ -1,4 +1,4 @@
-import { cp, readFile, rename, writeFile } from 'node:fs/promises';
+import { cp, readFile, rename, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { TEMPLATE_COPY_SKIP } from './skip-list.js';
@@ -10,10 +10,36 @@ interface CopyOptions {
 }
 
 /**
+ * Files that may contain the literal `__PROJECT_NAME__` placeholder which
+ * should be rewritten to the user-supplied project name on scaffold.
+ *
+ * Kept as an explicit allow-list rather than walking every file because:
+ *
+ *   1. The placeholder is intentionally narrow — only the desktop /
+ *      mobile shell configs use it. Walking everything risks false
+ *      positives in user docs that happen to mention the literal string.
+ *   2. Each entry is a path relative to the scaffold root; missing
+ *      files are tolerated (the strip-features pass may have removed
+ *      `apps/desktop/` or `apps/mobile/` before this runs in some
+ *      future ordering).
+ */
+const PROJECT_NAME_TARGETS: readonly string[] = [
+  'apps/desktop/package.json',
+  'apps/desktop/src-tauri/Cargo.toml',
+  'apps/desktop/src-tauri/tauri.conf.json',
+  'apps/desktop/src-tauri/icons/README.md',
+  'apps/desktop/README.md',
+  'apps/mobile/package.json',
+  'apps/mobile/capacitor.config.ts',
+  'apps/mobile/README.md',
+];
+
+/**
  * Copy the template tree to `dest`, then:
  *   - rewrite package.json's "name"
  *   - rename "_gitignore" / "_env" placeholder files to their dot-prefixed forms
  *     (npm strips real .gitignore from publishes; this is the standard workaround)
+ *   - substitute `__PROJECT_NAME__` in the desktop / mobile shell configs
  *
  * The template tree itself uses real ".gitignore" / ".env.example" because it is
  * not published as a tarball; the publishable copy under create-eikon-react/template
@@ -41,6 +67,38 @@ export async function copyTemplate(opts: CopyOptions): Promise<void> {
   pkg.private = true;
   delete pkg.description;
   await writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
+
+  await substituteProjectName(opts.dest, opts.projectName);
+}
+
+/**
+ * Replace every occurrence of `__PROJECT_NAME__` in the shell config
+ * files listed in `PROJECT_NAME_TARGETS` with `projectName`. Missing
+ * files are silently skipped — they may have been stripped earlier by
+ * `stripFeatures` (e.g. `apps/desktop/` is gone for `--platform mobile`).
+ *
+ * Uses a literal split/join rather than a regex so a project name with
+ * regex metacharacters (`.`, `+`, …) doesn't get mangled.
+ */
+async function substituteProjectName(
+  root: string,
+  projectName: string
+): Promise<void> {
+  await Promise.all(
+    PROJECT_NAME_TARGETS.map(async (rel) => {
+      const full = path.join(root, rel);
+      try {
+        const st = await stat(full);
+        if (!st.isFile()) return;
+      } catch {
+        return;
+      }
+      const raw = await readFile(full, 'utf8');
+      if (!raw.includes('__PROJECT_NAME__')) return;
+      const next = raw.split('__PROJECT_NAME__').join(projectName);
+      await writeFile(full, next, 'utf8');
+    })
+  );
 }
 
 async function safeRename(dir: string, from: string, to: string): Promise<void> {

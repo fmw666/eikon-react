@@ -25,6 +25,7 @@ import { describe, expect, it } from 'vitest';
 
 // --- Relative Imports ---
 import {
+  APP_ROOT,
   SHARED_ROOT,
   featureEnabled,
   flattenKeys,
@@ -33,6 +34,8 @@ import {
   listFeatures,
   readDir,
   readJSON,
+  readText,
+  walk,
 } from './_helpers';
 
 // =================================================================================================
@@ -103,6 +106,72 @@ describe('structure: i18n parity', () => {
             (missingInB.length ? `  missing in ${bundles[i]!.locale}: ${missingInB.join(', ')}` : '')
         ).toBe(0);
       }
+    });
+  });
+
+  // --- app/shared callsite reachability ---
+  //
+  // The previous block proves every locale's `common.json` shares the same
+  // key set; this block proves that every `t('nav.x')` (or other namespace-
+  // less) callsite in `src/app/**` and `src/shared/**` actually resolves
+  // against the shipping `common.json`. Without this assertion, adding a
+  // new layout that calls `t('nav.menu')` without adding the key to
+  // `common.json` produces a silent regression — the literal "nav.menu"
+  // string leaks into screen readers / aria-labels.
+  describe('app + shared callsites resolve against common.json', () => {
+    const localesDir = path.join(SHARED_ROOT, 'i18n', 'locales');
+    const enCommonPath = path.join(localesDir, 'en', 'common.json');
+    if (!isFile(enCommonPath)) {
+      it.skip('en/common.json missing — locale layout test cannot run', () => {});
+      return;
+    }
+    const enKeys = new Set(
+      flattenKeys(readJSON<Record<string, unknown>>(enCommonPath))
+    );
+
+    /**
+     * Match `t('key')`, `t("key")`, `t(\`key\`)` callsites where `key`
+     * does NOT contain a namespace separator (`:`). Multiline because
+     * call sites often break the args across lines after the first
+     * argument. We deliberately ignore the second argument: the
+     * defaultValue option there is a fallback string, not an i18n key.
+     */
+    const T_CALL_RE = /\bt\(\s*['"`]([a-zA-Z][a-zA-Z0-9_.]*)['"`]/g;
+
+    function collectCallsites(roots: string[]): Map<string, string[]> {
+      const out = new Map<string, string[]>();
+      for (const root of roots) {
+        if (!isDir(root)) continue;
+        const files = walk(root, { onlyFiles: true }).filter(
+          (p) => p.endsWith('.ts') || p.endsWith('.tsx')
+        );
+        for (const file of files) {
+          const text = readText(file);
+          for (const m of text.matchAll(T_CALL_RE)) {
+            const key = m[1]!;
+            // Namespace-prefixed (e.g. `tasks:list.title`) keys belong to
+            // a feature namespace; skip them — feature parity covers it.
+            if (key.includes(':')) continue;
+            const where = out.get(key) ?? [];
+            where.push(file);
+            out.set(key, where);
+          }
+        }
+      }
+      return out;
+    }
+
+    it('every nav.* / shared callsite key is present in en/common.json', () => {
+      const callsites = collectCallsites([APP_ROOT, SHARED_ROOT]);
+      const missing: string[] = [];
+      for (const [key, files] of callsites) {
+        if (enKeys.has(key)) continue;
+        missing.push(`${key}  (used in: ${files.map((f) => path.relative(SHARED_ROOT, f).split(path.sep).join('/')).join(', ')})`);
+      }
+      expect(
+        missing,
+        `i18n keys referenced from src/app or src/shared but missing from en/common.json:\n  ${missing.join('\n  ')}`
+      ).toEqual([]);
     });
   });
 

@@ -1,0 +1,16 @@
+# pnpm workspace declaration for the scaffolded project.
+#
+# Why it exists:
+#   The `tauri:*` and `cap:*` scripts in `package.json` use
+#   `pnpm --filter "./apps/desktop"` / `--filter "./apps/mobile"`. pnpm only
+#   considers a sub-directory's `package.json` to be a workspace package when
+#   a workspace declaration like this one resolves it via a glob. Without
+#   this file, `pnpm tauri:dev` aborts with
+#   `--filter <pattern>: No projects matched the filters`.
+#
+# Why it's safe for `--platform web` projects too:
+#   pnpm tolerates a glob that matches zero packages — the `apps/` directory
+#   simply doesn't exist after the strip pass on a web project, so `apps/*`
+#   resolves to nothing and `pnpm install` does the right thing.
+packages:
+  - "apps/*"

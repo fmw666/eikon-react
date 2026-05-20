@@ -25,7 +25,18 @@
     "test:browser": "vitest run --config vitest.browser.config.ts",
     "test:browser:setup": "playwright install chromium",
     "check": "pnpm run typecheck && pnpm run lint && pnpm run test",
-    "ci": "pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run build"
+    "ci": "pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run build",
+    "tauri": "pnpm --filter \"./apps/desktop\" tauri",
+    "tauri:dev": "pnpm --filter \"./apps/desktop\" dev",
+    "tauri:build": "pnpm --filter \"./apps/desktop\" build",
+    "cap": "pnpm --filter \"./apps/mobile\" cap",
+    "cap:sync": "pnpm --filter \"./apps/mobile\" sync",
+    "cap:add:ios": "pnpm --filter \"./apps/mobile\" add:ios",
+    "cap:add:android": "pnpm --filter \"./apps/mobile\" add:android",
+    "cap:open:ios": "pnpm --filter \"./apps/mobile\" open:ios",
+    "cap:open:android": "pnpm --filter \"./apps/mobile\" open:android",
+    "cap:run:ios": "pnpm --filter \"./apps/mobile\" run:ios",
+    "cap:run:android": "pnpm --filter \"./apps/mobile\" run:android"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",

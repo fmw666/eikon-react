@@ -1,0 +1,38 @@
+[package]
+# `__PROJECT_NAME__` is replaced at scaffold time by
+# `create-eikon-react/src/copy-template.ts:substituteProjectName`; the
+# CLI normalises the chosen project name with `toValidPackageName`,
+# which yields a Cargo-legal slug (lowercase, ASCII, `-`/`_` allowed).
+name = "__PROJECT_NAME__"
+version = "0.1.0"
+description = "Tauri 2 desktop shell for the project."
+edition = "2021"
+rust-version = "1.77"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# This `cdylib` target is what `tauri::Builder::default().run()` is loaded
+# from on Windows; the binary entrypoint lives under `src/main.rs`. We
+# keep the lib name fixed at `app_lib` (rather than deriving it from the
+# project name) so `main.rs`'s `app_lib::run()` doesn't have to be
+# templated too — the project-name substitution stays scoped to the
+# `[package]` table.
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# `custom-protocol` is added by `tauri build` to switch between the embedded
+# `tauri://localhost` asset protocol (production) and the dev-server URL
+# specified in tauri.conf.json (`devUrl`). Don't enable it manually.
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

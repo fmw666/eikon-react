@@ -1,4 +1,10 @@
-import { PARAMS, type ParamState } from './params-schema';
+import {
+  PARAMS,
+  coercePlatform,
+  getEffectiveDefault,
+  isAvailable,
+  type ParamState,
+} from './params-schema';
 
 /**
  * Placeholder rendered in place of the positional project-name arg when the
@@ -18,9 +24,11 @@ export interface BuildCliCommandOptions {
 /**
  * Render a `create-eikon-react` invocation that reproduces the given state.
  *
- * Only params whose value differs from the schema default are emitted, so the
- * displayed command stays as short as possible — the CLI applies the same
- * defaults internally.
+ * Only params whose value differs from the schema's *effective* default
+ * (per the chosen `platform`) are emitted, so the displayed command stays
+ * as short as possible — the CLI applies the same per-platform defaults
+ * internally. Params hidden under the current platform's `availableWhen`
+ * filter are skipped entirely.
  */
 export function buildCliCommand(
   state: ParamState,
@@ -31,13 +39,22 @@ export function buildCliCommand(
   tokens.push('create-eikon-react');
   tokens.push(opts.projectName ?? PROJECT_NAME_PLACEHOLDER);
 
+  const platform = coercePlatform(state.platform);
+
   for (const def of PARAMS) {
     const v = state[def.id];
-    if (v === def.default) continue;
+
+    // Hidden controls don't get emitted — their value is whatever the
+    // store happens to hold, which is meaningless to the CLI.
+    if (!isAvailable(def, platform)) continue;
 
     if (def.kind === 'boolean') {
+      const eff = getEffectiveDefault(def, platform);
+      if (v === eff) continue;
       tokens.push(v ? `--${def.cliFlag}` : `--no-${def.cliFlag}`);
     } else {
+      const eff = getEffectiveDefault(def, platform);
+      if (v === eff) continue;
       tokens.push(`--${def.cliFlag}`, String(v));
     }
   }

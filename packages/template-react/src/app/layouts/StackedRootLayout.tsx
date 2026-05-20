@@ -79,7 +79,7 @@ function StackedRootLayout() {
   // @eikon:feature(i18n:fallback) end
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-[100dvh] flex-col">
       <header className="border-b border-[var(--color-border)] bg-[var(--color-card)]/70 backdrop-blur">
         {/*
           3-column grid pattern: brand (left, 1fr) | nav (auto, centered) |

@@ -3,7 +3,11 @@
     "home": "Home",
     "counter": "Counter",
     "tasks": "Tasks",
-    "examples": "Examples"
+    "examples": "Examples",
+    "menu": "Open navigation",
+    "menuDescription": "Primary navigation for the application",
+    "primary": "Primary navigation",
+    "compose": "New task"
   },
   "actions": {
     "toggleTheme": "Toggle theme",

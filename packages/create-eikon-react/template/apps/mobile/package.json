@@ -1,0 +1,26 @@
+{
+  "name": "__PROJECT_NAME__-mobile",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Capacitor 6 mobile shell. Wraps the Vite-built web bundle in a native iOS / Android WebView via Capacitor; ios/ and android/ subdirectories are NOT prebuilt — run `pnpm cap:add:ios` / `pnpm cap:add:android` once per platform after first install.",
+  "type": "module",
+  "scripts": {
+    "cap": "cap",
+    "sync": "cap sync",
+    "add:ios": "cap add ios",
+    "add:android": "cap add android",
+    "open:ios": "cap open ios",
+    "open:android": "cap open android",
+    "run:ios": "cap run ios",
+    "run:android": "cap run android"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  },
+  "eikon": {
+    "shell": "mobile"
+  }
+}

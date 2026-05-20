@@ -3,7 +3,11 @@
     "home": "首页",
     "counter": "计数器",
     "tasks": "任务",
-    "examples": "组件展柜"
+    "examples": "组件展柜",
+    "menu": "打开导航",
+    "menuDescription": "应用的主导航",
+    "primary": "主导航",
+    "compose": "新建任务"
   },
   "actions": {
     "toggleTheme": "切换主题",

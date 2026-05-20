@@ -7,12 +7,21 @@ import {
 } from '../strip-features';
 
 describe('runWithConcurrency', () => {
-  it('runs every task and preserves input order in the result', async () => {
-    const tasks = Array.from({ length: 20 }, (_, i) => () =>
-      Promise.resolve(i * 2)
-    );
+  it('runs every task to completion (side-effect contract — return value is void)', async () => {
+    // The pool intentionally returns void; we record completion via a
+    // shared array so the test can still verify "every task ran". This
+    // matches the helper's audited contract — callers in strip-features
+    // always discarded the returned values, so the array allocation has
+    // been removed.
+    const seen: number[] = [];
+    const tasks = Array.from({ length: 20 }, (_, i) => async () => {
+      seen.push(i);
+    });
     const out = await runWithConcurrency(tasks, 4);
-    expect(out).toEqual(tasks.map((_, i) => i * 2));
+    expect(out).toBeUndefined();
+    expect(seen.sort((a, b) => a - b)).toEqual(
+      Array.from({ length: 20 }, (_, i) => i)
+    );
   });
 
   it('bounds the in-flight count by `limit`', async () => {
@@ -24,7 +33,6 @@ describe('runWithConcurrency', () => {
       // Yield to the event loop a few times so concurrency can build up.
       await new Promise<void>((r) => setTimeout(r, 1));
       inFlight--;
-      return 1;
     });
     await runWithConcurrency(tasks, 4);
     expect(peak).toBeLessThanOrEqual(4);
@@ -32,10 +40,14 @@ describe('runWithConcurrency', () => {
   });
 
   it('handles 0 and 1 task as fast paths', async () => {
-    expect(await runWithConcurrency([], 8)).toEqual([]);
-    expect(
-      await runWithConcurrency([() => Promise.resolve('only')], 8)
-    ).toEqual(['only']);
+    await expect(runWithConcurrency([], 8)).resolves.toBeUndefined();
+    let invoked = false;
+    await runWithConcurrency([
+      async () => {
+        invoked = true;
+      },
+    ], 8);
+    expect(invoked).toBe(true);
   });
 
   it('rejects if any task rejects', async () => {

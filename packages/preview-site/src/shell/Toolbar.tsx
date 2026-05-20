@@ -1,4 +1,5 @@
-import { useUiStore } from './store';
+import { useShellStore } from './store';
+import { type FrameSize, useUiStore } from './store';
 
 /**
  * Slim toolbar that sits between the params header and the resizable body.
@@ -51,11 +52,35 @@ const QUICK_LINKS: ReadonlyArray<QuickLink> = [
   },
 ];
 
+const FRAME_SIZE_LABELS: Record<FrameSize, { label: string; mobile: string; desktop: string }> = {
+  small: { label: 'S', mobile: 'iPhone SE — 375 × 667', desktop: 'Laptop — 1024 × 640' },
+  standard: {
+    label: 'M',
+    mobile: 'iPhone 14 Pro — 390 × 844',
+    desktop: 'Desktop — 1280 × 800',
+  },
+  large: {
+    label: 'L',
+    mobile: 'iPhone Pro Max — 430 × 932',
+    desktop: 'Monitor — 1440 × 900',
+  },
+};
+
+const FRAME_SIZES: readonly FrameSize[] = ['small', 'standard', 'large'];
+
 export function Toolbar() {
   const showFiles = useUiStore((s) => s.showFiles);
   const toggleFiles = useUiStore((s) => s.toggleFiles);
   const reloadPreview = useUiStore((s) => s.reloadPreview);
   const navigateInPreview = useUiStore((s) => s.navigateInPreview);
+  const frameSize = useUiStore((s) => s.frameSize);
+  const setFrameSize = useUiStore((s) => s.setFrameSize);
+  // Every platform now renders an Apple-styled DeviceShell (Safari for
+  // web, macOS Sequoia for desktop, iPhone for mobile), so the size
+  // segmented control is always meaningful — it picks the simulated
+  // reference device.  We still read the platform so the tooltip text
+  // can describe the right physical reference (Pro Max vs Monitor 24").
+  const platform = useShellStore((s) => String(s.state.platform));
 
   return (
     <div
@@ -90,6 +115,75 @@ export function Toolbar() {
         spacer acts on the previewed iframe — grouping by target keeps
         the related controls visually adjacent. */}
       <span style={{ flex: 1 }} />
+
+      {/* Frame-size segmented control. Sits LEFT of the quick-jump
+        cluster because changing the frame size is much closer to the
+        Files-side concern (presentation of the iframe) than to the
+        in-iframe navigation controls on the far right. */}
+      <span
+        style={{
+          color: '#8a8a8a',
+          fontSize: 11,
+          textTransform: 'uppercase',
+          letterSpacing: 0.4,
+          marginRight: 2,
+        }}
+      >
+        Size
+      </span>
+      <div
+        role="group"
+        aria-label="Device frame size"
+        style={{
+          display: 'inline-flex',
+          border: '1px solid #3a3a3a',
+          borderRadius: 3,
+          overflow: 'hidden',
+          marginRight: 6,
+        }}
+      >
+        {FRAME_SIZES.map((size, idx) => {
+          const meta = FRAME_SIZE_LABELS[size];
+          const active = frameSize === size;
+          // Web uses the desktop reference dimensions (Safari frames a
+          // browser window, which is just a desktop window with chrome),
+          // so the desktop tooltip applies to both web and desktop here.
+          const tooltip =
+            platform === 'mobile' ? meta.mobile : meta.desktop;
+          return (
+            <button
+              key={size}
+              type="button"
+              onClick={() => setFrameSize(size)}
+              title={tooltip}
+              aria-pressed={active}
+              style={{
+                background: active ? '#0e639c' : 'transparent',
+                color: active ? '#fff' : '#d4d4d4',
+                border: 'none',
+                borderLeft: idx === 0 ? 'none' : '1px solid #3a3a3a',
+                padding: '2px 8px',
+                fontSize: 12,
+                fontWeight: active ? 600 : 400,
+                cursor: 'pointer',
+                minWidth: 24,
+              }}
+            >
+              {meta.label}
+            </button>
+          );
+        })}
+      </div>
+      <span
+        aria-hidden="true"
+        style={{
+          width: 1,
+          height: 16,
+          background: '#3a3a3a',
+          margin: '0 4px',
+        }}
+      />
+
 
       <span
         style={{

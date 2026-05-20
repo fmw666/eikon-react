@@ -84,6 +84,54 @@ describe('stripBlocksForVariant', () => {
     expect(out).toContain('shadcn-style-block');
     expect(out).not.toContain('radix-block');
   });
+
+  it('does not swallow a structural `}` adjacent to a CSS end marker', () => {
+    // Regression — earlier the END regex's optional close-brace clause
+    // was `\\*\\/\\s*\\}?`, which let `\\s*` greedily eat the newline
+    // between `*/` and the next-line `}`, swallowing the `@theme {…}`
+    // close brace. Tailwind v4 then choked with "Missing closing }".
+    // Locking this in with a CSS-shaped fixture.
+    const input = [
+      '@theme {',
+      '  --color-foo: red;',
+      '  /* @eikon:variant(platform=mobile) begin */',
+      '  --touch-target-min: 44px;',
+      '  /* @eikon:variant(platform=mobile) end */',
+      '}',
+      '@variant dark (&:where(.dark));',
+    ].join('\n');
+
+    const out = stripBlocksForVariant(input, 'platform', 'web');
+
+    expect(out).not.toContain('--touch-target-min');
+    // The closing brace of the @theme block MUST survive the strip.
+    expect(out).toContain('}\n@variant dark');
+    // And brace balance must be preserved end-to-end.
+    const opens = (out.match(/\{/g) ?? []).length;
+    const closes = (out.match(/\}/g) ?? []).length;
+    expect(opens).toBe(closes);
+  });
+
+  it('still handles a JSX `*/}` adjacent end marker when block is non-kept', () => {
+    // The mirror case: removing the `\\s*` between `*/` and `\\}?` must
+    // NOT regress the JSX `{/* @eikon:variant(...) end */}` shape — the
+    // closer is intentionally fused, so the regex still needs to match.
+    const input = [
+      'render(',
+      '  {/* @eikon:variant(ui=animate-ui) begin */}',
+      '  <MotionButton/>',
+      '  {/* @eikon:variant(ui=animate-ui) end */}',
+      ');',
+    ].join('\n');
+
+    const out = stripBlocksForVariant(input, 'ui', 'radix');
+    expect(out).not.toContain('MotionButton');
+    expect(out).not.toContain('@eikon:variant(ui=animate-ui)');
+    // The `render(` and `);` lines on either side must be preserved
+    // intact — no orphan braces or stray `}` left behind.
+    expect(out).toContain('render(');
+    expect(out).toContain(');');
+  });
 });
 
 describe('stripFeatures with variants (file-level)', () => {

@@ -4,8 +4,41 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-export default defineConfig({
+/**
+ * Mode-aware Vite config.
+ *
+ *   - Default (`pnpm build`, `pnpm dev`): the bundle is served from a
+ *     real HTTP origin (Vite dev server, static host, Tauri's
+ *     `tauri://localhost`), so absolute asset paths (`/assets/foo.js`)
+ *     resolve correctly. Vite's built-in default for `base` is `/`, so
+ *     web / desktop scaffolds don't need to declare it explicitly.
+ *   - `--mode capacitor` (used by `pnpm cap:sync` upstream, mobile
+ *     scaffolds only): the bundle is loaded from `file://` inside an
+ *     iOS WKWebView / Android System WebView. Absolute paths fail
+ *     there because there's no host to resolve them against —
+ *     Capacitor expects relative URLs. Using `base: ''` (the empty
+ *     string) tells Rollup to emit relative references so the same
+ *     bundle works regardless of mount point. The whole `base:` line
+ *     and its accompanying mode parameter are gated by
+ *     `@eikon:variant(platform=mobile)` so non-mobile scaffolds drop
+ *     them entirely (and fall through to Vite's `/` default).
+ *
+ * The Tauri shell uses default mode: in dev it points at the Vite dev
+ * server (`devUrl`), in build it copies `dist/` into the bundle and
+ * loads via `tauri://localhost` (which behaves like a real origin).
+ */
+// The `mode: _mode` alias is deliberate: when the
+// `@eikon:variant(platform=mobile)` block below is stripped from a
+// web / desktop scaffold, the parameter is left destructured but
+// unused. The `_`-prefix opts out of `noUnusedParameters` (tsconfig)
+// and `@typescript-eslint/no-unused-vars` (eslint.config.js)
+// simultaneously — keep the prefix even if you reach for `mode`
+// directly during local edits.
+export default defineConfig(({ mode: _mode }) => ({
   plugins: [react(), tailwindcss()],
+  // @eikon:variant(platform=mobile) begin
+  base: _mode === 'capacitor' ? '' : '/',
+  // @eikon:variant(platform=mobile) end
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -62,4 +95,4 @@ export default defineConfig({
     chunkSizeWarningLimit: 1500,
   },
   envPrefix: 'VITE_',
-});
+}));

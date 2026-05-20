@@ -25,6 +25,7 @@ import {
 import { type BuildInputs } from './hash';
 
 interface BuildRequestBody {
+  platform?: string;
   supabase?: boolean;
   query?: boolean;
   design?: string;
@@ -35,6 +36,7 @@ interface BuildRequestBody {
 
 function normalizeInputs(body: BuildRequestBody): BuildInputs {
   return {
+    platform: String(body.platform ?? DEFAULT_INPUTS.platform),
     supabase:
       body.supabase === undefined ? DEFAULT_INPUTS.supabase : !!body.supabase,
     query: body.query === undefined ? DEFAULT_INPUTS.query : !!body.query,

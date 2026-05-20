@@ -22,7 +22,8 @@ Humans editing this project should also follow these rules — they encode the t
 │   ├── 50-animate-ui.md
 │   ├── 60-i18n.md
 │   ├── 70-commit-style.md
-│   └── 80-quality-system.md     <- structure guards + AI-friendly lint (read before changing layout/banners/filenames)
+│   ├── 80-quality-system.md     <- structure guards + AI-friendly lint (read before changing layout/banners/filenames)
+│   └── 90-platform-targets.md   <- web/desktop/mobile target rules (read before suggesting layouts, scripts, or shells)
 └── skills/                      <- task playbooks, invoke when the task matches
     ├── add-feature/SKILL.md              <- pure-client feature or fixed-backend feature
     ├── add-data-feature/SKILL.md         <- feature with swappable Mock+Supabase backends (canonical: tasks)

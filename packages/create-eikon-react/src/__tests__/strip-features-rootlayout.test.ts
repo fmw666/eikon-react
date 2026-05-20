@@ -40,7 +40,15 @@ const LAYOUTS_SRC = path.resolve(
   'layouts'
 );
 
-const ALL_LAYOUTS = ['stacked', 'sidebar', 'topbar-sidebar', 'centered'] as const;
+const ALL_LAYOUTS = [
+  'stacked',
+  'sidebar',
+  'topbar-sidebar',
+  'centered',
+  'mobile-drawer',
+  'bottom-tabs',
+  'bottom-tabs-fab',
+] as const;
 type LayoutChoice = (typeof ALL_LAYOUTS)[number];
 
 function siblingFile(choice: LayoutChoice): string {
@@ -53,6 +61,12 @@ function siblingFile(choice: LayoutChoice): string {
       return 'TopbarSidebarRootLayout.tsx';
     case 'centered':
       return 'CenteredRootLayout.tsx';
+    case 'mobile-drawer':
+      return 'MobileDrawerRootLayout.tsx';
+    case 'bottom-tabs':
+      return 'BottomTabsRootLayout.tsx';
+    case 'bottom-tabs-fab':
+      return 'BottomTabsFabRootLayout.tsx';
   }
 }
 
@@ -66,6 +80,12 @@ function importedSymbol(choice: LayoutChoice): string {
       return 'TopbarSidebarRootLayout';
     case 'centered':
       return 'CenteredRootLayout';
+    case 'mobile-drawer':
+      return 'MobileDrawerRootLayout';
+    case 'bottom-tabs':
+      return 'BottomTabsRootLayout';
+    case 'bottom-tabs-fab':
+      return 'BottomTabsFabRootLayout';
   }
 }
 

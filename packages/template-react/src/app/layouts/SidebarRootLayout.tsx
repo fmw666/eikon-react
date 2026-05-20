@@ -73,7 +73,7 @@ function SidebarRootLayout() {
   // @eikon:feature(i18n:fallback) end
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-[100dvh]">
       {/*
         The sidebar is a real flex column rather than a positioned overlay —
         sticky positioning keeps it visible while the main column scrolls,
@@ -82,7 +82,7 @@ function SidebarRootLayout() {
       */}
       <aside
         className={cn(
-          'sticky top-0 flex h-screen w-60 shrink-0 flex-col',
+          'sticky top-0 flex h-[100dvh] w-60 shrink-0 flex-col',
           'border-r border-[var(--color-border)] bg-[var(--color-card)]/70 backdrop-blur'
         )}
       >

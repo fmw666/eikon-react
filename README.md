@@ -31,6 +31,7 @@ pnpm create eikon-react my-app
 The CLI is interactive and will ask:
 
 - Project name (positional arg lets you skip the prompt)
+- **Platform target** — `web` (browser, default), `desktop` (Tauri 2 shell), or `mobile` (Capacitor shell)
 - Whether to include **Supabase** (auth + db + storage scaffolding)
 - Whether to include **TanStack Query** (server-state)
 - Package manager (pnpm / npm / bun)
@@ -41,13 +42,20 @@ Non-interactive flags exist for CI scripting:
 ```bash
 npx create-eikon-react my-app \
   --yes \
+  --platform desktop \
   --no-supabase --query \
   --pm pnpm \
   --no-install --no-git
 ```
 
+Picking `--platform desktop` adds an `apps/desktop/` Tauri 2 shell next to
+your web bundle; `--platform mobile` adds an `apps/mobile/` Capacitor 6
+shell. See [docs/platform-targets.md](docs/platform-targets.md) for the
+trade-offs and prerequisites.
+
 ## What you get in a generated project
 
+- **Platform target** — pick `web` (default), `desktop` (Tauri 2 shell under `apps/desktop/`), or `mobile` (Capacitor 6 shell under `apps/mobile/`); the same React app powers all three. See [docs/platform-targets.md](docs/platform-targets.md).
 - **React 19** + **TypeScript 5.6+**
 - **Vite 6** + **Tailwind CSS v4** (CSS-first config, no `tailwind.config.js`)
 - **animate-ui style** primitives in `src/shared/ui/` (`motion` + Radix)
@@ -129,6 +137,7 @@ cd packages/create-eikon-react && npm publish --access public
 
 - [docs/architecture.md](docs/architecture.md) — Feature-first design rationale + import boundary enforcement.
 - [docs/agent-protocol.md](docs/agent-protocol.md) — `.agent/rules` and `.agent/skills` schema and authoring guide.
+- [docs/platform-targets.md](docs/platform-targets.md) — Web / Desktop (Tauri 2) / Mobile (Capacitor) target selection, prerequisites, and how the same React app powers all three.
 - [packages/template-react/.agent/README.md](packages/template-react/.agent/README.md) — Live `.agent/` README inside the template.
 
 ## License

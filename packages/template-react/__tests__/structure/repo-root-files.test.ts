@@ -21,7 +21,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 // --- Relative Imports ---
-import { REPO_ROOT, isFile, readJSON } from './_helpers';
+import { REPO_ROOT, isDir, isFile, readJSON } from './_helpers';
 
 // =================================================================================================
 // Constants
@@ -71,6 +71,23 @@ describe('structure: project root', () => {
         `Required project-root file missing: ${f}`
       ).toBe(true);
     }
+  });
+
+  it('pnpm-workspace.yaml is present iff apps/ is present', () => {
+    // Conditional structural guard. The workspace declaration is
+    // load-bearing for desktop / mobile scaffolds (the `tauri:*` /
+    // `cap:*` scripts use `pnpm --filter "./apps/<x>"`), but on a web
+    // scaffold `apps/` is removed entirely and the workspace file
+    // becomes inert — the strip pass deletes it for cleanliness, so
+    // a web project must NOT carry a stray `pnpm-workspace.yaml`.
+    const hasApps = isDir(path.join(REPO_ROOT, 'apps'));
+    const hasWorkspace = isFile(path.join(REPO_ROOT, 'pnpm-workspace.yaml'));
+    expect(
+      hasApps,
+      hasWorkspace
+        ? 'pnpm-workspace.yaml is present but apps/ is missing — workspace declaration is dead, run the strip pass.'
+        : 'pnpm-workspace.yaml is missing but apps/ exists — desktop / mobile scaffolds need the workspace declaration.'
+    ).toBe(hasWorkspace);
   });
 
   describe('package.json', () => {

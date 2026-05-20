@@ -52,6 +52,7 @@ const RM_OPTS = {
  *  on incoming /api/build requests. Kept in lock-step with
  *  packages/preview-site/src/lib/params-schema.ts. */
 export const DEFAULT_INPUTS: BuildInputs = {
+  platform: 'web',
   supabase: false,
   query: true,
   design: 'default',
@@ -297,6 +298,7 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
     i18n: true,
   };
   const variants: VariantSelections = {
+    platform: inputs.platform,
     design: inputs.design,
     layout: inputs.layout,
     ui: inputs.ui,
@@ -323,6 +325,13 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
   await stripFeatures(cacheDir, flags, variants, {
     keepExamples: true,
     keepAllVariantFiles: true,
+    // The playground itself never invokes Tauri/Capacitor — it always
+    // produces a Vite web bundle — but keeping the shell directories
+    // lets a single cache entry serve any platform without re-stripping.
+    // Worth the few extra KB of disk: platform-switching in the UI now
+    // hits the cache hash purely on the `platform` axis (which controls
+    // layout narrowing), not on directory layout.
+    keepShells: true,
   });
 
   await viteBuild({

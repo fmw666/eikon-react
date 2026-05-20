@@ -37,8 +37,13 @@ const TEMPLATE_DIR = path.resolve(__dirname, '..', 'template');
 /**
  * Known values for each variant axis. Kept in lock-step with the playground
  * schema at packages/preview-site/src/lib/params-schema.ts.
+ *
+ * Order matters for the interactive prompt: `platform` is asked FIRST so
+ * that subsequent prompts can apply per-platform default/value overrides
+ * declared in `PLATFORM_OVERRIDES` below.
  */
 const VARIANT_CHOICES = {
+  platform: ['web', 'desktop', 'mobile'] as const,
   design: [
     'default',
     'apple',
@@ -47,7 +52,15 @@ const VARIANT_CHOICES = {
     'vercel',
     'notion',
   ] as const,
-  layout: ['stacked', 'sidebar', 'topbar-sidebar', 'centered'] as const,
+  layout: [
+    'stacked',
+    'sidebar',
+    'topbar-sidebar',
+    'centered',
+    'mobile-drawer',
+    'bottom-tabs',
+    'bottom-tabs-fab',
+  ] as const,
   ui: ['radix', 'shadcn-style', 'animate-ui'] as const,
   toast: [
     'default',
@@ -61,6 +74,69 @@ const VARIANT_CHOICES = {
 } satisfies Record<string, readonly string[]>;
 
 type VariantAxis = keyof typeof VARIANT_CHOICES;
+type PlatformValue = (typeof VARIANT_CHOICES)['platform'][number];
+
+/**
+ * Per-platform narrowing of accepted values + default overrides. The
+ * preview playground keeps the equivalent metadata on the schema's
+ * `valuesWhen` / `defaultWhen` fields; the CLI inlines a stripped-down
+ * mirror here because the CLI doesn't import the playground package.
+ *
+ * MUST stay in sync with packages/preview-site/src/lib/params-schema.ts.
+ * The `skip-list-parity` test in __tests__/ would be the right place to
+ * assert that synchronisation programmatically; for now the contract is
+ * documented here and verified at e2e.
+ */
+type PlatformOverride = {
+  readonly values?: readonly string[];
+  readonly default?: string;
+};
+
+const PLATFORM_OVERRIDES: Record<
+  Exclude<VariantAxis, 'platform'>,
+  Partial<Record<PlatformValue, PlatformOverride>>
+> = {
+  layout: {
+    // Web and desktop are restricted to the four desktop-shaped layouts —
+    // the three mobile variants (mobile-drawer / bottom-tabs(-fab)) are
+    // physically nonsensical on a desktop window. The schema declares the
+    // same `valuesWhen` block for both platforms; the CLI parity test in
+    // __tests__/cli-schema-parity.test.ts asserts the two stay aligned.
+    web: {
+      values: ['stacked', 'sidebar', 'topbar-sidebar', 'centered'],
+      default: 'stacked',
+    },
+    desktop: {
+      values: ['stacked', 'sidebar', 'topbar-sidebar', 'centered'],
+      default: 'sidebar',
+    },
+    mobile: {
+      values: ['centered', 'mobile-drawer', 'bottom-tabs', 'bottom-tabs-fab'],
+      default: 'mobile-drawer',
+    },
+  },
+  design: {},
+  ui: {},
+  toast: {},
+};
+
+function getEffectiveValues(
+  axis: VariantAxis,
+  platform: PlatformValue
+): readonly string[] {
+  if (axis === 'platform') return VARIANT_CHOICES.platform;
+  const override = PLATFORM_OVERRIDES[axis][platform];
+  return override?.values ?? VARIANT_CHOICES[axis];
+}
+
+function getEffectiveDefault(
+  axis: VariantAxis,
+  platform: PlatformValue
+): string {
+  if (axis === 'platform') return DEFAULT_VARIANTS.platform!;
+  const override = PLATFORM_OVERRIDES[axis][platform];
+  return override?.default ?? DEFAULT_VARIANTS[axis]!;
+}
 
 interface CliOptions {
   targetDir: string;
@@ -241,19 +317,46 @@ async function resolveFeatures(argv: ParsedArgs): Promise<FeatureFlags> {
 
 async function resolveVariants(argv: ParsedArgs): Promise<VariantSelections> {
   const out: VariantSelections = { ...DEFAULT_VARIANTS };
-  for (const axis of Object.keys(VARIANT_CHOICES) as VariantAxis[]) {
+  // Resolve `platform` FIRST so subsequent axes can default / restrict
+  // their accepted values per the chosen target. Order is enforced by
+  // walking `Object.keys(VARIANT_CHOICES)` which lists `platform` first.
+  const axes = Object.keys(VARIANT_CHOICES) as VariantAxis[];
+  for (const axis of axes) {
+    const platform = (out.platform ?? DEFAULT_VARIANTS.platform!) as PlatformValue;
+    const allowed = getEffectiveValues(axis, platform);
+    const effDefault = getEffectiveDefault(axis, platform);
+
+    // Snap any pre-set value (from --yes default-walk OR previous axis
+    // resolution) into the per-platform allowed set. E.g. when the user
+    // passes `--yes --platform mobile`, layout's seeded `'stacked'` would
+    // be invalid for mobile and gets snapped to `'mobile-drawer'`.
+    if (!allowed.includes(out[axis] ?? '')) {
+      out[axis] = effDefault;
+    }
+
     const fromArgv = argv.variants?.[axis];
     if (fromArgv !== undefined) {
-      out[axis] = fromArgv;
+      // Argv values bypass the prompt but still respect the per-platform
+      // narrowing — pass through only if the user-supplied value is valid
+      // for the chosen platform; otherwise keep the snapped default and
+      // surface a one-line warning. Silent ignore would hide bugs.
+      if (allowed.includes(fromArgv)) {
+        out[axis] = fromArgv;
+      } else {
+        log.warn(
+          `--${axis}=${kleur.yellow(fromArgv)} is not valid for platform=${platform}.` +
+            ` Using ${kleur.cyan(effDefault)} instead.`
+        );
+      }
       continue;
     }
     if (argv.yes) continue;
     const choice = await select({
       message: `Choose a ${axis} variant:`,
       initialValue: out[axis] as string,
-      options: VARIANT_CHOICES[axis].map((value) => ({
+      options: allowed.map((value) => ({
         value,
-        label: value === out[axis] ? `${value} (default)` : value,
+        label: value === effDefault ? `${value} (default)` : value,
       })),
     });
     if (isCancel(choice)) {

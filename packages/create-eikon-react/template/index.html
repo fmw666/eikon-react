@@ -3,9 +3,41 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      `viewport-fit=cover` is universal: desktop browsers ignore the
+      keyword, mobile browsers use it to let `env(safe-area-inset-*)`
+      resolve to non-zero values on devices with rounded corners /
+      notches / home-indicator bars (iOS Safari, Android with display
+      cutouts). The mobile layouts (MobileDrawer / BottomTabs /
+      BottomTabsFab) — and the platform-agnostic Centered layout
+      when scaffolded for `--platform mobile` — read these insets
+      to pad chrome away from physical obstructions.
+    -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <meta name="description" content="Eikon React starter" />
     <meta name="theme-color" content="#0a0a0a" />
+    <!-- @eikon:variant(platform=mobile) begin -->
+    <!--
+      iOS / Android PWA hooks. `apple-mobile-web-app-capable` enables
+      full-screen "Add to Home Screen" mode (no Safari chrome); the
+      status-bar style `black-translucent` keeps the system status bar
+      visible but lets the app draw under it, which pairs with the
+      `safe-area-inset-top` padding in the mobile layouts. These tags
+      are stripped from web / desktop scaffolds because they have no
+      effect outside an installed-PWA / mobile-Safari context — see the
+      block-level `@eikon:variant(platform=mobile)` marker that wraps
+      them, processed by `packages/create-eikon-react/src/strip-features.ts`.
+    -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <!-- @eikon:variant(platform=mobile) end -->
     <title>Eikon App</title>
     <script>
       (function () {

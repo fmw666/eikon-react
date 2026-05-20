@@ -3,6 +3,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { type ParamsStore } from '@/lib/params-store';
 
+import { DeviceShell, type DevicePlatform } from './DeviceShell';
 import { useShellStore, useUiStore } from './store';
 
 type BuildStatus = 'ready' | 'building' | 'error';
@@ -14,6 +15,7 @@ interface BuildState {
 }
 
 interface BuildInputs {
+  platform: string;
   supabase: boolean;
   query: boolean;
   design: string;
@@ -22,8 +24,38 @@ interface BuildInputs {
   toast: string;
 }
 
+const KNOWN_PLATFORMS: ReadonlySet<DevicePlatform> = new Set([
+  'web',
+  'desktop',
+  'mobile',
+]);
+
+/**
+ * Coerce the param-store's free-form `platform` string into the union
+ * `DeviceShell` expects. Anything unknown falls back to `web` so the
+ * shell still renders something sensible — the schema's coercion guard
+ * already filters bad values out of the URL, but we double-check here
+ * because the playground sometimes hot-loads a stored state from a
+ * previous session that pre-dates today's enum.
+ */
+function coercePlatform(raw: string): DevicePlatform {
+  return KNOWN_PLATFORMS.has(raw as DevicePlatform)
+    ? (raw as DevicePlatform)
+    : 'web';
+}
+
+/**
+ * Outer padding around the device shell so it doesn't sit flush against
+ * the pane edges. iPhone-style chrome casts the most prominent shadow
+ * and benefits from a touch more breathing room.
+ */
+function shellOuterPadding(platform: DevicePlatform): number {
+  return platform === 'mobile' ? 24 : 16;
+}
+
 function describeVariant(inputs: BuildInputs): string {
   return [
+    `platform=${inputs.platform}`,
     `design=${inputs.design}`,
     `layout=${inputs.layout}`,
     `ui=${inputs.ui}`,
@@ -106,6 +138,7 @@ function waitForVisible(): Promise<void> {
  */
 function selectBuildInputs(s: ParamsStore): BuildInputs {
   return {
+    platform: String(s.state.platform),
     supabase: !!s.state.supabase,
     query: !!s.state.query,
     design: String(s.state.design),
@@ -306,6 +339,26 @@ export function PreviewFrame() {
     ? `/preview/${lastReadyHash}/${subUrl.replace(/^\//, '')}`
     : null;
 
+  // Apple-styled device shell wrapping the iframe. The shell is purely
+  // presentational — it adds the right macOS / Safari / iPhone chrome
+  // around the iframe so the user knows at a glance which platform
+  // they're previewing. The size preset (S/M/L) is a UI-only knob
+  // (Toolbar segmented control), and so sits on `useUiStore` rather
+  // than `useShellStore` — changing the size never invalidates the
+  // build cache.
+  const frameSize = useUiStore((s) => s.frameSize);
+  const platform = useMemo(
+    () => coercePlatform(buildInputs.platform),
+    [buildInputs.platform]
+  );
+  const outerPadding = shellOuterPadding(platform);
+
+  // The iframe gets remounted when (hash, subUrl, reloadKey) change.
+  // We hoist the iframe element here so DeviceShell's `children` render
+  // prop can splice in the screen-style without forcing a remount on
+  // every (platform, size) tweak — only the wrapping chrome rerenders.
+  const iframeKey = `${lastReadyHash ?? ''}:${subUrl}:${reloadKey}`;
+
   return (
     <div
       style={{
@@ -313,20 +366,38 @@ export function PreviewFrame() {
         flex: 1,
         width: '100%',
         height: '100%',
-        background: '#fafafa',
+        // Subtle desk-like backdrop so the shell's drop shadow has
+        // something to land on. Slightly cooler than #fafafa to give
+        // the warm Apple chrome a gentle complementary tint.
+        background:
+          'radial-gradient(ellipse at top, #f7f7f9 0%, #ececef 80%, #e3e3e7 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: outerPadding,
+        overflow: 'auto',
       }}
     >
       {iframeSrc && (
-        <iframe
-          ref={iframeRef}
-          // Including `reloadKey` in the key lets the Toolbar's Reload
-          // button force a full iframe remount (cheap full refresh of the
-          // running variant) without touching params or rebuilding.
-          key={`${lastReadyHash}:${subUrl}:${reloadKey}`}
-          src={iframeSrc}
-          title="Eikon template preview"
-          style={{ width: '100%', height: '100%', border: 0 }}
-        />
+        <DeviceShell
+          platform={platform}
+          size={frameSize}
+          title="Eikon Preview"
+          domain="eikon-react.preview"
+        >
+          {(screenStyle) => (
+            <iframe
+              ref={iframeRef}
+              // Including `reloadKey` in the key lets the Toolbar's Reload
+              // button force a full iframe remount (cheap full refresh of
+              // the running variant) without touching params or rebuilding.
+              key={iframeKey}
+              src={iframeSrc}
+              title="Eikon template preview"
+              style={screenStyle}
+            />
+          )}
+        </DeviceShell>
       )}
 
       {isBuilding && (

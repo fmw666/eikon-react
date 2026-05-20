@@ -40,6 +40,7 @@ import { stripFeatures } from '../strip-features.js';
 
 const FLAGS = { supabase: false, query: true, i18n: true } as const;
 const DEFAULT_VARIANTS = {
+  platform: 'web',
   design: 'default',
   layout: 'stacked',
   ui: 'animate-ui',

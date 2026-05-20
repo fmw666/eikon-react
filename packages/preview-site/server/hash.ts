@@ -7,6 +7,16 @@ import { createHash } from 'node:crypto';
  * share a cache entry.
  */
 export interface BuildInputs {
+  /**
+   * Top-level "intent" axis (web / desktop / mobile). Affects which
+   * RootLayout variant is wired in and — at scaffold time — whether the
+   * `apps/desktop` (Tauri) or `apps/mobile` (Capacitor) shell directory
+   * survives the strip. The preview always builds the web bundle (no
+   * Tauri/Capacitor compile in the playground), but the chosen platform
+   * still narrows layout values via params-schema's `valuesWhen`, so the
+   * iframe reflects the target's typical shell.
+   */
+  platform: string;
   supabase: boolean;
   query: boolean;
   design: string;
@@ -28,6 +38,7 @@ export function hashBuildInputs(
 ): string {
   const ordered = {
     templateRev,
+    platform: String(inputs.platform),
     supabase: !!inputs.supabase,
     query: !!inputs.query,
     design: String(inputs.design),

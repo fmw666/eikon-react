@@ -1,0 +1,19 @@
+{
+  "name": "__PROJECT_NAME__-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Tauri 2 desktop shell for the project. Wraps the Vite-built web bundle in a system WebView with a Rust core (~3-5 MB binary). Run `pnpm tauri dev` to start the desktop window pointing at the Vite dev server; `pnpm tauri build` to produce a signed installer.",
+  "type": "module",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "icon": "tauri icon"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.1.0"
+  },
+  "eikon": {
+    "shell": "desktop"
+  }
+}

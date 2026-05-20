@@ -9,7 +9,19 @@
  * toggles still live in the top corners so they're reachable without
  * crowding the card itself.
  *
- * One of the four layout variants selected via `--layout` at scaffold time;
+ * Cross-platform: this is the ONE non-mobile layout the playground / CLI
+ * also offers under `--platform mobile` (auth shell shape works equally
+ * well on phones), which is why this file does the mobile-shaped polish
+ * the other three desktop layouts skip:
+ *   - `min-h-[100dvh]` instead of `min-h-screen` — iOS Safari's dynamic
+ *     toolbar would otherwise push content under the URL bar.
+ *   - `safe-px` / `safe-py` env() padding so notches and home-indicator
+ *     bars never clip the corners or the card.
+ *   - Nav links use `min-h-[var(--touch-target-min,44px)]` so the
+ *     tappable area meets HIG / Material recommendations on phones
+ *     while still rendering as a slim text bar on desktops.
+ *
+ * One of the layout variants selected via `--layout` at scaffold time;
  * the dispatcher at `./RootLayout.tsx` re-exports whichever variant won.
  */
 
@@ -76,15 +88,24 @@ function CenteredRootLayout() {
 
   return (
     <div
-      className={
-        'relative grid min-h-screen place-items-center bg-[var(--color-muted)]/30 px-4 py-12'
-      }
+      className={cn(
+        'relative grid min-h-[100dvh] place-items-center',
+        'bg-[var(--color-muted)]/30 px-4 py-12',
+        // Safe-area on mobile: keep the card and the corner toggles
+        // clear of notches / home-indicator. No-op on desktop because
+        // env(safe-area-inset-*) resolves to 0 there.
+        'pt-[max(3rem,calc(2rem+env(safe-area-inset-top)))]',
+        'pb-[max(3rem,calc(2rem+env(safe-area-inset-bottom)))]',
+        'pl-[max(1rem,env(safe-area-inset-left))]',
+        'pr-[max(1rem,env(safe-area-inset-right))]'
+      )}
     >
       {/*
         Brand in the top-left corner. Kept absolutely positioned so it does
         NOT consume vertical space — the card stays perfectly vertically
         centered even on tall viewports. Hidden on very narrow screens to
-        avoid colliding with the card.
+        avoid colliding with the card. The `top` offset already accounts
+        for the safe-area inset via the parent's padding.
       */}
       <Link
         to="/"
@@ -123,7 +144,7 @@ function CenteredRootLayout() {
         </main>
         <nav
           aria-label="Primary"
-          className="flex items-center gap-4 text-xs text-[var(--color-muted-foreground)]"
+          className="flex items-center gap-2 text-xs text-[var(--color-muted-foreground)]"
         >
           {navLinks.map((link) => (
             <NavLink
@@ -132,7 +153,12 @@ function CenteredRootLayout() {
               end={link.end}
               className={({ isActive }) =>
                 cn(
-                  'transition-colors hover:text-[var(--color-foreground)]',
+                  // 44px tap target for mobile (Apple HIG); on desktop
+                  // it just adds vertical padding around the text link,
+                  // so the visual rhythm is unchanged.
+                  'inline-flex items-center rounded-md px-3 transition-colors',
+                  'min-h-[var(--touch-target-min,44px)]',
+                  'hover:text-[var(--color-foreground)]',
                   isActive && 'text-[var(--color-foreground)] underline'
                 )
               }

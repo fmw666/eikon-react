@@ -45,6 +45,21 @@ export function UrlSync(): null {
 // params controls or the preview iframe.
 // ---------------------------------------------------------------------------
 
+/**
+ * Three preset device-frame sizes, surfaced as a Toolbar segmented control
+ * (only visible on `platform != 'web'`, where a frame actually renders).
+ *
+ *   - small:    iPhone SE (375 × 667)  /  laptop 13" (1024 × 640)
+ *   - standard: iPhone 14 Pro (390 × 844)  /  desktop 1280 × 800  ← default
+ *   - large:    iPhone Pro Max (430 × 932) /  monitor 1440 × 900
+ *
+ * Scaled this way (rather than 0.75x / 1x / 1.25x of a single base) so each
+ * preset corresponds to a real physical reference device — designers can
+ * pick "what does this look like on an SE" with one click instead of
+ * eyeballing a percent.
+ */
+export type FrameSize = 'small' | 'standard' | 'large';
+
 export interface UiStore {
   showFiles: boolean;
   showEditor: boolean;
@@ -57,6 +72,9 @@ export interface UiStore {
    *  remount the iframe — a cheap "reload the page in the preview" action
    *  that doesn't require the user to focus the iframe and hit Ctrl+R. */
   reloadKey: number;
+  /** Active device-frame preset. Only consumed when the current platform
+   *  renders a frame (mobile / desktop) — `web` ignores it entirely. */
+  frameSize: FrameSize;
   /**
    * In-iframe navigation request from the Toolbar's quick-jump buttons.
    * `target` is the sub-route inside the previewed app (e.g. '/examples'),
@@ -77,6 +95,7 @@ export interface UiStore {
   /** Queue an in-iframe navigation; consumed once by PreviewFrame. */
   navigateInPreview: (target: string) => void;
   clearNavRequest: () => void;
+  setFrameSize: (size: FrameSize) => void;
 }
 
 export const useUiStore = create<UiStore>((set) => ({
@@ -86,6 +105,7 @@ export const useUiStore = create<UiStore>((set) => ({
   currentHash: null,
   reloadKey: 0,
   navRequest: null,
+  frameSize: 'standard',
   // Files is the "parent" panel — the editor is meaningless without a way to
   // pick which file to open, so closing Files also collapses Editor, and
   // re-opening Files restores Editor iff there's a file still selected from
@@ -120,4 +140,5 @@ export const useUiStore = create<UiStore>((set) => ({
       navRequest: { target, tick: (s.navRequest?.tick ?? 0) + 1 },
     })),
   clearNavRequest: () => set({ navRequest: null }),
+  setFrameSize: (frameSize) => set({ frameSize }),
 }));

@@ -74,7 +74,7 @@ function TopbarSidebarRootLayout() {
   // @eikon:feature(i18n:fallback) end
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-[100dvh] flex-col">
       <header
         className={cn(
           'sticky top-0 z-10 border-b border-[var(--color-border)]',
@@ -107,7 +107,7 @@ function TopbarSidebarRootLayout() {
         */}
         <aside
           className={cn(
-            'sticky top-14 hidden h-[calc(100vh-3.5rem)] w-56 shrink-0 md:flex',
+            'sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-56 shrink-0 md:flex',
             'flex-col border-r border-[var(--color-border)]',
             'bg-[var(--color-card)]/50'
           )}

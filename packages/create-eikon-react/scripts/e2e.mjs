@@ -44,7 +44,14 @@ const SCENARIOS = [
       // CLI strips from EVERY scaffold regardless of flags — there is
       // intentionally no `--examples` opt-in. Its two runtime deps
       // (web-vitals, @tanstack/react-virtual) are pruned in lock-step.
-      filesAbsent: ['src/shared/supabase', 'src/features/examples'],
+      // platform=web (default) also drops the mobile-drawer Sheet
+      // primitive and the `apps/*` workspace declaration.
+      filesAbsent: [
+        'src/shared/supabase',
+        'src/features/examples',
+        'src/shared/ui/sheet.tsx',
+        'pnpm-workspace.yaml',
+      ],
       depsPresent: ['react', 'tailwindcss', 'motion'],
       depsAbsent: [
         '@supabase/supabase-js',
@@ -54,6 +61,17 @@ const SCENARIOS = [
       ],
       providersContains: ['BrowserRouter', '<Toaster'],
       providersAbsent: ['QueryClient', '@tanstack/react-query'],
+      // Platform=web must not carry mobile-only PWA meta tags, CSS
+      // tokens / utilities, or the capacitor mode branch in vite.
+      htmlAbsent: [
+        'apple-mobile-web-app-capable',
+        'apple-mobile-web-app-status-bar-style',
+        'mobile-web-app-capable',
+      ],
+      htmlContains: ['viewport-fit=cover'],
+      stylesAbsent: ['--touch-target-min', '@utility safe-pt', '@utility safe-pb'],
+      viteContains: ['_mode'],
+      viteAbsent: ["'capacitor'", "mode === 'capacitor'"],
     },
   },
   {
@@ -87,6 +105,107 @@ const SCENARIOS = [
       depsAbsent: ['@tanstack/react-virtual', 'web-vitals'],
       providersContains: ['QueryClientProvider'],
       providersAbsent: [],
+    },
+  },
+  {
+    // Platform=desktop scenario. Asserts the Tauri 2 shell survives, the
+    // Capacitor shell is gone, package.json's tauri:* scripts are kept,
+    // cap:* scripts are dropped, and __PROJECT_NAME__ is substituted.
+    id: 'desktop',
+    projectName: 'eikon-e2e-desktop',
+    flags: ['--platform', 'desktop'],
+    expect: {
+      filesPresent: [
+        'apps/desktop/src-tauri/Cargo.toml',
+        'apps/desktop/src-tauri/tauri.conf.json',
+        'apps/desktop/src-tauri/src/main.rs',
+        'apps/desktop/package.json',
+        // pnpm-workspace.yaml MUST survive on desktop — `tauri:dev` /
+        // `tauri:build` rely on `pnpm --filter "./apps/desktop"`.
+        'pnpm-workspace.yaml',
+      ],
+      // Desktop is still a "no mobile-drawer" scaffold (default layout
+      // is sidebar), so sheet.tsx is gone. Mobile-only PWA / safe-area
+      // / capacitor content is also dropped.
+      filesAbsent: [
+        'apps/mobile',
+        'src/features/examples',
+        'src/shared/supabase',
+        'src/shared/ui/sheet.tsx',
+      ],
+      depsPresent: ['react'],
+      depsAbsent: ['@supabase/supabase-js'],
+      providersContains: [],
+      providersAbsent: [],
+      scriptsPresent: ['tauri', 'tauri:dev', 'tauri:build'],
+      scriptsAbsent: ['cap', 'cap:sync', 'cap:add:ios', 'cap:add:android'],
+      htmlAbsent: ['apple-mobile-web-app-capable', 'mobile-web-app-capable'],
+      stylesAbsent: ['--touch-target-min', '@utility safe-pt'],
+      viteAbsent: ["'capacitor'"],
+      // Tauri config files use __PROJECT_NAME__ as a placeholder that
+      // copyTemplate() rewrites to the chosen project name. Verify both
+      // the substitution AND that the literal placeholder is gone.
+      tauriConfContains: ['"productName": "eikon-e2e-desktop"'],
+      tauriConfAbsent: ['__PROJECT_NAME__'],
+      // Cargo.toml's `[package].name` is now the bare project name (no
+      // `_app` suffix). The cdylib's `[lib].name` stays at `app_lib` so
+      // main.rs's `app_lib::run()` continues to compile post-strip.
+      cargoTomlContains: [
+        'name = "eikon-e2e-desktop"',
+        'name = "app_lib"',
+      ],
+      cargoTomlAbsent: ['__PROJECT_NAME__', 'eikon-e2e-desktop_app'],
+    },
+  },
+  {
+    // Platform=mobile scenario. Asserts the Capacitor shell survives,
+    // the Tauri shell is gone, cap:* scripts kept, tauri:* dropped, and
+    // __PROJECT_NAME__ substituted in capacitor.config.ts.
+    id: 'mobile',
+    projectName: 'eikon-e2e-mobile',
+    flags: ['--platform', 'mobile'],
+    expect: {
+      filesPresent: [
+        'apps/mobile/capacitor.config.ts',
+        'apps/mobile/package.json',
+        // Mobile defaults to layout=mobile-drawer, which IS the only
+        // layout that uses src/shared/ui/sheet.tsx — so the file
+        // must survive the strip pass on this scenario.
+        'src/shared/ui/sheet.tsx',
+        // Mobile uses pnpm --filter "./apps/mobile" for cap:* scripts.
+        'pnpm-workspace.yaml',
+      ],
+      filesAbsent: ['apps/desktop', 'src/features/examples', 'src/shared/supabase'],
+      depsPresent: ['react'],
+      depsAbsent: ['@supabase/supabase-js'],
+      providersContains: [],
+      providersAbsent: [],
+      scriptsPresent: ['cap', 'cap:sync', 'cap:add:ios', 'cap:add:android'],
+      scriptsAbsent: ['tauri', 'tauri:dev', 'tauri:build'],
+      capacitorConfContains: ["appId: 'app.eikon.eikon-e2e-mobile'"],
+      capacitorConfAbsent: ['__PROJECT_NAME__'],
+      // Mobile keeps every mobile-only adaptation: PWA meta, safe-area
+      // utilities, touch-target token, capacitor base branch.
+      htmlContains: [
+        'apple-mobile-web-app-capable',
+        'mobile-web-app-capable',
+        'viewport-fit=cover',
+      ],
+      stylesContains: ['--touch-target-min', '@utility safe-pt', '@utility safe-pb'],
+      viteContains: ["_mode === 'capacitor'"],
+      // Mobile platform also forces a mobile-default layout (`mobile-drawer`)
+      // when the user doesn't specify one. The dispatcher should keep
+      // only that variant block.
+      rootLayoutContains: [
+        'MobileDrawerRootLayout',
+        '@eikon:variant(layout=mobile-drawer)',
+      ],
+      rootLayoutAbsent: [
+        '@eikon:variant(layout=stacked)',
+        '@eikon:variant(layout=sidebar)',
+        'StackedRootLayout',
+        'SidebarRootLayout',
+      ],
     },
   },
   {
@@ -125,6 +244,10 @@ const SCENARIOS = [
         'src/shared/ui/toaster/terminal-toaster.tsx',
         'src/shared/ui/toaster/floating-bar-toaster.tsx',
         'src/shared/ui/toaster/stacked-cards-toaster.tsx',
+        // layout=sidebar means the mobile-drawer Sheet primitive is dead.
+        'src/shared/ui/sheet.tsx',
+        // platform defaults to web here, so the workspace yaml is dropped.
+        'pnpm-workspace.yaml',
       ],
       depsPresent: ['@tanstack/react-query'],
       depsAbsent: [
@@ -295,11 +418,13 @@ async function runScenario(scenario, tmpRoot, tarballPath) {
   }
 
   step('  pnpm install (in generated project)');
-  await run(
-    'pnpm',
-    ['install', '--prefer-offline', '--ignore-workspace'],
-    projectDir
-  );
+  // Honour the generated project's `pnpm-workspace.yaml` — desktop / mobile
+  // scaffolds depend on `apps/*` being recognised as workspace packages so
+  // that `tauri:dev` / `cap:sync` resolve via `pnpm --filter "./apps/<x>"`.
+  // `--prefer-offline` is kept; we deliberately do NOT pass
+  // `--ignore-workspace` (an earlier iteration did, which silently masked
+  // a missing workspace file in the template).
+  await run('pnpm', ['install', '--prefer-offline'], projectDir);
 
   step('  pnpm typecheck');
   await run('pnpm', ['typecheck'], projectDir);
@@ -405,6 +530,50 @@ async function verifyScenario(projectDir, expect) {
     }
   }
 
+  // index.html is gated by `@eikon:variant(platform=…)` block markers —
+  // mobile-only PWA meta tags must vanish on web/desktop scaffolds.
+  if (expect.htmlContains || expect.htmlAbsent) {
+    const html = await readFile(path.join(projectDir, 'index.html'), 'utf8');
+    for (const needle of expect.htmlContains ?? []) {
+      if (!html.includes(needle)) {
+        throw new Error(
+          `expected index.html to contain ${JSON.stringify(needle)}`
+        );
+      }
+    }
+    for (const needle of expect.htmlAbsent ?? []) {
+      if (html.includes(needle)) {
+        throw new Error(
+          `expected index.html to NOT contain ${JSON.stringify(needle)}`
+        );
+      }
+    }
+  }
+
+  // vite.config.ts: the capacitor base branch is stripped on non-mobile
+  // scaffolds, leaving the parameter destructure (`mode: _mode`) intact
+  // so the unused-parameter lint stays quiet.
+  if (expect.viteContains || expect.viteAbsent) {
+    const vite = await readFile(
+      path.join(projectDir, 'vite.config.ts'),
+      'utf8'
+    );
+    for (const needle of expect.viteContains ?? []) {
+      if (!vite.includes(needle)) {
+        throw new Error(
+          `expected vite.config.ts to contain ${JSON.stringify(needle)}`
+        );
+      }
+    }
+    for (const needle of expect.viteAbsent ?? []) {
+      if (vite.includes(needle)) {
+        throw new Error(
+          `expected vite.config.ts to NOT contain ${JSON.stringify(needle)}`
+        );
+      }
+    }
+  }
+
   if (expect.toasterContains || expect.toasterAbsent) {
     const toaster = await readFile(
       path.join(projectDir, 'src', 'shared', 'ui', 'toaster.tsx'),
@@ -421,6 +590,83 @@ async function verifyScenario(projectDir, expect) {
       if (toaster.includes(needle)) {
         throw new Error(
           `expected toaster.tsx to NOT contain ${JSON.stringify(needle)}`
+        );
+      }
+    }
+  }
+
+  if (expect.scriptsPresent || expect.scriptsAbsent) {
+    const scripts = pkg.scripts ?? {};
+    for (const name of expect.scriptsPresent ?? []) {
+      if (!(name in scripts)) {
+        throw new Error(`expected package.json script present: ${name}`);
+      }
+    }
+    for (const name of expect.scriptsAbsent ?? []) {
+      if (name in scripts) {
+        throw new Error(`expected package.json script absent: ${name}`);
+      }
+    }
+  }
+
+  if (expect.tauriConfContains || expect.tauriConfAbsent) {
+    const conf = await readFile(
+      path.join(projectDir, 'apps', 'desktop', 'src-tauri', 'tauri.conf.json'),
+      'utf8'
+    );
+    for (const needle of expect.tauriConfContains ?? []) {
+      if (!conf.includes(needle)) {
+        throw new Error(
+          `expected tauri.conf.json to contain ${JSON.stringify(needle)}`
+        );
+      }
+    }
+    for (const needle of expect.tauriConfAbsent ?? []) {
+      if (conf.includes(needle)) {
+        throw new Error(
+          `expected tauri.conf.json to NOT contain ${JSON.stringify(needle)}`
+        );
+      }
+    }
+  }
+
+  if (expect.cargoTomlContains || expect.cargoTomlAbsent) {
+    const cargoToml = await readFile(
+      path.join(projectDir, 'apps', 'desktop', 'src-tauri', 'Cargo.toml'),
+      'utf8'
+    );
+    for (const needle of expect.cargoTomlContains ?? []) {
+      if (!cargoToml.includes(needle)) {
+        throw new Error(
+          `expected Cargo.toml to contain ${JSON.stringify(needle)}`
+        );
+      }
+    }
+    for (const needle of expect.cargoTomlAbsent ?? []) {
+      if (cargoToml.includes(needle)) {
+        throw new Error(
+          `expected Cargo.toml to NOT contain ${JSON.stringify(needle)}`
+        );
+      }
+    }
+  }
+
+  if (expect.capacitorConfContains || expect.capacitorConfAbsent) {
+    const conf = await readFile(
+      path.join(projectDir, 'apps', 'mobile', 'capacitor.config.ts'),
+      'utf8'
+    );
+    for (const needle of expect.capacitorConfContains ?? []) {
+      if (!conf.includes(needle)) {
+        throw new Error(
+          `expected capacitor.config.ts to contain ${JSON.stringify(needle)}`
+        );
+      }
+    }
+    for (const needle of expect.capacitorConfAbsent ?? []) {
+      if (conf.includes(needle)) {
+        throw new Error(
+          `expected capacitor.config.ts to NOT contain ${JSON.stringify(needle)}`
         );
       }
     }
