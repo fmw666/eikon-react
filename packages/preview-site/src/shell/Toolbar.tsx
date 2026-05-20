@@ -6,7 +6,7 @@ import { type FrameSize, useUiStore } from './store';
  *
  * Layout, left-to-right:
  *
- *   [Files toggle]            [flex spacer]            [Go to ▸ Home ▸ Counter ▸ Tasks ▸ Examples ▸ Performance | Reload]
+ *   [Files toggle]            [flex spacer]            [Go to ▸ Home ▸ Counter ▸ Tasks ▸ Examples ▸ Performance ▸ Not Found | Reload]
  *   ── parent-side panel  ────────────────────────────  ── all iframe-targeting controls ─────────────────────────
  *
  * Files lives alone on the LEFT because it controls a parent-side
@@ -49,6 +49,15 @@ const QUICK_LINKS: ReadonlyArray<QuickLink> = [
     target: '/examples/performance',
     label: 'Performance',
     title: 'Web Vitals + virtual list + lazy-load demos',
+  },
+  // Intentionally unmatched path. The template router has a `*` catch-all
+  // wired to `<NotFoundPage />`, so any URL that no feature claims falls
+  // through to the 404 view — this button is the easiest way to preview
+  // that state without typing into the iframe's address bar.
+  {
+    target: '/404',
+    label: 'Not Found',
+    title: 'Preview the 404 catch-all page (any unmatched route works)',
   },
 ];
 
