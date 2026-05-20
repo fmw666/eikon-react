@@ -110,14 +110,37 @@ const APPLE_TOKENS = {
     '0 1px 2px rgba(0,0,0,0.04), 0 24px 48px -12px rgba(0,0,0,0.25), 0 8px 16px -8px rgba(0,0,0,0.18)',
 } as const;
 
+/**
+ * iPhone 14 Pro-flavoured token palette. Three concentric "layers" sit
+ * inside the body:
+ *
+ *   1. `rim`            — outer titanium edge of the frame
+ *   2. `rimHighlight`   — micro-thin polished sheen between titanium
+ *                         and rubber gasket (the strip you can see
+ *                         under direct light on a real Pro device)
+ *   3. `rimGasket`      — thicker rubberised antenna-gap ring
+ *
+ * Painted in MobileShell as a 3-layer stack of `box-shadow: inset …`
+ * declarations rather than nested DOM nodes — keeps the structure flat
+ * and lets the borderRadius animate smoothly if we ever transition
+ * between size presets. Values are tuned to roughly match the visual
+ * weight of devices.css's iPhone 14 Pro mock-up (border 1px #1b1721 +
+ * inset 0 0 4px 2px #c0b7cd + inset 0 0 0 6px #342c3f).
+ */
 const PHONE_TOKENS = {
-  body: '#0c0c0c',
-  rim: '#1f1f22',
-  islandBg: '#000',
+  // Surfaces
+  body: '#050507',             // black behind the screen cut-out
+  rim: '#1b1721',              // titanium / "deep space" outer edge
+  rimHighlight: '#c0b7cd',     // polished sheen between rim and gasket
+  rimGasket: '#342c3f',        // rubberised antenna gap (thickest layer)
+  // Buttons (side switches: mute, volume up/down, power)
+  button: '#1b1721',
+  // Dynamic Island & screen overlays
+  islandBg: '#010101',
   statusFg: '#fff',
   homeIndicator: 'rgba(255,255,255,0.92)',
   bodyShadow:
-    '0 1px 2px rgba(0,0,0,0.06), 0 30px 60px -15px rgba(0,0,0,0.45), 0 12px 30px -10px rgba(0,0,0,0.25)',
+    '0 1px 2px rgba(0,0,0,0.06), 0 32px 70px -18px rgba(0,0,0,0.55), 0 14px 32px -10px rgba(0,0,0,0.3)',
 } as const;
 
 // =================================================================================================
@@ -158,16 +181,100 @@ export function DeviceShell({
  * border than the SE — but the differences are subtle on screen so the
  * deltas here are conservative (real devices are within 1-2pt of each
  * other in CSS-pixel terms).
+ *
+ * `bezel` is intentionally thicker now (16-18px vs the original 10-11)
+ * because the new MobileShell paints THREE concentric layers inside
+ * the body — titanium edge + polished sheen + rubber gasket — and the
+ * combined inset shadows need ~8px to read cleanly. The visible "frame
+ * around the screen" still ends up at ~16-18 CSS px, which is exactly
+ * what an iPhone 14 Pro actually has in CSS-pixel terms (19 px on
+ * devices.css's reference).
+ *
+ * `islandTop` controls how far below the top edge of the inner screen
+ * the Dynamic Island sits. On a real 14 Pro the island floats roughly
+ * 12 px below the bezel, which keeps the status bar legible at 9:41
+ * height even with the island present.
+ *
+ * Side-button geometry (mute switch + 2 volume buttons on the left,
+ * power on the right) is expressed as percentages of the body height
+ * so it stays sensible across size presets without re-tuning per
+ * device.
  */
-const PHONE_GEOMETRY: Record<FrameSize, {
-  bezel: number;
-  cornerRadius: number;
-  islandWidth: number;
-  islandHeight: number;
-}> = {
-  small: { bezel: 10, cornerRadius: 38, islandWidth: 0, islandHeight: 0 },
-  standard: { bezel: 10, cornerRadius: 48, islandWidth: 120, islandHeight: 34 },
-  large: { bezel: 11, cornerRadius: 52, islandWidth: 130, islandHeight: 36 },
+interface PhoneGeometry {
+  readonly bezel: number;
+  readonly cornerRadius: number;
+  readonly islandWidth: number;
+  readonly islandHeight: number;
+  readonly islandTop: number;
+  /** Side-button widths/heights are in CSS px; positions in %-of-body. */
+  readonly buttons: {
+    readonly thickness: number;
+    readonly muteHeight: number;
+    readonly volumeHeight: number;
+    readonly powerHeight: number;
+    /** Top-edge offset, as a fraction of the body height (0 ≤ x < 1). */
+    readonly muteTopPct: number;
+    readonly volumeUpTopPct: number;
+    readonly volumeDownTopPct: number;
+    readonly powerTopPct: number;
+  };
+}
+
+const PHONE_GEOMETRY: Record<FrameSize, PhoneGeometry> = {
+  // No Dynamic Island (SE form-factor); slightly thinner frame.
+  small: {
+    bezel: 14,
+    cornerRadius: 44,
+    islandWidth: 0,
+    islandHeight: 0,
+    islandTop: 0,
+    buttons: {
+      thickness: 3,
+      muteHeight: 26,
+      volumeHeight: 48,
+      powerHeight: 70,
+      muteTopPct: 0.10,
+      volumeUpTopPct: 0.17,
+      volumeDownTopPct: 0.25,
+      powerTopPct: 0.13,
+    },
+  },
+  // iPhone 14 Pro reference — Dynamic Island + thick gasket.
+  standard: {
+    bezel: 16,
+    cornerRadius: 56,
+    islandWidth: 124,
+    islandHeight: 36,
+    islandTop: 12,
+    buttons: {
+      thickness: 3,
+      muteHeight: 30,
+      volumeHeight: 60,
+      powerHeight: 96,
+      muteTopPct: 0.11,
+      volumeUpTopPct: 0.18,
+      volumeDownTopPct: 0.27,
+      powerTopPct: 0.22,
+    },
+  },
+  // Pro Max-ish: a touch chunkier across the board.
+  large: {
+    bezel: 17,
+    cornerRadius: 60,
+    islandWidth: 132,
+    islandHeight: 38,
+    islandTop: 13,
+    buttons: {
+      thickness: 3,
+      muteHeight: 32,
+      volumeHeight: 64,
+      powerHeight: 102,
+      muteTopPct: 0.11,
+      volumeUpTopPct: 0.18,
+      volumeDownTopPct: 0.27,
+      powerTopPct: 0.22,
+    },
+  },
 };
 
 const STATUS_BAR_HEIGHT = 44;
@@ -183,6 +290,8 @@ function MobileShell({
   const screen = MOBILE_SCREEN[size];
   const geo = PHONE_GEOMETRY[size];
   const innerRadius = Math.max(geo.cornerRadius - geo.bezel, 18);
+  const outerWidth = screen.width + geo.bezel * 2;
+  const outerHeight = screen.height + geo.bezel * 2;
 
   // Outer body wraps a bezel + screen. The status bar and home indicator
   // are absolutely positioned over the screen, in the area we reserve via
@@ -190,26 +299,98 @@ function MobileShell({
   // bezel — the screen still maps 1-for-1 onto the reference device's
   // logical resolution, with the chrome borrowing a bit of it the way a
   // real iPhone borrows pixels for the Dynamic Island and home indicator).
+  //
+  // Three concentric "metal layers" are painted via stacked inset
+  // box-shadows on the body div, in order from outermost to innermost:
+  //   1. 1px hairline of `rim` (titanium edge — drawn as a real border
+  //      so the corner radius lines up perfectly at sub-pixel level)
+  //   2. ~2px inset sheen of `rimHighlight` (the polished ring you can
+  //      see on a real Pro device just inside the titanium)
+  //   3. ~6px inset of `rimGasket` (rubberised antenna gap that absorbs
+  //      most of the visual "thickness" of the frame)
+  // This avoids stacking three nested DOM nodes for a purely
+  // presentational effect, and keeps borderRadius transitions smooth.
   return (
     <div
       style={{
         position: 'relative',
-        width: screen.width + geo.bezel * 2,
-        height: screen.height + geo.bezel * 2,
+        width: outerWidth,
+        height: outerHeight,
         maxWidth: '100%',
         maxHeight: '100%',
         background: PHONE_TOKENS.body,
         borderRadius: geo.cornerRadius,
-        boxShadow: PHONE_TOKENS.bodyShadow,
+        border: `1px solid ${PHONE_TOKENS.rim}`,
+        boxShadow: [
+          // Inner layers: rendered top-to-bottom so the LAST entry is
+          // the innermost (closest to the screen).
+          `inset 0 0 4px 2px ${PHONE_TOKENS.rimHighlight}`,
+          `inset 0 0 0 6px ${PHONE_TOKENS.rimGasket}`,
+          // Outer drop shadow — the lift that gives the device a sense
+          // of weight on the desk backdrop.
+          PHONE_TOKENS.bodyShadow,
+        ].join(', '),
         padding: geo.bezel,
         flex: '0 0 auto',
-        // Subtle inner ring — gives the bezel a "tempered aluminium" edge.
-        outline: `1px solid ${PHONE_TOKENS.rim}`,
-        outlineOffset: -1,
       }}
       role="img"
       aria-label="iPhone preview"
     >
+      {/* Top-edge sheen: a 1px gradient line tucked just above the
+          frame's top border, mimicking the way a polished titanium
+          edge catches light from above. Kept short (50%-ish of the
+          corner radius on each side) so it doesn't run into the
+          corner curves where a real edge would refract differently. */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          top: -1,
+          left: geo.cornerRadius * 0.45,
+          right: geo.cornerRadius * 0.45,
+          height: 1,
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.22) 50%, transparent 100%)',
+          borderRadius: 1,
+          pointerEvents: 'none',
+          zIndex: 4,
+        }}
+      />
+
+      {/* ---- Side buttons ---- */}
+      {/* Mute switch (top-left). The slightly shorter height vs the
+          volume keys mirrors a real iPhone 14 Pro. */}
+      <SideButton
+        geo={geo}
+        side="left"
+        topPct={geo.buttons.muteTopPct}
+        height={geo.buttons.muteHeight}
+      />
+      {/* Volume up — sits below the mute switch. */}
+      <SideButton
+        geo={geo}
+        side="left"
+        topPct={geo.buttons.volumeUpTopPct}
+        height={geo.buttons.volumeHeight}
+      />
+      {/* Volume down — sits below volume up, with a small visual gap
+          (achieved purely via topPct math) so the two keys read as
+          separate buttons rather than one long bar. */}
+      <SideButton
+        geo={geo}
+        side="left"
+        topPct={geo.buttons.volumeDownTopPct}
+        height={geo.buttons.volumeHeight}
+      />
+      {/* Power / lock — single tall button on the right. */}
+      <SideButton
+        geo={geo}
+        side="right"
+        topPct={geo.buttons.powerTopPct}
+        height={geo.buttons.powerHeight}
+      />
+
+      {/* ---- Inner screen area ---- */}
       <div
         style={{
           position: 'relative',
@@ -217,7 +398,7 @@ function MobileShell({
           height: '100%',
           borderRadius: innerRadius,
           overflow: 'hidden',
-          background: '#fff',
+          background: '#000',
         }}
       >
         {/* iframe occupies the full screen area; status-bar / home-indicator
@@ -269,20 +450,30 @@ function MobileShell({
           <StatusBarIcons />
         </div>
 
-        {/* Dynamic Island — only on standard / large; SE doesn't have one. */}
+        {/* Dynamic Island — only on standard / large; SE doesn't have one.
+            Layered inset shadows give it a sense of depth: a faint edge
+            highlight reads as "rim", a top inner glow reads as the
+            sub-display catching light, and a bottom dark inner shadow
+            reads as the recessed sensor cluster. Outer 0.5px ring keeps
+            the silhouette crisp against very dark wallpapers. */}
         {geo.islandWidth > 0 && (
           <div
             aria-hidden="true"
             style={{
               position: 'absolute',
-              top: 10,
+              top: geo.islandTop,
               left: '50%',
               transform: 'translateX(-50%)',
               width: geo.islandWidth,
               height: geo.islandHeight,
               borderRadius: geo.islandHeight / 2,
               background: PHONE_TOKENS.islandBg,
-              boxShadow: '0 0 0 1px rgba(255,255,255,0.04) inset',
+              boxShadow: [
+                'inset 0 0 0 1px rgba(255,255,255,0.045)',
+                'inset 0 1px 2px rgba(255,255,255,0.07)',
+                'inset 0 -1px 1.5px rgba(0,0,0,0.55)',
+                '0 0 0 0.5px rgba(0,0,0,0.6)',
+              ].join(', '),
               pointerEvents: 'none',
               zIndex: 3,
             }}
@@ -308,6 +499,53 @@ function MobileShell({
         />
       </div>
     </div>
+  );
+}
+
+/**
+ * Single side-button on the iPhone body — mute / volume / power. Drawn
+ * as a thin rounded bar sitting OUTSIDE the body's left/right edge by
+ * one pixel so it reads as a discrete button rather than an indent
+ * etched into the frame.
+ *
+ * Position is expressed as a fraction of the body's height (`topPct`)
+ * rather than absolute px, so the same numbers work across the three
+ * size presets without re-tuning.
+ *
+ * `side='left'` rounds the left two corners and offsets to `left: -2`;
+ * `side='right'` mirrors. A subtle inner-edge shadow inside the button
+ * suggests the metal recess where the key meets the body.
+ */
+function SideButton({
+  geo,
+  side,
+  topPct,
+  height,
+}: {
+  geo: PhoneGeometry;
+  side: 'left' | 'right';
+  topPct: number;
+  height: number;
+}) {
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        position: 'absolute',
+        [side]: -2,
+        top: `${topPct * 100}%`,
+        width: geo.buttons.thickness,
+        height,
+        background: PHONE_TOKENS.button,
+        borderRadius:
+          side === 'left' ? '2px 0 0 2px' : '0 2px 2px 0',
+        boxShadow:
+          side === 'left'
+            ? 'inset -1px 0 0 rgba(255,255,255,0.06)'
+            : 'inset 1px 0 0 rgba(255,255,255,0.06)',
+        zIndex: 1,
+      }}
+    />
   );
 }
 
