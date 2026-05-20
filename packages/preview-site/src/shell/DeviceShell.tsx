@@ -9,9 +9,11 @@
  *                    and a home indicator at the bottom.
  *   - DesktopShell → macOS Sequoia window with traffic lights in the
  *                    top-left and a centred title.
- *   - WebShell     → Safari (macOS) chrome — traffic lights, back/
- *                    forward/reload buttons, and a pill-shaped URL bar
- *                    showing the previewed app's "domain".
+ *   - WebShell     → Chrome (macOS) chrome — tab strip with traffic
+ *                    lights + active tab + new-tab button on top, and
+ *                    a back/forward/reload toolbar with a pill-shaped
+ *                    URL bar showing the previewed app's "domain"
+ *                    underneath.
  *
  * All three are pure presentation: nothing here drives the iframe's src,
  * its build state, or any cache key. The shell is sized via the
@@ -726,11 +728,54 @@ function TrafficLights() {
 }
 
 // =================================================================================================
-// WebShell — Safari (macOS) chrome
+// WebShell — Chrome on macOS chrome
 // =================================================================================================
+//
+// Chrome differs from Safari in two visible ways the previous design
+// missed:
+//
+//   1. The tab strip sits ABOVE the toolbar (Chrome) rather than below
+//      (Safari).
+//   2. The whole top chrome is tinted with a tonal "surface-container"
+//      colour (a soft lavender / cool grey), with the active tab
+//      "punching out" of that tint into the toolbar below — the visual
+//      effect is that the tab is part of the same surface as the page,
+//      and the inactive area surrounds it.
+//
+// We keep the macOS traffic-light cluster on the leading edge of the
+// tab strip because the preview is still presented as a macOS window;
+// only the browser-chrome conventions change. Trailing toolbar icons
+// are intentionally minimal per the latest design reference — just
+// one extension glyph and a profile dot — so the chrome doesn't read
+// as cluttered next to the actual previewed app.
 
-const SAFARI_TOOLBAR_HEIGHT = 44;
-const SAFARI_TAB_BAR_HEIGHT = 30;
+const CHROME_TAB_BAR_HEIGHT = 36;
+const CHROME_TOOLBAR_HEIGHT = 40;
+
+const CHROME_TOKENS = {
+  // Tab strip tint — Chrome 122+ "surface-container" but pulled toward
+  // neutral so it harmonises with the macOS Sequoia desktop shell and
+  // the titanium iPhone in the other two platforms. The original
+  // `#dee3ec` lavender felt too saturated when all three shells sat
+  // next to each other in a marketing screenshot.
+  tabStripBg: '#e8e9ec',
+  // Toolbar + active-tab surface (they share a colour so the tab reads
+  // as cut out of the toolbar).
+  surfaceBg: '#ffffff',
+  // URL pill: light, slightly cooler than pure surface so it reads as
+  // a recessed input on the toolbar.
+  urlPillBg: '#f1f3f4',
+  urlPillBgHover: '#e8eaed',
+  urlPillBorder: 'transparent',
+  // Foregrounds
+  fg: '#1f1f1f',
+  fgMuted: '#5f6368',
+  // Profile circle (the avatar dot on the trailing edge). Neutral
+  // slate-grey rather than the vivid purple Chrome uses by default —
+  // a single colour dot is enough to read as "profile" without
+  // pulling visual attention from the previewed app.
+  profileBg: '#6b7280',
+} as const;
 
 function WebShell({
   size,
@@ -745,7 +790,7 @@ function WebShell({
 }) {
   const screen = DESKTOP_SCREEN[size];
   const radius = 12;
-  const totalChrome = SAFARI_TOOLBAR_HEIGHT + SAFARI_TAB_BAR_HEIGHT;
+  const totalChrome = CHROME_TAB_BAR_HEIGHT + CHROME_TOOLBAR_HEIGHT;
 
   return (
     <div
@@ -755,7 +800,7 @@ function WebShell({
         height: screen.height + totalChrome,
         maxWidth: '100%',
         maxHeight: '100%',
-        background: '#fff',
+        background: CHROME_TOKENS.surfaceBg,
         borderRadius: radius,
         boxShadow: APPLE_TOKENS.bodyShadow,
         border: `1px solid ${APPLE_TOKENS.windowBorder}`,
@@ -765,9 +810,9 @@ function WebShell({
         flexDirection: 'column',
       }}
       role="img"
-      aria-label="Safari browser preview"
+      aria-label="Chrome browser preview"
     >
-      <SafariTopChrome domain={domain} title={title} />
+      <ChromeTopChrome domain={domain} title={title} />
       <div style={{ flex: 1, position: 'relative' }}>
         {children({
           width: '100%',
@@ -781,7 +826,7 @@ function WebShell({
   );
 }
 
-function SafariTopChrome({
+function ChromeTopChrome({
   domain,
   title,
 }: {
@@ -792,85 +837,98 @@ function SafariTopChrome({
     <div
       aria-hidden="true"
       style={{
-        background: APPLE_TOKENS.titleBarBg,
-        borderBottom: `1px solid ${APPLE_TOKENS.windowBorder}`,
         userSelect: 'none',
         fontFamily:
-          '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
+          '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif',
       }}
     >
-      {/* Toolbar row: traffic lights + nav buttons + URL bar */}
+      {/* ---- Tab strip (top row) ---- */}
       <div
         style={{
-          height: SAFARI_TOOLBAR_HEIGHT,
-          display: 'grid',
-          gridTemplateColumns: 'auto auto 1fr auto',
-          alignItems: 'center',
-          gap: 12,
-          padding: '0 12px',
-        }}
-      >
-        <TrafficLights />
-        <NavButtonRow />
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <UrlBar domain={domain} />
-        </div>
-        <ToolbarTrailing />
-      </div>
-      {/* Tab bar row */}
-      <div
-        style={{
-          height: SAFARI_TAB_BAR_HEIGHT,
+          height: CHROME_TAB_BAR_HEIGHT,
           display: 'flex',
           alignItems: 'flex-end',
-          padding: '0 8px',
-          borderTop: `1px solid ${APPLE_TOKENS.windowBorder}`,
-          background: 'rgba(255,255,255,0.4)',
+          gap: 4,
+          padding: '0 10px 0 12px',
+          background: CHROME_TOKENS.tabStripBg,
         }}
       >
-        <SafariTab title={title} active />
+        <span style={{ alignSelf: 'center' }}>
+          <TrafficLights />
+        </span>
+        <span style={{ width: 8 }} />
+        <ChromeTab title={title} active />
+        <NewTabButton />
         <span style={{ flex: 1 }} />
+        <ProfileDot />
+      </div>
+      {/* ---- Toolbar (bottom row) — back / forward / reload + URL ---- */}
+      <div
+        style={{
+          height: CHROME_TOOLBAR_HEIGHT,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '0 12px',
+          background: CHROME_TOKENS.surfaceBg,
+        }}
+      >
+        <NavButtonRow />
+        <UrlBar domain={domain} />
+        <ToolbarTrailing />
       </div>
     </div>
   );
 }
 
 function NavButtonRow() {
-  // Back / forward / share / sidebar — drawn as flat outline icons
-  // matching the Safari 17+ minimalist toolbar. Plumbing the real
-  // back/forward to iframe history would be a nice future touch but
-  // out of scope for purely-visual chrome.
+  // Back / forward / reload — Chrome's three left-side nav buttons.
+  // Each is a circular icon button (≠ Safari's squared keys). The
+  // forward arrow is dimmed because the simulated history is empty
+  // beyond the current page.
   const btn: CSSProperties = {
-    width: 26,
-    height: 26,
-    borderRadius: 6,
+    width: 28,
+    height: 28,
+    borderRadius: '50%',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#3a3a3c',
+    color: CHROME_TOKENS.fg,
     background: 'transparent',
   };
   return (
-    <span style={{ display: 'inline-flex', gap: 2 }}>
+    <span style={{ display: 'inline-flex', gap: 2, marginRight: 4 }}>
       <span style={btn}>
-        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
           <path
-            d="M9 2 4 7l5 5"
+            d="M10 3 5 8l5 5"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.6"
+            strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
         </svg>
       </span>
-      <span style={{ ...btn, opacity: 0.45 }}>
-        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+      <span style={{ ...btn, opacity: 0.35 }}>
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
           <path
-            d="m5 2 5 5-5 5"
+            d="M6 3 11 8l-5 5"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.6"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </span>
+      <span style={btn}>
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+          <path
+            d="M13 8a5 5 0 1 1-1.46-3.54L13 6m0-3v3h-3"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -881,134 +939,241 @@ function NavButtonRow() {
 }
 
 function UrlBar({ domain }: { domain: string }) {
+  // Chrome 124+ URL pill: large radius, soft tonal background, no
+  // visible border on the resting state. The secure indicator on the
+  // leading edge is a small "tune" / settings glyph rather than the
+  // legacy padlock — Chrome dropped the padlock in late 2023.
   return (
     <div
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: 8,
-        height: 28,
+        gap: 10,
+        height: 30,
         minWidth: 320,
-        maxWidth: 560,
         flex: 1,
-        padding: '0 12px',
-        background: APPLE_TOKENS.urlBarBg,
-        border: `1px solid ${APPLE_TOKENS.urlBarBorder}`,
-        borderRadius: 7,
-        fontSize: 12,
-        color: APPLE_TOKENS.urlBarTextPrimary,
-        boxShadow: '0 1px 0 rgba(0,0,0,0.02) inset',
+        padding: '0 14px',
+        background: CHROME_TOKENS.urlPillBg,
+        border: `1px solid ${CHROME_TOKENS.urlPillBorder}`,
+        borderRadius: 16,
+        fontSize: 13,
+        color: CHROME_TOKENS.fg,
       }}
     >
-      <svg width="11" height="13" viewBox="0 0 11 13" aria-hidden="true">
-        <path
-          d="M2 5.5V4a3.5 3.5 0 1 1 7 0v1.5"
-          fill="none"
-          stroke={APPLE_TOKENS.urlBarTextSecondary}
-          strokeWidth="1.4"
-          strokeLinecap="round"
-        />
-        <rect
-          x="1"
-          y="5.5"
-          width="9"
-          height="6.5"
-          rx="1.3"
-          fill={APPLE_TOKENS.urlBarTextSecondary}
-        />
-      </svg>
-      <span style={{ color: APPLE_TOKENS.urlBarTextSecondary }}>https://</span>
-      <span style={{ fontWeight: 500 }}>{domain}</span>
-      <span style={{ flex: 1 }} />
-      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-        <path
-          d="M11 7a4 4 0 1 1-1.17-2.83l1.67-1.67M11 2.5V5h-2.5"
-          fill="none"
-          stroke={APPLE_TOKENS.urlBarTextSecondary}
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <SecureIndicator />
+      <span
+        style={{
+          flex: 1,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        <span style={{ color: CHROME_TOKENS.fgMuted }}>https://</span>
+        <span style={{ fontWeight: 400 }}>{domain}</span>
+      </span>
+      <BookmarkStarIcon />
     </div>
   );
 }
 
+function SecureIndicator() {
+  // Chrome's "tune sliders" connection-info icon (the replacement for
+  // the legacy padlock). Drawn as two horizontal rails with offset
+  // handles so it reads as a settings dial.
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      aria-hidden="true"
+      style={{ color: CHROME_TOKENS.fgMuted, flex: '0 0 auto' }}
+    >
+      <path
+        d="M2 4.5h6M2 9.5h2M10 9.5h2"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+      <circle
+        cx="10"
+        cy="4.5"
+        r="1.6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />
+      <circle
+        cx="6"
+        cy="9.5"
+        r="1.6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />
+    </svg>
+  );
+}
+
+function BookmarkStarIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      aria-hidden="true"
+      style={{ color: CHROME_TOKENS.fgMuted, flex: '0 0 auto' }}
+    >
+      <path
+        d="M7 1.6 8.6 5l3.6.5-2.6 2.5.6 3.6L7 9.9 3.8 11.6l.6-3.6L1.8 5.5 5.4 5Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function ToolbarTrailing() {
-  // Share + tabs icons on the trailing edge of the toolbar.
+  // Per the latest design reference the trailing edge is intentionally
+  // sparse — one "extensions" puzzle-piece glyph is enough to read as
+  // Chrome without crowding the toolbar. The profile circle lives in
+  // the tab strip (top-right), not here.
   const btn: CSSProperties = {
-    width: 26,
-    height: 26,
-    borderRadius: 6,
+    width: 28,
+    height: 28,
+    borderRadius: '50%',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#3a3a3c',
+    color: CHROME_TOKENS.fg,
+    marginLeft: 4,
   };
   return (
-    <span style={{ display: 'inline-flex', gap: 2 }}>
-      <span style={btn}>
-        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-          <path
-            d="M7 1.5v8M7 1.5 4.5 4M7 1.5 9.5 4M2.5 8v3a1.5 1.5 0 0 0 1.5 1.5h6a1.5 1.5 0 0 0 1.5-1.5V8"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </span>
-      <span style={btn}>
-        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-          <rect
-            x="1.5"
-            y="2.5"
-            width="11"
-            height="9"
-            rx="1.4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.4"
-          />
-          <path
-            d="M1.5 5.5h11"
-            stroke="currentColor"
-            strokeWidth="1.4"
-            strokeLinecap="round"
-          />
-        </svg>
-      </span>
+    <span style={btn}>
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+        <path
+          d="M6 2.5h2a1 1 0 0 1 1 1V5h1.5a1.5 1.5 0 0 1 0 3H9v1.5a1 1 0 0 0 1 1H11a1.5 1.5 0 0 1 1.5 1.5V13a.5.5 0 0 1-.5.5H8.5a1 1 0 0 1-1-1V11A1.5 1.5 0 0 0 6 9.5H4.5a1 1 0 0 1-1-1V6.5a1 1 0 0 1 1-1H5V3.5a1 1 0 0 1 1-1Z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.3"
+          strokeLinejoin="round"
+        />
+      </svg>
     </span>
   );
 }
 
-function SafariTab({ title, active }: { title: string; active: boolean }) {
+function ChromeTab({ title, active }: { title: string; active: boolean }) {
+  // A Chrome tab is a rounded-top trapezoid: top corners curve inward
+  // into the tab strip while the bottom corners curve OUTWARD into the
+  // toolbar surface (the "tab notch"). We approximate this with two
+  // small radial-gradient pseudo-elements painted as siblings, but
+  // since we can't use pseudo-elements with inline styles easily, the
+  // version below uses a simple rounded rectangle with the same
+  // surface colour as the toolbar — close enough at the size we
+  // render, and reads as a real Chrome tab.
   return (
     <div
       style={{
         display: 'inline-flex',
         alignItems: 'center',
         gap: 8,
-        height: 24,
+        height: 30,
         padding: '0 12px',
-        borderRadius: '6px 6px 0 0',
-        background: active ? '#fafafa' : 'transparent',
-        border: active ? `1px solid ${APPLE_TOKENS.windowBorder}` : 'none',
-        borderBottom: 'none',
-        fontSize: 11,
-        color: APPLE_TOKENS.titleColor,
+        borderRadius: '10px 10px 0 0',
+        background: active ? CHROME_TOKENS.surfaceBg : 'transparent',
+        fontSize: 12,
+        color: CHROME_TOKENS.fg,
         maxWidth: 240,
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         alignSelf: 'flex-end',
+        position: 'relative',
       }}
     >
-      <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
-        <circle cx="5" cy="5" r="3.5" fill="#0e639c" opacity="0.85" />
+      <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+        <circle cx="6" cy="6" r="4.2" fill="#0e639c" opacity="0.85" />
       </svg>
-      <span style={{ fontWeight: 500 }}>{title}</span>
+      <span
+        style={{
+          fontWeight: 500,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {title}
+      </span>
+      <span
+        style={{
+          width: 14,
+          height: 14,
+          borderRadius: '50%',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: CHROME_TOKENS.fgMuted,
+          flex: '0 0 auto',
+        }}
+      >
+        <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true">
+          <path
+            d="M1.5 1.5 6.5 6.5M6.5 1.5 1.5 6.5"
+            stroke="currentColor"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+          />
+        </svg>
+      </span>
     </div>
+  );
+}
+
+function NewTabButton() {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        width: 26,
+        height: 26,
+        borderRadius: '50%',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: CHROME_TOKENS.fgMuted,
+        alignSelf: 'center',
+        marginLeft: 2,
+      }}
+    >
+      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+        <path
+          d="M7 2.5v9M2.5 7h9"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+      </svg>
+    </span>
+  );
+}
+
+function ProfileDot() {
+  // Single small circular avatar on the trailing edge of the tab strip.
+  // Drawn flat (no inner letter) so it reads as a profile placeholder
+  // at any size without needing an extra glyph.
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        width: 22,
+        height: 22,
+        borderRadius: '50%',
+        background: CHROME_TOKENS.profileBg,
+        alignSelf: 'center',
+        boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.06)',
+      }}
+    />
   );
 }

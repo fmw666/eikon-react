@@ -84,11 +84,11 @@ export function Toolbar() {
   const navigateInPreview = useUiStore((s) => s.navigateInPreview);
   const frameSize = useUiStore((s) => s.frameSize);
   const setFrameSize = useUiStore((s) => s.setFrameSize);
-  // Every platform now renders an Apple-styled DeviceShell (Safari for
-  // web, macOS Sequoia for desktop, iPhone for mobile), so the size
-  // segmented control is always meaningful — it picks the simulated
-  // reference device.  We still read the platform so the tooltip text
-  // can describe the right physical reference (Pro Max vs Monitor 24").
+  // Every platform now renders a DeviceShell (Chrome for web, macOS
+  // Sequoia for desktop, iPhone for mobile), so the size segmented
+  // control is always meaningful — it picks the simulated reference
+  // device.  We still read the platform so the tooltip text can
+  // describe the right physical reference (Pro Max vs Monitor 24").
   const platform = useShellStore((s) => String(s.state.platform));
 
   return (
