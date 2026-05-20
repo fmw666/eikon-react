@@ -60,6 +60,74 @@ export function UrlSync(): null {
  */
 export type FrameSize = 'small' | 'standard' | 'large';
 
+/**
+ * Lifecycle of the cache-build pipeline as observed by the shell. Driven
+ * by `PreviewFrame` (which owns the /api/build polling) and consumed by
+ * `App.tsx`'s unified loading overlay.
+ *
+ *   - 'idle'     never fired a build yet (initial mount, pre any param).
+ *   - 'building' a /api/build is in flight or being polled.
+ *   - 'ready'    the build dist is on disk; we've published `currentHash`.
+ *   - 'error'    the build failed; PreviewFrame surfaces the message.
+ *
+ * NOTE: 'ready' does NOT mean the iframe and file tree are visually
+ * caught up — the panels still need to fetch their per-hash payloads
+ * AFTER the build completes. The unified overlay reads
+ * `iframeReadyHash` / `treeReadyHash` against `currentHash` to gate
+ * itself off only when EVERY visible panel matches the current build.
+ */
+export type BuildStatus = 'idle' | 'building' | 'ready' | 'error';
+
+// ---------------------------------------------------------------------------
+// Unified loading-overlay gate
+// ---------------------------------------------------------------------------
+
+export interface LoadingGateInputs {
+  buildStatus: BuildStatus;
+  currentHash: string | null;
+  iframeReadyHash: string | null;
+  treeReadyHash: string | null;
+  /** Whether the file-explorer panel is open. When closed the tree's
+   *  per-hash IO is invisible and shouldn't gate the overlay. */
+  showFiles: boolean;
+}
+
+export type OverlayMode = 'cold' | 'rebuild' | null;
+
+/**
+ * Pure decision function for the App-level loading overlay. Extracted
+ * from `App.tsx` so the conditions can be unit-tested without mounting
+ * React — this is the brain of the cross-panel coordination feature.
+ *
+ *   - `'cold'`     the user has never seen any iframe paint yet;
+ *                  rendered as a soft light wash + "Building variant…".
+ *   - `'rebuild'`  switching variants on top of an already-running
+ *                  preview; rendered as a darker dim + "Rebuilding
+ *                  variant…" because the prior content is still
+ *                  underneath and we want it to read as stale.
+ *   - `null`       no overlay should be shown.
+ *
+ * The cold/rebuild distinction is anchored on `iframeReadyHash` rather
+ * than `currentHash` so we don't flicker the heavier copy onto a still-
+ * blank panel the moment the build dist exists but before the iframe
+ * has actually painted.
+ */
+export function computeOverlayMode(inputs: LoadingGateInputs): OverlayMode {
+  const {
+    buildStatus,
+    currentHash,
+    iframeReadyHash,
+    treeReadyHash,
+    showFiles,
+  } = inputs;
+  const isLoading =
+    buildStatus === 'building' ||
+    (currentHash !== null && iframeReadyHash !== currentHash) ||
+    (showFiles && currentHash !== null && treeReadyHash !== currentHash);
+  if (!isLoading) return null;
+  return iframeReadyHash === null ? 'cold' : 'rebuild';
+}
+
 export interface UiStore {
   showFiles: boolean;
   showEditor: boolean;
@@ -68,6 +136,30 @@ export interface UiStore {
   /** Hash of the most recently READY preview build. The explorer & code view
    *  read against this so the tree always matches what's running in iframe. */
   currentHash: string | null;
+  /**
+   * Build pipeline status. Lifted out of `PreviewFrame` so the App-level
+   * loading overlay can render across the whole `<main>` area instead of
+   * being trapped inside the iframe panel.
+   */
+  buildStatus: BuildStatus;
+  /** Last build error message, surfaced by the iframe panel when the
+   *  pipeline failed. Cleared on the next successful build. */
+  buildError: string | null;
+  /**
+   * Hash for which the FileExplorer has finished loading the file tree.
+   * Diverges from `currentHash` during the brief window between a build
+   * completing and the explorer's `/api/files?hash=…` fetch finishing —
+   * which is the exact gap the unified overlay is meant to cover (the
+   * file tree used to silently swap in stale-then-fresh content there).
+   */
+  treeReadyHash: string | null;
+  /**
+   * Hash for which the iframe has fired `onLoad`, i.e. its document has
+   * actually parsed and the user is looking at fresh pixels. Same role
+   * as `treeReadyHash` but for the preview pane: build-ready alone isn't
+   * enough; we want to keep the overlay up until the iframe paints.
+   */
+  iframeReadyHash: string | null;
   /** Monotonically increasing counter. Bumping it forces PreviewFrame to
    *  remount the iframe — a cheap "reload the page in the preview" action
    *  that doesn't require the user to focus the iframe and hit Ctrl+R. */
@@ -91,6 +183,9 @@ export interface UiStore {
   openFile: (relPath: string) => void;
   closeFile: () => void;
   setCurrentHash: (hash: string | null) => void;
+  setBuildStatus: (status: BuildStatus, error?: string | null) => void;
+  setTreeReadyHash: (hash: string | null) => void;
+  setIframeReadyHash: (hash: string | null) => void;
   reloadPreview: () => void;
   /** Queue an in-iframe navigation; consumed once by PreviewFrame. */
   navigateInPreview: (target: string) => void;
@@ -103,6 +198,10 @@ export const useUiStore = create<UiStore>((set) => ({
   showEditor: false,
   selectedFile: null,
   currentHash: null,
+  buildStatus: 'idle',
+  buildError: null,
+  treeReadyHash: null,
+  iframeReadyHash: null,
   reloadKey: 0,
   navRequest: null,
   frameSize: 'standard',
@@ -134,6 +233,16 @@ export const useUiStore = create<UiStore>((set) => ({
   // panel and reclaiming the space for the preview.
   closeFile: () => set({ selectedFile: null, showEditor: false }),
   setCurrentHash: (currentHash) => set({ currentHash }),
+  setBuildStatus: (buildStatus, buildError = null) =>
+    set({ buildStatus, buildError }),
+  setTreeReadyHash: (treeReadyHash) => set({ treeReadyHash }),
+  setIframeReadyHash: (iframeReadyHash) => set({ iframeReadyHash }),
+  // Reloading is a user-initiated soft refresh of the SAME variant; the
+  // dist on disk hasn't changed, so we deliberately do NOT clear
+  // `iframeReadyHash` (it still equals `currentHash`). That keeps the
+  // unified overlay quiet during reload — the iframe will flash a brief
+  // browser-native blank while it remounts, but spamming a "Rebuilding…"
+  // overlay would misrepresent what's happening (no rebuild took place).
   reloadPreview: () => set((s) => ({ reloadKey: s.reloadKey + 1 })),
   navigateInPreview: (target) =>
     set((s) => ({

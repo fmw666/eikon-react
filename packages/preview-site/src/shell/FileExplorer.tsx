@@ -204,6 +204,7 @@ export function FileExplorer() {
   const hash = useUiStore((s) => s.currentHash);
   const selectedFile = useUiStore((s) => s.selectedFile);
   const openFile = useUiStore((s) => s.openFile);
+  const setTreeReadyHash = useUiStore((s) => s.setTreeReadyHash);
 
   const [tree, setTree] = useState<FileNode[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -224,12 +225,22 @@ export function FileExplorer() {
       .then((r) => {
         setTree(r.tree);
         setError(null);
+        // Tell the App-level loading overlay that THIS panel has caught
+        // up to `currentHash`. Reporting `r.hash` (what the server
+        // actually answered for) instead of the local `hash` closure
+        // shields us from the rare case where `currentHash` flipped
+        // again while the fetch was in flight — we only mark the
+        // freshly-arrived hash as ready.
+        setTreeReadyHash(r.hash);
       })
       .catch((e: unknown) => {
         if ((e as { name?: string }).name === 'AbortError') return;
         setError(e instanceof Error ? e.message : String(e));
       });
     return () => ctrl.abort();
+    // `setTreeReadyHash` is a stable zustand setter; omitting it from
+    // deps keeps this effect from re-running on store init.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hash]);
 
   useEffect(() => {

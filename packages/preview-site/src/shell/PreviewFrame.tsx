@@ -52,19 +52,6 @@ function shellOuterPadding(platform: DevicePlatform): number {
   return platform === 'mobile' ? 24 : 16;
 }
 
-function describeVariant(inputs: BuildInputs): string {
-  return [
-    `platform=${inputs.platform}`,
-    `design=${inputs.design}`,
-    `layout=${inputs.layout}`,
-    `ui=${inputs.ui}`,
-    `toast=${inputs.toast}`,
-    inputs.supabase ? 'supabase' : null,
-  ]
-    .filter(Boolean)
-    .join(' · ');
-}
-
 /**
  * Snapshot the iframe's current location relative to `/preview/<hash>/` so we
  * can preserve the user's in-template route when swapping to a new hash.
@@ -151,10 +138,11 @@ export function PreviewFrame() {
   // effect — the package manager only matters at scaffold time.
   const buildInputs = useShellStore(useShallow(selectBuildInputs));
   const setCurrentHash = useUiStore((s) => s.setCurrentHash);
+  const setBuildStatus = useUiStore((s) => s.setBuildStatus);
+  const setIframeReadyHash = useUiStore((s) => s.setIframeReadyHash);
   const reloadKey = useUiStore((s) => s.reloadKey);
   const navRequest = useUiStore((s) => s.navRequest);
   const clearNavRequest = useUiStore((s) => s.clearNavRequest);
-  const [build, setBuild] = useState<BuildState | null>(null);
   const [lastReadyHash, setLastReadyHash] = useState<string | null>(null);
   const [subUrl, setSubUrl] = useState<string>('');
   const [templateRev, setTemplateRev] = useState<string | null>(null);
@@ -211,8 +199,21 @@ export function PreviewFrame() {
     const ctrl = new AbortController();
 
     function adopt(next: BuildState): void {
-      setBuild(next);
-      if (next.status !== 'ready') return;
+      // Mirror the build lifecycle into the shared store so the App-level
+      // overlay covers the whole `<main>` (Files + Editor + Preview)
+      // instead of just the iframe panel. We surface 'building' / 'error'
+      // immediately, but only flip to 'ready' AFTER `currentHash` is
+      // updated below — sibling panels gate themselves on `currentHash`,
+      // so updating the two atomically (status before hash for failure,
+      // hash before status for success) keeps the overlay tight.
+      if (next.status === 'building') {
+        setBuildStatus('building');
+        return;
+      }
+      if (next.status === 'error') {
+        setBuildStatus('error', next.error ?? null);
+        return;
+      }
       // Capture wherever the user has navigated inside the previous
       // variant so we can re-mount the new variant at the same place.
       const sub = readIframeSubUrl(iframeRef.current);
@@ -221,6 +222,9 @@ export function PreviewFrame() {
       // Broadcast the current ready hash so sibling panels (file explorer,
       // code view) target the right cache dir for /api/files & /api/file.
       setCurrentHash(next.hash);
+      // Build dist exists; pixel-level "ready" is signalled by the iframe
+      // and tree onLoad reporters. The unified overlay reads those.
+      setBuildStatus('ready');
     }
 
     async function pollUntilDone(hash: string): Promise<void> {
@@ -263,11 +267,8 @@ export function PreviewFrame() {
     void go().catch((e: unknown) => {
       if (cancelled || seq !== requestSeq.current) return;
       if ((e as { name?: string })?.name === 'AbortError') return;
-      setBuild({
-        hash: '',
-        status: 'error',
-        error: e instanceof Error ? e.message : String(e),
-      });
+      const msg = e instanceof Error ? e.message : String(e);
+      setBuildStatus('error', msg);
     });
 
     return () => {
@@ -275,8 +276,9 @@ export function PreviewFrame() {
       if (pollTimer) clearTimeout(pollTimer);
       ctrl.abort();
     };
-    // `setCurrentHash` is stable across renders (zustand setter); omitting
-    // intentionally to keep the build effect from re-running on store init.
+    // The zustand setters (`setCurrentHash`, `setBuildStatus`,
+    // `setIframeReadyHash`) are stable across renders; omitting them
+    // intentionally so the build effect doesn't re-run on store init.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [buildInputs, templateRev]);
 
@@ -325,9 +327,6 @@ export function PreviewFrame() {
     clearNavRequest();
   }, [navRequest, lastReadyHash, clearNavRequest]);
 
-  const isBuilding = build?.status === 'building';
-  const isError = build?.status === 'error';
-  const variantLabel = useMemo(() => describeVariant(buildInputs), [buildInputs]);
 
   // The iframe's src is set ONCE per (hash, subUrl) pair via React's `key`
   // remount mechanism. We deliberately don't bind it as a controlled prop —
@@ -392,73 +391,26 @@ export function PreviewFrame() {
               src={iframeSrc}
               title="Eikon template preview"
               style={screenStyle}
+              // Pixel-level "ready" signal for the App-level overlay.
+              // We report the hash that this iframe was mounted for, NOT
+              // whatever happens to be `currentHash` at fire time, so a
+              // rapid param flip (build A → build B before A even loads)
+              // doesn't accidentally mark B as ready off A's onLoad.
+              onLoad={() => {
+                if (lastReadyHash) setIframeReadyHash(lastReadyHash);
+              }}
             />
           )}
         </DeviceShell>
       )}
 
-      {isBuilding && (
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: lastReadyHash
-              ? 'rgba(0,0,0,0.45)'
-              : 'rgba(0,0,0,0.04)',
-            color: lastReadyHash ? '#fff' : '#374151',
-            fontFamily: 'system-ui, sans-serif',
-            fontSize: 14,
-            pointerEvents: 'none',
-            backdropFilter: lastReadyHash ? 'blur(2px)' : 'none',
-            transition: 'background 120ms ease',
-          }}
-        >
-          <div style={{ textAlign: 'center', lineHeight: 1.5 }}>
-            <div style={{ fontWeight: 600 }}>
-              {lastReadyHash ? 'Rebuilding variant…' : 'Building variant…'}
-            </div>
-            <div
-              style={{
-                marginTop: 4,
-                fontSize: 12,
-                opacity: 0.85,
-                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-              }}
-            >
-              {variantLabel}
-            </div>
-            {!lastReadyHash && (
-              <div style={{ marginTop: 6, fontSize: 11, opacity: 0.7 }}>
-                first build of this combo takes a few seconds
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {isError && (
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            padding: 16,
-            background: '#fff0f0',
-            color: '#7f1d1d',
-            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-            fontSize: 12,
-            overflow: 'auto',
-            whiteSpace: 'pre-wrap',
-          }}
-        >
-          <div style={{ marginBottom: 8, fontWeight: 600 }}>
-            Build failed for variant: {variantLabel}
-          </div>
-          {build?.error ?? '(no error message)'}
-        </div>
-      )}
+      {/*
+        The build-error overlay used to live inside this panel, but a
+        failed build is a project-wide event (the file tree and editor
+        will be empty / stale until the user fixes the variant), so the
+        error UI is now rendered at the App level alongside the unified
+        loading overlay. PreviewFrame focuses purely on the iframe.
+      */}
     </div>
   );
 }
