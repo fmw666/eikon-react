@@ -1,16 +1,71 @@
 import { useEffect } from 'react';
 import { create } from 'zustand';
 
+import { defaultState, type ParamState } from '@/lib/params-schema';
 import { createParamsStore } from '@/lib/params-store';
 import { parseFromQuery, serializeToQuery } from '@/lib/params-url';
 
 /**
- * Single shell-side store. Initialised from the parent window's location.search
- * so that deep-linking a particular variant combination works out of the box.
+ * localStorage key holding the user's last-known param selection. We
+ * keep it under a stable namespace (`eikon.params`) so future params
+ * can be added to the shape without invalidating older selections —
+ * unknown fields are ignored on read, defaults fill the gaps.
  */
-export const useShellStore = createParamsStore(
-  parseFromQuery(typeof window === 'undefined' ? '' : window.location.search)
-);
+const PARAMS_STORAGE_KEY = 'eikon.params';
+
+/**
+ * Read the persisted params blob from localStorage. Returns `null` on
+ * any failure (missing entry, JSON corruption, storage disabled in
+ * private mode, etc.) so the caller can fall back cleanly.
+ *
+ * Why not `parse` strictly: the schema is the source of truth and the
+ * downstream `createParamsStore` already normalises against it
+ * (cross-axis snap on platform, default infill). Trying to pre-validate
+ * here would either duplicate the schema rules or reject perfectly
+ * recoverable inputs — neither is worth the maintenance cost.
+ */
+function readStoredParams(): Partial<ParamState> | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(PARAMS_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed as Partial<ParamState>;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Merge initial state from two sources, with the URL query taking
+ * precedence so explicit deep-links always win over the user's saved
+ * session. The store factory will further normalise the merged
+ * partial against the schema (e.g. snap to platform defaults).
+ *
+ * Precedence:
+ *   1. URL query (`?platform=mobile&design=…`) — deliberate user intent.
+ *   2. localStorage              — last session continuity.
+ *   3. Schema `defaultState()`   — pristine first visit.
+ */
+function resolveInitialParams(): Partial<ParamState> {
+  const fromQuery = parseFromQuery(
+    typeof window === 'undefined' ? '' : window.location.search
+  );
+  const fromStorage = readStoredParams() ?? {};
+  // Storage as base, query overrides. Empty `fromQuery` simply
+  // surfaces storage unchanged.
+  return { ...fromStorage, ...fromQuery };
+}
+
+/**
+ * Single shell-side store. The factory normalises the merged initial
+ * (URL ∪ localStorage) against the schema's cross-axis rules before
+ * mounting, so any stale combo (e.g. a saved `layout=sidebar` from
+ * before the user later picked `platform=mobile`) snaps to a valid
+ * platform default rather than rendering an invalid choice.
+ */
+export const useShellStore = createParamsStore(resolveInitialParams());
 
 /**
  * Mirror store changes back into the parent window's URL bar (without adding
@@ -32,10 +87,57 @@ function useSyncStateToUrl(): void {
 }
 
 /**
- * Isolation wrapper for `useSyncStateToUrl`. Render once at the App root.
+ * Mirror store changes into localStorage so a returning visitor lands
+ * on the same configuration even without a saved URL. We deliberately
+ * write the FULL state (not a diff against defaults) so a future
+ * schema change that flips a default doesn't silently mutate the
+ * user's intent — they'll keep their explicit value until they
+ * actively reset it.
+ *
+ * Storage write failures (private mode, quota exceeded, etc.) are
+ * swallowed; the URL mirror above is already a sufficient fallback
+ * persistence channel.
+ */
+function useSyncStateToStorage(): void {
+  const state = useShellStore((s) => s.state);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      // Avoid persisting the literal `defaultState()` on first mount
+      // when the user hasn't touched anything yet — that would leave
+      // a stale snapshot if the schema's defaults change.
+      const isDefault = isDefaultState(state);
+      if (isDefault) {
+        window.localStorage.removeItem(PARAMS_STORAGE_KEY);
+        return;
+      }
+      window.localStorage.setItem(
+        PARAMS_STORAGE_KEY,
+        JSON.stringify(state)
+      );
+    } catch {
+      // ignore — URL still carries the same payload
+    }
+  }, [state]);
+}
+
+function isDefaultState(state: ParamState): boolean {
+  const defaults = defaultState();
+  for (const key of Object.keys(defaults) as (keyof ParamState)[]) {
+    if (state[key] !== defaults[key]) return false;
+  }
+  return true;
+}
+
+/**
+ * Isolation wrapper for the param-state mirror effects. Renders both
+ * URL and localStorage sync side-by-side; mounted once at the page
+ * root so the rest of the tree never sees re-renders triggered by
+ * the full-state subscription.
  */
 export function UrlSync(): null {
   useSyncStateToUrl();
+  useSyncStateToStorage();
   return null;
 }
 

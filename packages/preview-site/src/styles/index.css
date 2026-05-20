@@ -1,5 +1,91 @@
 @import 'tailwindcss';
 
+/* ===========================================================================
+ * Theme tokens — Tailwind v4 CSS-first
+ *
+ * We expose semantic tokens as CSS custom properties and let Tailwind v4
+ * pick them up via `@theme`. The actual values flip between light and dark
+ * via `:root` vs `.dark` selectors so a single `class="dark"` toggle on
+ * <html> drives the entire palette without re-running JS.
+ *
+ * Brand: violet-500 (#8b5cf6). Picked once, used in CTAs, focus rings,
+ * platform-picker selected state, and prompt code accents.
+ * =========================================================================== */
+
+@theme {
+  --color-brand-50: oklch(0.97 0.02 290);
+  --color-brand-100: oklch(0.94 0.04 290);
+  --color-brand-200: oklch(0.88 0.08 290);
+  --color-brand-300: oklch(0.8 0.13 290);
+  --color-brand-400: oklch(0.71 0.18 290);
+  --color-brand-500: oklch(0.62 0.22 290);
+  --color-brand-600: oklch(0.55 0.24 290);
+  --color-brand-700: oklch(0.47 0.22 290);
+  --color-brand-800: oklch(0.39 0.18 290);
+  --color-brand-900: oklch(0.3 0.13 290);
+
+  --font-sans:
+    'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Helvetica Neue', Arial, sans-serif;
+  --font-mono:
+    'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+}
+
+/* ---------------------------------------------------------------------------
+ * Semantic surface tokens — exposed both as raw CSS vars (for places that
+ * need inline `style={{ background: 'var(--surface-1)' }}`) AND as Tailwind
+ * utilities via the `@theme inline` shim below. Light is the default; the
+ * `.dark` class on <html> swaps them.
+ * --------------------------------------------------------------------------- */
+
+:root {
+  color-scheme: light;
+  --surface-0: #ffffff;
+  --surface-1: #f8fafc;
+  --surface-2: #f1f5f9;
+  --surface-3: #e2e8f0;
+  --border-1: #e5e7eb;
+  --border-2: #d1d5db;
+  --fg-1: #0f172a;
+  --fg-2: #334155;
+  --fg-3: #64748b;
+  --fg-4: #94a3b8;
+  --accent-glow: rgba(139, 92, 246, 0.15);
+}
+
+.dark {
+  color-scheme: dark;
+  --surface-0: #0a0a0b;
+  --surface-1: #111114;
+  --surface-2: #16161a;
+  --surface-3: #1f1f24;
+  --border-1: #26262d;
+  --border-2: #34343c;
+  --fg-1: #f4f4f5;
+  --fg-2: #d4d4d8;
+  --fg-3: #a1a1aa;
+  --fg-4: #71717a;
+  --accent-glow: rgba(139, 92, 246, 0.25);
+}
+
+@theme inline {
+  --color-surface-0: var(--surface-0);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border-1: var(--border-1);
+  --color-border-2: var(--border-2);
+  --color-fg-1: var(--fg-1);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-fg-4: var(--fg-4);
+}
+
+/* ---------------------------------------------------------------------------
+ * Base reset / typography
+ * --------------------------------------------------------------------------- */
+
 html,
 body,
 #root {
@@ -9,12 +95,216 @@ body,
 }
 
 /*
- * Spinner used by the unified playground loading overlay (see
- * `App.tsx` → `Spinner`). Defined here as a single global keyframe so
- * we don't have to inject keyframes via inline <style> on every render.
+ * Reserve the vertical scrollbar gutter even when the page is short
+ * enough to not need one. Without this, navigating between a long
+ * route (home — with scroll) and a short one (changelog placeholder
+ * — without scroll) makes the viewport width change by the scrollbar
+ * width (~15px on Windows), which yanks every centred element
+ * (notably the Nav pill) sideways. `scrollbar-gutter: stable` is the
+ * modern, no-JS, no-overflow-hack fix for this.
  */
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  background: var(--surface-0);
+  color: var(--fg-1);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+/* Make the root container scrollable in landing mode (the playground itself
+   uses internal scrolling for files/code, but the landing page is a long
+   document). */
+#root {
+  height: auto;
+  min-height: 100%;
+}
+
+/* ---------------------------------------------------------------------------
+ * Keyframes
+ *
+ *   - eikon-preview-spin:  the unified playground loading overlay spinner.
+ *   - eikon-params-fade:   ParamsPanel cross-platform fade-in.
+ *   - eikon-marquee:       horizontal tech-stack logo wall (P1, kept here
+ *                          so the section can ship without extra CSS).
+ *   - eikon-fade-up:       generic reveal-on-scroll, opt-in via class.
+ *   - eikon-aurora:        Hero background slow drift.
+ * --------------------------------------------------------------------------- */
+
 @keyframes eikon-preview-spin {
   to {
     transform: rotate(360deg);
   }
+}
+
+@keyframes eikon-params-fade {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/*
+ * eikon-marquee
+ *
+ * Horizontal infinite-loop track for the tech-stack logo wall. The DOM
+ * shape that drives this is:
+ *
+ *   .eikon-marquee-host          (overflow-hidden, fade-mask)
+ *     └─ .eikon-marquee-track    (this animation, width = max-content)
+ *         ├─ .eikon-marquee-copy (gap-12 internal + pr-12 trailing)
+ *         └─ .eikon-marquee-copy (identical, aria-hidden)
+ *
+ * Because each copy carries its OWN trailing gap (via padding-right),
+ * the track width is exactly 2× one copy's footprint — translating the
+ * track by -50% lands the second copy's leading edge precisely where
+ * the first copy started, so the wrap is invisible (no half-gap jump).
+ *
+ * Pausing on hover is done in CSS only so we don't churn React state.
+ * `prefers-reduced-motion` disables the animation entirely.
+ */
+@keyframes eikon-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.eikon-marquee-track {
+  animation: eikon-marquee 40s linear infinite;
+  will-change: transform;
+}
+
+.eikon-marquee-host:hover .eikon-marquee-track,
+.eikon-marquee-host:focus-within .eikon-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-marquee-track {
+    animation: none;
+  }
+}
+
+@keyframes eikon-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes eikon-aurora-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-3%, 2%, 0);
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-gradient-shift
+ *
+ * Animates the active platform-card's gradient border. Two backgrounds
+ * are layered via `background-clip`: the inner one (`padding-box`)
+ * paints the card's surface; the outer one (`border-box`) paints a
+ * wide brand-coloured gradient that we slide horizontally to give the
+ * border a slow "lit candle" sweep. Whole effect is ~5s per cycle —
+ * loud enough to read as "the active one is alive" but slow enough
+ * not to fight the cursor for attention.
+ * ------------------------------------------------------------------ */
+@keyframes eikon-gradient-shift {
+  to {
+    background-position:
+      0 0,
+      200% 0;
+  }
+}
+
+.eikon-active-border {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface-1), var(--surface-1)) padding-box,
+    linear-gradient(
+        90deg,
+        #a78bfa,
+        #c084fc,
+        #ec4899,
+        #8b5cf6,
+        #a78bfa
+      )
+      border-box;
+  background-size:
+    100% 100%,
+    200% 100%;
+  background-position:
+    0 0,
+    0 0;
+  animation: eikon-gradient-shift 5s linear infinite;
+}
+
+/* Soft pulse for the "SELECTED" badge dot and the active mockup's
+   highlighted UI element. Stays alpha-only so it composites cheaply
+   over any background. */
+@keyframes eikon-pulse-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.eikon-pulse-glow {
+  animation: eikon-pulse-glow 1.8s ease-in-out infinite;
+}
+
+.eikon-fade-up {
+  animation: eikon-fade-up 600ms ease-out both;
+}
+
+/* ---------------------------------------------------------------------------
+ * Custom scrollbar styling (dark surfaces). Kept minimal — the playground
+ * iframe still uses the host browser's defaults, this only applies to the
+ * landing chrome / file tree / params panel.
+ * --------------------------------------------------------------------------- */
+
+.dark *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.dark *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background: var(--border-2);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-4);
+  background-clip: padding-box;
+  border: 2px solid transparent;
 }

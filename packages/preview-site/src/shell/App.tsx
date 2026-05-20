@@ -1,9 +1,7 @@
 import { lazy, Suspense, type CSSProperties, type ReactElement } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 
-import { CommandBar } from './CommandBar';
 import { FileExplorer } from './FileExplorer';
-import { ParamsPanel } from './ParamsPanel';
 import { PreviewFrame } from './PreviewFrame';
 import { computeOverlayMode, UrlSync, useShellStore, useUiStore } from './store';
 import { Toolbar } from './Toolbar';
@@ -16,15 +14,23 @@ const CodeView = lazy(() =>
 );
 
 /**
- * Three-pane layout, all but the preview optional:
+ * Resizable three-pane workspace used by the landing page's playground
+ * section. Was previously the whole App (top header, params row,
+ * toolbar, three panes, command bar). Today only the three panes +
+ * Toolbar + overlay live here — outer chrome (Nav, Hero, PlatformPicker,
+ * ParamsPanel, PromptOutput, Footer) is owned by `landing/`.
  *
- *   [ FileExplorer ] [ CodeView ] [ PreviewFrame ]
+ *   ┌── Toolbar ──────────────────────────────────────────────────────┐
+ *   ├──────────────┬──────────────────────────────────┬───────────────┤
+ *   │              │                                  │               │
+ *   │  Files       │  Code (lazy)                     │  Preview      │
+ *   │              │                                  │               │
+ *   └──────────────┴──────────────────────────────────┴───────────────┘
  *
- * Toggle either side panel from the Toolbar. The preview always takes the
- * remaining space, including the full width when both side panels are
- * collapsed (zero-overhead common case).
+ * The body of the section sits at a fixed height (controlled by the
+ * landing wrapper) so the resizable panels have a known parent box.
  */
-export default function App() {
+export function PlaygroundShell() {
   const showFiles = useUiStore((s) => s.showFiles);
   const showEditor = useUiStore((s) => s.showEditor);
   const buildStatus = useUiStore((s) => s.buildStatus);
@@ -36,17 +42,9 @@ export default function App() {
 
   // Bucket the Group id by which panels are visible so toggling Files /
   // Editor doesn't surprise-resize the preview to whatever the prior
-  // layout's split was. (Persistence is intentionally NOT enabled — sizes
-  // reset to the defaults below each session, which is what we want while
-  // we still iterate on those defaults.)
+  // layout's split was.
   const groupId = `eikon-${showFiles ? 'f' : ''}${showEditor ? 'e' : ''}p`;
 
-  // Unified loading gate. The overlay covers the whole `<main>` (Files +
-  // Editor + Preview) from the moment the user picks a param until every
-  // visible panel has actually rendered the new build, so the user
-  // doesn't see a half-updated UI (fresh iframe + stale tree, or vice
-  // versa). The decision lives in `computeOverlayMode` (pure / tested);
-  // App.tsx just plugs in the live store values.
   const overlayMode = computeOverlayMode({
     buildStatus,
     currentHash,
@@ -57,60 +55,22 @@ export default function App() {
   const isError = buildStatus === 'error';
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        minHeight: '100vh',
-        background: '#1e1e1e',
-      }}
-    >
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--border-1)] bg-[var(--surface-1)]">
       {/*
-        UrlSync is the ONLY component that subscribes to the full param
-        state. Keeping it as a sibling leaf (returns null) means the rest
-        of the shell (Toolbar, FileExplorer, CodeView, …) is not forced
-        to re-render every time the user toggles a checkbox.
+        URL sync is the ONLY consumer of the full param state. Mounted
+        once here so the rest of the shell does not re-render on every
+        param toggle.
       */}
       <UrlSync />
-      <header
-        style={{
-          borderBottom: '1px solid #2d2d30',
-          padding: 8,
-          background: '#252526',
-          color: '#d4d4d4',
-          fontFamily: 'system-ui, sans-serif',
-        }}
-      >
-        <strong>Eikon Template Playground</strong>
-        <ParamsPanel />
-      </header>
 
       <Toolbar />
 
-      <main
-        style={{
-          flex: 1,
-          display: 'flex',
-          minHeight: 0,
-          // `position: relative` so the unified overlay below can pin
-          // itself to the main content area (above Files + Editor +
-          // Preview, below the toolbar / params header).
-          position: 'relative',
-        }}
-      >
+      <main className="relative flex min-h-0 flex-1">
         <Group
           id={groupId}
           orientation="horizontal"
           style={{ flex: 1, width: '100%', height: '100%' }}
         >
-          {/*
-            Sizes are passed as STRING percentages on purpose. In v4 of
-            react-resizable-panels, bare numeric values are interpreted as
-            pixels (`defaultSize={18}` = 18px, which crushes the tree to a
-            sliver). Strings ending in `%` always mean percentage of the
-            parent Group, which is what we want here.
-          */}
           {showFiles && (
             <>
               <Panel
@@ -146,47 +106,35 @@ export default function App() {
         </Group>
 
         {overlayMode && (
-          <PlaygroundLoadingOverlay
-            mode={overlayMode}
-            platform={platform}
-          />
+          <PlaygroundLoadingOverlay mode={overlayMode} platform={platform} />
         )}
         {isError && buildError && (
           <PlaygroundErrorOverlay error={buildError} />
         )}
       </main>
-
-      <footer
-        style={{
-          borderTop: '1px solid #2d2d30',
-          background: '#252526',
-          color: '#d4d4d4',
-        }}
-      >
-        <CommandBar />
-      </footer>
     </div>
   );
 }
 
+/**
+ * Backwards-compat default export. The vite entry used to render `<App />`;
+ * `main.tsx` now mounts `<LandingPage />` directly, but we keep this
+ * thin alias so external scripts / tests / a future "playground-only"
+ * entry can still import the default.
+ */
+export default function App() {
+  return <PlaygroundShell />;
+}
+
 const separatorStyle: CSSProperties = {
   width: 4,
-  background: '#2d2d30',
+  background: 'var(--border-1)',
   cursor: 'col-resize',
 };
 
 function EditorFallback() {
   return (
-    <div
-      style={{
-        height: '100%',
-        background: '#1e1e1e',
-        color: '#6b7280',
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: 12,
-        padding: 12,
-      }}
-    >
+    <div className="h-full bg-[var(--surface-1)] p-3 text-xs text-[var(--fg-3)]">
       Loading editor…
     </div>
   );
@@ -194,22 +142,16 @@ function EditorFallback() {
 
 /**
  * Single loading overlay covering the entire main content area (Files +
- * Editor + Preview). Replaces the previous iframe-only "Building variant…"
- * pane so that a slow file-tree refetch or a still-loading iframe doesn't
- * leak through and create a half-updated impression while the build is
- * "ready" but panels haven't caught up yet.
+ * Editor + Preview).
  *
  *   - `mode='cold'`   first build of the session — there's no prior
- *                     content underneath, so we use a soft light wash
+ *                     content underneath, so we use a soft wash
  *                     instead of a heavy dim.
  *   - `mode='rebuild'` switching variants — the prior iframe / tree are
  *                     still mounted underneath; we dim them so the
  *                     spinner reads as "the app is working" and the
  *                     dimmed content reads as "this is the previous
  *                     state, not the new one yet".
- *
- * `pointerEvents: 'none'` so the user can still resize panels mid-build
- * (a common gesture — they nudge the layout while waiting).
  */
 function PlaygroundLoadingOverlay({
   mode,
@@ -221,67 +163,34 @@ function PlaygroundLoadingOverlay({
   const isRebuild = mode === 'rebuild';
   return (
     <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: isRebuild ? 'rgba(0,0,0,0.45)' : 'rgba(0,0,0,0.04)',
-        color: isRebuild ? '#fff' : '#374151',
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: 14,
-        pointerEvents: 'none',
-        backdropFilter: isRebuild ? 'blur(2px)' : 'none',
-        transition: 'background 120ms ease',
-        zIndex: 10,
-      }}
+      role="status"
       aria-live="polite"
       aria-busy="true"
+      className={
+        'pointer-events-none absolute inset-0 z-10 flex items-center justify-center transition-colors duration-150 ' +
+        (isRebuild
+          ? 'bg-black/45 text-white backdrop-blur-[2px]'
+          : 'bg-[color-mix(in_oklab,var(--surface-1)_70%,transparent)] text-[var(--fg-2)]')
+      }
     >
-      <div style={{ textAlign: 'center', lineHeight: 1.5 }}>
+      <div className="text-center leading-relaxed">
         <Spinner inverted={isRebuild} />
-        <div style={{ fontWeight: 600, marginTop: 10 }}>
+        <div className="mt-2.5 text-sm font-semibold">
           {isRebuild ? 'Rebuilding variant…' : 'Building variant…'}
         </div>
-        <div
-          style={{
-            marginTop: 4,
-            fontSize: 12,
-            opacity: 0.85,
-            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-          }}
-        >
+        <div className="mt-1 font-mono text-[11px] opacity-80">
           platform={platform}
         </div>
         {!isRebuild && (
-          <div style={{ marginTop: 6, fontSize: 11, opacity: 0.7 }}>
+          <div className="mt-1 text-[11px] opacity-70">
             first build of this combo takes a few seconds
           </div>
         )}
-        <div
-          style={{
-            marginTop: 10,
-            fontSize: 11,
-            opacity: 0.65,
-            maxWidth: 360,
-          }}
-        >
-          The file tree, editor, and preview iframe all repaint together
-          when the build is ready.
-        </div>
       </div>
     </div>
   );
 }
 
-/**
- * Spinner sized to match the surrounding text. CSS-only so we don't pull
- * in any animation dependency. Inline keyframes via a `style` tag would
- * leak into every render; instead we lean on a Web Animations API call
- * indirectly by using `animation` shorthand against a globally-defined
- * keyframe in `index.css` (added below).
- */
 function Spinner({ inverted }: { inverted: boolean }): ReactElement {
   return (
     <span
@@ -292,9 +201,9 @@ function Spinner({ inverted }: { inverted: boolean }): ReactElement {
         height: 18,
         borderRadius: '50%',
         border: `2px solid ${
-          inverted ? 'rgba(255,255,255,0.25)' : 'rgba(55,65,81,0.18)'
+          inverted ? 'rgba(255,255,255,0.25)' : 'rgba(148, 163, 184, 0.25)'
         }`,
-        borderTopColor: inverted ? '#fff' : '#374151',
+        borderTopColor: inverted ? '#fff' : 'var(--fg-1)',
         animation: 'eikon-preview-spin 0.8s linear infinite',
       }}
     />
@@ -302,29 +211,17 @@ function Spinner({ inverted }: { inverted: boolean }): ReactElement {
 }
 
 /**
- * Build-error overlay. Pinned to the same area as the loading overlay
- * (covers main) because a build failure is a project-wide event, not a
- * preview-pane-only issue — the file tree and editor will be empty or
- * stale until the user fixes the variant.
+ * Build-error overlay. A failed build is a project-wide event, so we
+ * cover the entire playground main area — file tree and editor will be
+ * empty / stale until the user fixes the variant.
  */
 function PlaygroundErrorOverlay({ error }: { error: string }): ReactElement {
   return (
     <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        padding: 16,
-        background: '#fff0f0',
-        color: '#7f1d1d',
-        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-        fontSize: 12,
-        overflow: 'auto',
-        whiteSpace: 'pre-wrap',
-        zIndex: 11,
-      }}
       role="alert"
+      className="absolute inset-0 z-[11] overflow-auto whitespace-pre-wrap bg-red-50 p-4 font-mono text-xs text-red-900 dark:bg-red-950/40 dark:text-red-300"
     >
-      <div style={{ marginBottom: 8, fontWeight: 600 }}>
+      <div className="mb-2 font-semibold">
         Build failed for the current variant
       </div>
       {error}

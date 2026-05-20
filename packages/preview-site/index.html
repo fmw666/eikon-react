@@ -1,9 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Eikon Template Playground</title>
+    <meta
+      name="description"
+      content="Eikon-React — AI-ready React template. Pick a platform + design, copy a prompt, ship."
+    />
+    <meta name="theme-color" content="#0a0a0b" />
+    <title>Eikon-React · AI-ready React template</title>
+    <!--
+      The theme toggle is currently hidden from the UI and the site
+      always boots in dark. We hardcode the class here (instead of
+      reading storage / prefers-color-scheme) so the very first paint
+      lands on the dark palette without flicker. When the toggle is
+      re-introduced, swap this back for a storage-aware bootstrap.
+    -->
+    <script>
+      document.documentElement.classList.add('dark');
+    </script>
   </head>
   <body>
     <div id="root"></div>

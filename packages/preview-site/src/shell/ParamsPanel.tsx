@@ -1,3 +1,24 @@
+/**
+ * @file ParamsPanel.tsx
+ * @description Parameter configurator for the playground.
+ *
+ * History: this panel used to own the platform segmented control at the
+ * top, but the landing page now hosts `PlatformPicker` as a section of
+ * its own (the platform choice is the primary visual axis, not a
+ * configurator-internal knob). So this panel:
+ *
+ *   - Renders every param EXCEPT `platform` itself.
+ *   - Continues to honour the schema's `availableWhen` / `valuesWhen` /
+ *     `defaultWhen` cross-axis rules — controls show / hide / narrow as
+ *     the platform changes (driven from PlatformPicker through the
+ *     shared store, exactly the same wiring as before).
+ *
+ * Visual model: a card with two semantic sub-sections separated by a
+ * thin divider — "Configuration" (controls that actually change the
+ * build hash) and "Tooling" (e.g. package manager, which only affects
+ * the rendered CLI command, never the build).
+ */
+
 import { useMemo } from 'react';
 
 import {
@@ -13,149 +34,106 @@ import {
 
 import { useShellStore } from './store';
 
-/**
- * Unstyled controls — one per param. Layout:
- *
- *   ┌──────────────────────────────────────────────┐
- *   │       [ Web ]  [ Desktop ]  [ Mobile ]       │  ← platform tab (top)
- *   ├──────────────────────────────────────────────┤
- *   │ Layout: [▾ Stacked]   UI: [▾ animate-ui] …   │  ← platform-filtered
- *   └──────────────────────────────────────────────┘
- *
- * The top row is a segmented control because `platform` is mutually
- * exclusive AND it changes which controls below appear / which values
- * they accept (see `params-store.snapToPlatform`). The lower row reuses
- * the existing flex-wrap of unstyled controls; a 200ms opacity fade on
- * platform change hints to the user that the available choices below
- * have just shifted.
- */
+// Each element of PARAMS keeps its literal `id` type because the schema
+// uses `as const satisfies ...`. We re-use that narrow union so the
+// `def.id` we pass into `setParam` below is still `ParamId`, not the
+// wider `string` that `ParamDef` exposes. Without this alias the
+// generic `setParam<K extends ParamId>` overload would refuse the call.
+type SchemaParam = (typeof PARAMS)[number];
+
+// Params that should be considered "tooling" rather than build inputs.
+// They affect the rendered CLI command but not the build hash. The
+// schema-level `axis` field already tags them, but we duplicate the
+// classification here as a UI-side allowlist so re-tagging in the
+// schema doesn't silently move controls between sections of this card.
+const TOOLING_IDS = new Set<string>(['pm']);
+
+function isToolingParam(def: SchemaParam): boolean {
+  return TOOLING_IDS.has(def.id);
+}
+
 export function ParamsPanel() {
   const state = useShellStore((s) => s.state);
   const setParam = useShellStore((s) => s.setParam);
   const platform = coercePlatform(state.platform);
 
-  // The visible-controls list changes when platform changes; memoising
-  // keeps the lower row stable across unrelated state mutations (toggling
-  // a checkbox doesn't recompute the filter).
-  const visibleParams = useMemo(
-    () => PARAMS.filter((def) => def.id !== 'platform' && isAvailable(def, platform)),
+  // Memo so re-rendering on an unrelated state field (e.g. toggling
+  // `supabase`) doesn't force the whole param list to re-filter.
+  const visible = useMemo(
+    () =>
+      PARAMS.filter(
+        (def) => def.id !== 'platform' && isAvailable(def, platform)
+      ) as ReadonlyArray<SchemaParam>,
     [platform]
   );
 
+  const buildParams = visible.filter((def) => !isToolingParam(def));
+  const toolingParams = visible.filter(isToolingParam);
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
-      <PlatformTabs
-        value={platform}
-        onChange={(next) => setParam('platform', next)}
+    <div
+      key={platform}
+      className="rounded-2xl border border-[var(--border-1)] bg-[var(--surface-1)] p-5"
+      style={{ animation: 'eikon-params-fade 200ms ease-out' }}
+    >
+      <ParamGrid
+        items={buildParams}
+        state={state}
+        platform={platform}
+        onChange={setParam}
       />
-      <div
-        key={platform}
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 12,
-          alignItems: 'center',
-          // Cheap visual cue that the set of choices below was just
-          // refreshed by a platform change. The `key={platform}` above
-          // forces a remount so the animation re-fires.
-          animation: 'eikon-params-fade 200ms ease-out',
-        }}
-      >
-        <style>
-          {`@keyframes eikon-params-fade { from { opacity: 0.4; } to { opacity: 1; } }`}
-        </style>
-        {visibleParams.map((def) => {
-          if (def.kind === 'boolean') {
-            return (
-              <BooleanControl
-                key={def.id}
-                def={def}
-                value={state[def.id] as boolean}
-                onChange={(v) => setParam(def.id, v)}
-              />
-            );
-          }
-          return (
-            <EnumControl
-              key={def.id}
-              def={def}
-              platform={platform}
-              value={state[def.id] as string}
-              onChange={(v) => setParam(def.id, v)}
-            />
-          );
-        })}
-      </div>
+
+      {toolingParams.length > 0 && (
+        <>
+          <div className="my-5 h-px w-full bg-[var(--border-1)]" />
+          <ParamGrid
+            items={toolingParams}
+            state={state}
+            platform={platform}
+            onChange={setParam}
+          />
+        </>
+      )}
     </div>
   );
 }
 
-/**
- * Top-of-panel segmented control. The `platform` param is special-cased
- * because it owns the cross-axis filter rules below — pulling it out of
- * the generic `visibleParams` map makes the visual hierarchy explicit
- * (intent above, configuration below).
- */
-function PlatformTabs({
-  value,
+function ParamGrid({
+  items,
+  state,
+  platform,
   onChange,
 }: {
-  value: Platform;
-  onChange: (next: Platform) => void;
+  items: ReadonlyArray<SchemaParam>;
+  state: ReturnType<typeof useShellStore.getState>['state'];
+  platform: Platform;
+  onChange: ReturnType<typeof useShellStore.getState>['setParam'];
 }) {
-  const platformParam = PARAMS.find((p) => p.id === 'platform');
-  if (!platformParam || platformParam.kind !== 'enum') return null;
   return (
-    <div
-      role="tablist"
-      aria-label="Target platform"
-      style={{
-        display: 'inline-flex',
-        alignSelf: 'center',
-        gap: 0,
-        background: '#1f1f1f',
-        border: '1px solid #3a3a3a',
-        borderRadius: 4,
-        padding: 2,
-      }}
-    >
-      {platformParam.values.map((v) => {
-        const active = v === value;
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {items.map((def) => {
+        if (def.kind === 'boolean') {
+          return (
+            <BooleanControl
+              key={def.id}
+              def={def}
+              value={state[def.id] as boolean}
+              onChange={(v) => onChange(def.id, v)}
+            />
+          );
+        }
         return (
-          <button
-            key={v}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={() => onChange(v as Platform)}
-            title={platformParam.valueLabels?.[v] ?? v}
-            style={{
-              background: active ? '#0e639c' : 'transparent',
-              color: active ? '#fff' : '#d4d4d4',
-              border: 'none',
-              borderRadius: 3,
-              padding: '4px 14px',
-              fontSize: 12,
-              fontWeight: active ? 500 : 400,
-              cursor: 'pointer',
-              minWidth: 72,
-            }}
-          >
-            {labelFor(v)}
-          </button>
+          <EnumControl
+            key={def.id}
+            def={def}
+            platform={platform}
+            value={state[def.id] as string}
+            onChange={(v) => onChange(def.id, v)}
+          />
         );
       })}
     </div>
   );
-}
-
-/**
- * Short label for the platform tab itself. The schema's `valueLabels` is
- * a longer dropdown-style description ("Web (browser)") that's overkill
- * for a tab; reuse the raw value here capitalised.
- */
-function labelFor(v: string): string {
-  return v.charAt(0).toUpperCase() + v.slice(1);
 }
 
 function BooleanControl({
@@ -168,14 +146,44 @@ function BooleanControl({
   onChange: (next: boolean) => void;
 }) {
   return (
-    <label style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-      <input
-        type="checkbox"
-        checked={value}
-        onChange={(e) => onChange(e.target.checked)}
-      />
-      {def.label}
+    <label
+      className={
+        'flex cursor-pointer items-center justify-between gap-3 rounded-lg border bg-[var(--surface-2)] px-3 py-2.5 text-sm transition hover:border-[var(--border-2)] ' +
+        (value ? 'border-brand-500/40 text-[var(--fg-1)]' : 'border-[var(--border-1)] text-[var(--fg-2)]')
+      }
+    >
+      <span className="font-medium">{def.label}</span>
+      <Switch checked={value} onChange={onChange} />
     </label>
+  );
+}
+
+function Switch({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={
+        'relative h-5 w-9 shrink-0 rounded-full transition ' +
+        (checked ? 'bg-brand-500' : 'bg-[var(--border-2)]')
+      }
+    >
+      <span
+        aria-hidden="true"
+        className={
+          'absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ' +
+          (checked ? 'translate-x-[18px]' : 'translate-x-0.5')
+        }
+      />
+    </button>
   );
 }
 
@@ -190,27 +198,82 @@ function EnumControl({
   value: string;
   onChange: (next: string) => void;
 }) {
-  // Per-platform value narrowing. The store already snapped `value` to a
-  // valid choice when the platform changed (see `snapToPlatform`); this
-  // just makes sure the rendered <option>s mirror what the store will
-  // accept.
   const allowedValues = getEffectiveValues(def, platform);
-  // The platform-specific default is shown with a "(default)" suffix so
-  // the user can tell which option they'd land on if they reset.
   const effectiveDefault = getEffectiveDefault(def, platform);
+
+  // `pm` is a 3-state choice and reads better as a segmented control
+  // than a dropdown. Everything else stays on a styled <select> — it
+  // scales to any number of options without overflowing the row.
+  if (def.id === 'pm') {
+    return (
+      <div className="flex flex-col gap-2">
+        <span className="text-xs font-medium uppercase tracking-wide text-[var(--fg-3)]">
+          {def.label}
+        </span>
+        <div className="inline-flex w-fit overflow-hidden rounded-lg border border-[var(--border-1)] bg-[var(--surface-2)] p-0.5">
+          {allowedValues.map((v) => {
+            const active = v === value;
+            return (
+              <button
+                key={v}
+                type="button"
+                onClick={() => onChange(v)}
+                aria-pressed={active}
+                className={
+                  'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition ' +
+                  (active
+                    ? 'bg-brand-500/15 text-brand-400'
+                    : 'text-[var(--fg-3)] hover:text-[var(--fg-1)]')
+                }
+              >
+                <span>{def.valueLabels?.[v] ?? v}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <label style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-      {def.label}:
-      <select value={value} onChange={(e) => onChange(e.target.value)}>
-        {allowedValues.map((v) => {
-          const label = def.valueLabels?.[v] ?? v;
-          return (
-            <option key={v} value={v}>
-              {v === effectiveDefault ? `${label} (default)` : label}
-            </option>
-          );
-        })}
-      </select>
+    <label className="flex flex-col gap-2">
+      <span className="text-xs font-medium uppercase tracking-wide text-[var(--fg-3)]">
+        {def.label}
+      </span>
+      <div className="relative">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full appearance-none rounded-lg border border-[var(--border-1)] bg-[var(--surface-2)] px-3 py-2 pr-9 text-sm text-[var(--fg-1)] transition hover:border-[var(--border-2)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
+        >
+          {allowedValues.map((v) => {
+            const label = def.valueLabels?.[v] ?? v;
+            return (
+              <option key={v} value={v}>
+                {v === effectiveDefault ? `${label} (default)` : label}
+              </option>
+            );
+          })}
+        </select>
+        <ChevronIcon className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--fg-3)]" />
+      </div>
     </label>
+  );
+}
+
+function ChevronIcon({ className }: { className: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m6 9 6 6 6-6" />
+    </svg>
   );
 }

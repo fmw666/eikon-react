@@ -97,11 +97,11 @@ export function Toolbar() {
         display: 'flex',
         alignItems: 'center',
         gap: 6,
-        padding: '4px 10px',
-        background: '#252526',
-        color: '#d4d4d4',
-        borderBottom: '1px solid #2d2d30',
-        fontFamily: 'system-ui, sans-serif',
+        padding: '6px 12px',
+        background: 'var(--surface-2)',
+        color: 'var(--fg-2)',
+        borderBottom: '1px solid var(--border-1)',
+        fontFamily: 'var(--font-sans, system-ui, sans-serif)',
         fontSize: 12,
       }}
     >
@@ -131,7 +131,7 @@ export function Toolbar() {
         in-iframe navigation controls on the far right. */}
       <span
         style={{
-          color: '#8a8a8a',
+          color: 'var(--fg-3)',
           fontSize: 11,
           textTransform: 'uppercase',
           letterSpacing: 0.4,
@@ -145,8 +145,8 @@ export function Toolbar() {
         aria-label="Device frame size"
         style={{
           display: 'inline-flex',
-          border: '1px solid #3a3a3a',
-          borderRadius: 3,
+          border: '1px solid var(--border-1)',
+          borderRadius: 4,
           overflow: 'hidden',
           marginRight: 6,
         }}
@@ -167,15 +167,17 @@ export function Toolbar() {
               title={tooltip}
               aria-pressed={active}
               style={{
-                background: active ? '#0e639c' : 'transparent',
-                color: active ? '#fff' : '#d4d4d4',
+                background: active
+                  ? 'rgb(139 92 246 / 0.18)'
+                  : 'transparent',
+                color: active ? 'var(--color-brand-400, #c4b5fd)' : 'var(--fg-2)',
                 border: 'none',
-                borderLeft: idx === 0 ? 'none' : '1px solid #3a3a3a',
-                padding: '2px 8px',
+                borderLeft: idx === 0 ? 'none' : '1px solid var(--border-1)',
+                padding: '3px 10px',
                 fontSize: 12,
                 fontWeight: active ? 600 : 400,
                 cursor: 'pointer',
-                minWidth: 24,
+                minWidth: 26,
               }}
             >
               {meta.label}
@@ -188,7 +190,7 @@ export function Toolbar() {
         style={{
           width: 1,
           height: 16,
-          background: '#3a3a3a',
+          background: 'var(--border-1)',
           margin: '0 4px',
         }}
       />
@@ -196,7 +198,7 @@ export function Toolbar() {
 
       <span
         style={{
-          color: '#8a8a8a',
+          color: 'var(--fg-3)',
           fontSize: 11,
           textTransform: 'uppercase',
           letterSpacing: 0.4,
@@ -225,7 +227,7 @@ export function Toolbar() {
         style={{
           width: 1,
           height: 16,
-          background: '#3a3a3a',
+          background: 'var(--border-1)',
           margin: '0 4px',
         }}
       />
@@ -240,10 +242,10 @@ export function Toolbar() {
           alignItems: 'center',
           gap: 4,
           background: 'transparent',
-          color: '#d4d4d4',
-          border: '1px solid #3a3a3a',
-          borderRadius: 3,
-          padding: '2px 10px',
+          color: 'var(--fg-2)',
+          border: '1px solid var(--border-1)',
+          borderRadius: 4,
+          padding: '3px 10px',
           fontSize: 12,
           cursor: 'pointer',
         }}
@@ -291,11 +293,11 @@ function ToggleButton({
       onClick={onClick}
       title={title}
       style={{
-        background: active ? '#0e639c' : 'transparent',
-        color: active ? '#fff' : '#d4d4d4',
-        border: '1px solid ' + (active ? '#1177bb' : '#3a3a3a'),
-        borderRadius: 3,
-        padding: '2px 10px',
+        background: active ? 'rgb(139 92 246 / 0.18)' : 'transparent',
+        color: active ? 'var(--color-brand-400, #c4b5fd)' : 'var(--fg-2)',
+        border: '1px solid ' + (active ? 'rgb(139 92 246 / 0.45)' : 'var(--border-1)'),
+        borderRadius: 4,
+        padding: '3px 10px',
         fontSize: 12,
         cursor: 'pointer',
       }}
@@ -329,11 +331,11 @@ function QuickJumpButton({
       title={title}
       style={{
         background: 'transparent',
-        color: highlight ? '#f0b400' : '#d4d4d4',
+        color: highlight ? '#f59e0b' : 'var(--fg-2)',
         border:
-          '1px solid ' + (highlight ? 'rgba(240, 180, 0, 0.45)' : '#3a3a3a'),
-        borderRadius: 3,
-        padding: '2px 10px',
+          '1px solid ' + (highlight ? 'rgba(245, 158, 11, 0.45)' : 'var(--border-1)'),
+        borderRadius: 4,
+        padding: '3px 10px',
         fontSize: 12,
         cursor: 'pointer',
         fontWeight: highlight ? 500 : 400,
