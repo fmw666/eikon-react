@@ -104,78 +104,97 @@ function ExamplesIndexPage() {
       <ShowcasePageHeader title={t('meta.title')} subtitle={t('meta.subtitle')} />
 
       {/*
-        md:grid-cols-[1fr_220px] keeps the TOC narrow + the content column
-        flexible. On small screens we drop to a single column with the TOC
-        first (so it's discoverable on mobile) and unset the sticky.
+        Two-column layout is gated by a CSS *container query* (`@2xl` on the
+        named `examples` container) rather than a viewport media query, so
+        the page degrades gracefully no matter what shell it ends up in.
+
+        Why this matters in practice:
+          - Wide layouts (Stacked / Sidebar / TopbarSidebar): the container
+            is hundreds of pixels wide, `@2xl` (~672px) triggers, and we
+            get the classic "content + sticky TOC" reading layout.
+          - Narrow layouts (CenteredRootLayout's `max-w-md` ≈ 448px card,
+            or any future modal / split-view embed): the container stays
+            below `@2xl`, so we stay in a single comfortable column and
+            the TOC drops to the top of the page instead of being shoved
+            into a ~200px gutter where its labels would wrap to 3 lines.
+
+        `min-w-0` on `<main>` is the standard grid-item escape hatch — CSS
+        grid items default to `min-width: auto`, which is `min-content`,
+        which would otherwise let a wide demo (e.g. the button matrix) push
+        the column past the assigned `minmax(0,1fr)` track and break the
+        layout. Setting `min-w-0` re-enables shrink behaviour.
       */}
-      <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_220px]">
-        <main className="flex flex-col gap-12">
-          <ShowcaseSection
-            anchor="button"
-            eyebrow={t('toc.uiPrimitives')}
-            title={t('sections.button.title')}
-            description={t('sections.button.description')}
-          >
-            <ButtonShowcase />
-          </ShowcaseSection>
+      <div className="@container/examples">
+        <div className="grid gap-8 @2xl/examples:grid-cols-[minmax(0,1fr)_220px]">
+          <main className="flex min-w-0 flex-col gap-12">
+            <ShowcaseSection
+              anchor="button"
+              eyebrow={t('toc.uiPrimitives')}
+              title={t('sections.button.title')}
+              description={t('sections.button.description')}
+            >
+              <ButtonShowcase />
+            </ShowcaseSection>
 
-          <ShowcaseSection
-            anchor="card"
-            eyebrow={t('toc.uiPrimitives')}
-            title={t('sections.card.title')}
-            description={t('sections.card.description')}
-          >
-            <CardShowcase />
-          </ShowcaseSection>
+            <ShowcaseSection
+              anchor="card"
+              eyebrow={t('toc.uiPrimitives')}
+              title={t('sections.card.title')}
+              description={t('sections.card.description')}
+            >
+              <CardShowcase />
+            </ShowcaseSection>
 
-          <ShowcaseSection
-            anchor="tabs"
-            eyebrow={t('toc.uiPrimitives')}
-            title={t('sections.tabs.title')}
-            description={t('sections.tabs.description')}
-          >
-            <TabsShowcase />
-          </ShowcaseSection>
+            <ShowcaseSection
+              anchor="tabs"
+              eyebrow={t('toc.uiPrimitives')}
+              title={t('sections.tabs.title')}
+              description={t('sections.tabs.description')}
+            >
+              <TabsShowcase />
+            </ShowcaseSection>
 
-          <ShowcaseSection
-            anchor="theme"
-            eyebrow={t('toc.label')}
-            title={t('sections.theme.title')}
-            description={t('sections.theme.description')}
-          >
-            <ThemeShowcase />
-          </ShowcaseSection>
+            <ShowcaseSection
+              anchor="theme"
+              eyebrow={t('toc.label')}
+              title={t('sections.theme.title')}
+              description={t('sections.theme.description')}
+            >
+              <ThemeShowcase />
+            </ShowcaseSection>
 
-          {/* @eikon:feature(i18n) begin */}
-          <ShowcaseSection
-            anchor="i18n"
-            eyebrow={t('toc.label')}
-            title={t('sections.i18n.title')}
-            description={t('sections.i18n.description')}
-          >
-            <I18nShowcase />
-          </ShowcaseSection>
-          {/* @eikon:feature(i18n) end */}
+            {/* @eikon:feature(i18n) begin */}
+            <ShowcaseSection
+              anchor="i18n"
+              eyebrow={t('toc.label')}
+              title={t('sections.i18n.title')}
+              description={t('sections.i18n.description')}
+            >
+              <I18nShowcase />
+            </ShowcaseSection>
+            {/* @eikon:feature(i18n) end */}
 
-          <ShowcaseSection
-            anchor="animation"
-            eyebrow={t('toc.label')}
-            title={t('sections.animation.title')}
-            description={t('sections.animation.description')}
-          >
-            <AnimationShowcase />
-          </ShowcaseSection>
-        </main>
+            <ShowcaseSection
+              anchor="animation"
+              eyebrow={t('toc.label')}
+              title={t('sections.animation.title')}
+              description={t('sections.animation.description')}
+            >
+              <AnimationShowcase />
+            </ShowcaseSection>
+          </main>
 
-        {/*
-          The aside is sticky from `md+` only. Below that breakpoint we
-          let it scroll with the content so it doesn't crowd the mobile
-          viewport. `self-start` keeps the box height tight against
-          its own content rather than stretching to fill the row.
-        */}
-        <aside className="order-first self-start md:order-last md:sticky md:top-20">
-          <ShowcaseTOC groups={tocGroups} ariaLabel={t('toc.label')} />
-        </aside>
+          {/*
+            Until `@2xl/examples` kicks in, the aside sits at the top of the
+            single-column flow (so the TOC is still discoverable in narrow
+            shells); from `@2xl` upwards it docks to the right and goes
+            sticky. `self-start` keeps its row-track height tight against
+            its own content rather than stretching to match `<main>`.
+          */}
+          <aside className="order-first self-start @2xl/examples:order-last @2xl/examples:sticky @2xl/examples:top-20">
+            <ShowcaseTOC groups={tocGroups} ariaLabel={t('toc.label')} />
+          </aside>
+        </div>
       </div>
     </div>
   );
