@@ -575,6 +575,129 @@ body {
   animation: eikon-fade-up 600ms ease-out both;
 }
 
+/* ------------------------------------------------------------------
+ * eikon-menu-pop — small dropdown enter animation
+ *
+ * Used by the Nav language switcher (and any future small popover) so
+ * the menu doesn't snap in. Three things matter here:
+ *
+ *   1. The transform-origin is `top right` because the menu hangs
+ *      from the trigger's bottom-right corner — scaling from there
+ *      reads as "the menu unfolded out of the trigger", not "a panel
+ *      appeared in mid-air".
+ *   2. The cubic-bezier is the standard "material exit" curve
+ *      (0.16, 1, 0.3, 1) — overshoot-free but with a slight settle
+ *      that feels native rather than algorithmic.
+ *   3. Total duration ≤ 200ms so the menu is *always* fully present
+ *      before the user can plausibly aim at an item; we never want
+ *      the animation to be a perceived latency cost.
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-menu-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.eikon-menu-pop {
+  transform-origin: top right;
+  animation: eikon-menu-pop 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-menu-pop {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-route-enter / eikon-route-leave — SPA route cross-fade pair
+ *
+ * The router (`nav/route.ts`) flips between three top-level routes
+ * (home / changelog / playground). The `RouteCrossFader` in
+ * LandingPage renders *two* layers during each transition:
+ *
+ *     ┌─ outgoing (absolute, z-10, .eikon-route-leave) ─┐
+ *     │     fades out, settles up by 6px                │
+ *     └─────────────────────────────────────────────────┘
+ *     ┌─ incoming (normal flow, .eikon-route-enter) ────┐
+ *     │     fades in, settles down from 12px below      │
+ *     └─────────────────────────────────────────────────┘
+ *
+ * The two animations are deliberately tuned to OVERLAP — the leave
+ * is 320ms and the enter is 480ms, so the entire first 320ms is
+ * a true cross-fade (both layers visible at intermediate alpha).
+ * The eye reads this as "old material dissolves while new material
+ * emerges", not "page A disappears, then page B appears" — which is
+ * the difference between a film cut and a film dissolve.
+ *
+ * Motion vocabulary:
+ *
+ *   - leave : 320ms `cubic-bezier(0.4, 0, 1, 1)` — accelerate-out
+ *             curve, so the outgoing layer "falls away" rather than
+ *             lingers. Pairs with a tiny `-6px translateY` so it
+ *             reads as "lifting off the page".
+ *   - enter : 480ms `cubic-bezier(0.16, 1, 0.3, 1)` — overshoot-free
+ *             material-exit curve. Starts at `12px translateY +
+ *             0.992 scale` so the new page reads as "rising into
+ *             place" with a touch of depth, then settles flat.
+ *
+ * Both are purely `transform` + `opacity` — composite-only animations
+ * that never touch layout, paint, or scroll position. The outgoing
+ * layer uses `pointer-events: none` and `inert` (set in JSX) so the
+ * user can't accidentally interact with the previous page during
+ * the dissolve.
+ *
+ * `prefers-reduced-motion`: the JS in `RouteCrossFader` checks the
+ * media query and skips the cross-fade entirely (single-layer swap)
+ * — the CSS fallbacks here only matter for the rare case where the
+ * class is applied directly without the JS guard.
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.992);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.eikon-route-enter {
+  animation: eikon-route-enter 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
+@keyframes eikon-route-leave {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.996);
+  }
+}
+
+.eikon-route-leave {
+  animation: eikon-route-leave 320ms cubic-bezier(0.4, 0, 1, 1) both;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-route-enter,
+  .eikon-route-leave {
+    animation: none;
+  }
+}
+
 /* ---------------------------------------------------------------------------
  * Custom scrollbar styling (dark surfaces). Kept minimal — the playground
  * iframe still uses the host browser's defaults, this only applies to the

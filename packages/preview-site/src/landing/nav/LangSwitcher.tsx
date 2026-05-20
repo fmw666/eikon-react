@@ -39,6 +39,14 @@ import {
 } from '../theme/i18n';
 import { useThemeStore } from '../theme/theme-store';
 
+/**
+ * Visual offset between the trigger button and the dropdown menu,
+ * in pixels. Kept as a named constant because the same number gates
+ * the menu's transform-origin (anchored at `top` of the menu) and
+ * the gap below the trigger — keep them in lockstep.
+ */
+const MENU_OFFSET_PX = 8;
+
 export function LangSwitcher({ compact = false }: { compact?: boolean } = {}) {
   const lang = useThemeStore((s) => s.lang);
   const setLang = useThemeStore((s) => s.setLang);
@@ -85,11 +93,13 @@ export function LangSwitcher({ compact = false }: { compact?: boolean } = {}) {
   }
 
   // Compact: small icon-only globe trigger. Used inside the Nav pill.
-  // Mirrors PillLink's pure-opacity colour scheme so links and the
+  // Mirrors NavLink's pure-opacity colour scheme so links and the
   // language icon read as one consistent palette inside the island:
-  //   - idle / closed : white @ 35%
-  //   - hover / open  : white @ 80%
-  // No background, no border — keeps the pill internals flat.
+  //   - idle / closed : white @ 42%
+  //   - hover / open  : white @ 90%
+  // The globe also performs a tiny 0.85→1 scale when the menu opens
+  // so the icon registers as "armed" — telegraphs that the trigger
+  // is actively producing a UI surface, not just changing colour.
   if (compact) {
     return (
       <div className="relative">
@@ -103,13 +113,18 @@ export function LangSwitcher({ compact = false }: { compact?: boolean } = {}) {
           title={t('nav.language')}
           onClick={() => setOpen((v) => !v)}
           className={
-            'inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-150 ' +
+            'group inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-200 ease-out ' +
             (open
-              ? 'text-[hsla(0,0%,100%,0.8)]'
-              : 'text-[hsla(0,0%,100%,0.35)] hover:text-[hsla(0,0%,100%,0.8)]')
+              ? 'text-[hsla(0,0%,100%,0.9)]'
+              : 'text-[hsla(0,0%,100%,0.42)] hover:text-[hsla(0,0%,100%,0.9)]')
           }
         >
-          <GlobeIcon className="h-3.5 w-3.5" />
+          <GlobeIcon
+            className={
+              'h-3.5 w-3.5 transition-transform duration-200 ease-out ' +
+              (open ? 'scale-110' : 'scale-100 group-hover:scale-110')
+            }
+          />
         </button>
 
         {open && (
@@ -165,6 +180,15 @@ export function LangSwitcher({ compact = false }: { compact?: boolean } = {}) {
  * Shared dropdown body. Both compact and pill triggers anchor it at
  * the same relative offset; the menu width is tuned so language names
  * with diacritics still fit on one line.
+ *
+ * Enter animation is the `eikon-menu-pop` keyframe — short fade +
+ * 6px settle anchored at top-right so the menu reads as "unfolded
+ * from the trigger". Honours `prefers-reduced-motion` via CSS.
+ *
+ * Border is bumped to `border-2` (a slightly stronger line than
+ * the rest of the dark UI) so the menu visually detaches from the
+ * pill behind it even when the page background also happens to be
+ * dark.
  */
 function Menu({
   menuRef,
@@ -185,7 +209,8 @@ function Menu({
       id={id}
       role="menu"
       aria-label={label}
-      className="absolute right-0 top-[calc(100%+8px)] z-50 min-w-[150px] overflow-hidden rounded-lg border border-[var(--border-1)] bg-[var(--surface-1)] py-1 shadow-lg shadow-black/20"
+      style={{ top: `calc(100% + ${MENU_OFFSET_PX}px)` }}
+      className="eikon-menu-pop absolute right-0 z-50 min-w-[160px] overflow-hidden rounded-xl border border-[var(--border-2)] bg-[var(--surface-1)]/95 py-1 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.45),0_2px_6px_rgba(0,0,0,0.15)] backdrop-blur-xl"
     >
       {SUPPORTED_LANGS.map((l) => {
         const active = l === lang;
@@ -197,7 +222,7 @@ function Menu({
               aria-checked={active}
               onClick={() => onChoose(l)}
               className={
-                'flex w-full items-center justify-between gap-3 px-3 py-1.5 text-left text-sm transition ' +
+                'flex w-full items-center justify-between gap-3 px-3 py-1.5 text-left text-sm transition-colors duration-150 ease-out ' +
                 (active
                   ? 'bg-brand-500/10 text-brand-400'
                   : 'text-[var(--fg-2)] hover:bg-[var(--surface-2)] hover:text-[var(--fg-1)]')
