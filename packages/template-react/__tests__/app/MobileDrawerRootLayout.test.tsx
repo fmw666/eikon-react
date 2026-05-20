@@ -21,7 +21,30 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+// =================================================================================================
+// Module mocks (must be hoisted ABOVE imports of code-under-test)
+// =================================================================================================
+//
+// The layout renders <SignInButton /> from `@/features/auth`, which
+// transitively imports `@/shared/supabase` via the auth service
+// factory. The real supabase client constructs a Realtime client at
+// module load that needs a `WebSocket` global — happy-dom doesn't
+// provide one, so the import would crash before the layout renders.
+
+vi.mock('@/shared/supabase', () => ({
+  supabase: new Proxy(
+    {},
+    {
+      get() {
+        throw new Error(
+          '@/shared/supabase was accessed in a layout test — mock it explicitly.'
+        );
+      },
+    }
+  ),
+}));
 
 // --- Absolute Imports ---
 import { MobileDrawerRootLayout } from '@/app/layouts/MobileDrawerRootLayout';

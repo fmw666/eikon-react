@@ -23,6 +23,9 @@ import { useNavigate } from 'react-router-dom';
 // --- Third-party Libraries ---
 import { Loader2 } from 'lucide-react';
 
+// --- Absolute Imports ---
+import { toast } from '@/shared/ui/toaster';
+
 // --- Relative Imports ---
 import { TaskCard } from '../components/TaskCard';
 import { TasksScreen } from '../components/TasksScreen';
@@ -58,11 +61,25 @@ function TasksIndexPage() {
   const isLoading = useTaskLoading();
   const isInitialized = useTaskInitialized();
   const error = useTaskError();
-  const { initialize } = useTaskActions();
+  const { initialize, deleteTask } = useTaskActions();
 
   useEffect(() => {
     void initialize();
   }, [initialize]);
+
+  // The delete flow lives here (not in TaskCard) so the card stays a
+  // pure presentational component: it owns the confirmation dialog UX
+  // but delegates the store mutation + toast feedback up. Errors are
+  // re-thrown so the card keeps the dialog open and the user can retry.
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteTask(id);
+      toast.success(t('delete.doneToast'));
+    } catch (e) {
+      toast.error(t('delete.errorToast'));
+      throw e;
+    }
+  };
 
   return (
     <TasksScreen
@@ -88,6 +105,7 @@ function TasksIndexPage() {
               <TaskCard
                 task={task}
                 onClick={() => navigate(`/tasks/${task.id}`)}
+                onDelete={() => handleDelete(task.id)}
               />
             </li>
           ))}

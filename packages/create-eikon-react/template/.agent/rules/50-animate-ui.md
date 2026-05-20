@@ -27,6 +27,18 @@ This template adopts the **animate-ui** philosophy: shadcn-style primitives that
 
 See [src/shared/ui/button.tsx](../../src/shared/ui/button.tsx) as the canonical example.
 
+## Modal primitives (`dialog`, `sheet`, `command`)
+
+The template ships three overlay primitives, all built on Radix + `motion/react`, and **never** swappable via a `--ui` axis. Pick by *intent*, not aesthetics — see [skills/add-modal/SKILL.md](../skills/add-modal/SKILL.md) for the full decision tree.
+
+- **`src/shared/ui/dialog.tsx`** — centred overlay built on `@radix-ui/react-dialog` with a `motion.div` content wrapper inside `<AnimatePresence>`. Use for confirmations, forms, sized panels, nested confirms, or a fullscreen surface (override `DialogContent`'s `className` with the `left-0 top-0 h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 rounded-none p-0` recipe). The `<DialogTitle>` + `<DialogDescription>` pair is required for a11y — if a use case truly has no description, pass an empty `description=""` instead of skipping it.
+- **`src/shared/ui/sheet.tsx`** — edge-anchored drawer with `side="top" | "right" | "bottom" | "left"`. Header + footer stay pinned; `<SheetBody>` owns its own vertical scroll. Top/bottom panels grow to fit content up to `max-h-[80vh]`. **Note:** the file ships behind the `@eikon:variant(layout=mobile-drawer) file` marker — it is only kept for the `mobile-drawer` layout out of the box. To use a Sheet under a different layout, copy the file (and drop the marker) into your scaffolded project.
+- **`src/shared/ui/command.tsx`** — searchable command palette wrapping [`cmdk`](https://cmdk.paco.me). Exports `Command`, `CommandDialog`, `CommandInput`, `CommandList`, `CommandEmpty`, `CommandGroup`, `CommandItem`, `CommandSeparator`, `CommandShortcut`. The file is gated by `@eikon:feature(examples) file` and `cmdk` is listed under `PACKAGE_DEPS_BY_FEATURE.examples` in `packages/create-eikon-react/src/strip-features.ts`, so both the file and the dependency are pruned together when `--features` excludes `examples`. Bind ⌘K / Ctrl+K with a `keydown` listener that calls `preventDefault()` before toggling `open`.
+
+For a globally-openable Modal driven by a store (auth, role switcher, app-wide composer), mirror the `features/auth` feature: a vanilla zustand store + selectors + a controlled `XModal` + an `XModalMount` mounted next to `<Toaster />` in [src/app/providers.tsx](../../src/app/providers.tsx). The Modal primitive stays presentational; the Mount wrapper owns toasts + i18n preload.
+
+These three primitives + the feature-level Modal pattern are showcased end-to-end in `features/examples`: `DialogShowcasePage` (basics / sizes / nested / fullscreen), `SheetShowcasePage` (4 sides + scrollable body), `CommandShowcasePage` (⌘K + inline) and `SignInModalShowcasePage` (mount + 2 triggers). Use those pages as runnable references when extending behaviour.
+
 ## Toast notifications (`toast` variant axis)
 
 - Toasts are mounted exactly once in [src/app/providers.tsx](../../src/app/providers.tsx) via `<Toaster />` from `@/shared/ui/toaster`. Business code fires events imperatively via `import { toast } from '@/shared/ui/toaster'` (`toast.success`, `toast.error`, `toast.promise`, …). The imperative API surface comes from [`sonner`](https://sonner.emilkowal.ski/) and is **identical across every preset** — switching presets never touches feature code.

@@ -100,17 +100,21 @@ describe('Tasks feature — end-to-end flow', () => {
     resetEverything();
   });
 
-  it('lists the seed tasks on /tasks', async () => {
-    renderApp('/tasks');
-    await waitFor(
-      () => {
-        expect(
-          screen.getByText(/read the eikon readme/i)
-        ).toBeInTheDocument();
-      },
-      { timeout: SLOW_TIMEOUT }
-    );
-  });
+  it(
+    'lists the seed tasks on /tasks',
+    async () => {
+      renderApp('/tasks');
+      await waitFor(
+        () => {
+          expect(
+            screen.getByText(/read the eikon readme/i)
+          ).toBeInTheDocument();
+        },
+        { timeout: SLOW_TIMEOUT }
+      );
+    },
+    SLOW_TIMEOUT * 3
+  );
 
   it(
     'creates a task and shows it in the list + details flow',

@@ -39,10 +39,17 @@ import {
 
 // Re-export source paths a barrel is allowed to read from. Anything
 // else (e.g. `./store/tasksStore`) is a private-path leak.
+//
+// `./components` is allowed as a sub-barrel for features whose public
+// surface IS a set of components (e.g. `features/auth` exposes the
+// SignInButton + Modal trio mounted by layouts / providers). Going
+// through a sub-barrel — never `./components/<Name>` directly —
+// preserves the "barrel owns the public name list" invariant.
 const ALLOWED_REEXPORT_PATTERNS: RegExp[] = [
   /^\.\/routes$/,
   /^\.\/types$/,
   /^\.\/selectors$/,
+  /^\.\/components$/,
   /^\.\/services\/[a-z][A-Za-z0-9]*Service$/,
   /^\.\/store\/[a-z][A-Za-z0-9]*Store$/,
   /^\.\/stores\/[a-z][A-Za-z0-9]*Store$/,

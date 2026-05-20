@@ -66,6 +66,36 @@ const DialogShowcasePage = lazy(async () => {
   return { default: mod.DialogShowcasePage };
 });
 
+const SheetShowcasePage = lazy(async () => {
+  const [mod] = await Promise.all([
+    import('./pages/SheetShowcasePage'),
+    // @eikon:feature(i18n) begin
+    loadNamespace('examples'),
+    // @eikon:feature(i18n) end
+  ]);
+  return { default: mod.SheetShowcasePage };
+});
+
+const CommandShowcasePage = lazy(async () => {
+  const [mod] = await Promise.all([
+    import('./pages/CommandShowcasePage'),
+    // @eikon:feature(i18n) begin
+    loadNamespace('examples'),
+    // @eikon:feature(i18n) end
+  ]);
+  return { default: mod.CommandShowcasePage };
+});
+
+const SignInModalShowcasePage = lazy(async () => {
+  const [mod] = await Promise.all([
+    import('./pages/SignInModalShowcasePage'),
+    // @eikon:feature(i18n) begin
+    loadNamespace('examples'),
+    // @eikon:feature(i18n) end
+  ]);
+  return { default: mod.SignInModalShowcasePage };
+});
+
 const MotionShowcasePage = lazy(async () => {
   const [mod] = await Promise.all([
     import('./pages/MotionShowcasePage'),
@@ -95,6 +125,12 @@ export const examplesRoutes = (
     <Route path="/examples" element={<ExamplesIndexPage />} />
     <Route path="/examples/toaster" element={<ToasterShowcasePage />} />
     <Route path="/examples/dialog" element={<DialogShowcasePage />} />
+    <Route path="/examples/sheet" element={<SheetShowcasePage />} />
+    <Route path="/examples/command" element={<CommandShowcasePage />} />
+    <Route
+      path="/examples/sign-in-modal"
+      element={<SignInModalShowcasePage />}
+    />
     <Route path="/examples/motion" element={<MotionShowcasePage />} />
     <Route
       path="/examples/performance"

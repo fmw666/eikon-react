@@ -11,6 +11,7 @@
     "label": "本页目录",
     "uiPrimitives": "UI 基元",
     "patterns": "交互模式",
+    "modals": "模态与浮层",
     "performance": "性能"
   },
   "sections": {
@@ -91,21 +92,119 @@
     },
     "dialog": {
       "title": "Dialog",
-      "description": "Radix Dialog 配合 motion/react 的进入/退出动画，关闭时整棵 portal 子树会被卸载。",
-      "openLabel": "打开 Dialog",
-      "openWithFormLabel": "打开表单 Dialog",
-      "openDestructiveLabel": "打开危险操作",
-      "destructiveLead": "此操作无法撤销。",
-      "destructiveDetail": "请确认你已经备份后再继续。",
-      "destructiveConfirm": "确定，删除",
+      "description": "Radix Dialog 配合 motion/react 的进入/退出动画，关闭时整棵 portal 子树会被卸载。下面四组覆盖了 Modal 最常见的四种形态。",
       "cancel": "取消",
-      "formTitle": "速记",
-      "formDescription": "笔记仅保存在本地，不会发送到任何服务器。",
-      "noteLabel": "笔记",
-      "notePlaceholder": "记录一个想法…",
-      "save": "保存",
-      "savedToast": "笔记已保存",
-      "destructiveDoneToast": "项目已删除"
+      "basics": {
+        "eyebrow": "基础形态",
+        "title": "基础三件套",
+        "description": "信息提示、表单输入和危险确认 —— 80% 的场景就用这三种。",
+        "openLabel": "打开 Dialog",
+        "openWithFormLabel": "打开表单 Dialog",
+        "openDestructiveLabel": "打开危险操作",
+        "destructiveLead": "此操作无法撤销。",
+        "destructiveDetail": "请确认你已经备份后再继续。",
+        "destructiveConfirm": "确定，删除",
+        "destructiveDoneToast": "项目已删除",
+        "formTitle": "速记",
+        "formDescription": "笔记仅保存在本地，不会发送到任何服务器。",
+        "noteLabel": "笔记",
+        "notePlaceholder": "记录一个想法…",
+        "save": "保存",
+        "savedToast": "笔记已保存"
+      },
+      "sizes": {
+        "eyebrow": "尺寸",
+        "title": "宽度矩阵",
+        "description": "用单个 Tailwind class 覆盖 DialogContent 的默认 max-width。sm 适合确认弹窗，md/lg 适合表单，xl 适合内容型面板。",
+        "body": "当前 Dialog 使用 {{size}} 预设。",
+        "sm": "小 (sm)",
+        "md": "中 (md)",
+        "lg": "大 (lg)",
+        "xl": "超大 (xl)"
+      },
+      "nested": {
+        "eyebrow": "嵌套",
+        "title": "嵌套 Dialog",
+        "description": "在父 Modal 内部再打开一个确认 Modal。Radix 的 portal 栈负责 z-index，AnimatePresence 各自管理退出动画。",
+        "openLabel": "打开设置",
+        "parentTitle": "工作区设置",
+        "parentBody": "在下方选择一个工作区操作 —— 危险操作会在当前 Modal 之上再弹出确认窗。",
+        "confirmTrigger": "删除工作区",
+        "confirmTitle": "确定删除工作区？",
+        "confirmBody": "这将永久删除该工作区以及其中所有内容，无法撤销。",
+        "confirmFinal": "永久删除",
+        "confirmedToast": "工作区已删除"
+      },
+      "fullscreen": {
+        "eyebrow": "布局",
+        "title": "全屏形态",
+        "description": "覆盖整个视口的 Modal，适合 Modal 即页面的移动端场景。去掉居中卡片样式，整张吃满。",
+        "openLabel": "打开全屏",
+        "body": "Modal 占据整个视口。",
+        "bodyDetail": "图片裁剪、多步引导，或任何不希望页面 chrome 抢焦点的流程都适合用这种形态。Header / Footer 分区让主按钮在长内容下也能保持可见。",
+        "confirm": "完成"
+      }
+    },
+    "sheet": {
+      "title": "Sheet",
+      "description": "基于 Radix 的边缘抽屉。Sheet 适合从屏幕边缘滑入，Dialog 适合居中浮层。",
+      "directions": {
+        "eyebrow": "方向",
+        "title": "四个方向",
+        "description": "同一个 Sheet 通过 `side` prop 切换方向。移动端导航多用左右，快速筛选/选择器用底部，状态条用顶部。",
+        "left": "左侧滑入",
+        "right": "右侧滑入",
+        "top": "顶部滑入",
+        "bottom": "底部滑入",
+        "body": "Sheet 从 {{side}} 侧滑入。"
+      },
+      "scroll": {
+        "eyebrow": "高内容",
+        "title": "可滚动内容",
+        "description": "Sheet 内容溢出视口时，SheetBody 单独滚动，Header / Footer 保持固定，主按钮永远不会被滚到屏外。",
+        "openLabel": "打开长内容 Sheet",
+        "header": "长表单",
+        "row": "第 {{n}} 行",
+        "close": "关闭"
+      }
+    },
+    "command": {
+      "title": "命令面板",
+      "description": "基于 cmdk 的键盘优先搜索菜单。包在我们的动画 Dialog 里（CommandDialog）就是经典 ⌘K 体验；也可以单独 inline 渲染 Command 作为静态菜单。",
+      "openLabel": "打开命令面板",
+      "shortcutHint": "在本页任意位置按 ⌘K（或 Ctrl+K）即可打开命令面板。",
+      "placeholder": "输入命令或搜索…",
+      "empty": "无匹配结果。",
+      "groups": {
+        "suggestions": "推荐",
+        "navigation": "导航",
+        "actions": "操作"
+      },
+      "items": {
+        "newTask": "新建任务",
+        "openSettings": "打开设置",
+        "search": "搜索文档",
+        "home": "前往首页",
+        "counter": "前往 Counter",
+        "tasks": "前往 Tasks",
+        "signOut": "退出登录"
+      },
+      "shortcuts": {
+        "newTask": "⌘N",
+        "openSettings": "⌘,",
+        "search": "⌘F"
+      },
+      "ranToast": "执行了：{{label}}"
+    },
+    "signInModal": {
+      "title": "登录 Modal",
+      "description": "auth 模块的 Modal 在 app/providers.tsx 通过 SignInModalMount 全局挂载一次，任何路由都可以通过 useOpenSignInModal() 唤起。下方按钮可分别预览两种模式。",
+      "openSignIn": "打开登录",
+      "openSignUp": "打开注册",
+      "openFromAnywhere": "从任意位置唤起",
+      "mountedNoteTitle": "已挂载",
+      "mountedNoteBody": "Modal 已经在当前应用里挂载好，下方按钮只是调用 auth store 的 openModal()。右上角顶栏的 Sign in 按钮触发的是同一个 Modal。",
+      "modeTabHint": "在 Modal 内的 Tabs 上切换登录 / 注册；预览里 OAuth 走的是 Mock service。"
     },
     "motion": {
       "title": "Motion",

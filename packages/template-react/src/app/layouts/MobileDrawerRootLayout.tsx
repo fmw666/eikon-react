@@ -39,6 +39,7 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 
 // --- Absolute Imports ---
+import { SignInButton } from '@/features/auth';
 import { cn } from '@/shared/lib/cn';
 import {
   Sheet,
@@ -173,6 +174,7 @@ function MobileDrawerRootLayout() {
             <LanguageSwitcher />
             {/* @eikon:feature(i18n) end */}
             <ThemeToggle />
+            <SignInButton />
           </div>
         </div>
       </header>

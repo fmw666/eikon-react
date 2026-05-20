@@ -63,16 +63,28 @@ function ExamplesIndexPage() {
       ],
     },
     {
-      label: t('toc.label'),
+      label: t('toc.patterns'),
       items: [
         { type: 'anchor', id: 'theme', label: t('sections.theme.title') },
         // @eikon:feature(i18n) begin
         { type: 'anchor', id: 'i18n', label: t('sections.i18n.title') },
         // @eikon:feature(i18n) end
         { type: 'anchor', id: 'animation', label: t('sections.animation.title') },
+        { type: 'route', to: '/examples/motion', label: t('pages.motion.title') },
+      ],
+    },
+    {
+      label: t('toc.modals'),
+      items: [
         { type: 'route', to: '/examples/toaster', label: t('pages.toaster.title') },
         { type: 'route', to: '/examples/dialog', label: t('pages.dialog.title') },
-        { type: 'route', to: '/examples/motion', label: t('pages.motion.title') },
+        { type: 'route', to: '/examples/sheet', label: t('pages.sheet.title') },
+        { type: 'route', to: '/examples/command', label: t('pages.command.title') },
+        {
+          type: 'route',
+          to: '/examples/sign-in-modal',
+          label: t('pages.signInModal.title'),
+        },
       ],
     },
     {

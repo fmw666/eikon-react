@@ -86,9 +86,13 @@ const PACKAGE_DEPS_BY_FEATURE: Record<string, string[]> = {
 
   // The `examples` showcase is a DEV-ONLY template-internal feature. Its
   // entire directory (`src/features/examples/`) is removed by the directory
-  // sweep below; its two runtime dependencies are pruned here so a
-  // scaffolded project's `pnpm install` doesn't pull them in.
-  examples: ['web-vitals', '@tanstack/react-virtual'],
+  // sweep below; its runtime-only dependencies are pruned here so a
+  // scaffolded project's `pnpm install` doesn't pull them in. `cmdk` joins
+  // the list because the `<Command>` primitive at
+  // `src/shared/ui/command.tsx` is gated by `@eikon:feature(examples)
+  // file` — only the examples showcase mounts it in the unstripped
+  // template, so the package is dead-weight once examples is stripped.
+  examples: ['web-vitals', '@tanstack/react-virtual', 'cmdk'],
 };
 
 /**

@@ -18,6 +18,7 @@ import { Route, Routes } from 'react-router-dom';
 // --- Absolute Imports ---
 import { RootLayout } from '@/app/layouts/RootLayout';
 import { NotFoundPage } from '@/app/pages/NotFoundPage';
+import { authRoutes } from '@/features/auth';
 import { counterRoutes } from '@/features/counter';
 // @eikon:feature(examples) begin
 import { examplesRoutes } from '@/features/examples';
@@ -36,6 +37,7 @@ function AppRouter() {
         {homeRoutes}
         {counterRoutes}
         {tasksRoutes}
+        {authRoutes}
         {/* @eikon:feature(examples) begin */}
         {/*
           The examples feature is a DEV-ONLY component showcase. Two

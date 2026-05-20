@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
 // --- Absolute Imports ---
+import { SignInButton } from '@/features/auth';
 import { cn } from '@/shared/lib/cn';
 // @eikon:feature(i18n) begin
 import { LanguageSwitcher } from '@/shared/ui/language-switcher';
@@ -117,6 +118,7 @@ function StackedRootLayout() {
             <LanguageSwitcher />
             {/* @eikon:feature(i18n) end */}
             <ThemeToggle />
+            <SignInButton />
           </div>
         </div>
       </header>

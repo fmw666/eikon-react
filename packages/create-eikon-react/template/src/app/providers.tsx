@@ -24,6 +24,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // @eikon:feature(query) end
 
 // --- Absolute Imports ---
+import { SignInModalMount } from '@/features/auth';
 import { Toaster } from '@/shared/ui/toaster';
 
 // =================================================================================================
@@ -72,6 +73,13 @@ function AppProviders({ children }: AppProvidersProps) {
         {/* @eikon:feature(query) end */}
         {children}
         <Toaster />
+        {/*
+          Global sign-in / sign-up modal. Lives at provider scope (not
+          inside a layout) so the modal is reachable from any route and
+          survives layout-level remounts; opens via
+          `useOpenSignInModal()()` from anywhere.
+        */}
+        <SignInModalMount />
         {/* @eikon:feature(query) begin */}
       </QueryClientProvider>
       {/* @eikon:feature(query) end */}

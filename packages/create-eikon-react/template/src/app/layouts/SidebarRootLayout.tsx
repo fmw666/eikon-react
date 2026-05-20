@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
 // --- Absolute Imports ---
+import { SignInButton } from '@/features/auth';
 import { cn } from '@/shared/lib/cn';
 // @eikon:feature(i18n) begin
 import { LanguageSwitcher } from '@/shared/ui/language-switcher';
@@ -110,11 +111,12 @@ function SidebarRootLayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="flex items-center gap-1 border-t border-[var(--color-border)] p-2">
+        <div className="flex flex-wrap items-center gap-1 border-t border-[var(--color-border)] p-2">
           {/* @eikon:feature(i18n) begin */}
           <LanguageSwitcher />
           {/* @eikon:feature(i18n) end */}
           <ThemeToggle />
+          <SignInButton />
         </div>
       </aside>
       <main className="mx-auto w-full max-w-5xl flex-1 px-8 py-8">

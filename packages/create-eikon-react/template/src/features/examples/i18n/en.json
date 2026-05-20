@@ -11,6 +11,7 @@
     "label": "On this page",
     "uiPrimitives": "UI primitives",
     "patterns": "Interaction patterns",
+    "modals": "Modals & overlays",
     "performance": "Performance"
   },
   "sections": {
@@ -91,21 +92,119 @@
     },
     "dialog": {
       "title": "Dialog",
-      "description": "Radix Dialog with motion/react enter/exit transitions, conditionally portalled so the subtree fully unmounts on close.",
-      "openLabel": "Open dialog",
-      "openWithFormLabel": "Open form dialog",
-      "openDestructiveLabel": "Open destructive",
-      "destructiveLead": "This action cannot be undone.",
-      "destructiveDetail": "Make sure you have a backup before you proceed.",
-      "destructiveConfirm": "Yes, delete",
+      "description": "Radix Dialog with motion/react enter/exit transitions, conditionally portalled so the subtree fully unmounts on close. Four flavours below cover every common Modal shape.",
       "cancel": "Cancel",
-      "formTitle": "Quick note",
-      "formDescription": "Notes are stored locally and never sent anywhere.",
-      "noteLabel": "Note",
-      "notePlaceholder": "Capture an idea…",
-      "save": "Save",
-      "savedToast": "Note saved",
-      "destructiveDoneToast": "Item deleted"
+      "basics": {
+        "eyebrow": "Foundations",
+        "title": "Basic flavours",
+        "description": "Informational, form-style and destructive-confirmation Modals — the three shapes you reach for 80% of the time.",
+        "openLabel": "Open dialog",
+        "openWithFormLabel": "Open form dialog",
+        "openDestructiveLabel": "Open destructive",
+        "destructiveLead": "This action cannot be undone.",
+        "destructiveDetail": "Make sure you have a backup before you proceed.",
+        "destructiveConfirm": "Yes, delete",
+        "destructiveDoneToast": "Item deleted",
+        "formTitle": "Quick note",
+        "formDescription": "Notes are stored locally and never sent anywhere.",
+        "noteLabel": "Note",
+        "notePlaceholder": "Capture an idea…",
+        "save": "Save",
+        "savedToast": "Note saved"
+      },
+      "sizes": {
+        "eyebrow": "Sizes",
+        "title": "Width matrix",
+        "description": "Override DialogContent's default max-width with a single Tailwind class. Use sm for confirmation prompts, md/lg for forms, xl for content surfaces.",
+        "body": "This dialog uses the {{size}} preset.",
+        "sm": "Small (sm)",
+        "md": "Medium (md)",
+        "lg": "Large (lg)",
+        "xl": "Extra large (xl)"
+      },
+      "nested": {
+        "eyebrow": "Stacked",
+        "title": "Nested dialogs",
+        "description": "A confirmation Modal opened from inside another Modal. Radix's portal stack handles z-index; AnimatePresence handles independent exit animations.",
+        "openLabel": "Open settings",
+        "parentTitle": "Workspace settings",
+        "parentBody": "Choose a workspace action below — destructive actions open a confirmation Modal on top of this one.",
+        "confirmTrigger": "Delete workspace",
+        "confirmTitle": "Delete workspace?",
+        "confirmBody": "This permanently removes the workspace and every artefact inside it. There is no undo.",
+        "confirmFinal": "Delete forever",
+        "confirmedToast": "Workspace deleted"
+      },
+      "fullscreen": {
+        "eyebrow": "Layout",
+        "title": "Fullscreen flavour",
+        "description": "Viewport-filling Modal for mobile shells where the modal IS the page. Drops the centred-card chrome and runs edge-to-edge.",
+        "openLabel": "Open fullscreen",
+        "body": "The Modal owns the whole viewport.",
+        "bodyDetail": "Use this shape for image cropping, multi-step wizards, or any flow where chrome would steal attention. The header / footer split keeps the action bar reachable on tall mobile screens.",
+        "confirm": "Done"
+      }
+    },
+    "sheet": {
+      "title": "Sheet",
+      "description": "Side-anchored drawers built on the same Radix primitives as Dialog but with edge-locked motion. Use Sheet when the surface should slide in from a screen edge — Dialog when it should centre over the page.",
+      "directions": {
+        "eyebrow": "Directions",
+        "title": "Four edges",
+        "description": "The same Sheet primitive accepts any side via the `side` prop. Mobile drawers usually anchor left or right; quick filters / pickers anchor bottom; status panels anchor top.",
+        "left": "From left",
+        "right": "From right",
+        "top": "From top",
+        "bottom": "From bottom",
+        "body": "Sheet anchored to the {{side}} edge."
+      },
+      "scroll": {
+        "eyebrow": "Tall content",
+        "title": "Scrollable body",
+        "description": "When the Sheet contents overflow the viewport, the SheetBody scrolls independently — the header / footer stay pinned so primary actions never sit below the fold.",
+        "openLabel": "Open long sheet",
+        "header": "Long form",
+        "row": "Row #{{n}}",
+        "close": "Close"
+      }
+    },
+    "command": {
+      "title": "Command palette",
+      "description": "Searchable, keyboard-first menu built on cmdk. Wrap it in our animated Dialog (CommandDialog) for the classic ⌘K experience, or render Command inline for static menus.",
+      "openLabel": "Open palette",
+      "shortcutHint": "Press ⌘K (or Ctrl+K) anywhere on this page to open the palette.",
+      "placeholder": "Type a command or search…",
+      "empty": "No results found.",
+      "groups": {
+        "suggestions": "Suggestions",
+        "navigation": "Navigation",
+        "actions": "Actions"
+      },
+      "items": {
+        "newTask": "Create new task",
+        "openSettings": "Open settings",
+        "search": "Search documentation",
+        "home": "Go to Home",
+        "counter": "Go to Counter",
+        "tasks": "Go to Tasks",
+        "signOut": "Sign out"
+      },
+      "shortcuts": {
+        "newTask": "⌘N",
+        "openSettings": "⌘,",
+        "search": "⌘F"
+      },
+      "ranToast": "Ran: {{label}}"
+    },
+    "signInModal": {
+      "title": "Sign-in modal",
+      "description": "The auth feature's modal is mounted once at the provider level (SignInModalMount in app/providers.tsx) and openable from any route via useOpenSignInModal(). Trigger it below to preview both modes.",
+      "openSignIn": "Open Sign in",
+      "openSignUp": "Open Sign up",
+      "openFromAnywhere": "Open from anywhere",
+      "mountedNoteTitle": "Already mounted",
+      "mountedNoteBody": "The Modal is already live in this app — the buttons below just call openModal() on the auth store. Look for the topbar Sign in button on the right to see the same trigger inline.",
+      "modeTabHint": "Use the tabs inside the modal to switch between sign in and sign up; OAuth providers are wired to the Mock service in this preview."
     },
     "motion": {
       "title": "Motion",

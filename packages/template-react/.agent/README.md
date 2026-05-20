@@ -29,6 +29,7 @@ Humans editing this project should also follow these rules — they encode the t
     ├── add-data-feature/SKILL.md         <- feature with swappable Mock+Supabase backends (canonical: tasks)
     ├── add-page/SKILL.md
     ├── add-animate-ui-component/SKILL.md
+    ├── add-modal/SKILL.md                  <- Dialog / Sheet / Command / feature-level modal (mirror SignInModal)
     ├── add-zustand-store/SKILL.md        <- both flavours: hook (create()) and vanilla (createStore())
     ├── add-i18n-keys/SKILL.md
     ├── add-locale/SKILL.md                <- register a new BCP 47 language across every feature ns
