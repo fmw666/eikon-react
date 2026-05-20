@@ -33,9 +33,12 @@ The CLI is interactive and will ask:
 - Project name (positional arg lets you skip the prompt)
 - **Platform target** — `web` (browser, default), `desktop` (Tauri 2 shell), or `mobile` (Capacitor shell)
 - Whether to include **Supabase** (auth + db + storage scaffolding)
-- Whether to include **TanStack Query** (server-state)
 - Package manager (pnpm / npm / bun)
 - Install deps and `git init` now or later
+
+TanStack Query ships as baseline infrastructure in every scaffold (alongside
+React Router), so there's no question about it — the `QueryClientProvider`
+is wired in `src/app/providers.tsx` out of the box.
 
 Non-interactive flags exist for CI scripting:
 
@@ -43,7 +46,7 @@ Non-interactive flags exist for CI scripting:
 npx create-eikon-react my-app \
   --yes \
   --platform desktop \
-  --no-supabase --query \
+  --no-supabase \
   --pm pnpm \
   --no-install --no-git
 ```
@@ -62,7 +65,8 @@ trade-offs and prerequisites.
 - **Feature-first architecture** with ESLint-enforced import boundaries
 - **Vitest** + **Testing Library** with `__tests__/` colocated per feature
 - **React Router v7**, **Zustand**, **React Hook Form** + **zod**, **i18next** (en/zh)
-- Optional **Supabase** (`@supabase/supabase-js`) and **TanStack Query**
+- **TanStack Query** for server-state — baseline, wired by default
+- Optional **Supabase** (`@supabase/supabase-js`)
 - **`.agent/` protocol** — rules and skills any AI coding agent can read directly:
 
   ```

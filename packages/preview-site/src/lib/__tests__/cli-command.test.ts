@@ -30,12 +30,6 @@ describe('buildCliCommand', () => {
     expect(cmd).toBe('npx create-eikon-react <proj_name> --supabase');
   });
 
-  it('emits `--no-<flag>` when a boolean default=true is disabled', () => {
-    const state = { ...defaultState(), query: false };
-    const cmd = buildCliCommand(state);
-    expect(cmd).toBe('npx create-eikon-react <proj_name> --no-query');
-  });
-
   it('emits `--<flag> <value>` for enum overrides only', () => {
     const state = { ...defaultState(), pm: 'bun', design: 'linear' };
     const cmd = buildCliCommand(state);
@@ -120,12 +114,12 @@ describe('buildAgentInstructions', () => {
   });
 
   it('preserves any flags emitted by the command', () => {
-    const state = { ...defaultState(), supabase: true, query: false };
+    const state = { ...defaultState(), supabase: true, design: 'linear' };
     const cmd = buildCliCommand(state);
     const out = buildAgentInstructions(cmd);
     expect(out.startsWith('`' + cmd + '`')).toBe(true);
     expect(out).toContain('--supabase');
-    expect(out).toContain('--no-query');
+    expect(out).toContain('--design linear');
   });
 
   it('reminds the agent to relocate .agent/rules and .agent/skills', () => {

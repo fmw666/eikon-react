@@ -170,7 +170,7 @@ describe('stripFeatures with variants (file-level)', () => {
 
     await stripFeatures(
       tmp,
-      { supabase: false, query: true, i18n: true },
+      { supabase: false, i18n: true },
       { layout: 'sidebar' }
     );
 
@@ -199,7 +199,7 @@ describe('stripFeatures with variants (file-level)', () => {
 
     await stripFeatures(
       tmp,
-      { supabase: false, query: true, i18n: true },
+      { supabase: false, i18n: true },
       { design: 'bar' }
     );
 
@@ -220,7 +220,6 @@ describe('stripFeatures with variants (file-level)', () => {
 
     await stripFeatures(tmp, {
       supabase: false,
-      query: true,
       i18n: true,
     });
 

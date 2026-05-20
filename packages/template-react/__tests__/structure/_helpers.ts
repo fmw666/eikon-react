@@ -141,22 +141,18 @@ export function detectFeatureShape(dir: string): FeatureShape {
  * current tree. Structure tests must wrap optional-feature assertions
  * (i18n parity, supabase shape, …) in `if (featureEnabled('i18n')) { … }`
  * so a CLI-stripped project still passes the suite.
+ *
+ * Note: TanStack Query was previously listed here as a strippable
+ * feature. It's now baseline infrastructure (always present in every
+ * scaffold), so it's intentionally absent from this union — any test
+ * may import from `@tanstack/react-query` without a feature gate.
  */
-export function featureEnabled(name: 'i18n' | 'supabase' | 'query'): boolean {
+export function featureEnabled(name: 'i18n' | 'supabase'): boolean {
   switch (name) {
     case 'i18n':
       return isDir(path.join(SHARED_ROOT, 'i18n'));
     case 'supabase':
       return isDir(path.join(SHARED_ROOT, 'supabase'));
-    case 'query':
-      try {
-        const pkg = readJSON<{ dependencies?: Record<string, string> }>(
-          path.join(REPO_ROOT, 'package.json')
-        );
-        return Boolean(pkg.dependencies?.['@tanstack/react-query']);
-      } catch {
-        return false;
-      }
   }
 }
 

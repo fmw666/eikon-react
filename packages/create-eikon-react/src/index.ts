@@ -275,10 +275,9 @@ function isCwdShortcut(value: string): boolean {
 }
 
 async function resolveFeatures(argv: ParsedArgs): Promise<FeatureFlags> {
-  const flags: FeatureFlags = { supabase: false, query: true, i18n: true };
+  const flags: FeatureFlags = { supabase: false, i18n: true };
 
   if (argv.supabase !== undefined) flags.supabase = argv.supabase;
-  if (argv.query !== undefined) flags.query = argv.query;
 
   if (!argv.yes && argv.supabase === undefined) {
     const supabase = await select({
@@ -294,22 +293,6 @@ async function resolveFeatures(argv: ParsedArgs): Promise<FeatureFlags> {
       process.exit(1);
     }
     flags.supabase = Boolean(supabase);
-  }
-
-  if (!argv.yes && argv.query === undefined) {
-    const query = await select({
-      message: 'Include TanStack Query (server-state)?',
-      initialValue: true as boolean,
-      options: [
-        { value: true, label: 'Yes — recommended for any project that fetches data' },
-        { value: false, label: 'No — keep the bundle lean' },
-      ],
-    });
-    if (isCancel(query)) {
-      cancel('Aborted.');
-      process.exit(1);
-    }
-    flags.query = Boolean(query);
   }
 
   return flags;
@@ -454,7 +437,6 @@ interface ParsedArgs {
   name?: string;
   yes: boolean;
   supabase?: boolean;
-  query?: boolean;
   install?: boolean;
   git?: boolean;
   pm?: 'pnpm' | 'npm' | 'bun';
@@ -468,8 +450,6 @@ function parseArgs(argv: string[]): ParsedArgs {
     if (a === '-y' || a === '--yes') out.yes = true;
     else if (a === '--supabase') out.supabase = true;
     else if (a === '--no-supabase') out.supabase = false;
-    else if (a === '--query') out.query = true;
-    else if (a === '--no-query') out.query = false;
     else if (a === '--install') out.install = true;
     else if (a === '--no-install') out.install = false;
     else if (a === '--git') out.git = true;

@@ -38,10 +38,9 @@ describe('snapToPlatform', () => {
   });
 
   it('preserves boolean params that have no platform-specific gating', () => {
-    const input: ParamState = { ...defaultState(), supabase: true, query: false };
+    const input: ParamState = { ...defaultState(), supabase: true };
     const out = snapToPlatform(input, 'mobile');
     expect(out.supabase).toBe(true);
-    expect(out.query).toBe(false);
   });
 
   it('keeps enum values that are still valid under the new platform', () => {

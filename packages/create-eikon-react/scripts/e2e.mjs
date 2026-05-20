@@ -35,9 +35,15 @@ const args = parseArgs(process.argv.slice(2));
 
 const SCENARIOS = [
   {
-    id: 'lean',
-    projectName: 'eikon-e2e-lean',
-    flags: ['--no-supabase', '--no-query'],
+    // Default scaffold (platform=web, supabase off). TanStack Query is
+    // baseline infrastructure now — every scaffold ships with it — so
+    // this scenario doubles as the canonical "web minimal" smoke test:
+    // it covers the web-specific stripping (no PWA meta, no capacitor
+    // mode, no mobile safe-area utilities) alongside the dependency
+    // assertions.
+    id: 'default',
+    projectName: 'eikon-e2e-default',
+    flags: ['--no-supabase'],
     expect: {
       filesPresent: ['src/features/counter/index.ts', '.agent/README.md'],
       // The `examples` feature is a DEV-only template showcase that the
@@ -52,15 +58,24 @@ const SCENARIOS = [
         'src/shared/ui/sheet.tsx',
         'pnpm-workspace.yaml',
       ],
-      depsPresent: ['react', 'tailwindcss', 'motion'],
+      depsPresent: [
+        'react',
+        'tailwindcss',
+        'motion',
+        '@tanstack/react-query',
+      ],
       depsAbsent: [
         '@supabase/supabase-js',
-        '@tanstack/react-query',
         '@tanstack/react-virtual',
         'web-vitals',
       ],
-      providersContains: ['BrowserRouter', '<Toaster'],
-      providersAbsent: ['QueryClient', '@tanstack/react-query'],
+      providersContains: [
+        'BrowserRouter',
+        '<Toaster',
+        'QueryClientProvider',
+        '@tanstack/react-query',
+      ],
+      providersAbsent: [],
       // Platform=web must not carry mobile-only PWA meta tags, CSS
       // tokens / utilities, or the capacitor mode branch in vite.
       htmlAbsent: [
@@ -75,26 +90,9 @@ const SCENARIOS = [
     },
   },
   {
-    id: 'default',
-    projectName: 'eikon-e2e-default',
-    flags: ['--no-supabase', '--query'],
-    expect: {
-      filesPresent: ['src/features/counter/index.ts'],
-      filesAbsent: ['src/shared/supabase', 'src/features/examples'],
-      depsPresent: ['@tanstack/react-query'],
-      depsAbsent: [
-        '@supabase/supabase-js',
-        '@tanstack/react-virtual',
-        'web-vitals',
-      ],
-      providersContains: ['QueryClientProvider', '@tanstack/react-query'],
-      providersAbsent: [],
-    },
-  },
-  {
     id: 'full',
     projectName: 'eikon-e2e-full',
-    flags: ['--supabase', '--query'],
+    flags: ['--supabase'],
     expect: {
       filesPresent: [
         'src/features/counter/index.ts',
@@ -215,7 +213,6 @@ const SCENARIOS = [
     projectName: 'eikon-e2e-variants',
     flags: [
       '--no-supabase',
-      '--query',
       '--design',
       'linear',
       '--layout',

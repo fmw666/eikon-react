@@ -17,7 +17,6 @@ interface BuildState {
 interface BuildInputs {
   platform: string;
   supabase: boolean;
-  query: boolean;
   design: string;
   layout: string;
   ui: string;
@@ -61,7 +60,6 @@ function describeVariant(inputs: BuildInputs): string {
     `ui=${inputs.ui}`,
     `toast=${inputs.toast}`,
     inputs.supabase ? 'supabase' : null,
-    inputs.query ? 'query' : null,
   ]
     .filter(Boolean)
     .join(' · ');
@@ -140,7 +138,6 @@ function selectBuildInputs(s: ParamsStore): BuildInputs {
   return {
     platform: String(s.state.platform),
     supabase: !!s.state.supabase,
-    query: !!s.state.query,
     design: String(s.state.design),
     layout: String(s.state.layout),
     ui: String(s.state.ui),

@@ -2,10 +2,16 @@
  * @file providers.tsx
  * @description App-level provider stack.
  *
- * Wraps the children with the router (BrowserRouter), optional
- * TanStack Query provider, and the global toast renderer. Add new
- * providers HERE rather than in `main.tsx` so the provider order is
- * a single review point.
+ * Wraps the children with the router (BrowserRouter), the TanStack Query
+ * provider, and the global toast renderer. Add new providers HERE rather
+ * than in `main.tsx` so the provider order is a single review point.
+ *
+ * TanStack Query is treated as baseline infrastructure (alongside React
+ * Router) — every scaffold ships with it, so the provider mounts
+ * unconditionally. The cost when unused is negligible: one `QueryClient`
+ * instance is allocated at module load, and the library itself sits in a
+ * dedicated vendor chunk that the app never pulls into the main bundle
+ * until something actually calls `useQuery` / `useMutation`.
  */
 
 // =================================================================================================
@@ -19,9 +25,7 @@ import { type ReactNode } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 
 // --- Third-party Libraries ---
-// @eikon:feature(query) begin
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-// @eikon:feature(query) end
 
 // --- Absolute Imports ---
 import { SignInModalMount } from '@/features/auth';
@@ -31,7 +35,6 @@ import { Toaster } from '@/shared/ui/toaster';
 // Constants
 // =================================================================================================
 
-// @eikon:feature(query) begin
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -41,7 +44,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-// @eikon:feature(query) end
 
 /**
  * Strip any trailing slash so react-router accepts the value (it errors on
@@ -68,9 +70,7 @@ interface AppProvidersProps {
 function AppProviders({ children }: AppProvidersProps) {
   return (
     <BrowserRouter basename={ROUTER_BASENAME}>
-      {/* @eikon:feature(query) begin */}
       <QueryClientProvider client={queryClient}>
-        {/* @eikon:feature(query) end */}
         {children}
         <Toaster />
         {/*
@@ -80,9 +80,7 @@ function AppProviders({ children }: AppProvidersProps) {
           `useOpenSignInModal()()` from anywhere.
         */}
         <SignInModalMount />
-        {/* @eikon:feature(query) begin */}
       </QueryClientProvider>
-      {/* @eikon:feature(query) end */}
     </BrowserRouter>
   );
 }

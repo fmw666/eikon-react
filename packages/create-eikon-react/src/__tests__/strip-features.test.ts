@@ -6,16 +6,16 @@ describe('stripBlocksForFeature', () => {
   it('removes a labeled block when its feature is disabled', () => {
     const input = [
       'before',
-      '// @eikon:feature(query) begin',
-      'const queryClient = new QueryClient();',
-      '// @eikon:feature(query) end',
+      '// @eikon:feature(supabase) begin',
+      'const sb = createClient(url, key);',
+      '// @eikon:feature(supabase) end',
       'after',
     ].join('\n');
 
-    const out = stripBlocksForFeature(input, 'query');
+    const out = stripBlocksForFeature(input, 'supabase');
     expect(out).toContain('before');
     expect(out).toContain('after');
-    expect(out).not.toContain('QueryClient');
+    expect(out).not.toContain('createClient');
     expect(out).not.toContain('@eikon:feature');
   });
 
@@ -38,18 +38,18 @@ describe('stripBlocksForFeature', () => {
   it('handles JSX-style {/* … */} block markers', () => {
     const input = [
       'render(',
-      '  {/* @eikon:feature(query) begin */}',
-      '  <QueryClientProvider client={qc}>',
-      '  {/* @eikon:feature(query) end */}',
+      '  {/* @eikon:feature(supabase) begin */}',
+      '  <SupabaseContext.Provider value={sb}>',
+      '  {/* @eikon:feature(supabase) end */}',
       '    {children}',
-      '  {/* @eikon:feature(query) begin */}',
-      '  </QueryClientProvider>',
-      '  {/* @eikon:feature(query) end */}',
+      '  {/* @eikon:feature(supabase) begin */}',
+      '  </SupabaseContext.Provider>',
+      '  {/* @eikon:feature(supabase) end */}',
       ');',
     ].join('\n');
 
-    const out = stripBlocksForFeature(input, 'query');
-    expect(out).not.toContain('QueryClient');
+    const out = stripBlocksForFeature(input, 'supabase');
+    expect(out).not.toContain('SupabaseContext');
     expect(out).toContain('{children}');
   });
 

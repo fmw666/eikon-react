@@ -40,7 +40,7 @@ import { stripFeatures } from '../strip-features.js';
 // Fixture
 // =================================================================================================
 
-const FLAGS = { supabase: false, query: true, i18n: true } as const;
+const FLAGS = { supabase: false, i18n: true } as const;
 
 /**
  * Minimal package.json so `pruneDependencies` / `prunePackageScripts`

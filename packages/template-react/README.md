@@ -9,7 +9,7 @@ This package is the canonical template consumed by `npx create-eikon-react`. It 
 - **React 19** + **TypeScript 5.6+**
 - **Vite 6** + **Tailwind CSS v4** (CSS-first config via `@theme`)
 - **animate-ui style** components (`motion` + Radix primitives, copy-paste friendly)
-- **Zustand** state, **TanStack Query** async data (optional, `@eikon:feature(query)`)
+- **Zustand** state, **TanStack Query** async data (baseline; always wired)
 - **React Router v7**, **React Hook Form** + **zod**
 - **i18next** (en/zh) — included by default
 - **Supabase** client (optional, `@eikon:feature(supabase)`)

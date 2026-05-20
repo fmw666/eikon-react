@@ -22,7 +22,7 @@ Is it server data AND the feature needs swappable backends (Mock vs Supabase)?
   └── NO  ↓
 
 Is it server / remote data with fetching, caching, retries, mutations?
-  └── YES → TanStack Query (@eikon:feature(query))
+  └── YES → TanStack Query (baseline; provider mounted in app/providers.tsx)
   └── NO  ↓
 
 Is it client-side, cross-feature, or cross-route?

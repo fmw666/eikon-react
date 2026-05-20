@@ -97,14 +97,6 @@ export const PARAMS = [
     axis: 'feature',
   },
   {
-    id: 'query',
-    kind: 'boolean',
-    default: true,
-    cliFlag: 'query',
-    label: 'TanStack Query',
-    axis: 'feature',
-  },
-  {
     id: 'pm',
     kind: 'enum',
     values: ['pnpm', 'npm', 'bun'],

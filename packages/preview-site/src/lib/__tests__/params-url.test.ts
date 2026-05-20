@@ -13,7 +13,6 @@ describe('serializeToQuery', () => {
     const sp = new URLSearchParams(qs);
     expect(sp.get('platform')).toBe('web');
     expect(sp.get('supabase')).toBe('off');
-    expect(sp.get('query')).toBe('on');
     expect(sp.get('pm')).toBe('pnpm');
     expect(sp.get('design')).toBe('default');
     expect(sp.get('layout')).toBe('stacked');
@@ -25,7 +24,6 @@ describe('serializeToQuery', () => {
     const state = {
       ...defaultState(),
       supabase: true,
-      query: false,
       pm: 'bun',
       design: 'linear',
       toast: 'minimal',
@@ -49,8 +47,8 @@ describe('parseFromQuery', () => {
   });
 
   it('accepts true/false aliases for booleans', () => {
-    const out = parseFromQuery('supabase=true&query=false');
-    expect(out).toEqual({ supabase: true, query: false });
+    const out = parseFromQuery('supabase=true');
+    expect(out).toEqual({ supabase: true });
   });
 });
 

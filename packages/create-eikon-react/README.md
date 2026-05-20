@@ -16,7 +16,8 @@ pnpm create eikon-react my-app
 - **Feature-first** architecture with ESLint-enforced boundaries
 - **`.agent/` protocol**: portable rules + skills any AI coding agent can read
 - **Vitest** + **Testing Library** wired with `__tests__/` colocation
-- Optional **Supabase** (auth + db + storage) and **TanStack Query**
+- **TanStack Query** for server-state, wired by default
+- Optional **Supabase** (auth + db + storage)
 
 ## CLI flags
 
@@ -48,11 +49,10 @@ pnpm e2e -- --keep              # keep the temp directory after the run
 
 Scenarios:
 
-| id      | flags                          | covers                                         |
-| ------- | ------------------------------ | ---------------------------------------------- |
-| lean    | `--no-supabase --no-query`     | Bare-minimum scaffold; both optional features off |
-| default | `--no-supabase --query`        | TanStack Query but no Supabase (recommended)   |
-| full    | `--supabase --query`           | Every optional feature on                      |
+| id      | flags             | covers                                                  |
+| ------- | ----------------- | ------------------------------------------------------- |
+| default | `--no-supabase`   | Web scaffold with TanStack Query baseline, no Supabase  |
+| full    | `--supabase`      | Adds Supabase on top of the baseline                    |
 
 ## License
 

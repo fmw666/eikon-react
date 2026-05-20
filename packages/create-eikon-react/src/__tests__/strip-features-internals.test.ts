@@ -71,22 +71,22 @@ describe('strip block regex caching', () => {
    * artefacts that this exercises.)
    */
   const sample = [
-    '// @eikon:feature(query) begin',
-    'const q = useQuery();',
-    '// @eikon:feature(query) end',
+    '// @eikon:feature(supabase) begin',
+    'const s = sb();',
+    '// @eikon:feature(supabase) end',
     'console.log("kept");',
-    '// @eikon:feature(query) begin',
-    'const q2 = useQuery();',
-    '// @eikon:feature(query) end',
+    '// @eikon:feature(supabase) begin',
+    'const s2 = sb();',
+    '// @eikon:feature(supabase) end',
   ].join('\n');
 
   it('produces stable output across repeated calls', () => {
-    const a = stripBlocksForFeature(sample, 'query');
-    const b = stripBlocksForFeature(sample, 'query');
-    const c = stripBlocksForFeature(sample, 'query');
+    const a = stripBlocksForFeature(sample, 'supabase');
+    const b = stripBlocksForFeature(sample, 'supabase');
+    const c = stripBlocksForFeature(sample, 'supabase');
     expect(a).toBe(b);
     expect(b).toBe(c);
-    expect(a).not.toContain('@eikon:feature(query)');
+    expect(a).not.toContain('@eikon:feature(supabase)');
   });
 
   it('handles multiple features without cross-contamination', () => {
@@ -94,17 +94,17 @@ describe('strip block regex caching', () => {
       '// @eikon:feature(supabase) begin',
       'const s = sb();',
       '// @eikon:feature(supabase) end',
-      '// @eikon:feature(query) begin',
-      'const q = useQuery();',
-      '// @eikon:feature(query) end',
+      '// @eikon:feature(i18n) begin',
+      'const t = useTranslation();',
+      '// @eikon:feature(i18n) end',
     ].join('\n');
-    const removedQuery = stripBlocksForFeature(mixed, 'query');
-    expect(removedQuery).toContain('const s = sb();');
-    expect(removedQuery).not.toContain('const q = useQuery();');
-
     const removedSupabase = stripBlocksForFeature(mixed, 'supabase');
-    expect(removedSupabase).toContain('const q = useQuery();');
+    expect(removedSupabase).toContain('const t = useTranslation();');
     expect(removedSupabase).not.toContain('const s = sb();');
+
+    const removedI18n = stripBlocksForFeature(mixed, 'i18n');
+    expect(removedI18n).toContain('const s = sb();');
+    expect(removedI18n).not.toContain('const t = useTranslation();');
   });
 });
 

@@ -58,15 +58,18 @@ export default defineConfig(({ mode: _mode }) => ({
         /*
          * Vendor splitting. Each group is selected because it's either
          * large (motion / react-query / supabase), feature-toggleable
-         * (query / i18n / supabase — may be stripped entirely), or
-         * benefits from long-lived browser cache (react itself).
+         * (i18n / supabase — may be stripped entirely), or benefits
+         * from long-lived browser cache (react itself). TanStack Query
+         * is baseline infrastructure here (not strippable) but still
+         * gets its own chunk so the cache hit ratio across deploys
+         * stays high.
          */
         manualChunks(id) {
           if (!id.includes('node_modules')) return undefined;
           if (id.includes('node_modules/react-router')) return 'router';
           if (id.includes('node_modules/motion')) return 'motion';
           if (id.includes('node_modules/@tanstack/react-query')) {
-            return 'query';
+            return 'react-query';
           }
           if (
             id.includes('node_modules/i18next') ||

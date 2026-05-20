@@ -3,7 +3,6 @@ import path from 'node:path';
 
 export interface FeatureFlags {
   supabase: boolean;
-  query: boolean;
   i18n: boolean;
 }
 
@@ -80,9 +79,10 @@ const VARIANT_FILE_MARKER_RE =
 
 const PACKAGE_DEPS_BY_FEATURE: Record<string, string[]> = {
   supabase: ['@supabase/supabase-js'],
-  query: ['@tanstack/react-query'],
-  // i18n is non-strippable in this template; if a future template strips it,
-  // its deps would go here.
+  // i18n and TanStack Query are non-strippable in this template; if a
+  // future template strips one of them, its deps would go here. TanStack
+  // Query (`@tanstack/react-query`) is treated as baseline infrastructure
+  // alongside React / React Router — every scaffold ships with it.
 
   // The `examples` showcase is a DEV-ONLY template-internal feature. Its
   // entire directory (`src/features/examples/`) is removed by the directory
@@ -148,7 +148,6 @@ export async function stripFeatures(
 ): Promise<void> {
   const disabled = new Set<string>();
   if (!flags.supabase) disabled.add('supabase');
-  if (!flags.query) disabled.add('query');
   if (!flags.i18n) disabled.add('i18n'); // currently never disabled by the CLI
   // The `examples` feature is a template-internal component showcase. End
   // users of `create-eikon-react` never want it in their scaffolded project

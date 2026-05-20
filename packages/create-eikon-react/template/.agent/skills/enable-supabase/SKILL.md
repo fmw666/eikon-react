@@ -170,7 +170,7 @@ Use when the feature has no Mock requirement. Skip the factory boilerplate.
    }
    ```
 
-2. **Wrap calls in TanStack Query** (`@eikon:feature(query)` block must be enabled):
+2. **Wrap calls in TanStack Query** (the `QueryClientProvider` is mounted by default in `src/app/providers.tsx`):
 
    ```ts
    // src/features/<feature>/hooks/use<Thing>Query.ts

@@ -54,7 +54,6 @@ const RM_OPTS = {
 export const DEFAULT_INPUTS: BuildInputs = {
   platform: 'web',
   supabase: false,
-  query: true,
   design: 'default',
   layout: 'stacked',
   ui: 'animate-ui',
@@ -294,7 +293,6 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
 
   const flags: FeatureFlags = {
     supabase: inputs.supabase,
-    query: inputs.query,
     i18n: true,
   };
   const variants: VariantSelections = {

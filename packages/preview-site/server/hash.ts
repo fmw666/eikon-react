@@ -18,7 +18,6 @@ export interface BuildInputs {
    */
   platform: string;
   supabase: boolean;
-  query: boolean;
   design: string;
   layout: string;
   ui: string;
@@ -40,7 +39,6 @@ export function hashBuildInputs(
     templateRev,
     platform: String(inputs.platform),
     supabase: !!inputs.supabase,
-    query: !!inputs.query,
     design: String(inputs.design),
     layout: String(inputs.layout),
     ui: String(inputs.ui),

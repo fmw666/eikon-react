@@ -113,7 +113,7 @@ describe('stripFeatures — layout dispatcher + sibling files', () => {
     it(`keeps only ${siblingFile(choice)} + RootLayout.tsx when layout="${choice}"`, async () => {
       await stripFeatures(
         tmp,
-        { supabase: false, query: true, i18n: true },
+        { supabase: false, i18n: true },
         { layout: choice }
       );
 
