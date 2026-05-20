@@ -15,6 +15,17 @@
  *   --spacing         → base step for ALL p-N / m-N / gap-N / size-* utilities
  *   --shadow-*        → shadow-sm / shadow-md / shadow-lg
  *
+ * Non-utility tokens (consumed directly via `var(--…)` in @layer base):
+ *   --scrollbar-*     → drives the global `::-webkit-scrollbar` + Firefox
+ *                       `scrollbar-color` rules in @layer base. Each
+ *                       design preset rebinds these to match its brand —
+ *                       `apple` gets a soft cool-gray tube; `vercel` gets
+ *                       a near-square monochrome bar; `linear` gets a
+ *                       narrow architectural thumb; etc. NOT a Tailwind
+ *                       namespace — no utilities are generated — but
+ *                       lives in @theme so presets can override it in
+ *                       lock-step with the palette / typography tokens.
+ *
  * Strategy: the base @theme below stays minimal (colour palette + radii +
  * font-sans). Each design preset further down then overrides typography,
  * density, and shadow tokens to express its design language — e.g. `apple`
@@ -61,6 +72,19 @@
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
     'Courier New', monospace;
+
+  /* Scrollbar (not a Tailwind namespace — see header comment). The
+   * `border` trick on the thumb creates a faux padding inside the track:
+   * the border is painted in the (usually transparent) track colour via
+   * `background-clip: padding-box`, so the visible thumb reads narrower
+   * than the gutter. Each preset can override either the geometry
+   * (size / radius / border) or the palette (thumb / hover / track). */
+  --scrollbar-size: 12px;
+  --scrollbar-thumb: oklch(0.82 0.005 260);
+  --scrollbar-thumb-hover: oklch(0.55 0.02 260);
+  --scrollbar-track: transparent;
+  --scrollbar-thumb-radius: 8px;
+  --scrollbar-thumb-border: 3px;
 }
 
 /* Dark mode tokens are activated via the `.dark` class on <html>. */
@@ -88,11 +112,18 @@
 
   --color-accent: oklch(0.26 0.02 280);
   --color-accent-foreground: oklch(0.97 0 0);
+
+  --scrollbar-thumb: oklch(0.36 0.01 260);
+  --scrollbar-thumb-hover: oklch(0.55 0.02 260);
 }
 
 @layer base {
   * {
     border-color: var(--color-border);
+    /* Firefox + modern Edge honour `scrollbar-color`; WebKit pseudo-element
+     * rules below handle Chrome / Safari / older Edge. We set BOTH because
+     * the two engines silently ignore the other one's syntax. */
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   }
   html,
   body,
@@ -103,6 +134,35 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+  }
+
+  /* --- Scrollbar (WebKit / Chromium / Safari) ---
+   * Token-driven so each `design=<preset>` overlay can rebrand the
+   * scrollbar without forking the rules. Firefox above uses the same
+   * tokens via the `scrollbar-color` shorthand. */
+  ::-webkit-scrollbar {
+    width: var(--scrollbar-size);
+    height: var(--scrollbar-size);
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: var(--scrollbar-thumb-radius);
+    /* Transparent border + padding-box clipping creates a faux gutter:
+     * the thumb visually shrinks below the scrollbar gutter width by
+     * `--scrollbar-thumb-border` on each side, while still being big
+     * enough to grab. Setting border-color = track-color would also
+     * work but breaks when track is transparent (default). */
+    border: var(--scrollbar-thumb-border) solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+  ::-webkit-scrollbar-corner {
+    background: var(--scrollbar-track);
   }
 }
 
@@ -192,6 +252,14 @@
   --shadow-sm: 0 1px 2px 0 oklch(0 0 0 / 0.04);
   --shadow-md: 0 4px 10px -2px oklch(0 0 0 / 0.06);
   --shadow-lg: 0 12px 28px -6px oklch(0 0 0 / 0.1);
+
+  /* Apple scrollbar — soft cool-gray tube, generous radius, slimmer
+   * gutter to match the airy HIG density. */
+  --scrollbar-size: 11px;
+  --scrollbar-thumb: oklch(0.8 0.005 240);
+  --scrollbar-thumb-hover: oklch(0.5 0.005 240);
+  --scrollbar-thumb-radius: 7px;
+  --scrollbar-thumb-border: 3px;
 }
 .dark {
   --color-background: oklch(0.16 0.005 240);
@@ -209,6 +277,9 @@
   --color-accent: oklch(0.28 0.04 256);
   --color-accent-foreground: oklch(0.97 0 0);
   --color-ring: oklch(0.72 0.18 256);
+
+  --scrollbar-thumb: oklch(0.4 0.005 240);
+  --scrollbar-thumb-hover: oklch(0.6 0.008 240);
 }
 /* @eikon:variant(design=apple) end */
 
@@ -269,6 +340,15 @@
   --shadow-sm: 0 1px 0 0 oklch(0.4 0.01 264 / 0.05);
   --shadow-md: 0 2px 4px -1px oklch(0.4 0.01 264 / 0.08);
   --shadow-lg: 0 8px 20px -4px oklch(0.4 0.01 264 / 0.12);
+
+  /* Linear scrollbar — narrow architectural thumb. Tight 0.25rem radius
+   * matches `--radius-sm`; reduced border (2px) keeps the thumb visible
+   * inside the 9px gutter. */
+  --scrollbar-size: 9px;
+  --scrollbar-thumb: oklch(0.82 0.005 264);
+  --scrollbar-thumb-hover: oklch(0.5 0.012 264);
+  --scrollbar-thumb-radius: 0.25rem;
+  --scrollbar-thumb-border: 2px;
 }
 .dark {
   --color-background: oklch(0.18 0.005 264);
@@ -286,6 +366,9 @@
   --color-accent: oklch(0.28 0.05 280);
   --color-accent-foreground: oklch(0.95 0.005 264);
   --color-ring: oklch(0.69 0.18 280);
+
+  --scrollbar-thumb: oklch(0.36 0.005 264);
+  --scrollbar-thumb-hover: oklch(0.55 0.012 264);
 }
 /* @eikon:variant(design=linear) end */
 
@@ -356,6 +439,14 @@
   --shadow-sm: 0 1px 2px 0 oklch(0.2 0 90 / 0.05);
   --shadow-md: 0 4px 10px -2px oklch(0.2 0 90 / 0.08);
   --shadow-lg: 0 12px 28px -6px oklch(0.2 0 90 / 0.1);
+
+  /* Anthropic scrollbar — warm-tinted thumb on the cream surface,
+   * editorial-generous gutter to echo the loose 1.7 line-height. */
+  --scrollbar-size: 13px;
+  --scrollbar-thumb: oklch(0.82 0.015 90);
+  --scrollbar-thumb-hover: oklch(0.55 0.025 60);
+  --scrollbar-thumb-radius: 7px;
+  --scrollbar-thumb-border: 3px;
 }
 .dark {
   --color-background: oklch(0.2 0 90);
@@ -373,6 +464,9 @@
   --color-accent: oklch(0.32 0.04 40);
   --color-accent-foreground: oklch(0.94 0.006 90);
   --color-ring: oklch(0.74 0.14 40);
+
+  --scrollbar-thumb: oklch(0.4 0.01 90);
+  --scrollbar-thumb-hover: oklch(0.6 0.02 60);
 }
 /* @eikon:variant(design=anthropic) end */
 
@@ -439,6 +533,14 @@
   --shadow-sm: 0 0 0 1px oklch(0 0 0 / 0.06);
   --shadow-md: 0 0 0 1px oklch(0 0 0 / 0.08), 0 2px 8px -2px oklch(0 0 0 / 0.06);
   --shadow-lg: 0 0 0 1px oklch(0 0 0 / 0.08), 0 10px 24px -6px oklch(0 0 0 / 0.1);
+
+  /* Vercel scrollbar — pure monochrome, near-square corners to echo the
+   * 0.125rem `--radius-sm`. No tint: chroma stays at 0. */
+  --scrollbar-size: 10px;
+  --scrollbar-thumb: oklch(0.82 0 0);
+  --scrollbar-thumb-hover: oklch(0.4 0 0);
+  --scrollbar-thumb-radius: 2px;
+  --scrollbar-thumb-border: 2px;
 }
 .dark {
   --color-background: oklch(0.09 0 0);
@@ -456,6 +558,9 @@
   --color-accent: oklch(0.22 0 0);
   --color-accent-foreground: oklch(0.98 0 0);
   --color-ring: oklch(0.7 0.2 257);
+
+  --scrollbar-thumb: oklch(0.3 0 0);
+  --scrollbar-thumb-hover: oklch(0.55 0 0);
 }
 /* @eikon:variant(design=vercel) end */
 
@@ -518,6 +623,14 @@
   --shadow-sm: 0 1px 2px 0 oklch(0.4 0.005 60 / 0.04);
   --shadow-md: 0 4px 8px -2px oklch(0.4 0.005 60 / 0.06);
   --shadow-lg: 0 10px 24px -6px oklch(0.4 0.005 60 / 0.08);
+
+  /* Notion scrollbar — warm-gray thumb on cream surface, soft 5px
+   * radius to match the small-radius `--radius-md`. */
+  --scrollbar-size: 11px;
+  --scrollbar-thumb: oklch(0.84 0.008 60);
+  --scrollbar-thumb-hover: oklch(0.55 0.015 60);
+  --scrollbar-thumb-radius: 5px;
+  --scrollbar-thumb-border: 2px;
 }
 .dark {
   --color-background: oklch(0.21 0.003 60);
@@ -535,6 +648,9 @@
   --color-accent: oklch(0.32 0.04 220);
   --color-accent-foreground: oklch(0.96 0.003 60);
   --color-ring: oklch(0.78 0.13 220);
+
+  --scrollbar-thumb: oklch(0.42 0.008 60);
+  --scrollbar-thumb-hover: oklch(0.6 0.015 60);
 }
 /* @eikon:variant(design=notion) end */
 

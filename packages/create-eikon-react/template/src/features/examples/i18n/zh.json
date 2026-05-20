@@ -1,0 +1,153 @@
+{
+  "meta": {
+    "title": "组件展柜",
+    "subtitle": "浏览并试用模板内置的每一个 UI 基元、交互模式与性能演示。",
+    "devOnlyBadge": "仅开发环境",
+    "devOnlyNotice": "组件展柜仅在开发环境可预览，相关路由不会进入生产构建。",
+    "backToIndex": "返回展柜",
+    "openInNewTab": "在新标签页打开"
+  },
+  "toc": {
+    "label": "本页目录",
+    "uiPrimitives": "UI 基元",
+    "patterns": "交互模式",
+    "performance": "性能"
+  },
+  "sections": {
+    "button": {
+      "title": "Button",
+      "description": "Variant + Size 矩阵，内嵌 motion/react 的悬浮抬升与按压收缩微交互。",
+      "variantsLabel": "Variants",
+      "sizesLabel": "Sizes",
+      "statesLabel": "States",
+      "disabledLabel": "禁用",
+      "loadingLabel": "加载中",
+      "asChildLabel": "asChild",
+      "asChildHint": "渲染为 <a> 同时保留按钮样式",
+      "asChildLink": "前往 Eikon"
+    },
+    "card": {
+      "title": "Card",
+      "description": "包含普通、悬浮抬升以及结构化（Header + Content + Footer）三种形态。悬浮态在用户未启用 prefers-reduced-motion 时会上抬几像素。",
+      "plainLabel": "普通卡片",
+      "plainBody": "边框、内边距和 token 化的表面颜色，开箱即用。",
+      "hoverableLabel": "悬浮抬升",
+      "hoverableBody": "把鼠标移上来 — 整张卡片会向上抬升。",
+      "structuredLabel": "结构化",
+      "structuredTitle": "用组合构建",
+      "structuredBody": "组合 CardHeader + CardContent + CardFooter 让排版保持一致。",
+      "structuredAction": "我知道了"
+    },
+    "tabs": {
+      "title": "Tabs",
+      "description": "Radix Tabs 配合 motion/react 的共享 layoutId 指示器。指示器在 Trigger 之间滑动；启用 prefers-reduced-motion 时会自动降级为静态。",
+      "accountTab": "账户",
+      "passwordTab": "密码",
+      "preferencesTab": "偏好",
+      "accountBody": "用户资料、计费信息和已连接的服务集中在这里。",
+      "passwordBody": "修改密码并查看活跃会话。",
+      "preferencesBody": "通知、语言、主题与无障碍设置。"
+    },
+    "theme": {
+      "title": "主题 Token",
+      "description": "所有基元都通过 var(--color-*) CSS 自定义属性绘制。点击顶栏的主题切换即可看到所有 token 同步翻转。",
+      "currentMode": "当前模式",
+      "preferred": "偏好",
+      "resolved": "实际",
+      "swatchesLabel": "Token 色板"
+    },
+    "i18n": {
+      "title": "国际化",
+      "description": "feature 文案放在 src/features/<name>/i18n/<lng>.json 下，每个命名空间都是独立的懒加载 chunk。切换语言即可看到整棵树立即重渲染。",
+      "currentLanguage": "当前语言",
+      "tryItHint": "提示：使用顶栏的语言切换按钮。",
+      "sampleHeading": "示例文案",
+      "sampleBody": "这一段文字从 examples 命名空间读取，切换语言后会立即更新。"
+    },
+    "animation": {
+      "title": "基础动画",
+      "description": "Token 驱动的旋转、脉动与入场动画时长。全部尊重 prefers-reduced-motion。",
+      "spinLabel": "旋转",
+      "pulseLabel": "脉动",
+      "bounceLabel": "弹跳",
+      "hoverHint": "把鼠标移到方块上触发弹簧抬升。"
+    }
+  },
+  "pages": {
+    "toaster": {
+      "title": "Toaster",
+      "description": "模板自带 7 种基于 Sonner 的 Toaster 预设。在 scaffold 出的项目里 CLI 会只保留你选中的那一种；此处可以并排预览所有 variant。",
+      "currentLabel": "当前预设",
+      "fireSuccess": "触发 success",
+      "fireError": "触发 error",
+      "fireInfo": "触发 info",
+      "firePromise": "触发 promise",
+      "successMessage": "保存成功",
+      "errorMessage": "发生错误",
+      "infoMessage": "有新版本可用",
+      "promiseLoading": "正在保存…",
+      "promiseSuccess": "完成",
+      "promiseError": "保存失败"
+    },
+    "dialog": {
+      "title": "Dialog",
+      "description": "Radix Dialog 配合 motion/react 的进入/退出动画，关闭时整棵 portal 子树会被卸载。",
+      "openLabel": "打开 Dialog",
+      "openWithFormLabel": "打开表单 Dialog",
+      "openDestructiveLabel": "打开危险操作",
+      "destructiveLead": "此操作无法撤销。",
+      "destructiveDetail": "请确认你已经备份后再继续。",
+      "destructiveConfirm": "确定，删除",
+      "cancel": "取消",
+      "formTitle": "速记",
+      "formDescription": "笔记仅保存在本地，不会发送到任何服务器。",
+      "noteLabel": "笔记",
+      "notePlaceholder": "记录一个想法…",
+      "save": "保存",
+      "savedToast": "笔记已保存",
+      "destructiveDoneToast": "项目已删除"
+    },
+    "motion": {
+      "title": "Motion",
+      "description": "motion/react 与常见 UI 时刻的联动：进入、悬浮、按压、布局变化。在系统里启用 prefers-reduced-motion 即可看到静态降级。",
+      "fadeInLabel": "挂载时淡入",
+      "stackLabel": "子元素错峰",
+      "layoutLabel": "Layout 交换",
+      "layoutSwap": "交换顺序",
+      "tapLabel": "按压目标"
+    },
+    "performance": {
+      "title": "性能",
+      "description": "三个运行时诊断演示：Core Web Vitals、虚拟列表、懒加载 chunk。指标每 2 秒刷新一次。",
+      "webVitals": {
+        "title": "Core Web Vitals",
+        "description": "通过 web-vitals 库实时读取。某些数字在底层 observer 触发前会保持横线 — LCP 需要一次布局，INP 需要一次交互。",
+        "interactHint": "点击页面任意位置以采集一次 INP 样本。",
+        "lcp": "LCP（加载）",
+        "cls": "CLS（视觉稳定性）",
+        "inp": "INP（交互响应）",
+        "fcp": "FCP（首次绘制）",
+        "ttfb": "TTFB（网络）",
+        "memory": "JS 堆内存"
+      },
+      "virtualList": {
+        "title": "虚拟列表",
+        "description": "用 @tanstack/react-virtual 渲染 10,000 行数据。只有视口内的行会被挂载，所以无论数据集多大滚动都很流畅。",
+        "scrollHint": "向下滚动 — 仅可视区域内的行会被实际挂载。",
+        "rowItem": "条目 #{{index}}",
+        "rowBody": "挂载于 {{time}}",
+        "stats": "已渲染 {{visible}} / {{total}} 行"
+      },
+      "lazyLoad": {
+        "title": "懒加载",
+        "description": "触发一次动态 import，观察 Suspense 占位的呈现过程。在 DevTools 里把网络节流到 Slow 3G 可以拉长可见窗口。",
+        "trigger": "加载重型 chunk",
+        "reset": "重置",
+        "loadingLabel": "正在加载重型模块…",
+        "loadedTitle": "模块已加载",
+        "loadedBody": "这个组件位于独立的 JS chunk 里，只有当你请求它时才会下载。",
+        "elapsedLabel": "耗时"
+      }
+    }
+  }
+}

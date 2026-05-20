@@ -63,13 +63,30 @@ function HomePage() {
         {t('subtitle')}
       </p>
 
-      <div className="mt-8 flex items-center gap-3">
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <Button asChild size="lg">
           <Link to="/counter">
             {t('cta')}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
+        {/* @eikon:feature(examples) begin */}
+        {/*
+          The "View examples" CTA targets the dev-only component
+          showcase. Gated the same way as the route registration in
+          app/router.tsx: `import.meta.env.DEV` so a production template
+          build hides it, and the CLI strips this whole block from
+          scaffolded projects so end users never see a broken CTA.
+        */}
+        {import.meta.env.DEV && (
+          <Button asChild size="lg" variant="secondary">
+            <Link to="/examples">
+              {t('ctaExamples')}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        )}
+        {/* @eikon:feature(examples) end */}
         <Button asChild size="lg" variant="outline">
           <a href="https://github.com/" target="_blank" rel="noreferrer noopener">
             GitHub

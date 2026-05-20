@@ -18,15 +18,16 @@
 // =================================================================================================
 
 // --- Absolute Imports ---
+// @eikon:feature(supabase) begin
 import { serviceConfig } from '@/shared/services';
+// @eikon:feature(supabase) end
 
 // --- Relative Imports ---
 
 import { MockTasksService } from '../implementations/MockTasksService';
+import type { ITasksService } from '../interfaces/ITasksService';
 // @eikon:feature(supabase) begin
 import { SupabaseTasksService } from '../implementations/SupabaseTasksService';
-
-import type { ITasksService } from '../interfaces/ITasksService';
 // @eikon:feature(supabase) end
 
 // =================================================================================================

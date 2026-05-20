@@ -85,7 +85,11 @@ function renderApp(initialPath = '/tasks') {
 // Tests
 // =================================================================================================
 
-const SLOW_TIMEOUT = 4000;
+// Generous timeout — lazy() chunk resolution + i18n bundle loading can
+// be slow on cold-cache CI machines. Local runs typically finish in well
+// under a second; we leave headroom for the e2e harness, which exercises
+// this same test inside a freshly-scaffolded sandbox directory.
+const SLOW_TIMEOUT = 10_000;
 
 describe('Tasks feature — end-to-end flow', () => {
   beforeEach(() => {

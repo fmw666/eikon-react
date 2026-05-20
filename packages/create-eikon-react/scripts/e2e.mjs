@@ -40,9 +40,18 @@ const SCENARIOS = [
     flags: ['--no-supabase', '--no-query'],
     expect: {
       filesPresent: ['src/features/counter/index.ts', '.agent/README.md'],
-      filesAbsent: ['src/shared/supabase'],
+      // The `examples` feature is a DEV-only template showcase that the
+      // CLI strips from EVERY scaffold regardless of flags — there is
+      // intentionally no `--examples` opt-in. Its two runtime deps
+      // (web-vitals, @tanstack/react-virtual) are pruned in lock-step.
+      filesAbsent: ['src/shared/supabase', 'src/features/examples'],
       depsPresent: ['react', 'tailwindcss', 'motion'],
-      depsAbsent: ['@supabase/supabase-js', '@tanstack/react-query'],
+      depsAbsent: [
+        '@supabase/supabase-js',
+        '@tanstack/react-query',
+        '@tanstack/react-virtual',
+        'web-vitals',
+      ],
       providersContains: ['BrowserRouter', '<Toaster'],
       providersAbsent: ['QueryClient', '@tanstack/react-query'],
     },
@@ -53,9 +62,13 @@ const SCENARIOS = [
     flags: ['--no-supabase', '--query'],
     expect: {
       filesPresent: ['src/features/counter/index.ts'],
-      filesAbsent: ['src/shared/supabase'],
+      filesAbsent: ['src/shared/supabase', 'src/features/examples'],
       depsPresent: ['@tanstack/react-query'],
-      depsAbsent: ['@supabase/supabase-js'],
+      depsAbsent: [
+        '@supabase/supabase-js',
+        '@tanstack/react-virtual',
+        'web-vitals',
+      ],
       providersContains: ['QueryClientProvider', '@tanstack/react-query'],
       providersAbsent: [],
     },
@@ -69,9 +82,9 @@ const SCENARIOS = [
         'src/features/counter/index.ts',
         'src/shared/supabase/client.ts',
       ],
-      filesAbsent: [],
+      filesAbsent: ['src/features/examples'],
       depsPresent: ['@supabase/supabase-js', '@tanstack/react-query'],
-      depsAbsent: [],
+      depsAbsent: ['@tanstack/react-virtual', 'web-vitals'],
       providersContains: ['QueryClientProvider'],
       providersAbsent: [],
     },
@@ -102,6 +115,8 @@ const SCENARIOS = [
       ],
       filesAbsent: [
         'src/shared/supabase',
+        // examples is always stripped — see comment on the lean scenario.
+        'src/features/examples',
         // Every non-chosen toast preset's sibling file is removed by its
         // own first-line `@eikon:variant(toast=X) file` marker.
         'src/shared/ui/toaster/default-toaster.tsx',
@@ -112,7 +127,11 @@ const SCENARIOS = [
         'src/shared/ui/toaster/stacked-cards-toaster.tsx',
       ],
       depsPresent: ['@tanstack/react-query'],
-      depsAbsent: ['@supabase/supabase-js'],
+      depsAbsent: [
+        '@supabase/supabase-js',
+        '@tanstack/react-virtual',
+        'web-vitals',
+      ],
       providersContains: ['QueryClientProvider'],
       providersAbsent: [],
       // Strip-features must keep ONLY the chosen variant block in

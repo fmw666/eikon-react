@@ -2,7 +2,8 @@
   "nav": {
     "home": "Home",
     "counter": "Counter",
-    "tasks": "Tasks"
+    "tasks": "Tasks",
+    "examples": "Examples"
   },
   "actions": {
     "toggleTheme": "Toggle theme",

@@ -105,6 +105,24 @@ Token namespaces (Tailwind v4 CSS-first config) consumed by utilities:
 | `--spacing`           | EVERY `p-N / m-N / gap-N / size-*`       | preset `@theme` (per-density)                  |
 | `--shadow-*`          | `shadow-sm / shadow-md / shadow-lg`      | preset `@theme` (per brand shadow personality) |
 
+Non-utility tokens (consumed directly via `var()` inside `@layer base`,
+not exposed as Tailwind utilities):
+
+| Token                       | Drives                                                       | Per-preset override?               |
+| --------------------------- | ------------------------------------------------------------ | ---------------------------------- |
+| `--scrollbar-size`          | width (vertical) / height (horizontal) of `::-webkit-scrollbar` | yes — narrower for `linear`, wider for `anthropic` |
+| `--scrollbar-thumb`         | thumb fill, also bound to Firefox `scrollbar-color`           | yes — and a matching `.dark` override |
+| `--scrollbar-thumb-hover`   | thumb fill on `:hover` (WebKit only)                          | yes — and a matching `.dark` override |
+| `--scrollbar-track`         | track / gutter background (defaults transparent)              | rarely overridden                  |
+| `--scrollbar-thumb-radius`  | thumb `border-radius`                                         | yes — square-ish for `vercel`, generous for `apple` |
+| `--scrollbar-thumb-border`  | transparent border on the thumb (faux gutter inset)           | yes — 2 px for tight presets, 3 px for spacious ones |
+
+These don't generate utility classes (no namespace match), but they DO
+live inside `@theme { }` so each preset can override them in lock-step
+with the palette / typography tokens. The actual `::-webkit-scrollbar`
+and `scrollbar-color` rules that consume them are in `@layer base` near
+the top of `index.css`.
+
 Four immutable rules:
 
 1. **Components never hard-code colours, sizes, spacings, or shadows.**
@@ -284,6 +302,13 @@ block at the end of the **design axis** section (after `notion`):
   /* --- shadows (optional) --- */
   --shadow-sm: 0 0 0 1px oklch(0.7 0.27 320 / 0.4);
   --shadow-md: 0 0 12px -2px oklch(0.7 0.27 320 / 0.5);
+
+  /* --- scrollbar (optional — override to express character) --- */
+  --scrollbar-size: 10px;
+  --scrollbar-thumb: oklch(0.7 0.22 320 / 0.4);
+  --scrollbar-thumb-hover: oklch(0.85 0.27 320);
+  --scrollbar-thumb-radius: 0rem;
+  --scrollbar-thumb-border: 2px;
 }
 .dark {
   --color-background: oklch(0.12 0.04 280);
@@ -299,6 +324,9 @@ block at the end of the **design axis** section (after `notion`):
   --color-accent: oklch(0.6 0.22 180);
   --color-accent-foreground: oklch(0.1 0 0);
   --color-ring: oklch(0.78 0.27 320);
+
+  --scrollbar-thumb: oklch(0.5 0.22 320 / 0.5);
+  --scrollbar-thumb-hover: oklch(0.78 0.27 320);
 }
 /* @eikon:variant(design=cyberpunk) end */
 ```
@@ -309,6 +337,7 @@ Checklist for the preset itself:
 - [ ] Contains BOTH an `@theme { ... }` block (light) and a `.dark { ... }` block (dark). Skipping the dark block is the #1 mistake — the base `.dark` will leak through.
 - [ ] **Palette (required)**: Override at least `--color-primary`, `--color-primary-foreground`, `--color-ring`, `--color-accent`. Override more (`--color-background`, `--color-card`, `--color-border`) when the preset's identity demands it.
 - [ ] **Typography / density / shadow (optional)**: Override `--spacing`, `--text-base` (+ `--text-base--line-height`), `--font-weight-medium / -semibold`, `--tracking-tight`, `--shadow-sm / -md / -lg` to express density and typographic rhythm. Omit any that match the default — Tailwind v4 fallbacks will take over.
+- [ ] **Scrollbar (optional)**: Override `--scrollbar-{size,thumb,thumb-hover,thumb-radius,thumb-border}` (light) plus matching `--scrollbar-thumb` / `--scrollbar-thumb-hover` in `.dark`. Keep the thumb radius in the same family as `--radius-sm/-md` and the gutter size proportional to `--spacing` so the scrollbar reads as part of the same design language.
 - [ ] All colour values use `oklch(...)`. Don't mix in `#hex` / `rgb(...)` / `hsl(...)` — the codebase only uses OKLCH in `index.css` and we want to keep grep clean.
 - [ ] Pass the **contrast cheatsheet** (see below).
 

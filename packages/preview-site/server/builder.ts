@@ -302,16 +302,46 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
     ui: inputs.ui,
     toast: inputs.toast,
   };
-  await stripFeatures(cacheDir, flags, variants);
+  // The playground simulates template-react's own local-dev experience.
+  // Three knobs hold that contract together:
+  //
+  //   - `keepExamples: true` keeps `src/features/examples/` (the
+  //     dev-only showcase) in the rendered tree. The CLI default still
+  //     strips it for end users.
+  //   - `keepAllVariantFiles: true` keeps every variant sibling on disk
+  //     (all 4 `*RootLayout.tsx`, all 7 `*-toaster.tsx`, …). Block-level
+  //     variant markers still narrow each dispatcher down to the user's
+  //     chosen value, so picking `toast=apple` in the params panel
+  //     still changes the GLOBAL Toaster — but the orphan sibling files
+  //     stay around so the examples showcase (which statically imports
+  //     all 7 toasters) can still compile.
+  //   - The viteBuild below runs in `mode: 'development'`, which flips
+  //     `import.meta.env.DEV` to `true` inside the generated bundle.
+  //     Without that, every showcase route would tree-shake away even
+  //     though its source survived the strip — because the router and
+  //     layouts gate them on `import.meta.env.DEV`.
+  await stripFeatures(cacheDir, flags, variants, {
+    keepExamples: true,
+    keepAllVariantFiles: true,
+  });
 
   await viteBuild({
     root: cacheDir,
     base: `/preview/${hash}/`,
     configFile: path.join(cacheDir, 'vite.config.ts'),
+    // `mode` flips `import.meta.env.DEV` to `true` in the produced
+    // bundle, which is the second half of "the playground is the
+    // template's dev environment". The first half (source files
+    // present) is handled by `keepExamples: true` above.
+    mode: 'development',
     build: {
       outDir: 'dist',
       emptyOutDir: true,
       sourcemap: false,
+      // We still want production-grade output (minified, no HMR client)
+      // because the iframe loads the static dist via the server's
+      // pass-through middleware. Only the env semantics change.
+      minify: true,
     },
     logLevel: 'warn',
     clearScreen: false,

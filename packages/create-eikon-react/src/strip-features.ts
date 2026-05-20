@@ -74,7 +74,39 @@ const PACKAGE_DEPS_BY_FEATURE: Record<string, string[]> = {
   query: ['@tanstack/react-query'],
   // i18n is non-strippable in this template; if a future template strips it,
   // its deps would go here.
+
+  // The `examples` showcase is a DEV-ONLY template-internal feature. Its
+  // entire directory (`src/features/examples/`) is removed by the directory
+  // sweep below; its two runtime dependencies are pruned here so a
+  // scaffolded project's `pnpm install` doesn't pull them in.
+  examples: ['web-vitals', '@tanstack/react-virtual'],
 };
+
+/**
+ * Optional knobs that bypass the default strip behaviour.
+ *
+ * Both knobs exist for the in-repo preview playground; every other
+ * caller (the CLI, the e2e suite) leaves them at their defaults so
+ * end-user projects get the fully-stripped tree.
+ *
+ *   - `keepExamples`: keep the dev-only `src/features/examples/`
+ *     showcase + its `package.json` deps.
+ *
+ *   - `keepAllVariantFiles`: skip the `@eikon:variant(<axis>=<value>) file`
+ *     first-line strip so every variant sibling stays on disk (all 4
+ *     `*RootLayout.tsx`, all 7 `*-toaster.tsx`, …). Block-level variant
+ *     markers still apply, so dispatchers like `app/layouts/RootLayout.tsx`
+ *     and `shared/ui/toaster.tsx` continue to narrow to the user's
+ *     chosen value — variant selection in the playground still drives
+ *     the rendered global UI. The reason we keep the orphan files: the
+ *     examples showcase (e.g. `ToasterShowcasePage`) imports every
+ *     sibling directly to demo all presets, which would fail to build
+ *     once 6 of 7 files have been deleted.
+ */
+export interface StripOptions {
+  keepExamples?: boolean;
+  keepAllVariantFiles?: boolean;
+}
 
 /**
  * Walk the project tree and remove code/files corresponding to disabled
@@ -87,17 +119,23 @@ const PACKAGE_DEPS_BY_FEATURE: Record<string, string[]> = {
 export async function stripFeatures(
   root: string,
   flags: FeatureFlags,
-  variants: VariantSelections = {}
+  variants: VariantSelections = {},
+  options: StripOptions = {}
 ): Promise<void> {
   const disabled = new Set<string>();
   if (!flags.supabase) disabled.add('supabase');
   if (!flags.query) disabled.add('query');
   if (!flags.i18n) disabled.add('i18n'); // currently never disabled by the CLI
+  // The `examples` feature is a template-internal component showcase. End
+  // users of `create-eikon-react` never want it in their scaffolded project
+  // so it's stripped by default — there's no `--examples` CLI flag.
+  // The preview playground opts out via `keepExamples` because the showcase
+  // IS its primary value-add.
+  if (!options.keepExamples) {
+    disabled.add('examples');
+  }
 
-  const hasVariants = Object.keys(variants).length > 0;
-  if (disabled.size === 0 && !hasVariants) return;
-
-  await walkAndStrip(root, disabled, variants);
+  await walkAndStrip(root, disabled, variants, options);
   await pruneDependencies(root, disabled);
 }
 
@@ -111,7 +149,8 @@ const FILE_CONCURRENCY = 32;
 async function walkAndStrip(
   dir: string,
   disabled: ReadonlySet<string>,
-  variants: VariantSelections
+  variants: VariantSelections,
+  options: StripOptions
 ): Promise<void> {
   const entries = await readdir(dir, { withFileTypes: true });
   const fileTasks: Array<() => Promise<void>> = [];
@@ -130,14 +169,18 @@ async function walkAndStrip(
         await rm(full, { recursive: true, force: true });
         continue;
       }
+      if (disabled.has('examples') && isInsideExamplesDir(full)) {
+        await rm(full, { recursive: true, force: true });
+        continue;
+      }
       // Directories still recurse sequentially — bounded depth in the
       // template tree means there's nothing to gain from racing them,
       // and serial recursion keeps fd usage predictable.
-      await walkAndStrip(full, disabled, variants);
+      await walkAndStrip(full, disabled, variants, options);
       continue;
     }
     if (!entry.isFile()) continue;
-    fileTasks.push(() => stripFile(full, disabled, variants));
+    fileTasks.push(() => stripFile(full, disabled, variants, options));
   }
   // Leaf-file work is independent and IO-bound (read → maybe write).
   // Running them with a small concurrency bound trims wall-clock time
@@ -175,10 +218,16 @@ function isInsideSupabaseDir(p: string): boolean {
   return norm.endsWith('/src/shared/supabase');
 }
 
+function isInsideExamplesDir(p: string): boolean {
+  const norm = p.replace(/\\/g, '/');
+  return norm.endsWith('/src/features/examples');
+}
+
 async function stripFile(
   file: string,
   disabled: ReadonlySet<string>,
-  variants: VariantSelections
+  variants: VariantSelections,
+  options: StripOptions
 ): Promise<void> {
   if (await isBinary(file)) return;
   const raw = await readFile(file, 'utf8');
@@ -191,14 +240,21 @@ async function stripFile(
     return;
   }
 
-  const variantFileMatch = raw.match(VARIANT_FILE_MARKER_RE);
-  if (variantFileMatch) {
-    const axis = variantFileMatch[1]!;
-    const value = variantFileMatch[2]!;
-    const chosen = variants[axis];
-    if (chosen !== undefined && chosen !== value) {
-      await rm(file, { force: true });
-      return;
+  // Variant file-level strip: removes orphan variant siblings (e.g. the
+  // 6 unchosen toasters / 3 unchosen layouts) so the scaffolded project
+  // only carries the user's selection. The playground opts out via
+  // `keepAllVariantFiles` so its examples showcase can still statically
+  // import every preset.
+  if (!options.keepAllVariantFiles) {
+    const variantFileMatch = raw.match(VARIANT_FILE_MARKER_RE);
+    if (variantFileMatch) {
+      const axis = variantFileMatch[1]!;
+      const value = variantFileMatch[2]!;
+      const chosen = variants[axis];
+      if (chosen !== undefined && chosen !== value) {
+        await rm(file, { force: true });
+        return;
+      }
     }
   }
 

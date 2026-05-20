@@ -198,9 +198,13 @@ describe('structure: import boundaries', () => {
   });
 
   // Sentinel so test summaries report a positive expectation even when
-  // all sweeps are empty.
+  // all sweeps are empty. We deliberately do NOT pin REPO_ROOT to the
+  // string `'template-react'` — that's the directory name in our monorepo
+  // but a scaffolded user project renames it to whatever they typed.
+  // SRC_ROOT must end with `src` regardless; REPO_ROOT just has to be
+  // its parent.
   it('REPO_ROOT and SRC_ROOT resolved correctly', () => {
-    expect(REPO_ROOT).toContain('template-react');
-    expect(SRC_ROOT).toContain('src');
+    expect(SRC_ROOT.replace(/\\/g, '/')).toMatch(/\/src$/);
+    expect(SRC_ROOT.startsWith(REPO_ROOT)).toBe(true);
   });
 });

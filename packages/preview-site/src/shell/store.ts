@@ -57,6 +57,15 @@ export interface UiStore {
    *  remount the iframe — a cheap "reload the page in the preview" action
    *  that doesn't require the user to focus the iframe and hit Ctrl+R. */
   reloadKey: number;
+  /**
+   * In-iframe navigation request from the Toolbar's quick-jump buttons.
+   * `target` is the sub-route inside the previewed app (e.g. '/examples'),
+   * NOT a full URL — PreviewFrame prefixes it with `/preview/<hash>/`.
+   * `tick` is monotonic so clicking the SAME target twice still triggers
+   * the effect (which is exactly what users expect — they want to "go to
+   * Examples" even if they're already there but somehow lost it).
+   */
+  navRequest: { target: string; tick: number } | null;
   toggleFiles: () => void;
   toggleEditor: () => void;
   setShowFiles: (v: boolean) => void;
@@ -65,6 +74,9 @@ export interface UiStore {
   closeFile: () => void;
   setCurrentHash: (hash: string | null) => void;
   reloadPreview: () => void;
+  /** Queue an in-iframe navigation; consumed once by PreviewFrame. */
+  navigateInPreview: (target: string) => void;
+  clearNavRequest: () => void;
 }
 
 export const useUiStore = create<UiStore>((set) => ({
@@ -73,6 +85,7 @@ export const useUiStore = create<UiStore>((set) => ({
   selectedFile: null,
   currentHash: null,
   reloadKey: 0,
+  navRequest: null,
   // Files is the "parent" panel — the editor is meaningless without a way to
   // pick which file to open, so closing Files also collapses Editor, and
   // re-opening Files restores Editor iff there's a file still selected from
@@ -102,4 +115,9 @@ export const useUiStore = create<UiStore>((set) => ({
   closeFile: () => set({ selectedFile: null, showEditor: false }),
   setCurrentHash: (currentHash) => set({ currentHash }),
   reloadPreview: () => set((s) => ({ reloadKey: s.reloadKey + 1 })),
+  navigateInPreview: (target) =>
+    set((s) => ({
+      navRequest: { target, tick: (s.navRequest?.tick ?? 0) + 1 },
+    })),
+  clearNavRequest: () => set({ navRequest: null }),
 }));

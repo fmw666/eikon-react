@@ -264,8 +264,7 @@ describe('structure: src/shared/', () => {
   // shared/i18n — bootstrap + locales
   // -----------------------------------------------------------------------------------------------
 
-  describe('shared/i18n/', () => {
-    if (!featureEnabled('i18n')) return;
+  describe.skipIf(!featureEnabled('i18n'))('shared/i18n/', () => {
     const dir = path.join(SHARED_ROOT, 'i18n');
 
     it('has index.ts and locales/ tree', () => {
@@ -334,8 +333,7 @@ describe('structure: src/shared/', () => {
   // shared/supabase — CLI-strippable Supabase client
   // -----------------------------------------------------------------------------------------------
 
-  describe('shared/supabase/', () => {
-    if (!featureEnabled('supabase')) return;
+  describe.skipIf(!featureEnabled('supabase'))('shared/supabase/', () => {
     const dir = path.join(SHARED_ROOT, 'supabase');
 
     it('has index.ts and client.ts', () => {

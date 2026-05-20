@@ -2,7 +2,8 @@
   "nav": {
     "home": "首页",
     "counter": "计数器",
-    "tasks": "任务"
+    "tasks": "任务",
+    "examples": "组件展柜"
   },
   "actions": {
     "toggleTheme": "切换主题",
