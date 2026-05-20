@@ -323,13 +323,21 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
   await stripFeatures(cacheDir, flags, variants, {
     keepExamples: true,
     keepAllVariantFiles: true,
-    // The playground itself never invokes Tauri/Capacitor — it always
-    // produces a Vite web bundle — but keeping the shell directories
-    // lets a single cache entry serve any platform without re-stripping.
-    // Worth the few extra KB of disk: platform-switching in the UI now
-    // hits the cache hash purely on the `platform` axis (which controls
-    // layout narrowing), not on directory layout.
-    keepShells: true,
+    // Platform-shell stripping IS applied — the playground used to opt
+    // out via `keepShells: true` to share one on-disk tree across every
+    // platform, but that hid a real CLI behaviour from users: picking
+    // `--platform web` in `create-eikon-react` actually deletes both
+    // `apps/desktop/` and `apps/mobile/`, prunes `tauri:*` / `cap:*`
+    // scripts from `package.json`, and removes `pnpm-workspace.yaml`.
+    // Mirroring those passes here makes the file tree shown in the
+    // preview match what the user gets after scaffolding 1:1.
+    //
+    // Cost: each platform now gets its own physical cache directory
+    // (already its own cache hash, so no new entries — just slightly
+    // different on-disk contents per entry). The playground still
+    // produces a Vite web bundle regardless of platform; nothing in
+    // `src/` imports from `apps/`, so the dropped shells are inert
+    // for the build itself.
   });
 
   await viteBuild({

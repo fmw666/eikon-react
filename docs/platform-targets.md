@@ -192,7 +192,12 @@ strip:
    and `apps/mobile/{capacitor.config.ts,package.json,…}` to the user's
    chosen project name.
 
-The preview playground bypasses passes 1 and 2 by setting
-`stripFeatures(..., { keepShells: true })`. Switching platforms in the
-playground UI keeps the cache hash hitting the same on-disk tree —
-which is the whole point of `keepShells`.
+The preview playground applies all three passes too, so the file tree
+shown in the playground iframe / file explorer matches what
+`create-eikon-react` would scaffold on disk for the same flags. This is
+a deliberate switch from the earlier `keepShells: true` opt-out: a
+single tree that always carried both shells was cheaper to cache but
+hid the CLI's actual platform-stripping behaviour from users skimming
+the preview. Each platform now gets its own physical cache directory
+(it already had its own cache hash); the option remains available on
+`stripFeatures` for callers that explicitly want the union shape.
