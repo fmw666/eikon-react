@@ -180,6 +180,11 @@ const DICT = {
     'footer.tagline': '偏 AI · 前端 · 跨端工程化',
     'footer.contactHint': '有任何问题，欢迎直接联系作者',
     'footer.copyright': '© 2026 Eikon-React',
+    'footer.explore': '探索',
+    'footer.connect': '联系',
+    'footer.madeWith': '用 React 19 · Vite 6 · Tailwind v4 精心打磨',
+    'footer.live': '在线运转中',
+    'footer.backToTop': '回到顶部',
 
     'changelog.comingSoon': '更新日志即将上线',
     'changelog.back': '← 返回首页',
@@ -362,6 +367,11 @@ const DICT = {
     'footer.tagline': 'AI · frontend · cross-platform tooling',
     'footer.contactHint': 'Questions? Reach out anytime.',
     'footer.copyright': '© 2026 Eikon-React',
+    'footer.explore': 'Explore',
+    'footer.connect': 'Connect',
+    'footer.madeWith': 'Crafted with React 19 · Vite 6 · Tailwind v4',
+    'footer.live': 'Online & live',
+    'footer.backToTop': 'Back to top',
 
     'changelog.comingSoon': 'Changelog is on the way',
     'changelog.back': '← Back to home',

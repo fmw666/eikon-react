@@ -725,3 +725,146 @@ body {
   background-clip: padding-box;
   border: 2px solid transparent;
 }
+
+/* ------------------------------------------------------------------
+ * eikon-footer-shine — slow horizontal sweep along the footer hairline
+ *
+ * The footer's top edge is a 1px line. By default it carries the
+ * site's `var(--border-1)` colour; this animation overlays a moving
+ * gradient highlight that crosses left-to-right every ~7s. The
+ * highlight uses the brand mid-tone so it reads as "this line is
+ * alive" without painting it any saturated colour.
+ *
+ * Why a slow loop (7s) instead of an event-driven flash:
+ *   The footer is the *last* thing a visitor sees before leaving.
+ *   A constantly-flashing line would feel desperate; a slow,
+ *   periodic shimmer reads as "the page is still humming after
+ *   you stopped scrolling" — a quiet sign of craft.
+ *
+ * Composite-only animation (transform), no layout / paint.
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-footer-shine {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  60%,
+  100% {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+
+.eikon-footer-shine {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-brand-400) 50%,
+    transparent 100%
+  );
+  animation: eikon-footer-shine 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-footer-shine {
+    animation: none;
+    background: var(--border-2);
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-footer-wordmark — oversized decorative brand stamp
+ *
+ * Renders the brand name at clamp(3.5rem, 14vw, 11.5rem) as the
+ * footer's visual anchor. The text is masked with a vertical
+ * gradient to transparent at the bottom so it reads as a
+ * "ghost wordmark" fading off the page edge — present enough
+ * to give the footer typographic weight, faded enough to never
+ * compete with the legible content above it.
+ *
+ * Hovering anywhere in the footer (group/footer:hover) lifts the
+ * opacity from 0.10 to 0.18 — a small reward for visitors who
+ * linger in the footer area.
+ * ------------------------------------------------------------------ */
+
+.eikon-footer-wordmark {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  font-size: clamp(3.25rem, 14vw, 11rem);
+  line-height: 0.85;
+  white-space: nowrap;
+  background: linear-gradient(
+    180deg,
+    var(--fg-1) 0%,
+    var(--fg-1) 35%,
+    transparent 95%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  opacity: 0.1;
+  transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.group\/footer:hover .eikon-footer-wordmark {
+  opacity: 0.18;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-footer-wordmark {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-footer-status-dot — soft "online" indicator
+ *
+ * 6px dot in the footer's bottom microcopy row that pulses every
+ * 2s. Uses the brand mid-tone so it stays on-palette (no rogue
+ * "system-green") and is visible in both light and dark themes.
+ * The outer ring scales + fades on the same cadence to give the
+ * dot a quiet "breath" — reads as "the site is alive", not
+ * "alarm bell".
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-footer-status-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.eikon-footer-status-dot {
+  position: relative;
+  display: inline-flex;
+  height: 6px;
+  width: 6px;
+  border-radius: 9999px;
+  background: var(--color-brand-400);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.eikon-footer-status-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-brand-400);
+  animation: eikon-footer-status-pulse 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-footer-status-dot::after {
+    animation: none;
+    display: none;
+  }
+}
+
