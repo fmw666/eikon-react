@@ -37,6 +37,7 @@
 import type { CSSProperties } from 'react';
 
 import { CtaButton } from '../components/CtaButton';
+import { isGithubConfigured, SITE } from '../site-config';
 import { useI18n } from '../theme/i18n';
 
 /** Anchor id used by Nav's "Home" link to scroll back to the top. */
@@ -152,15 +153,21 @@ export function Hero({
             <CtaButton variant="primary" onClick={onPrimaryCta}>
               {t('hero.cta.primary')}
             </CtaButton>
-            <CtaButton
-              variant="secondary"
-              href="https://github.com/fmw666/eikon-react"
-              target="_blank"
-              rel="noreferrer"
-              leadingIcon={<GithubIcon className="h-3.5 w-3.5" />}
-            >
-              {t('hero.cta.secondary')}
-            </CtaButton>
+            {/* Drop the secondary GitHub CTA when site-config has no
+                real repo configured — the destination would be a 404
+                or the github.com home page, neither of which serves
+                the visitor. */}
+            {isGithubConfigured() && (
+              <CtaButton
+                variant="secondary"
+                href={SITE.github.url}
+                target="_blank"
+                rel="noreferrer"
+                leadingIcon={<GithubIcon className="h-3.5 w-3.5" />}
+              >
+                {t('hero.cta.secondary')}
+              </CtaButton>
+            )}
           </div>
         </div>
 

@@ -48,14 +48,13 @@ import { PromptOutput, PROMPT_OUTPUT_ANCHOR_ID } from './sections/PromptOutput';
 import { QASection } from './sections/QASection';
 import { TechStackWall } from './sections/TechStackWall';
 import { ThemeAndLangSync } from './theme/theme-store';
-import { useI18n } from './theme/i18n';
 
-// The /playground route is a fairly heavy bundle (it pulls in
-// PlaygroundShell + ParamsPanel + PromptOutput in one composition).
-// Lazy-loading lets the marketing home keep its cold JS lean —
-// visitors who never click through to the dedicated playground
-// don't pay for the extra code.
+// Both /playground and /changelog are heavy routes (CodeMirror, react-
+// arborist, the markdown notes block). Lazy-loading keeps the cold JS
+// for the marketing home small — visitors who never click through to
+// these tools don't pay for the extra code.
 const PlaygroundPage = lazy(() => import('./PlaygroundPage'));
+const ChangelogPage = lazy(() => import('./changelog/ChangelogPage'));
 
 type Route = 'home' | 'changelog' | 'playground';
 
@@ -67,7 +66,7 @@ type Route = 'home' | 'changelog' | 'playground';
  * Routes:
  *   /            → home
  *   /playground  → playground (full-screen tool view)
- *   /changelog…  → changelog (placeholder)
+ *   /changelog…  → changelog (GitHub-release diff viewer)
  */
 function useRoute(): Route {
   const [route, setRoute] = useState<Route>(() => resolveRoute());
@@ -94,7 +93,11 @@ export default function LandingPage() {
     <>
       <ThemeAndLangSync />
       <Nav />
-      {route === 'changelog' && <ChangelogPlaceholder />}
+      {route === 'changelog' && (
+        <Suspense fallback={<PageFallback />}>
+          <ChangelogPage />
+        </Suspense>
+      )}
       {route === 'home' && <HomeRoute />}
       {route === 'playground' && (
         <Suspense fallback={<PageFallback />}>
@@ -170,22 +173,3 @@ function SectionDivider() {
   );
 }
 
-function ChangelogPlaceholder() {
-  const { t } = useI18n();
-  return (
-    <main className="mx-auto flex max-w-3xl flex-col items-center justify-center px-6 py-32 text-center">
-      <div className="rounded-full border border-[var(--border-1)] bg-[var(--surface-1)] px-3 py-1 text-xs text-[var(--fg-3)]">
-        v0.1.0
-      </div>
-      <h1 className="mt-6 text-3xl font-semibold tracking-tight text-[var(--fg-1)] sm:text-4xl">
-        {t('changelog.comingSoon')}
-      </h1>
-      <a
-        href="/"
-        className="mt-8 text-sm text-brand-400 no-underline hover:text-brand-300"
-      >
-        {t('changelog.back')}
-      </a>
-    </main>
-  );
-}

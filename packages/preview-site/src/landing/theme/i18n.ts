@@ -183,6 +183,37 @@ const DICT = {
 
     'changelog.comingSoon': '更新日志即将上线',
     'changelog.back': '← 返回首页',
+
+    'changelog.eyebrow': '版本对比',
+    'changelog.title': '更新日志',
+    'changelog.subtitle':
+      '从 GitHub 实时拉取每个 Tag 的发行包，并以左右双侧版本可视化代码差异。',
+    'changelog.picker.base': '基线',
+    'changelog.picker.head': '目标',
+    'changelog.picker.swap': '互换基线与目标',
+    'changelog.picker.refresh': '刷新',
+    'changelog.compare.loading': '正在加载差异…',
+    'changelog.compare.identical': '所选两个版本完全一致。',
+    'changelog.compare.pick': '请选择左右两侧的版本。',
+    'changelog.compare.files': '个文件变更',
+    'changelog.compare.commits': '次提交',
+    'changelog.compare.viewOnGithub': '在 GitHub 上查看',
+    'changelog.notes.title': '发行说明 ·',
+    'changelog.notes.openOnGithub': '在 GitHub 上打开',
+    'changelog.error.title': '无法加载版本数据',
+    'changelog.error.retry': '重试',
+    'changelog.error.rateLimitUntil': '请求被限流，预计恢复时间：',
+    'changelog.empty.title': '该仓库暂无发布版本',
+    'changelog.empty.subtitle':
+      '一旦在 GitHub 上发布带 Tag 的 Release，更新日志会自动出现在这里。',
+    'changelog.empty.missingTitle': '找不到这个 GitHub 仓库',
+    'changelog.empty.missingSubtitle':
+      '在 src/landing/site-config.ts 里把 owner / repo 改成你实际的公开仓库（私有仓库匿名访问会拿到相同的 404）。',
+    'changelog.empty.cta': '前往 GitHub 仓库 →',
+
+    'changelog.demo.title': '演示数据',
+    'changelog.demo.subtitle':
+      '这是一份内置的样例 diff，用于展示完整的版本对比能力。配置好真实仓库后会自动切换为线上数据 ——',
   },
   en: {
     'nav.home': 'Home',
@@ -334,6 +365,37 @@ const DICT = {
 
     'changelog.comingSoon': 'Changelog is on the way',
     'changelog.back': '← Back to home',
+
+    'changelog.eyebrow': 'Version compare',
+    'changelog.title': 'Changelog',
+    'changelog.subtitle':
+      'Pulled from GitHub releases in real time. Pick a left and a right version to see the diff.',
+    'changelog.picker.base': 'Base',
+    'changelog.picker.head': 'Head',
+    'changelog.picker.swap': 'Swap base and head',
+    'changelog.picker.refresh': 'Refresh',
+    'changelog.compare.loading': 'Loading diff…',
+    'changelog.compare.identical': 'These two versions are identical.',
+    'changelog.compare.pick': 'Pick a base and a head version.',
+    'changelog.compare.files': 'changed files',
+    'changelog.compare.commits': 'commits',
+    'changelog.compare.viewOnGithub': 'View on GitHub',
+    'changelog.notes.title': 'Release notes ·',
+    'changelog.notes.openOnGithub': 'Open on GitHub',
+    'changelog.error.title': 'Failed to load version data',
+    'changelog.error.retry': 'Retry',
+    'changelog.error.rateLimitUntil': 'Rate-limited until',
+    'changelog.empty.title': 'No releases yet',
+    'changelog.empty.subtitle':
+      'Tag a Release on GitHub and it will show up here automatically.',
+    'changelog.empty.missingTitle': "Couldn't find that GitHub repo",
+    'changelog.empty.missingSubtitle':
+      'Update owner / repo in src/landing/site-config.ts to point at your real public repository (private repos return the same 404 anonymously).',
+    'changelog.empty.cta': 'Open the GitHub repo →',
+
+    'changelog.demo.title': 'Demo data',
+    'changelog.demo.subtitle':
+      "This is a built-in example diff so you can see the full compare experience. Wire up a real repo and it'll switch to live data automatically —",
   },
 } as const;
 

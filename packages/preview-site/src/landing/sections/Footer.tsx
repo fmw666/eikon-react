@@ -10,7 +10,7 @@
  */
 
 import { useI18n } from '../theme/i18n';
-import { SITE } from '../site-config';
+import { isGithubConfigured, SITE } from '../site-config';
 
 export function Footer() {
   const { t } = useI18n();
@@ -41,12 +41,17 @@ export function Footer() {
               icon={<MailIcon className="h-3.5 w-3.5" />}
               label={SITE.author.email}
             />
-            <ContactLink
-              href={SITE.github.url}
-              icon={<GithubIcon className="h-3.5 w-3.5" />}
-              label={`${SITE.github.owner}/${SITE.github.repo}`}
-              external
-            />
+            {/* Hide the GitHub contact entirely when site-config has
+                no real repo behind it — better to drop the link than
+                send the visitor to a 404 / GitHub home page. */}
+            {isGithubConfigured() && (
+              <ContactLink
+                href={SITE.github.url}
+                icon={<GithubIcon className="h-3.5 w-3.5" />}
+                label={`${SITE.github.owner}/${SITE.github.repo}`}
+                external
+              />
+            )}
           </div>
         </div>
 
