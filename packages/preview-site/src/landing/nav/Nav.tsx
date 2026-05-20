@@ -1,18 +1,24 @@
 /**
  * @file Nav.tsx
- * @description Sticky centred pill nav with a magic indicator,
+ * @description Sticky centred two-island nav with a magic indicator,
  * scroll-state glass, SPA route swaps and hover-time chunk prefetch.
  *
- *   ┌─ Home   Changelog   [▶ Playground]   🌐 ─┐
- *   └─────────── centred island ───────────────┘
+ *   ┌─ Home  Changelog  [▶ Playground] ─┐   ┌─ 🌐 ─┐
+ *   └─────── main pill ─────────────────┘   └ orb ┘
+ *                          gap-2.5
  *
  * What's intentional about this nav:
  *
- *   1. ONE FLOATING PILL, NO HEADER CHROME — the `<header>` itself is
- *      a transparent positioner; only the inner `<nav>` pill paints
- *      anything. The empty area on either side of the pill is
- *      `pointer-events-none` so it never swallows clicks meant for the
- *      content that scrolls behind it.
+ *   1. TWO FLOATING ISLANDS, NO HEADER CHROME — the `<header>` itself
+ *      is a transparent positioner; only the inner pill + orb paint
+ *      anything. The empty area around them is `pointer-events-none`
+ *      so it never swallows clicks meant for the content scrolling
+ *      behind. Splitting the language switch into its own small orb
+ *      (instead of cramming it inside the pill behind a hairline
+ *      divider) gives the cluster a "main subject + satellite" read
+ *      — the pill carries route intent, the orb carries chrome — and
+ *      lets the negative space between them do real composition work
+ *      instead of being decorative padding.
  *
  *   2. MAGIC INDICATOR — a single `<span>` sitting underneath the pill
  *      links. Its `translate3d` + `width` are driven by measuring the
@@ -27,10 +33,12 @@
  *          - resting on the active link  → brighter background + 1px
  *                                          inset top highlight
  *      Hover state is published via `data-nav-key` + a single
- *      pointerover handler on the rail (no per-link event hookup),
- *      which is also what keeps mouse moves over the LangSwitcher
- *      from confusing the indicator (no `data-nav-key` → indicator
- *      retreats to the active link).
+ *      pointerover handler on the rail (no per-link event hookup).
+ *      Anything inside the rail without a `data-nav-key` reads as
+ *      "no link hovered" and the indicator retreats to the active
+ *      link — moving the language switch out of the rail entirely
+ *      makes that contract even cleaner: the orb is on its own
+ *      surface and cannot accidentally tug the indicator at all.
  *
  *   3. SCROLL-STATE GLASS — `useScrolled(8)` flips a class once the
  *      viewport is past 8px so the pill switches from flat to
@@ -153,10 +161,11 @@ export function Nav({ route, pending }: { route: AppRoute; pending: boolean }) {
       >
         <div
           className={
-            'mx-auto flex max-w-7xl justify-center px-6 pt-6 pb-4 transition-transform duration-300 ease-out ' +
+            'mx-auto flex max-w-7xl items-end justify-center gap-2.5 px-6 pt-6 pb-4 transition-transform duration-300 ease-out ' +
             (scrolled ? 'scale-[0.985]' : 'scale-100')
           }
         >
+          {/* Main island: route navigation. */}
           <div className="pointer-events-auto">
             <NavPill
               activeKey={indicatorActive}
@@ -181,15 +190,22 @@ export function Nav({ route, pending }: { route: AppRoute; pending: boolean }) {
                 label={t('nav.playground')}
                 active={route === 'playground'}
               />
-
-              {/* Hairline divider between the CTA and utility icons. */}
-              <span
-                aria-hidden="true"
-                className="mx-0.5 h-5 w-px bg-[var(--border-1)]/70"
-              />
-
-              <LangSwitcher compact />
             </NavPill>
+          </div>
+
+          {/* Satellite orb: utility chrome (language switch). Same
+              glass material as the pill so the two islands breathe
+              together on scroll. The orb is a perfect circle and
+              meaningfully smaller than the pill; the outer flex row
+              uses `items-end` so the orb is anchored to the pill's
+              bottom edge (not vertically centered), giving the
+              cluster a "main pill + small moon hanging at the
+              lower-right" silhouette instead of "two siblings
+              floating mid-air". */}
+          <div className="pointer-events-auto">
+            <LangOrb scrolled={scrolled}>
+              <LangSwitcher compact />
+            </LangOrb>
           </div>
         </div>
       </header>
@@ -243,18 +259,19 @@ function useScrolled(threshold: number): boolean {
 type TrackedKey = 'home' | 'changelog';
 
 /**
- * The dark pill container that houses every nav item. Carries the
+ * The dark pill container that houses route navigation. Carries the
  * indicator span and one delegated pointerover handler that watches
- * `data-nav-key` to publish hover state — no per-link wiring needed,
- * and the LangSwitcher (no `data-nav-key`) automatically reads as
- * "indicator should retreat to the active link" without any extra
- * code.
+ * `data-nav-key` to publish hover state — no per-link wiring needed.
+ * Anything inside without a `data-nav-key` (e.g. a future utility
+ * icon) reads as "no link hovered" and the indicator retreats to
+ * the active link.
  *
  * Background / shadow / border are driven by `scrolled`: at the top
  * of the page the pill sits flat against the hero; once the user
  * scrolls past 8px we glass it (backdrop-blur + deeper shadow + a
  * slightly tighter outline) so it reads as floating chrome over
- * the scrolling content.
+ * the scrolling content. The companion `LangOrb` mirrors this exact
+ * surface so the two islands inhale and exhale on scroll together.
  */
 function NavPill({
   children,
@@ -380,6 +397,47 @@ function NavPill({
       {children}
     </nav>
   );
+}
+
+// =============================================================================
+// Satellite orb (language switch)
+// =============================================================================
+
+/**
+ * The "moon" — a tiny circular companion to the main `NavPill`.
+ * Pulled out of the pill so:
+ *
+ *   1. The pill stays purely about route navigation. The magic
+ *      indicator can no longer be tugged by a hover pass over the
+ *      language icon, because the language icon is no longer in
+ *      the same surface as the route links.
+ *   2. The two surfaces — long pill + small disc — sit beside each
+ *      other with a deliberate gap, reading as a composed pair
+ *      rather than a single overstuffed bar. The negative space
+ *      between them does real composition work.
+ *   3. The orb deliberately runs a touch smaller than the pill so
+ *      the cluster has a clear "main subject + satellite" hierarchy;
+ *      two identical-height boxes side by side would read as a
+ *      split bar, not as a designed cluster.
+ *
+ * Material is intentionally identical to `NavPill` — same border,
+ * same surface, same scroll-state crossfade — so the pair feels
+ * like one piece of glass that happens to be in two shapes.
+ */
+function LangOrb({
+  children,
+  scrolled,
+}: {
+  children: ReactNode;
+  scrolled: boolean;
+}) {
+  const orbClass =
+    'relative inline-flex items-center justify-center rounded-full border p-0.5 transition-[background-color,box-shadow,border-color,backdrop-filter] duration-300 ease-out ' +
+    (scrolled
+      ? 'border-[var(--border-2)]/80 bg-[var(--surface-2)]/80 backdrop-blur-xl shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_8px_24px_rgb(0_0_0/0.28)]'
+      : 'border-[var(--border-1)] bg-[var(--surface-2)] backdrop-blur-0 shadow-[inset_0_1px_0_rgb(255_255_255/0.04),0_2px_8px_rgb(0_0_0/0.08)]');
+
+  return <div className={orbClass}>{children}</div>;
 }
 
 // =============================================================================
