@@ -38,31 +38,101 @@ interface MockupProps extends Omit<SVGProps<SVGSVGElement>, 'children'> {
 // =============================================================================
 // Brand palette — keep in one spot so re-skinning is a single diff.
 //
-// Cool slate (Tailwind slate-200…slate-500 range). These are SVG-internal
-// hex strings rather than `var(--color-brand-*)` because SVG attribute
+// Warm amber accent + warm tungsten halo. These are SVG-internal hex
+// strings rather than `var(--color-brand-*)` because SVG attribute
 // values don't resolve CSS custom properties in older Safari/Firefox
 // kernels, and the mockups need to render identically everywhere they
 // appear (landing card, screenshots, share previews, etc.).
+//
+// Two layers carry the "powered on, warm room" mood:
+//
+//   - `BRAND`     → UI accents painted INSIDE the device (CTA pill,
+//                   active editor line, hero app icon, screen ring).
+//                   Sits in the amber-200…amber-500 range so each
+//                   accent harmonises with the warm halo around it.
+//   - `WARM_HALO` → Ambient kelvin spill painted OUTSIDE / AROUND
+//                   the device (far-glow radial, bezel-shaped halo,
+//                   keyboard / desk light pool). A warm tungsten
+//                   yellow that simulates the way a real lit panel
+//                   bounces incandescent light onto the wall behind
+//                   it and the surface below it.
 // =============================================================================
 
 const BRAND = {
-  active: '#cbd5e1',
-  activeStrong: '#94a3b8',
-  activeSoft: 'rgba(148, 163, 184, 0.18)',
-  glow: 'rgba(203, 213, 225, 0.40)',
+  active: '#fcd34d',
+  activeStrong: '#f59e0b',
+  activeSoft: 'rgba(252, 211, 77, 0.22)',
+  glow: 'rgba(253, 224, 71, 0.55)',
+  // Inner-bloom hot core. Deliberately a near-neutral warm white
+  // (amber-50 territory) rather than a saturated yellow, so the
+  // bloom painted on top of the screen content reads as "the panel
+  // turned on" instead of "someone poured honey on the screen" —
+  // the surrounding WARM_HALO carries the visible yellow tone.
+  glowHot: '#fff7e6',
+};
+
+// Warm tungsten halo — the "wall behind the monitor" colour. Painted
+// as a 3-zone radial wash behind/around each device so the surrounding
+// card surface picks up the warm spill the way a real lit screen
+// bounces light onto its environment.
+//
+// Three stops, three roles — this is what creates the LAYERED
+// "I can see where the light source is" read instead of a flat
+// uniform wash:
+//
+//   - `hot`  → amber-300, the small bright core directly behind
+//              the device panel. Saturated enough to look like the
+//              actual emitting source.
+//   - `mid`  → amber-200, the visible warm halo wrapping around
+//              the bright core. Where most of the "warm" colour
+//              lives, perceptually.
+//   - `edge` → amber-100, the long pale tail that dissolves into
+//              the card background. Low chroma so the brain still
+//              reads it as "reflected ambient", not pigment.
+//
+// Each stop sits at a different RADIUS in the gradient, with
+// opacity dropping faster than radius grows. Net effect: a clear
+// hot point, a soft layered glow, and a clean dissolve — i.e.
+// "a lamp on", not "a yellow rectangle painted on the card".
+const WARM_HALO = {
+  hot: '#fcd34d',
+  mid: '#fde68a',
+  edge: '#fef3c7',
 };
 
 const NEUTRAL = {
   bezel: '#0d0d14',
   bezelEdge: '#2a2a36',
   base: '#1a1a24',
-  screenBg: '#0f0f18',
-  screenDim: '#13131e',
+  // Screen base nudged a half-stop brighter than before. The bloom
+  // wash painted on top does most of the "lit panel" work, but a
+  // pitch-black base undercut it — bumping the base lets the panel
+  // read as "on" even before the radial bloom finishes fading in.
+  screenBg: '#15151f',
+  screenDim: '#181824',
   chrome: '#1a1a26',
-  text: '#cdd0d8',
+  text: '#e2e8f0',
   textDim: '#5a5d68',
   faint: '#2c2c38',
   faintEdge: '#3a3a4a',
+};
+
+// =============================================================================
+// Code-editor syntax palette — used by the MonitorMockup so the
+// editor surface reads as a real lit IDE (purple keywords, cyan
+// strings, blue identifiers, amber numbers) instead of a row of
+// uniform grey bars. The amber `number` stop is intentionally the
+// same hue family as the warm halo, so the brightest in-screen
+// token ties into the ambient glow rather than fighting it.
+// =============================================================================
+
+const SYNTAX = {
+  keyword: '#c084fc',
+  identifier: '#60a5fa',
+  string: '#5eead4',
+  number: '#fcd34d',
+  comment: '#64748b',
+  text: '#e2e8f0',
 };
 
 // =============================================================================
@@ -91,51 +161,94 @@ export function LaptopMockup({ active, className, ...rest }: MockupProps) {
             on top of the screen content. Brightens the centre of
             the display the way an LCD's backlight bleeds when the
             panel is lit, fading to nothing well before reaching the
-            bezel so the content underneath stays readable. */}
+            bezel so the content underneath stays readable.
+            The hot core is a warm near-white (amber-50) so the
+            panel reads "really lit" without dumping yellow tint
+            onto the page content — the surrounding WARM_HALO
+            carries the visible warm colour. */}
         <radialGradient
           id="mock-web-screen-bloom"
           cx="0.5"
           cy="0.42"
-          r="0.65"
+          r="0.78"
         >
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.12" />
-          <stop offset="55%" stopColor="#ffffff" stopOpacity="0.04" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="0%" stopColor={BRAND.glowHot} stopOpacity="0.45" />
+          <stop offset="35%" stopColor={BRAND.glowHot} stopOpacity="0.18" />
+          <stop offset="100%" stopColor={BRAND.glowHot} stopOpacity="0" />
         </radialGradient>
 
-        {/* Outer halo blur — used by the rect painted *behind* the
-            laptop body so a softened brand-tinted bloom appears to
-            leak out of the screen and onto the desk surface around
-            it. Filter region is generous (-30%/-30% to 130%/130%)
-            so the blur isn't clipped at the rectangle's bounds. */}
+        {/* Far ambient glow — LAYERED 3-zone radial wash:
+            tight saturated hot core (amber-300) → mid warm halo
+            (amber-200) → pale ambient tail (amber-100) → nothing.
+            Each zone uses its own opacity profile so the visitor
+            reads "a light source at the device, glowing outward"
+            rather than "a uniform yellow wash across the card".
+            The hot stop only lives in the inner ~15% of the
+            radius so it never feels "thick" — most of the card
+            background sees only the mid + edge zones, both pale
+            and low-opacity. */}
+        <radialGradient
+          id="mock-web-far-glow"
+          cx="0.5"
+          cy="0.45"
+          r="0.95"
+        >
+          <stop offset="0%" stopColor={WARM_HALO.hot} stopOpacity="0.28" />
+          <stop offset="10%" stopColor={WARM_HALO.hot} stopOpacity="0.20" />
+          <stop offset="22%" stopColor={WARM_HALO.mid} stopOpacity="0.13" />
+          <stop offset="45%" stopColor={WARM_HALO.mid} stopOpacity="0.06" />
+          <stop offset="72%" stopColor={WARM_HALO.edge} stopOpacity="0.018" />
+          <stop offset="100%" stopColor={WARM_HALO.edge} stopOpacity="0" />
+        </radialGradient>
+
+        {/* Mid halo blur — used by the bezel-shaped rect for the
+            close-in atmospheric spill. Wide stdDev (18) so the
+            halo's outer edge dissolves all the way into the
+            far-ambient wash — no visible "second ring" around the
+            device, just a diffuse warm bounce. */}
         <filter
           id="mock-web-halo-blur"
-          x="-30%"
-          y="-30%"
-          width="160%"
-          height="160%"
+          x="-50%"
+          y="-50%"
+          width="200%"
+          height="200%"
         >
-          <feGaussianBlur stdDeviation="6" />
+          <feGaussianBlur stdDeviation="18" />
         </filter>
       </defs>
 
-      {/* Outer screen halo — sits BEHIND the bezel so the blur
-          spills outside the laptop's silhouette only. Only mounted
-          when the card is the active selection; the
-          `eikon-screen-glow` class fades it in with the bootup
-          keyframe. */}
+      {/* Layered outer glow — two soft passes painted from
+          far-to-near, both in warm tungsten amber so the laptop
+          looks like it's sitting in a dim room with its panel lit.
+          The far-glow rect is oversized (480×340) so the radial's
+          long-tail fall-off has room to fully dissolve into the
+          card background — no visible "circle edge". The closer
+          bezel-shaped halo gives the device a soft warm rim
+          spilling onto the immediate background. */}
       {active && (
-        <rect
-          className="eikon-screen-glow"
-          x="20"
-          y="-2"
-          width="360"
-          height="220"
-          rx="14"
-          fill={BRAND.active}
-          opacity="0.14"
-          filter="url(#mock-web-halo-blur)"
-        />
+        <>
+          <rect
+            className="eikon-screen-glow"
+            x="-40"
+            y="-60"
+            width="480"
+            height="340"
+            fill="url(#mock-web-far-glow)"
+            pointerEvents="none"
+          />
+          <rect
+            className="eikon-screen-glow"
+            x="20"
+            y="-2"
+            width="360"
+            height="220"
+            rx="16"
+            fill={WARM_HALO.mid}
+            opacity="0.08"
+            filter="url(#mock-web-halo-blur)"
+            pointerEvents="none"
+          />
+        </>
       )}
 
       {/* Outer screen body */}
@@ -267,6 +380,25 @@ export function LaptopMockup({ active, className, ...rest }: MockupProps) {
       {/* Hinge / trackpad hint */}
       <rect x="170" y="208" width="60" height="2" rx="1" fill={NEUTRAL.bezelEdge} />
       <ellipse cx="200" cy="219" rx="22" ry="1.2" fill="#262630" />
+
+      {/* Keyboard spill — soft warm wash painted ON TOP of the
+          laptop base, simulating screen light falling onto the
+          palm-rest. Mid-amber and low-opacity so it reads as
+          light landing on a surface, not a bright stripe glued on
+          top of the trackpad. */}
+      {active && (
+        <ellipse
+          className="eikon-screen-glow"
+          cx="200"
+          cy="214"
+          rx="170"
+          ry="8"
+          fill={WARM_HALO.mid}
+          opacity="0.07"
+          filter="url(#mock-web-halo-blur)"
+          pointerEvents="none"
+        />
+      )}
     </svg>
   );
 }
@@ -284,51 +416,136 @@ export function MonitorMockup({ active, className, ...rest }: MockupProps) {
       {...rest}
     >
       <defs>
+        {/* Screen base — nudged a hair brighter than before so the
+            panel reads as "really on" rather than a pitch-black
+            glass plate that the bloom is trying to fake light onto.
+            The bloom radial above still does most of the lit-panel
+            work; this base just gives it a non-zero floor. */}
         <linearGradient id="mock-desk-screen" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#10101a" />
-          <stop offset="100%" stopColor="#0a0a12" />
+          <stop offset="0%" stopColor="#1c1c28" />
+          <stop offset="100%" stopColor="#101019" />
         </linearGradient>
 
-        {/* Inner backlight bloom — see `mock-web-screen-bloom` for
-            the full rationale. Cx/Cy nudged slightly upward so the
-            wash centres above the editor's status bar (the focal
-            content row), not on the empty bottom area. */}
+        {/* Inner backlight bloom — soft warm-white wash painted on
+            top of the editor content. Cx/Cy nudged slightly upward
+            so the wash centres above the status bar (the focal
+            content row), not on the empty bottom area. Hot core is
+            a near-neutral warm white (amber-50) so the panel reads
+            as "really lit" without dumping yellow tint onto the
+            code — the WARM_HALO around the device carries the
+            visible warm colour. */}
         <radialGradient
           id="mock-desk-screen-bloom"
           cx="0.5"
-          cy="0.38"
-          r="0.7"
+          cy="0.4"
+          r="0.78"
         >
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.10" />
-          <stop offset="55%" stopColor="#ffffff" stopOpacity="0.03" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="0%" stopColor={BRAND.glowHot} stopOpacity="0.42" />
+          <stop offset="35%" stopColor={BRAND.glowHot} stopOpacity="0.18" />
+          <stop offset="100%" stopColor={BRAND.glowHot} stopOpacity="0" />
         </radialGradient>
 
-        {/* Outer halo blur for the monitor surround. */}
+        {/* Far ambient glow — LAYERED 3-zone warm wash (hot →
+            mid → edge), same structural recipe as the laptop's
+            `mock-web-far-glow`. The hot stop sits behind the
+            panel as a small bright source, the mid carries the
+            visible warm halo, and the edge fades into the card
+            background as pale ambient. Bumped a hair more
+            saturated than the laptop because the monitor is the
+            tallest device in the trio — without the extra punch
+            it would feel under-lit relative to its bezel size. */}
+        <radialGradient
+          id="mock-desk-far-glow"
+          cx="0.5"
+          cy="0.42"
+          r="0.95"
+        >
+          <stop offset="0%" stopColor={WARM_HALO.hot} stopOpacity="0.32" />
+          <stop offset="10%" stopColor={WARM_HALO.hot} stopOpacity="0.22" />
+          <stop offset="22%" stopColor={WARM_HALO.mid} stopOpacity="0.14" />
+          <stop offset="45%" stopColor={WARM_HALO.mid} stopOpacity="0.065" />
+          <stop offset="72%" stopColor={WARM_HALO.edge} stopOpacity="0.02" />
+          <stop offset="100%" stopColor={WARM_HALO.edge} stopOpacity="0" />
+        </radialGradient>
+
+        {/* Mid halo blur — wide stdDev so the outer edge dissolves
+            cleanly into the far-ambient wash and never reads as a
+            visible ring of light around the bezel. */}
         <filter
           id="mock-desk-halo-blur"
-          x="-30%"
-          y="-30%"
-          width="160%"
-          height="160%"
+          x="-50%"
+          y="-50%"
+          width="200%"
+          height="200%"
         >
-          <feGaussianBlur stdDeviation="6" />
+          <feGaussianBlur stdDeviation="18" />
+        </filter>
+
+        {/* Desk pool blur — used by the elliptical wash painted
+            UNDER the stand to simulate light landing on the desk
+            surface. Wider stdDev (14) and a tall, narrow ellipse
+            give the spill an unmistakable "pool of light" shape
+            instead of a tight ring. */}
+        <filter
+          id="mock-desk-pool-blur"
+          x="-50%"
+          y="-50%"
+          width="200%"
+          height="200%"
+        >
+          <feGaussianBlur stdDeviation="14" />
         </filter>
       </defs>
 
-      {/* Outer screen halo — sits behind the monitor body. */}
+      {/* Layered outer glow — two soft passes (far-ambient +
+          bezel-shaped halo), both in warm tungsten amber so the
+          monitor reads as a panel lit in a dim room. The wash
+          behind the device is the dominant "warm light on the
+          wall" cue; the bezel-shaped halo gives the device a
+          soft warm rim that ties it into that wider spill. */}
       {active && (
-        <rect
-          className="eikon-screen-glow"
-          x="30"
-          y="-4"
-          width="340"
-          height="214"
-          rx="14"
-          fill={BRAND.active}
-          opacity="0.14"
-          filter="url(#mock-desk-halo-blur)"
-        />
+        <>
+          <rect
+            className="eikon-screen-glow"
+            x="-30"
+            y="-60"
+            width="460"
+            height="320"
+            fill="url(#mock-desk-far-glow)"
+            pointerEvents="none"
+          />
+          <rect
+            className="eikon-screen-glow"
+            x="30"
+            y="-4"
+            width="340"
+            height="214"
+            rx="14"
+            fill={WARM_HALO.mid}
+            opacity="0.08"
+            filter="url(#mock-desk-halo-blur)"
+            pointerEvents="none"
+          />
+          {/* Desk pool — a stretched ellipse sitting beneath the
+              stand, simulating screen light landing on the desk
+              surface. Mid-amber and low-opacity so it reads as
+              a pool of spilled candlelight, not a bright shelf.
+              Slightly stronger than the bezel halo because the
+              radial gradient's hot core sits above the screen,
+              not below it — this pool is what gives the bottom
+              of the device its own little anchor of warm light. */}
+          <ellipse
+            className="eikon-screen-glow"
+            cx="200"
+            cy="232"
+            rx="150"
+            ry="10"
+            fill={WARM_HALO.mid}
+            opacity="0.12"
+            filter="url(#mock-desk-pool-blur)"
+            pointerEvents="none"
+          />
+        </>
       )}
 
       {/* Monitor body */}
@@ -382,57 +599,86 @@ export function MonitorMockup({ active, className, ...rest }: MockupProps) {
         />
       ))}
 
-      {/* Code lines — each row is a sequence of "syntax-highlighted"
-          tokens. We use three slate tints (300 / 400 / 500) instead
-          of literal keyword-purple / string-cyan / number-amber so
-          the editor reads as a styled mono surface, not a rainbow. */}
+      {/* Code lines — each row is a sequence of syntax-highlighted
+          tokens (purple keyword, blue identifier, teal string,
+          amber number, slate comment). Real IDE-style colour gives
+          the screen the "really lit editor" read the visitor
+          expects from a powered-on monitor, instead of the muted
+          row-of-grey-bars look that made the panel feel off. The
+          amber `number` stop is the same hue family as the warm
+          halo around the device, so the brightest in-screen token
+          ties into the surrounding glow rather than fighting it. */}
       <g>
-        {/* Line 1 - import */}
-        <rect x="76" y="55" width="30" height="3" rx="0.5" fill="#94a3b8" />
-        <rect x="110" y="55" width="60" height="3" rx="0.5" fill={NEUTRAL.text} />
-        <rect x="174" y="55" width="40" height="3" rx="0.5" fill="#64748b" />
+        {/* Line 1 — import keyword + identifier + string + punctuation */}
+        <rect x="76" y="55" width="30" height="3" rx="0.5" fill={SYNTAX.keyword} />
+        <rect x="110" y="55" width="42" height="3" rx="0.5" fill={SYNTAX.identifier} />
+        <rect x="156" y="55" width="14" height="3" rx="0.5" fill={SYNTAX.keyword} />
+        <rect x="174" y="55" width="44" height="3" rx="0.5" fill={SYNTAX.string} />
 
-        {/* Line 2 - blank-ish */}
+        {/* Line 2 — single-line comment */}
+        <rect x="76" y="66" width="86" height="3" rx="0.5" fill={SYNTAX.comment} />
 
-        {/* Line 3 - keyword + identifier */}
-        <rect x="76" y="77" width="36" height="3" rx="0.5" fill="#94a3b8" />
-        <rect x="116" y="77" width="50" height="3" rx="0.5" fill="#cbd5e1" />
-        <rect x="170" y="77" width="20" height="3" rx="0.5" fill={NEUTRAL.text} />
+        {/* Line 3 — `const name = "..."` */}
+        <rect x="76" y="77" width="22" height="3" rx="0.5" fill={SYNTAX.keyword} />
+        <rect x="104" y="77" width="40" height="3" rx="0.5" fill={SYNTAX.identifier} />
+        <rect x="148" y="77" width="6" height="3" rx="0.5" fill={SYNTAX.text} />
+        <rect x="160" y="77" width="48" height="3" rx="0.5" fill={SYNTAX.string} />
 
-        {/* Line 4 - active line (brand-coloured when card is active) */}
-        <rect x="86" y="88" width="40" height="3" rx="0.5" fill="#94a3b8" />
+        {/* Line 4 — ACTIVE line. Whole row sits on a warm
+            highlight band (the "current line" gutter wash editors
+            use), with the inner token painted in the warm accent
+            so it ties into the ambient glow. When the card isn't
+            active everything falls back to muted slate. */}
+        {active && (
+          <rect
+            x="48"
+            y="85"
+            width="304"
+            height="9"
+            fill={BRAND.active}
+            opacity="0.08"
+          />
+        )}
+        <rect x="86" y="88" width="32" height="3" rx="0.5" fill={SYNTAX.keyword} />
         <rect
-          x="130"
+          x="122"
           y="88"
-          width="80"
+          width="46"
           height="3"
           rx="0.5"
-          fill={active ? BRAND.active : '#64748b'}
-          opacity={active ? 1 : 0.6}
+          fill={active ? BRAND.active : SYNTAX.identifier}
+          opacity={active ? 1 : 0.7}
         />
-        <rect x="214" y="88" width="30" height="3" rx="0.5" fill="#cbd5e1" />
+        <rect x="172" y="88" width="6" height="3" rx="0.5" fill={SYNTAX.text} />
+        <rect x="182" y="88" width="24" height="3" rx="0.5" fill={SYNTAX.number} />
+        <rect x="210" y="88" width="38" height="3" rx="0.5" fill={SYNTAX.string} />
 
-        {/* Line 5 */}
-        <rect x="86" y="99" width="56" height="3" rx="0.5" fill="#cbd5e1" />
-        <rect x="146" y="99" width="34" height="3" rx="0.5" fill={NEUTRAL.text} />
-        <rect x="184" y="99" width="50" height="3" rx="0.5" fill="#64748b" />
+        {/* Line 5 — `if (count > 0) {` */}
+        <rect x="86" y="99" width="14" height="3" rx="0.5" fill={SYNTAX.keyword} />
+        <rect x="104" y="99" width="32" height="3" rx="0.5" fill={SYNTAX.identifier} />
+        <rect x="140" y="99" width="6" height="3" rx="0.5" fill={SYNTAX.text} />
+        <rect x="150" y="99" width="14" height="3" rx="0.5" fill={SYNTAX.number} />
 
-        {/* Line 6 */}
-        <rect x="86" y="110" width="44" height="3" rx="0.5" fill="#94a3b8" />
+        {/* Line 6 — `count += 1` (indented one extra level) */}
+        <rect x="96" y="110" width="34" height="3" rx="0.5" fill={SYNTAX.identifier} />
+        <rect x="134" y="110" width="8" height="3" rx="0.5" fill={SYNTAX.text} />
+        <rect x="146" y="110" width="10" height="3" rx="0.5" fill={SYNTAX.number} />
 
-        {/* Line 7 */}
-        <rect x="76" y="121" width="20" height="3" rx="0.5" fill="#94a3b8" />
-        <rect x="100" y="121" width="64" height="3" rx="0.5" fill={NEUTRAL.text} />
+        {/* Line 7 — `return result` */}
+        <rect x="86" y="121" width="22" height="3" rx="0.5" fill={SYNTAX.keyword} />
+        <rect x="112" y="121" width="44" height="3" rx="0.5" fill={SYNTAX.identifier} />
 
-        {/* Line 8 */}
-        <rect x="86" y="132" width="50" height="3" rx="0.5" fill="#cbd5e1" />
-        <rect x="140" y="132" width="38" height="3" rx="0.5" fill={NEUTRAL.text} />
+        {/* Line 8 — closing brace + comment */}
+        <rect x="86" y="132" width="6" height="3" rx="0.5" fill={SYNTAX.text} />
+        <rect x="100" y="132" width="74" height="3" rx="0.5" fill={SYNTAX.comment} />
 
-        {/* Line 9 */}
-        <rect x="86" y="143" width="32" height="3" rx="0.5" fill="#94a3b8" />
+        {/* Line 9 — function call */}
+        <rect x="76" y="143" width="40" height="3" rx="0.5" fill={SYNTAX.identifier} />
+        <rect x="120" y="143" width="24" height="3" rx="0.5" fill={SYNTAX.number} />
+        <rect x="148" y="143" width="36" height="3" rx="0.5" fill={SYNTAX.string} />
 
-        {/* Line 10 - closing brace */}
-        <rect x="76" y="154" width="6" height="3" rx="0.5" fill={NEUTRAL.text} />
+        {/* Line 10 — closing punctuation */}
+        <rect x="76" y="154" width="6" height="3" rx="0.5" fill={SYNTAX.text} />
       </g>
 
       {/* Cursor block on the active line — only when the card is active,
@@ -450,12 +696,16 @@ export function MonitorMockup({ active, className, ...rest }: MockupProps) {
       )}
 
       {/* Bottom status / terminal strip */}
-      <rect x="48" y="170" width="304" height="22" fill="#0a0a12" />
-      {/* Status indicator — was a vivid green "running" dot; toned
-          down to slate so the editor footer stays monochrome. */}
-      <rect x="56" y="178" width="6" height="3" rx="0.5" fill="#cbd5e1" />
-      <rect x="68" y="178" width="90" height="3" rx="0.5" fill={NEUTRAL.textDim} />
-      <rect x="166" y="178" width="60" height="3" rx="0.5" fill={NEUTRAL.text} />
+      <rect x="48" y="170" width="304" height="22" fill="#0c0c14" />
+      {/* Status indicator — a small green "running" dot, the
+          classic IDE / language-server cue. Adds one bright tiny
+          colour accent at the bottom edge of the panel so the
+          monitor reads as "powered on with something live happening
+          inside it", reinforcing the lit-screen mood. */}
+      <circle cx="58" cy="179" r="2" fill="#34d399" opacity="0.95" />
+      <rect x="64" y="178" width="90" height="3" rx="0.5" fill={NEUTRAL.textDim} />
+      <rect x="158" y="178" width="46" height="3" rx="0.5" fill={SYNTAX.identifier} opacity="0.85" />
+      <rect x="210" y="178" width="32" height="3" rx="0.5" fill={NEUTRAL.text} />
 
       {/* Inner screen backlight bloom — painted over the editor
           content so the whole display reads as "lit up", not just
@@ -539,36 +789,59 @@ export function PhonesMockup({ active, className, ...rest }: MockupProps) {
           <stop offset="100%" stopColor="#0a0d18" />
         </linearGradient>
 
-        {/* Inner backlight bloom for each phone — see Laptop's
-            `mock-web-screen-bloom` for the full rationale. Shared
-            by both phones because at this scale the centre offset
-            doesn't differ enough between lock-screen and home-grid
-            to warrant two separate gradients. */}
+        {/* Inner backlight bloom for each phone — soft warm-white
+            wash painted on top of the wallpaper + content so the
+            small panel reads as "really lit" without dumping
+            yellow tint onto the icons. Shared by both phones
+            because at this scale the centre offset doesn't differ
+            enough between lock-screen and home-grid to warrant
+            two separate gradients. */}
         <radialGradient
           id="mock-mob-screen-bloom"
           cx="0.5"
-          cy="0.42"
-          r="0.7"
+          cy="0.45"
+          r="0.78"
         >
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.14" />
-          <stop offset="55%" stopColor="#ffffff" stopOpacity="0.04" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="0%" stopColor={BRAND.glowHot} stopOpacity="0.4" />
+          <stop offset="40%" stopColor={BRAND.glowHot} stopOpacity="0.15" />
+          <stop offset="100%" stopColor={BRAND.glowHot} stopOpacity="0" />
         </radialGradient>
 
-        {/* Outer halo blur for the phone surround. Phones are
-            smaller targets than the laptop/monitor, so we use a
-            slightly tighter blur (stdDev 5 vs. 6) — keeps the
-            spill from washing across the gap between the two
-            handsets, which would read as "one big blob" rather
-            than two lit devices. */}
+        {/* Per-phone far ambient radial — LAYERED 3-zone warm
+            wash (hot → mid → edge), same recipe as the laptop /
+            monitor far-glows. Painted as a 200×300 rect behind
+            each handset so the wash follows the individual phone's
+            rotated transform — a tilted phone glows in the
+            direction it's leaning. Opacities held a step below the
+            laptop's because the phones sit side-by-side; if we
+            ran the same numbers, the two halos would visibly
+            bleed into each other in the middle of the card. */}
+        <radialGradient
+          id="mock-mob-far-glow"
+          cx="0.5"
+          cy="0.45"
+          r="0.92"
+        >
+          <stop offset="0%" stopColor={WARM_HALO.hot} stopOpacity="0.24" />
+          <stop offset="10%" stopColor={WARM_HALO.hot} stopOpacity="0.17" />
+          <stop offset="22%" stopColor={WARM_HALO.mid} stopOpacity="0.11" />
+          <stop offset="45%" stopColor={WARM_HALO.mid} stopOpacity="0.05" />
+          <stop offset="72%" stopColor={WARM_HALO.edge} stopOpacity="0.014" />
+          <stop offset="100%" stopColor={WARM_HALO.edge} stopOpacity="0" />
+        </radialGradient>
+
+        {/* Mid halo blur — tighter (stdDev 12) than the
+            laptop/monitor (stdDev 18) because phones are smaller
+            targets sitting side-by-side; an 18-stdDev blur would
+            visibly merge the two handsets' halos into one. */}
         <filter
           id="mock-mob-halo-blur"
-          x="-30%"
-          y="-30%"
-          width="160%"
-          height="160%"
+          x="-50%"
+          y="-50%"
+          width="200%"
+          height="200%"
         >
-          <feGaussianBlur stdDeviation="5" />
+          <feGaussianBlur stdDeviation="12" />
         </filter>
       </defs>
 
@@ -619,20 +892,36 @@ function Phone({
 }) {
   return (
     <g>
-      {/* Outer screen halo — behind the bezel so the blur spills
-          outside the phone's silhouette only. */}
+      {/* Layered outer glow — two soft passes (far-ambient +
+          bezel-shaped halo) per handset, both in warm tungsten
+          amber so each phone reads as a panel lit in a dim room.
+          The per-phone rotation transform carries the glow along
+          with the device, so a tilted phone glows in the direction
+          it's leaning. */}
       {active && (
-        <rect
-          className="eikon-screen-glow"
-          x="-8"
-          y="-8"
-          width="136"
-          height="236"
-          rx="24"
-          fill={BRAND.active}
-          opacity="0.14"
-          filter="url(#mock-mob-halo-blur)"
-        />
+        <>
+          <rect
+            className="eikon-screen-glow"
+            x="-40"
+            y="-40"
+            width="200"
+            height="300"
+            fill="url(#mock-mob-far-glow)"
+            pointerEvents="none"
+          />
+          <rect
+            className="eikon-screen-glow"
+            x="-8"
+            y="-8"
+            width="136"
+            height="236"
+            rx="24"
+            fill={WARM_HALO.mid}
+            opacity="0.08"
+            filter="url(#mock-mob-halo-blur)"
+            pointerEvents="none"
+          />
+        </>
       )}
 
       {/* Bezel */}
