@@ -84,7 +84,7 @@ import {
   CollapsibleSidebar,
   SlidersIcon,
   TerminalIcon,
-} from '../components/CollapsibleSidebar';
+} from '../components/collapsible-sidebar';
 import { useI18n } from '../theme/i18n';
 import { PromptOutput } from './PromptOutput';
 

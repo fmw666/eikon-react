@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import { useI18n } from '../../theme/i18n';
 import type { SidebarController } from '../../hooks/useSidebarMode';
 import type { SidebarSectionSpec } from './types';

@@ -19,7 +19,7 @@ import { type MouseEvent as ReactMouseEvent } from 'react';
 
 import { useI18n } from '../../theme/i18n';
 
-import { MEADOW_ANCHOR_ID } from './Footer';
+import { MEADOW_ANCHOR_ID } from './constants';
 
 export function HuntCard() {
   const { t } = useI18n();

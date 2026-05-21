@@ -71,16 +71,10 @@ import { navigate } from '../../nav/route';
 import { isGithubConfigured, SITE } from '../../site-config';
 import { useI18n } from '../../theme/i18n';
 
+import { HERO_TOP_ID, MEADOW_ANCHOR_ID } from './constants';
 import { HuntCard } from './HuntCard';
 import { ArrowRight, ArrowUp, GithubIcon, MailIcon } from './icons';
 import { Meadow } from './Meadow';
-
-const HERO_TOP_ID = 'top';
-
-// Anchor on the wordmark wrapper. The HuntCard scrolls here so a
-// visitor who clicks the prompt is brought face-to-face with the
-// meadow they're being invited to explore.
-export const MEADOW_ANCHOR_ID = 'eikon-footer-meadow-anchor';
 
 export function Footer() {
   const { t } = useI18n();
