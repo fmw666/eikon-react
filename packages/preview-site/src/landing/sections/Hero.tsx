@@ -57,60 +57,25 @@ export function Hero({
       id={HERO_ANCHOR_ID}
       className="relative isolate overflow-hidden"
     >
-      {/* Top-left grid backdrop — the only decoration left in the
-          hero. A small, tightly-masked patch of 40px grid lines
-          tucked behind the badge / first line of the title, fading
-          to nothing well before it reaches the rest of the text.
-          Acts as a "kerning mark" — present enough to give the eye
-          something to anchor on, gone before it competes with the
-          slogan.
-
-          `eikon-grid-drift` adds a slow background-position drift
-          along the diagonal — the grid never reads as moving on a
-          quick glance, but on any pause >2s the visitor's eye
-          catches the lines crawling. Adds "alive" without painting
-          the hero in extra colour or motion. */}
-      <div
-        aria-hidden="true"
-        className="eikon-grid-drift pointer-events-none absolute inset-0 -z-10 opacity-[0.55] dark:opacity-[0.35]"
-        style={
-          {
-            backgroundImage:
-              'linear-gradient(to right, var(--border-1) 1px, transparent 1px), linear-gradient(to bottom, var(--border-1) 1px, transparent 1px)',
-            backgroundSize: '40px 40px',
-            maskImage:
-              'radial-gradient(ellipse 18% 26% at 8% 18%, black 15%, transparent 60%)',
-            WebkitMaskImage:
-              'radial-gradient(ellipse 18% 26% at 8% 18%, black 15%, transparent 60%)',
-            '--eikon-grid-step': '40px',
-          } as CSSProperties
-        }
-      />
-
-      {/* Content — single left-aligned text column with a free-floating
-          terminal teaser anchored to the bottom-right corner on lg+.
-          We deliberately do NOT use a flex row here: a flex sibling
-          on the right would compete for horizontal space and shrink
-          the text column, capping the title below its `max-w-4xl`.
-          Instead, the terminal teaser is positioned *absolutely*
-          (out of flow) so the title can claim its natural width and
-          spill all the way across the content area without ever
-          being squeezed by the teaser. The teaser's `lg:bottom-20`
-          + `lg:right-6` align it exactly with the bottom-right inner
-          corner of the wrapper's padding box. */}
-      {/*
-        VERTICAL RHYTHM
-        - `pt`: there's a ~80px tall floating Nav pill above this
-          section, and Hero is the *first* block the visitor sees.
-          `pt-24` (96px) on mobile gives the badge enough breathing
-          room from the pill so the page reads as "Nav | gap |
-          Hero" rather than "Nav-Hero" smashed together. Scales up
-          on `sm` / `lg` along with the title's clamp.
-        - `pb`: matched against PlatformPicker's `pt` below, so the
-          seam reads as a single deliberate gap (~144-176px combined
-          on mobile/sm, growing to ~256px on lg).
-      */}
       <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 sm:px-6 sm:pb-32 sm:pt-28 lg:pb-40 lg:pt-32">
+        {/* Grid backdrop — anchored to the content container so its
+            mask coordinates align with the text's left edge. */}
+        <div
+          aria-hidden="true"
+          className="eikon-grid-drift pointer-events-none absolute inset-0 -z-10 opacity-[0.55] dark:opacity-[0.35]"
+          style={
+            {
+              backgroundImage:
+                'linear-gradient(to right, var(--border-1) 1px, transparent 1px), linear-gradient(to bottom, var(--border-1) 1px, transparent 1px)',
+              backgroundSize: '40px 40px',
+              maskImage:
+                'radial-gradient(ellipse 40% 55% at 0% 0%, black 10%, transparent 60%)',
+              WebkitMaskImage:
+                'radial-gradient(ellipse 40% 55% at 0% 0%, black 10%, transparent 60%)',
+              '--eikon-grid-step': '40px',
+            } as CSSProperties
+          }
+        />
         {/* Text column */}
         <div className="flex flex-col items-start text-left">
           {/* Badge */}
