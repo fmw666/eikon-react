@@ -48,10 +48,10 @@ export function HuntCard() {
       href={`#${MEADOW_ANCHOR_ID}`}
       onClick={onClick}
       className="
-        group/hunt relative isolate inline-flex w-fit items-center gap-2.5
+        group/hunt relative isolate inline-flex w-fit self-start items-center gap-2
         rounded-full border border-[var(--border-1)]
         bg-gradient-to-br from-[var(--surface-2)]/70 to-[var(--surface-1)]
-        py-1.5 pl-1.5 pr-4
+        py-1 pl-1 pr-3.5
         no-underline
         shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_1px_3px_rgb(0_0_0/0.25)]
         transition-all duration-300 ease-out
@@ -73,14 +73,14 @@ export function HuntCard() {
       {/* Flower icon well */}
       <span
         aria-hidden="true"
-        className="eikon-hunt-icon-well inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--surface-0)] ring-1 ring-[var(--border-1)] shadow-[inset_0_1px_0_rgb(255_255_255/0.05),inset_0_-1px_0_rgb(0_0_0/0.3)]"
+        className="eikon-hunt-icon-well inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--surface-0)] ring-1 ring-[var(--border-1)] shadow-[inset_0_1px_0_rgb(255_255_255/0.05),inset_0_-1px_0_rgb(0_0_0/0.3)]"
       >
         <span className="eikon-hunt-icon inline-block">
           <FlowerIcon />
         </span>
       </span>
 
-      <span className="text-[12px] font-semibold tracking-tight text-[var(--fg-1)]">
+      <span className="text-[11px] font-semibold tracking-tight text-[var(--fg-1)]">
         {t('footer.huntTitle')}
       </span>
     </a>
@@ -91,7 +91,7 @@ function FlowerIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
-      className="h-4 w-4"
+      className="h-3.5 w-3.5"
       aria-hidden="true"
     >
       <g transform="translate(12 12)">

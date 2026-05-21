@@ -14,7 +14,7 @@
 // reveals itself. Reward for curiosity.
 // =============================================================================
 
-import { type CSSProperties, type Ref } from 'react';
+import { type CSSProperties, type Ref, useCallback, useState } from 'react';
 
 /**
  * Deterministic "random" grass blade descriptors.
@@ -245,12 +245,35 @@ function GrassBlades({
   );
 }
 
-export function Meadow({ ref }: { ref: Ref<HTMLDivElement> }) {
+export function Meadow({
+  ref,
+  onLitChange,
+}: {
+  ref: Ref<HTMLDivElement>;
+  onLitChange?: (lit: boolean) => void;
+}) {
+  const [phase, setPhase] = useState<'idle' | 'lit' | 'dimming'>('idle');
+
+  const handleFlowerClick = useCallback(() => {
+    setPhase('lit');
+    onLitChange?.(true);
+    setTimeout(() => setPhase('dimming'), 4000);
+    setTimeout(() => {
+      setPhase('idle');
+      onLitChange?.(false);
+    }, 5600);
+  }, [onLitChange]);
+
+  const meadowClass =
+    'eikon-footer-meadow' +
+    (phase === 'lit' ? ' eikon-meadow-lit' : '') +
+    (phase === 'dimming' ? ' eikon-meadow-lit eikon-meadow-dimming' : '');
+
   return (
     <div
       ref={ref}
       aria-hidden="true"
-      className="eikon-footer-meadow"
+      className={meadowClass}
       style={
         {
           '--eikon-meadow-mx': '-9999px',
@@ -281,9 +304,69 @@ export function Meadow({ ref }: { ref: Ref<HTMLDivElement> }) {
           the same coordinate origin as the grass layers above. Only
           paints one tiny flower at the right end of the meadow. */}
       <div className="eikon-footer-meadow__flower">
-        <Flower />
+        <InteractiveFlower onBurst={handleFlowerClick} />
       </div>
     </div>
+  );
+}
+
+const PETAL_COLORS = [
+  'hsl(338 62% 68%)',
+  'hsl(338 55% 75%)',
+  'hsl(48 82% 62%)',
+  'hsl(330 60% 60%)',
+  'hsl(108 38% 45%)',
+  'hsl(28 70% 65%)',
+];
+
+function InteractiveFlower({ onBurst }: { onBurst: () => void }) {
+  const [blooming, setBlooming] = useState(false);
+  const [particles, setParticles] = useState<
+    Array<{ id: number; angle: number; dist: number; rot: number; color: string }>
+  >([]);
+
+  const handleClick = useCallback(() => {
+    setBlooming(true);
+    onBurst();
+    const newParticles = Array.from({ length: 14 }, (_, i) => {
+      const angle = (i / 14) * 360 + (Math.random() - 0.5) * 25;
+      const dist = 18 + Math.random() * 14;
+      const rot = (Math.random() - 0.5) * 180;
+      const color = PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)];
+      return { id: Date.now() + i, angle, dist, rot, color };
+    });
+    setParticles(newParticles);
+
+    setTimeout(() => setBlooming(false), 600);
+    setTimeout(() => setParticles([]), 1200);
+  }, []);
+
+  return (
+    <button
+      type="button"
+      className={`eikon-footer-flower-btn${blooming ? ' eikon-flower-blooming' : ''}`}
+      onClick={handleClick}
+      aria-label="Hidden flower easter egg"
+    >
+      <Flower />
+      {particles.map((p) => {
+        const rad = (p.angle * Math.PI) / 180;
+        const px = Math.cos(rad) * p.dist;
+        const py = Math.sin(rad) * p.dist * -1;
+        return (
+          <span
+            key={p.id}
+            className="eikon-petal-particle"
+            style={{
+              '--px': `${px}px`,
+              '--py': `${py}px`,
+              '--pr': `${p.rot}deg`,
+              backgroundColor: p.color,
+            } as CSSProperties}
+          />
+        );
+      })}
+    </button>
   );
 }
 
@@ -299,6 +382,7 @@ function Flower() {
       aria-hidden="true"
       className="eikon-footer-flower"
       viewBox="0 0 24 48"
+      style={{ position: 'relative', width: '100%', height: 'auto' }}
     >
       <path
         d="M12 48 Q10.5 32 12 16"

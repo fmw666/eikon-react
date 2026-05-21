@@ -60,8 +60,10 @@
  */
 
 import {
+  useCallback,
   useEffect,
   useRef,
+  useState,
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
@@ -79,6 +81,8 @@ import { Meadow } from './Meadow';
 export function Footer() {
   const { t } = useI18n();
   const containerRef = useRef<HTMLElement | null>(null);
+  const [footerLit, setFooterLit] = useState(false);
+  const handleLitChange = useCallback((lit: boolean) => setFooterLit(lit), []);
   // Brand wordmark derived from site config: split on the hyphen so
   // forks that rename the project (e.g. "Acme · Stack") still get
   // a clean two-token mark with a centred dot separator.
@@ -176,7 +180,7 @@ export function Footer() {
   return (
     <footer
       ref={containerRef}
-      className="group/footer relative isolate mt-16 overflow-hidden bg-[var(--surface-1)]"
+      className={`group/footer relative isolate mt-16 overflow-hidden bg-[var(--surface-1)]${footerLit ? ' eikon-footer-lit' : ''}`}
       style={
         {
           '--eikon-footer-mx': '50%',
@@ -197,7 +201,7 @@ export function Footer() {
       {/* Background decoration layer — grid + cursor spotlight. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10"
+        className="eikon-footer-backdrop pointer-events-none absolute inset-0 -z-10"
       >
         {/* Faint line-grid, masked to the lower-centre so it backs
             the wordmark rather than the readable content. */}
@@ -312,7 +316,7 @@ export function Footer() {
                   </span>
                 ))}
               </div>
-              <Meadow ref={meadowRef} />
+              <Meadow ref={meadowRef} onLitChange={handleLitChange} />
             </div>
           </div>
         )}
