@@ -165,7 +165,7 @@ const DICT = {
     'qa.title': '常见问题',
     'qa.subtitle': '上手前你可能会问的事',
     'qa.contact.text':
-      '没找到你想要的答案？直接给作者发邮件，平均 24 小时内回复。',
+      '没找到你想要的答案？直接给作者发邮件，平均 24 小时内回复。……或者……为什么不直接问问你的 AI？',
     'qa.contact.cta': '联系作者',
     'qa.1.q': '和 create-next-app / create-t3-app 有什么区别？',
     'qa.1.a':
@@ -185,6 +185,9 @@ const DICT = {
     'qa.6.q': '如何升级到新版本？',
     'qa.6.a':
       '推荐使用 git diff 对比 changelog 里的版本变动，把你需要的改动 cherry-pick 进现有项目。模板本身不强求版本一致 —— 它是一份起点，不是依赖。',
+    'qa.7.q': '为什么组件示例里没有代码用法？',
+    'qa.7.a':
+      '刻意没放。组件的 API、props、组合方式都写在 .agent/ 里 —— 你的 Coding Agent 加载之后自己就看得懂、自己会用。你只需要描述「我想要一个什么样的页面」，剩下「调哪个组件、怎么 import、传什么参数」交给它。把脑容量留给真正属于你的需求。',
 
     'footer.author': 'fmw · 独立开发者',
     'footer.tagline': '偏 AI · 前端 · 跨端工程化',
@@ -362,7 +365,7 @@ const DICT = {
     'qa.title': 'FAQ',
     'qa.subtitle': "Things you might ask before getting started",
     'qa.contact.text':
-      "Can't find the answer you're looking for? Email the author directly — usually a reply within 24 hours.",
+      "Can't find the answer you're looking for? Email the author directly — usually a reply within 24 hours. … or … why not just ask your AI?",
     'qa.contact.cta': 'Contact author',
     'qa.1.q':
       "How is this different from create-next-app / create-t3-app?",
@@ -383,6 +386,9 @@ const DICT = {
     'qa.6.q': 'How do I upgrade to a new version?',
     'qa.6.a':
       "Diff against the changelog and cherry-pick the deltas you care about. The template is a starting point, not a dependency — version drift is expected.",
+    'qa.7.q': "Why don't the component demos show usage code?",
+    'qa.7.a':
+      "Intentionally omitted. Component APIs, props, and composition patterns all live in .agent/ — once your coding agent loads them, it knows what to call, what to import, and what to pass in. You describe the page you want; spend your attention on the requirement, not on copying imports from a demo.",
 
     'footer.author': 'fmw · indie developer',
     'footer.tagline': 'AI · frontend · cross-platform tooling',

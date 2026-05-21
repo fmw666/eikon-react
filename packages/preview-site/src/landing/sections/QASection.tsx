@@ -60,6 +60,7 @@ const QAS: ReadonlyArray<QA> = [
   { qKey: 'qa.2.q', aKey: 'qa.2.a' },
   { qKey: 'qa.3.q', aKey: 'qa.3.a' },
   { qKey: 'qa.4.q', aKey: 'qa.4.a' },
+  { qKey: 'qa.7.q', aKey: 'qa.7.a' },
   { qKey: 'qa.5.q', aKey: 'qa.5.a' },
   { qKey: 'qa.6.q', aKey: 'qa.6.a' },
 ];
