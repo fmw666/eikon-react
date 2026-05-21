@@ -992,6 +992,250 @@ body {
   }
 }
 
+/* ===========================================================================
+ * Collapsible playground sidebar — silky-smooth motion system.
+ *
+ * Design intent
+ * -------------
+ * Every animation here aims for "silky" rather than "snappy" or "springy":
+ *
+ *   - Long enough durations (320–520ms) for the eye to *perceive motion*
+ *     rather than register a snap. Sub-200ms transitions feel mechanical;
+ *     400ms-ish with a smooth curve reads as the panel "gliding".
+ *   - Smooth easing — primarily `--ease-silk` (Material standard
+ *     `cubic-bezier(0.16, 1, 0.3, 1)`): very fast acceleration, very
+ *     gentle deceleration into the rest position. No spring overshoot
+ *     (which reads as "bouncy", the opposite of silky). For coordinated
+ *     property changes (width + opacity + blur), we use `--ease-glide`
+ *     (Apple's `cubic-bezier(0.32, 0.72, 0, 1)`) which has even more
+ *     decel at the tail — perfect for sliding panels.
+ *   - Coordinated multi-property motion — transform, opacity, blur,
+ *     box-shadow all interpolate together over the same window with
+ *     the same curve, so the eye reads "one continuous gesture".
+ *   - Exit animations everywhere — abrupt unmounts are the #1 enemy of
+ *     silkiness. The peek panel slides + fades out before unmounting
+ *     (state machine in `SidebarPanel` drives `data-state`).
+ *   - Backdrop-filter ramps smoothly — blur 0 → 24px during entrance,
+ *     so the "fog forming behind the panel" reads as a soft reveal
+ *     rather than an instant overlay.
+ *
+ * Components
+ * ----------
+ *   eikon-rail-glow    — slow vertical brightness sweep on the rail's
+ *                        right edge. Reads as "there is something here";
+ *                        16s, much slower than the workbench ring (12s),
+ *                        so it never competes for visual attention.
+ *   eikon-rail-magnet  — background + box-shadow swell on hover. Uses
+ *                        --ease-silk over 360ms so the rail "warms up"
+ *                        rather than clicks on.
+ *   eikon-peek-in/out  — paired entrance / exit keyframes for the
+ *                        floating peek panel. 380ms in, 260ms out
+ *                        (exits should always be a bit faster than
+ *                        entrances — the eye accepts faster departure
+ *                        but resents fast arrival).
+ *
+ * Easing tokens
+ * -------------
+ * Declared once on :root so this file (and any future consumer) can
+ * stay in sync. Override per-element only when there's a real reason.
+ * =========================================================================== */
+
+:root {
+  /* Material "emphasised" — fast accel, very gentle decel. The
+     workhorse curve for hover states, panel slides, opacity fades.
+     Equivalent to Material Design 3's "Emphasized Decelerate". */
+  --ease-silk: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Apple's iOS spring (sans-overshoot). Even more decel at the
+     tail; ideal for elements that travel a longer distance (width
+     transitions, large translates). */
+  --ease-glide: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Slow-start, fast-end. Use sparingly for elements that should
+     "settle quickly after a delayed launch" — not common here. */
+  --ease-snap: cubic-bezier(0.7, 0, 0.2, 1);
+}
+
+@keyframes eikon-rail-glow {
+  0%,
+  100% {
+    background-position: 0 -40%;
+  }
+  50% {
+    background-position: 0 140%;
+  }
+}
+
+.eikon-rail-glow {
+  position: relative;
+}
+
+.eikon-rail-glow::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -1px;
+  bottom: 0;
+  width: 1px;
+  pointer-events: none;
+  background-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--color-brand-500, #64748b) 50%,
+    transparent 100%
+  );
+  background-size: 100% 60%;
+  background-repeat: no-repeat;
+  opacity: 0.22;
+  /* The opacity transition is what makes hovering the rail feel
+     silky — without it the glow "pops" to 0.6 on hover. 520ms is
+     intentionally long for an opacity tween (long enough to read
+     as "the rail brightens", not "the rail toggled on"). */
+  transition: opacity 520ms var(--ease-silk);
+  animation: eikon-rail-glow 18s ease-in-out infinite;
+}
+
+.eikon-rail-glow[data-active]::after,
+.eikon-rail-glow:hover::after {
+  opacity: 0.7;
+}
+
+/* Background + box-shadow swell. Two intentional choices:
+   1. 360ms is in the silky range (eye perceives gradient, not snap).
+   2. The shadow blur radius is large (28px), so the rail looks
+      "lit from behind" rather than "outlined". Tighter shadows
+      always feel snappier; softer shadows feel silkier. */
+.eikon-rail-magnet {
+  box-shadow: inset 0 0 0 0 transparent;
+  transition:
+    box-shadow 360ms var(--ease-silk),
+    background-color 360ms var(--ease-silk);
+}
+
+.eikon-rail-magnet:hover,
+.eikon-rail-magnet[data-active] {
+  background-color: color-mix(in srgb, var(--surface-1) 78%, transparent);
+  box-shadow:
+    inset 0 0 0 1px var(--border-2),
+    0 0 28px -6px var(--accent-glow);
+}
+
+/* ── Peek panel: entrance / exit ──────────────────────────────────
+   Both keyframes are pure-glide (no overshoot). The entrance
+   translates 14px from the left and rises in opacity + blur; the
+   exit reverses the motion in 70% of the time. Backdrop-blur is
+   animated explicitly because backdrop-filter doesn't tween from
+   `none` to `blur(24px)` — we declare it from 0px on the start
+   keyframe so the GPU has something to interpolate. */
+@keyframes eikon-peek-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(-14px, 0, 0);
+    backdrop-filter: blur(0px) saturate(100%);
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+  }
+}
+
+@keyframes eikon-peek-out {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-10px, 0, 0);
+    backdrop-filter: blur(0px) saturate(100%);
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
+  }
+}
+
+.eikon-peek-in {
+  animation: eikon-peek-in 380ms var(--ease-glide) both;
+  transform-origin: left center;
+  will-change: transform, opacity, backdrop-filter;
+}
+
+.eikon-peek-out {
+  animation: eikon-peek-out 260ms var(--ease-silk) both;
+  transform-origin: left center;
+  will-change: transform, opacity, backdrop-filter;
+  pointer-events: none;
+}
+
+/* Icon micro-interactions — the rail's quick-jump buttons should
+   feel like they "lean toward the cursor". A subtle scale + bg fade
+   over 280ms with the silk curve does this without ever crossing
+   the line into "bouncy". The transition is on the *icon wrapper*,
+   not the button, so the bg fade and the icon scale interpolate
+   on the same timeline. */
+.eikon-rail-icon {
+  transition:
+    background-color 280ms var(--ease-silk),
+    color 280ms var(--ease-silk),
+    transform 280ms var(--ease-silk);
+}
+
+.eikon-rail-icon:hover {
+  background-color: color-mix(in srgb, var(--surface-2) 85%, transparent);
+  color: var(--fg-1);
+}
+
+.eikon-rail-icon:hover .eikon-rail-icon-glyph {
+  transform: scale(1.12);
+}
+
+.eikon-rail-icon-glyph {
+  transition: transform 320ms var(--ease-silk);
+  will-change: transform;
+}
+
+/* Pin button rotates with extra easing for the "click feels good"
+   sensation. The 480ms rotation is intentionally longer than the
+   bg fade — the icon keeps turning slightly after the colour has
+   settled, which the eye reads as "the action committed". */
+.eikon-pin-icon {
+  transition: transform 480ms var(--ease-silk);
+  will-change: transform;
+}
+
+.eikon-pin-icon[data-pinned='true'] {
+  transform: rotate(-45deg);
+}
+
+/* Wrapper width transition. 420ms is in the silky range; the
+   `--ease-glide` curve has the strongest deceleration tail, so the
+   sidebar "comes to rest" rather than "stops" at the new width.
+   This is the curve most responsible for the silky pinned↔collapsed
+   feel — be very conservative changing it. */
+.eikon-sidebar-width {
+  transition: width 420ms var(--ease-glide);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-rail-glow::after {
+    animation: none;
+    opacity: 0.35;
+    transition: none;
+  }
+  .eikon-rail-magnet,
+  .eikon-rail-icon,
+  .eikon-rail-icon-glyph,
+  .eikon-pin-icon,
+  .eikon-sidebar-width {
+    transition: none;
+  }
+  .eikon-peek-in,
+  .eikon-peek-out {
+    animation: none;
+  }
+}
+
 /* ---------------------------------------------------------------------------
  * Custom scrollbar styling (dark surfaces). Kept minimal — the playground
  * iframe still uses the host browser's defaults, this only applies to the

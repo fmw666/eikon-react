@@ -77,11 +77,14 @@
  *                                   "find it" pill.
  */
 
-import type { ReactNode } from 'react';
-
 import { ParamsPanel } from '@/shell/ParamsPanel';
 import { PlaygroundShell } from '@/shell/App';
 
+import {
+  CollapsibleSidebar,
+  SlidersIcon,
+  TerminalIcon,
+} from '../components/CollapsibleSidebar';
 import { useI18n } from '../theme/i18n';
 import { PromptOutput } from './PromptOutput';
 
@@ -308,49 +311,51 @@ export function PlaygroundSection() {
         style={{ transformOrigin: 'center' }}
       >
         <div className="flex h-full flex-col lg:flex-row">
-          {/* ─── Left: sidebar with params + copyable prompt ─────
-              Width clamped to a useful sidebar size on lg+
-              (320–400px, ~28vw). On <lg the layout flips to
-              vertical stack and the sidebar takes full width
-              above a fixed-height frame.
+          {/* ─── Left: collapsible sidebar (rail / peek / pinned)
+              Same content as before (params + copyable prompt),
+              now wrapped in `CollapsibleSidebar`:
 
-              `overflow-y-auto` makes the sidebar scroll
-              internally on lg+ (when its content exceeds the
-              clamped card height) instead of pushing the page
-              into a full-window scroll — the Files/Code/Preview
-              on the right then keeps its own scroll behaviour
-              undisturbed. */}
-          <aside
-            aria-label="Workbench controls"
-            // Sidebar width scales with the now-wider workbench:
-            // `clamp(340px, 24vw, 440px)` keeps it readable but
-            // not greedy. At 1280px viewport ⇒ 340px (floor); at
-            // 1440px ⇒ 346px; at 1760px ⇒ 422px; at 1920px ⇒
-            // capped at 440px. The cap matters — without it the
-            // prompt sidebar on a 4K monitor would stretch past
-            // 500px and start to feel like a landing column,
-            // pulling visual weight away from the live preview.
-            className="flex min-h-0 flex-col gap-5 border-b border-[var(--border-1)] bg-[var(--surface-0)]/60 p-4 sm:p-5 lg:w-[clamp(340px,24vw,440px)] lg:shrink-0 lg:overflow-y-auto lg:border-b-0 lg:border-r"
-          >
-            <SidebarBlock title={t('playgroundPage.paramsTitle')}>
-              <ParamsPanel />
-            </SidebarBlock>
+                • Default pinned — first-time visitors see the
+                  full params + prompt without having to discover
+                  the rail. This matches the home-page intent of
+                  showing the full "configure → preview → copy"
+                  loop in one viewport.
 
-            {/* The prompt block carries `PROMPT_OUTPUT_ANCHOR_ID`
-                so the Hero's "find it" pill still has a target —
-                the prompt simply lives inside the workbench now
-                rather than in its own downstream section.
-                `fill` makes this block consume any remaining
-                vertical room in the sidebar so the prompt's
-                <pre> isn't squashed to its content minimum. */}
-            <SidebarBlock
-              title={t('playgroundPage.promptTitle')}
-              id={PROMPT_OUTPUT_ANCHOR_ID}
-              fill
-            >
-              <PromptOutput compact />
-            </SidebarBlock>
-          </aside>
+                • After the user clicks the pin (or presses `[`)
+                  the choice is persisted to localStorage under
+                  `home-workbench`, independent of the dedicated
+                  `/playground` page's pin state.
+
+                • In peek state, the sidebar floats over the
+                  PlaygroundShell within the bounds of the
+                  workbench card (the card's `overflow-hidden`
+                  intentionally contains the peek panel — it
+                  never breaks out of the conic-ringed frame).
+
+              The `<lg` layout (mobile/tablet) bypasses the rail
+              and renders the static stacked layout, identical to
+              the previous behaviour. */}
+          <CollapsibleSidebar
+            storageKey="home-workbench"
+            ariaLabel="Workbench controls"
+            defaultPinned
+            sections={[
+              {
+                id: 'workbench-params',
+                title: t('playgroundPage.paramsTitle'),
+                icon: <SlidersIcon className="h-5 w-5" />,
+                children: <ParamsPanel />,
+              },
+              {
+                id: 'workbench-prompt',
+                anchorId: PROMPT_OUTPUT_ANCHOR_ID,
+                title: t('playgroundPage.promptTitle'),
+                icon: <TerminalIcon className="h-5 w-5" />,
+                children: <PromptOutput compact />,
+                fill: true,
+              },
+            ]}
+          />
 
           {/* ─── Right: live playground ─────────────────────────
               The three-pane shell (Toolbar + Files + Code +
@@ -367,43 +372,6 @@ export function PlaygroundSection() {
             <PlaygroundShell />
           </main>
         </div>
-      </div>
-    </section>
-  );
-}
-
-/**
- * One labelled block inside the workbench sidebar. Renders a small
- * uppercase eyebrow above its content; `fill` makes the block
- * greedy on the cross-axis so the prompt card doesn't collapse
- * to its <pre> minimum on tall sidebars.
- *
- * The optional `id` is forwarded to the wrapping <section> so
- * external scroll targets (notably `PROMPT_OUTPUT_ANCHOR_ID` for
- * the Hero "find it" pill) can land here directly.
- */
-function SidebarBlock({
-  title,
-  id,
-  fill,
-  children,
-}: {
-  title: string;
-  id?: string;
-  fill?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <section
-      id={id}
-      className={'flex min-h-0 flex-col gap-2 ' + (fill ? 'flex-1' : '')}
-      aria-label={title}
-    >
-      <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--fg-3)]">
-        {title}
-      </h3>
-      <div className={'min-h-0 ' + (fill ? 'flex flex-1 flex-col' : '')}>
-        {children}
       </div>
     </section>
   );

@@ -84,6 +84,16 @@ const DICT = {
     'playgroundPage.paramsTitle': '参数',
     'playgroundPage.promptTitle': '复制 Prompt / CLI',
 
+    'sidebar.controlsLabel': '控制台',
+    'sidebar.expand': '展开参数面板',
+    'sidebar.collapse': '收起面板',
+    'sidebar.openAndPin': '展开并固定',
+    'sidebar.pin': '固定面板',
+    'sidebar.unpin': '取消固定',
+    'sidebar.close': '关闭',
+    'sidebar.jumpTo': '跳转到',
+    'sidebar.sectionsNav': '面板分区导航',
+
     'prompt.title': '复制以下内容，立即开始',
     'prompt.subtitle': '把它喂给 Cursor / Claude / Codex，剩下交给 AI',
     'prompt.tab.prompt': 'Prompt',
@@ -262,6 +272,16 @@ const DICT = {
     'playgroundPage.targetTitle': 'Target',
     'playgroundPage.paramsTitle': 'Parameters',
     'playgroundPage.promptTitle': 'Copy Prompt / CLI',
+
+    'sidebar.controlsLabel': 'Controls',
+    'sidebar.expand': 'Expand parameters panel',
+    'sidebar.collapse': 'Collapse panel',
+    'sidebar.openAndPin': 'Open and pin',
+    'sidebar.pin': 'Pin panel',
+    'sidebar.unpin': 'Unpin panel',
+    'sidebar.close': 'Close',
+    'sidebar.jumpTo': 'Jump to',
+    'sidebar.sectionsNav': 'Panel sections',
 
     'prompt.title': 'Copy this, start now',
     'prompt.subtitle':

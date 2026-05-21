@@ -6,24 +6,23 @@
  *
  *   ┌──────────────────────────────────────────────────────────────┐
  *   │                          Nav                                  │
- *   ├──────────────────┬───────────────────────────────────────────┤
- *   │                  │                                            │
- *   │  Target          │                                            │
- *   │  · Web           │                                            │
- *   │  · Desktop       │                                            │
- *   │  · Mobile        │                                            │
- *   │                  │       PlaygroundShell                      │
- *   │  Parameters      │       (Files | Code | Preview)             │
- *   │  · Design        │                                            │
- *   │  · Layout        │                                            │
- *   │  · UI / Toast    │                                            │
- *   │  · pm            │                                            │
- *   │                  │                                            │
- *   │  Prompt / CLI    │                                            │
- *   │  ┌────────────┐  │                                            │
- *   │  │ npx … --…  │  │                                            │
- *   │  └────────────┘  │                                            │
- *   └──────────────────┴───────────────────────────────────────────┘
+ *   ├──┬───────────────────────────────────────────────────────────┤
+ *   │ ▎│                                                            │
+ *   │ ⌖│                                                            │
+ *   │ ⚙│                                                            │
+ *   │ ❯│       PlaygroundShell                                      │
+ *   │ ◇│       (Files | Code | Preview)                             │
+ *   │ ▎│                                                            │
+ *   │  │                                                            │
+ *   │ 📌│                                                            │
+ *   └──┴───────────────────────────────────────────────────────────┘
+ *           ↑ collapsed rail (48px) on first visit if user previously
+ *             collapsed; pinned-open by default otherwise.
+ *             Hover the rail → panel slides out as a transient peek,
+ *             overlaying the playground without resizing it.
+ *             Click the pin → the panel locks into layout, the
+ *             playground shrinks. `[` keyboard shortcut also toggles
+ *             pin/collapse; `Esc` dismisses a transient peek.
  *
  * The sidebar carries every control + the copyable Prompt/CLI block.
  * The right pane is the playground itself, sized to fill the viewport
@@ -34,13 +33,24 @@
  * platform in the sidebar here is reflected on the home section, and
  * vice versa. Persistence comes from the `UrlSync` mirror (URL query
  * + localStorage), mounted inside `PlaygroundShell`.
+ *
+ * Sidebar fold state is persisted independently of the home-page
+ * workbench (`storageKey: 'playground-page'`), so a user who prefers
+ * the dedicated page expanded but the home section collapsed gets
+ * both.
  */
 
 import { PlaygroundShell } from '@/shell/App';
+import { ParamsPanel } from '@/shell/ParamsPanel';
 
 import { NAV_REGION_HEIGHT_REM } from './nav/Nav';
+import {
+  CollapsibleSidebar,
+  SlidersIcon,
+  TargetIcon,
+  TerminalIcon,
+} from './components/CollapsibleSidebar';
 import { PlatformPicker } from './sections/PlatformPicker';
-import { ParamsPanel } from '@/shell/ParamsPanel';
 import { PromptOutput } from './sections/PromptOutput';
 import { useI18n } from './theme/i18n';
 
@@ -52,78 +62,44 @@ export default function PlaygroundPage() {
   // top/bottom padding ever changes.
   const fillHeight = `calc(100vh - ${NAV_REGION_HEIGHT_REM}rem)`;
   return (
+    // `relative` anchors the peek panel's `position: absolute`
+    // overlay; `gap-4` on lg+ keeps a small breathing strip between
+    // the sidebar/rail and the playground frame, mirroring the
+    // home-page workbench's internal seam.
     <div
-      className="flex min-h-[640px] gap-4 px-4 pb-4 sm:px-6 sm:pb-6"
+      className="relative flex min-h-[640px] gap-4 px-4 pb-4 sm:px-6 sm:pb-6"
       style={{ height: fillHeight }}
     >
-      <Sidebar>
-        <SidebarSection title={t('playgroundPage.targetTitle')}>
-          <PlatformPicker compact />
-        </SidebarSection>
-
-        <SidebarSection title={t('playgroundPage.paramsTitle')}>
-          <ParamsPanel />
-        </SidebarSection>
-
-        <SidebarSection
-          title={t('playgroundPage.promptTitle')}
-          fill
-        >
-          <PromptOutput compact />
-        </SidebarSection>
-      </Sidebar>
+      <CollapsibleSidebar
+        storageKey="playground-page"
+        ariaLabel="Playground controls"
+        defaultPinned
+        sections={[
+          {
+            id: 'playground-target',
+            title: t('playgroundPage.targetTitle'),
+            icon: <TargetIcon className="h-5 w-5" />,
+            children: <PlatformPicker compact />,
+          },
+          {
+            id: 'playground-params',
+            title: t('playgroundPage.paramsTitle'),
+            icon: <SlidersIcon className="h-5 w-5" />,
+            children: <ParamsPanel />,
+          },
+          {
+            id: 'playground-prompt',
+            title: t('playgroundPage.promptTitle'),
+            icon: <TerminalIcon className="h-5 w-5" />,
+            children: <PromptOutput compact />,
+            fill: true,
+          },
+        ]}
+      />
 
       <main className="min-h-0 min-w-0 flex-1">
         <PlaygroundShell />
       </main>
     </div>
-  );
-}
-
-/**
- * Scroll container for the left controls. Width is fixed-ish (clamped
- * between 320 and 400px) so the playground always has the lion's
- * share of horizontal space. `overflow-y-auto` makes long content
- * (params card on a tall variant) scroll internally instead of
- * pushing the page into a full-window scroll.
- */
-function Sidebar({ children }: { children: React.ReactNode }) {
-  return (
-    <aside
-      aria-label="Playground controls"
-      className="hidden w-[clamp(320px,28vw,400px)] shrink-0 flex-col gap-4 overflow-y-auto lg:flex"
-    >
-      {children}
-    </aside>
-  );
-}
-
-/**
- * Lightweight wrapper that pairs a section heading with its contents.
- * `fill` makes the section greedy on the cross-axis so the Prompt
- * card naturally consumes the remaining sidebar height instead of
- * collapsing to its `<pre>` minimum.
- */
-function SidebarSection({
-  title,
-  fill,
-  children,
-}: {
-  title: string;
-  fill?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <section
-      className={'flex min-h-0 flex-col gap-2 ' + (fill ? 'flex-1' : '')}
-      aria-label={title}
-    >
-      <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--fg-3)]">
-        {title}
-      </h2>
-      <div className={'min-h-0 ' + (fill ? 'flex flex-1 flex-col' : '')}>
-        {children}
-      </div>
-    </section>
   );
 }
