@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import type { Platform } from '@/lib/params-schema';
 
@@ -89,39 +96,16 @@ export function StackedStage({
         </p>
       </div>
 
-      {/* Tab row */}
-      <div
-        role="tablist"
-        aria-label={t('platform.title')}
+      {/* Tab row with sliding indicator */}
+      <TabNav
+        options={options}
+        current={current}
+        activeIdx={activeIdx}
+        tabRefs={tabRefs}
         onKeyDown={handleTabsKeyDown}
-        className="mx-auto mb-6 flex w-fit items-center gap-1 rounded-full border border-[var(--border-1)] bg-[var(--surface-1)] p-1 sm:gap-1.5"
-      >
-        {options.map((opt, i) => {
-          const active = opt.value === current;
-          return (
-            <button
-              key={opt.value}
-              ref={(el) => {
-                tabRefs.current[i] = el;
-              }}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              tabIndex={active ? 0 : -1}
-              onClick={() => handleSelect(opt.value)}
-              className={
-                'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-200 sm:px-4 sm:py-2 sm:text-sm ' +
-                (active
-                  ? 'bg-[var(--surface-3)] text-[var(--fg-1)] shadow-[inset_0_1px_0_rgb(255_255_255/0.05),0_1px_3px_rgb(0_0_0/0.15)]'
-                  : 'text-[var(--fg-3)] hover:text-[var(--fg-1)]')
-              }
-            >
-              <opt.Icon className="h-3.5 w-3.5" />
-              <span>{t(opt.compactTitleKey)}</span>
-            </button>
-          );
-        })}
-      </div>
+        onSelect={handleSelect}
+        t={t}
+      />
 
       {/* Stage: three device shells stacked */}
       <div className="relative mx-auto max-w-4xl">
@@ -187,5 +171,94 @@ export function StackedStage({
 
       <span className="sr-only" aria-hidden="true" data-lang={lang} />
     </section>
+  );
+}
+
+function TabNav({
+  options,
+  current,
+  activeIdx,
+  tabRefs,
+  onKeyDown,
+  onSelect,
+  t,
+}: {
+  options: ReadonlyArray<PlatformOption>;
+  current: Platform;
+  activeIdx: number;
+  tabRefs: React.MutableRefObject<Array<HTMLButtonElement | null>>;
+  onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+  onSelect: (p: Platform) => void;
+  t: (key: I18nKey) => string;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+  const [flashKey, setFlashKey] = useState(0);
+  const isInitial = useRef(true);
+
+  useLayoutEffect(() => {
+    const el = tabRefs.current[activeIdx];
+    const container = containerRef.current;
+    if (!el || !container) return;
+    const cRect = container.getBoundingClientRect();
+    const eRect = el.getBoundingClientRect();
+    setIndicator({
+      left: eRect.left - cRect.left,
+      width: eRect.width,
+    });
+  }, [activeIdx, tabRefs]);
+
+  useEffect(() => {
+    if (isInitial.current) {
+      isInitial.current = false;
+      return;
+    }
+    setFlashKey(0);
+    const timer = setTimeout(() => setFlashKey((n) => n + 1), 300);
+    return () => clearTimeout(timer);
+  }, [activeIdx]);
+
+  return (
+    <div
+      ref={containerRef}
+      role="tablist"
+      aria-label={t('platform.title')}
+      onKeyDown={onKeyDown}
+      className="relative mx-auto mb-6 flex w-fit items-center gap-1 rounded-full border border-[var(--border-1)] bg-[var(--surface-1)] p-1 sm:gap-1.5"
+    >
+      <span
+        className="pointer-events-none absolute top-1 bottom-1 rounded-full bg-[var(--surface-3)] shadow-[inset_0_1px_0_rgb(255_255_255/0.05),0_1px_3px_rgb(0_0_0/0.15)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+        style={{ left: indicator.left, width: indicator.width }}
+      >
+        {flashKey > 0 && (
+          <span key={flashKey} className="eikon-tab-flash" aria-hidden="true" />
+        )}
+      </span>
+      {options.map((opt, i) => {
+        const active = opt.value === current;
+        return (
+          <button
+            key={opt.value}
+            ref={(el) => {
+              tabRefs.current[i] = el;
+            }}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            tabIndex={active ? 0 : -1}
+            onClick={() => onSelect(opt.value)}
+            className={
+              'relative z-10 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-200 sm:px-4 sm:py-2 sm:text-sm ' +
+              (active
+                ? 'text-[var(--fg-1)]'
+                : 'text-[var(--fg-3)] hover:text-[var(--fg-1)]')
+            }
+          >
+            <opt.Icon className="h-3.5 w-3.5" />
+            <span>{t(opt.compactTitleKey)}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
