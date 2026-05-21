@@ -1,0 +1,632 @@
+/* ---------------------------------------------------------------------------
+ * Custom scrollbar styling (dark surfaces). Kept minimal — the playground
+ * iframe still uses the host browser’s defaults, this only applies to the
+ * landing chrome / file tree / params panel.
+ * --------------------------------------------------------------------------- */
+
+.dark *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.dark *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background: var(--border-2);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-4);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+}
+
+/* ------------------------------------------------------------------
+ * eikon-footer-shine — slow horizontal sweep along the footer hairline
+ *
+ * The footer’s top edge is a 1px line. By default it carries the
+ * site’s `var(--border-1)` colour; this animation overlays a moving
+ * gradient highlight that crosses left-to-right every ~7s. The
+ * highlight uses the brand mid-tone so it reads as "this line is
+ * alive" without painting it any saturated colour.
+ *
+ * Why a slow loop (7s) instead of an event-driven flash:
+ *   The footer is the *last* thing a visitor sees before leaving.
+ *   A constantly-flashing line would feel desperate; a slow,
+ *   periodic shimmer reads as "the page is still humming after
+ *   you stopped scrolling" — a quiet sign of craft.
+ *
+ * Composite-only animation (transform), no layout / paint.
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-footer-shine {
+  0% {
+    transform: translate3d(-100%, 0, 0);
+  }
+  60%,
+  100% {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+
+.eikon-footer-shine {
+  background: linear-gradient(90deg, transparent 0%, var(--color-brand-400) 50%, transparent 100%);
+  animation: eikon-footer-shine 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-footer-shine {
+    animation: none;
+    background: var(--border-2);
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-footer-wordmark — oversized decorative brand stamp
+ *
+ * Renders the brand name at clamp(3.5rem, 14vw, 11.5rem) as the
+ * footer’s visual anchor. The text is masked with a vertical
+ * gradient to transparent at the bottom so it reads as a
+ * "ghost wordmark" fading off the page edge — present enough
+ * to give the footer typographic weight, faded enough to never
+ * compete with the legible content above it.
+ *
+ * Hovering anywhere in the footer (group/footer:hover) lifts the
+ * opacity from 0.10 to 0.18 — a small reward for visitors who
+ * linger in the footer area.
+ * ------------------------------------------------------------------ */
+
+.eikon-footer-wordmark {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  /* Smaller floor on phones so the wordmark doesn’t crowd the small
+     viewport. Scales up rapidly past tablet widths. */
+  font-size: clamp(2.5rem, 14vw, 11rem);
+  line-height: 0.85;
+  white-space: nowrap;
+  background: linear-gradient(180deg, var(--fg-1) 0%, var(--fg-1) 35%, transparent 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  opacity: 0.1;
+  transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+/* Hover-only "reward" — gated so touch viewports don’t sit at the
+   dimmer opacity forever (touch never fires `:hover`). On touch,
+   we baseline at the brighter 0.18 instead. */
+@media (hover: hover) {
+  .group\/footer:hover .eikon-footer-wordmark {
+    opacity: 0.18;
+  }
+}
+@media (hover: none) {
+  .eikon-footer-wordmark {
+    opacity: 0.16;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-footer-wordmark {
+    transition: none;
+  }
+}
+
+/* Footer "lit" state — triggered by flower click.
+   Wordmark brightens, cursor spotlight hides. */
+.eikon-footer-lit .eikon-footer-wordmark {
+  opacity: 0.45 !important;
+  transition: opacity 1s cubic-bezier(0.22, 1, 0.3, 1);
+}
+
+.eikon-footer-lit .eikon-footer-backdrop {
+  opacity: 0 !important;
+  transition: opacity 800ms ease-out;
+}
+
+/* ------------------------------------------------------------------
+ * eikon-hunt — the footer’s "find the flower" invitation pill
+ *
+ * Two quiet animations carry the prompt’s discover-the-meadow
+ * intent without ever spelling the answer out loud:
+ *
+ *   1. `eikon-hunt-aura` — a slow radial glow behind the pill,
+ *      breathing every ~5.5s. Uses `--accent-glow` so the prompt’s
+ *      colour language matches the spotlight in the meadow it
+ *      points to.
+ *   2. `eikon-hunt-icon` — the small flower icon sways gently like
+ *      grass in wind. Hover pauses the sway and stands the flower
+ *      upright with a small scale-up — a quiet "you’ve caught it"
+ *      acknowledgement of pointer focus.
+ *   3. `eikon-hunt-grating` — a holographic light-grating overlay
+ *      that sweeps diagonal bands across the pill in a loop. The
+ *      easing accelerates in the middle and decelerates at edges,
+ *      giving a "momentum" feel like a card catching light.
+ *
+ * Both are composite-only (transform / opacity), so the pill costs
+ * nothing to repaint at rest. `prefers-reduced-motion` and
+ * `prefers-reduced-data` silence every loop and fall back to a
+ * static design.
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-hunt-aura-pulse {
+  0%,
+  100% {
+    opacity: 0.32;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.eikon-hunt-aura {
+  background: radial-gradient(circle at 24% 28%, var(--accent-glow), transparent 65%);
+  opacity: 0.35;
+  animation: eikon-hunt-aura-pulse 5.5s ease-in-out infinite;
+}
+
+@keyframes eikon-hunt-icon-sway {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2.6deg);
+  }
+}
+
+.eikon-hunt-icon {
+  transform-origin: 50% 80%;
+  animation: eikon-hunt-icon-sway 4.6s ease-in-out infinite;
+}
+
+/* Hover acknowledgement: stop the sway and stand the bloom upright
+   with a tiny scale-up. Reads as "you’ve caught it" — the prompt
+   responding to the cursor finding it. */
+.group\/hunt:hover .eikon-hunt-icon {
+  animation-play-state: paused;
+  transform: rotate(0deg) scale(1.08);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Glass shimmer — a single soft highlight sweeps across like light
+   catching a curved glass surface. Speed ramps up then eases out,
+   with a long pause between cycles for a living, breathing feel. */
+
+@keyframes eikon-hunt-glass-sweep {
+  0% {
+    transform: translateX(-130%) skewX(-15deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(130%) skewX(-15deg);
+    opacity: 0.6;
+  }
+  58% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(130%) skewX(-15deg);
+  }
+}
+
+.eikon-hunt-glass {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.eikon-hunt-glass::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  width: 45%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 20%,
+    rgba(255, 255, 255, 0.12) 45%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.12) 55%,
+    rgba(255, 255, 255, 0.03) 80%,
+    transparent 100%
+  );
+  animation: eikon-hunt-glass-sweep 5s cubic-bezier(0.22, 0.6, 0.36, 1) infinite;
+  mix-blend-mode: plus-lighter;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-hunt-aura,
+  .eikon-hunt-icon,
+  .eikon-hunt-glass::before {
+    animation: none;
+  }
+  .eikon-hunt-icon {
+    transform: rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-data: reduce) {
+  .eikon-hunt-aura,
+  .eikon-hunt-icon,
+  .eikon-hunt-glass::before {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-footer-meadow — spotlight-revealed grass under the wordmark
+ *
+ * A thin SVG strip of grass blades that sits flush against the lower
+ * edge of the giant EIKON · REACT wordmark. Mostly invisible: a
+ * radial-gradient mask centred on the visitor’s cursor (via two CSS
+ * custom properties updated in Footer.tsx’s pointermove handler)
+ * reveals the grass only inside the spotlight’s reach.
+ *
+ * The intended discovery moment:
+ *
+ *   1. Visitor lingers in the footer, sees the giant wordmark.
+ *   2. They drift their cursor over the wordmark and notice a
+ *      patch of grass "growing" under the letters wherever the
+ *      spotlight passes.
+ *   3. If they sweep the spotlight all the way to the right end
+ *      of "REACT" the single tiny pink flower reveals itself —
+ *      reward for the curious.
+ *
+ * The blades are stroked with `vector-effect: non-scaling-stroke`
+ * so their width stays crisp regardless of how much the SVG is
+ * stretched horizontally (`preserveAspectRatio="none"`).
+ *
+ * The mask uses pixel coordinates (not %) because the meadow is
+ * much shorter than the footer — feeding it footer-relative %
+ * coordinates would smear the spotlight vertically across the
+ * whole strip.
+ * ------------------------------------------------------------------ */
+
+.eikon-footer-meadow {
+  position: absolute;
+  inset-inline: 0;
+
+  /* Height is an explicit vw clamp mirroring the wordmark’s
+     `clamp(2.5rem, 14vw, 11rem)` sizing — NOT an em unit. The
+     naive `em` approach silently failed because `em` resolves
+     against the meadow’s *own* font-size (inherited from `body`,
+     ~16px), not the wordmark’s font-size, so the meadow ended
+     up only ~8px tall and clipped the flower out of existence
+     via `mask-clip: border-box`.
+
+     `bottom: 0` parks the meadow’s lower edge flush with the
+     wordmark wrapper’s lower edge (which, with the wordmark’s
+     `line-height: 0.85`, sits at ≈ the cap-line of EIKON ·
+     REACT). The meadow grows entirely UPWARD from that line:
+     soil + grass roots ride exactly on the brand text’s
+     baseline, and the tallest front-row blades reach into the
+     lower ~half of the letters. Result: the wordmark reads as
+     literally growing out of the lawn rather than hovering
+     above a decorative strip beneath it. */
+  height: clamp(60px, 6.5vw, 90px);
+  bottom: -12px;
+
+  pointer-events: none;
+  z-index: 1;
+
+  /* Default keeps the mask centre far off-canvas so nothing shows
+     before the first pointermove arrives. The pointermove handler
+     swaps in real pixel coordinates relative to this element. The
+     value is inherited by every child layer, so a single update
+     drives the shade / light / flower masks together. */
+  --eikon-meadow-mx: -9999px;
+  --eikon-meadow-my: -9999px;
+
+  opacity: 0;
+  transition: opacity 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Fade the whole stack in only while the visitor is actually hovering
+   the footer. The per-layer masks already restrict reveal to the
+   spotlight area; this transition just polishes the entry/exit so
+   the grass never pops on/off abruptly. */
+@media (hover: hover) and (pointer: fine) {
+  .group\/footer:hover .eikon-footer-meadow {
+    opacity: 1;
+  }
+}
+
+.eikon-footer-meadow__shade,
+.eikon-footer-meadow__light,
+.eikon-footer-meadow__flower {
+  position: absolute;
+  inset: 0;
+}
+
+/* Outer halo — wide soft reveal of the *dim* grass copy.
+   This is the "almost in shadow" perimeter: a faint patch of
+   grass visible well beyond where the bright highlight reaches,
+   so the spotlight has a soft outer edge instead of a hard cutout. */
+.eikon-footer-meadow__shade {
+  mask-image: radial-gradient(
+    circle 320px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    black 0%,
+    black 32%,
+    transparent 92%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 320px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    black 0%,
+    black 32%,
+    transparent 92%
+  );
+}
+
+/* Hot spot — tight reveal of the *bright* grass copy, stacked over
+   the shade layer. Because both layers share blade geometry the
+   bright copy slots cleanly over the dim copy where the masks
+   overlap → the same blade reads as lit at its base of the cursor
+   and shadowed at the rim. This is the meadow’s "light falloff". */
+.eikon-footer-meadow__light {
+  mask-image: radial-gradient(
+    circle 135px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    black 0%,
+    black 28%,
+    transparent 80%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 135px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    black 0%,
+    black 28%,
+    transparent 80%
+  );
+}
+
+/* Flower reveal — medium radius, between shade and light. The
+   flower is a discoverable easter egg, not a hot-spot freebie:
+   the visitor has to sweep the spotlight to the wordmark’s tail
+   end, but doesn’t have to land on a pixel-precise spot. */
+.eikon-footer-meadow__flower {
+  mask-image: radial-gradient(
+    circle 210px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    black 0%,
+    black 40%,
+    transparent 86%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 210px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    black 0%,
+    black 40%,
+    transparent 86%
+  );
+}
+
+/* The end-of-meadow flower. Anchored a few percent in from the
+   right so it never hangs off the footer’s bleed edge. Sized in
+   absolute px clamps (not % of meadow height) so the flower stays
+   readable at any viewport — and crucially, so its head never
+   spills above the meadow’s top edge, where `mask-clip: border-box`
+   would silently chop the bloom in half. The bottom offset is
+   tuned so the flower head clears the front-row blade tips by a
+   small margin, reading as "popping out of the lawn". */
+.eikon-footer-flower {
+  position: absolute;
+  right: 5%;
+  bottom: 0;
+  width: clamp(20px, 2.2vw, 30px);
+  height: auto;
+  filter: drop-shadow(0 1.5px 2px rgb(0 0 0 / 0.45));
+}
+
+/* Interactive flower — pointer-events override + cursor */
+.eikon-footer-flower-btn {
+  position: absolute;
+  right: 5%;
+  bottom: 0;
+  width: clamp(20px, 2.2vw, 30px);
+  pointer-events: auto;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  outline: none;
+  z-index: 5;
+}
+
+.eikon-footer-flower-btn:hover .eikon-footer-flower {
+  filter: drop-shadow(0 2px 6px rgb(0 0 0 / 0.3)) drop-shadow(0 0 8px hsl(338 62% 68% / 0.4));
+}
+
+/* Bloom bounce on click */
+@keyframes eikon-flower-bloom {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.35) rotate(8deg);
+  }
+  60% {
+    transform: scale(0.9) rotate(-3deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.eikon-flower-blooming .eikon-footer-flower {
+  animation: eikon-flower-bloom 600ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Petal burst particles */
+@keyframes eikon-petal-burst {
+  0% {
+    transform: translate(0, 0) scale(0) rotate(0deg);
+    opacity: 1;
+  }
+  20% {
+    transform: translate(var(--px), var(--py)) scale(1.2) rotate(var(--pr));
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(calc(var(--px) * 2.2), calc(var(--py) * 2.2 + 12px)) scale(0.3) rotate(calc(var(--pr) * 2));
+    opacity: 0;
+  }
+}
+
+.eikon-petal-particle {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50% 50% 50% 0;
+  pointer-events: none;
+  animation: eikon-petal-burst 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* "Lights on" state — flower click reveals the entire meadow for 5s.
+   Override layer masks to show everything with a radial expand animation. */
+
+.eikon-meadow-lit {
+  opacity: 1 !important;
+  transition: opacity 600ms ease-out;
+}
+
+.eikon-meadow-lit .eikon-footer-meadow__shade,
+.eikon-meadow-lit .eikon-footer-meadow__light,
+.eikon-meadow-lit .eikon-footer-meadow__flower {
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+.eikon-meadow-lit .eikon-footer-meadow__light {
+  opacity: 0;
+  animation: eikon-meadow-fadein 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.eikon-meadow-lit .eikon-footer-meadow__shade {
+  opacity: 0;
+  animation: eikon-meadow-fadein 1s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+}
+
+@keyframes eikon-meadow-fadein {
+  0% {
+    opacity: 0;
+    filter: brightness(2.5);
+  }
+  40% {
+    opacity: 0.7;
+    filter: brightness(1.5);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+}
+
+/* Fade-out / dimming state */
+.eikon-meadow-dimming {
+  transition: opacity 1.4s ease-in;
+}
+
+.eikon-meadow-dimming .eikon-footer-meadow__light {
+  animation: eikon-meadow-fadeout 1.4s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.eikon-meadow-dimming .eikon-footer-meadow__shade {
+  animation: eikon-meadow-fadeout 1.4s cubic-bezier(0.4, 0, 1, 1) 0.2s forwards;
+}
+
+@keyframes eikon-meadow-fadeout {
+  0% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  60% {
+    opacity: 0.5;
+    filter: brightness(0.6);
+  }
+  100% {
+    opacity: 0;
+    filter: brightness(0.2);
+  }
+}
+
+/* Touch + reduced-motion: ship the page without the easter egg.
+   The reveal is driven by the cursor spotlight, which itself is
+   gated to fine-pointer devices, so on touch the meadow would
+   either stay frozen (one finger) or stay invisible (no pointermove).
+   Hiding the layer outright keeps SVG parse cost out of the paint
+   budget on phones. */
+@media (hover: none) {
+  .eikon-footer-meadow {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eikon-footer-meadow {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-footer-status-dot — soft "online" indicator
+ *
+ * 6px dot in the footer’s bottom microcopy row that pulses every
+ * 2s. Uses the brand mid-tone so it stays on-palette (no rogue
+ * "system-green") and is visible in both light and dark themes.
+ * The outer ring scales + fades on the same cadence to give the
+ * dot a quiet "breath" — reads as "the site is alive", not
+ * "alarm bell".
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-footer-status-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.eikon-footer-status-dot {
+  position: relative;
+  display: inline-flex;
+  height: 6px;
+  width: 6px;
+  border-radius: 9999px;
+  background: var(--color-brand-400);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.eikon-footer-status-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-brand-400);
+  animation: eikon-footer-status-pulse 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-footer-status-dot::after {
+    animation: none;
+    display: none;
+  }
+}

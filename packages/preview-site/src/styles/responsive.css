@@ -1,0 +1,139 @@
+/* ===========================================================================
+ * Mobile / low-end device override block
+ *
+ * Below 1024px (Tailwind `lg`) the page should be visibly calmer:
+ *
+ *   1. The PlaygroundSection’s cinematic dolly + halo + vignette + the
+ *      workbench’s slowly-rotating conic ring all live to make the
+ *      page feel "lit from behind" on a wide desktop monitor. On a
+ *      phone they cost paint cost and read as "the page is glitching"
+ *      because the small viewport makes the dolly’s overshoot dramatic.
+ *
+ *   2. `backdrop-filter: blur(24px) saturate(160%)` on Nav pill /
+ *      LangOrb / sidebar peek panel is the single biggest mobile
+ *      framerate killer in this app — iOS Safari rasterises every
+ *      composited layer below the blur on every scroll frame.
+ *
+ *   3. `prefers-reduced-data` is a quiet save-data hint. Browsers
+ *      that surface it (Chrome + Firefox on metered connections)
+ *      get the same calm-mode treatment as small screens.
+ * =========================================================================== */
+
+@media (max-width: 1023.98px) {
+  .eikon-playground-frame {
+    /* Drop the cinematic dolly + the heavy shadow keyframes — keep
+       the rest-state shadow (already painted by the Tailwind
+       `shadow-[...]` class on the element) so the card still has
+       depth, just no scroll-driven motion. */
+    animation: none !important;
+    transform: none !important;
+  }
+  .eikon-playground-halo,
+  .eikon-playground-vignette {
+    display: none !important;
+  }
+  .eikon-conic-border {
+    /* Static ring at the resting gradient position. The
+       `@property --eikon-angle` keeps `from 0deg` deterministic. */
+    animation: none !important;
+  }
+  .eikon-aurora-drift,
+  .eikon-grid-drift {
+    /* Decorative drift keyframes are still cheap, but on phones
+       they’re just visual noise in tiny viewports. */
+    animation: none !important;
+  }
+}
+
+@media (prefers-reduced-data: reduce) {
+  .eikon-playground-frame,
+  .eikon-playground-halo,
+  .eikon-playground-vignette,
+  .eikon-conic-border,
+  .eikon-aurora-drift,
+  .eikon-grid-drift,
+  .eikon-marquee-track,
+  .eikon-footer-shine,
+  .eikon-footer-status-dot::after,
+  .eikon-cursor-blink,
+  .eikon-pulse-glow,
+  .eikon-rail-glow::after {
+    animation: none !important;
+  }
+}
+
+/* Touch viewports: drop the expensive `backdrop-filter` on the
+   floating chrome (Nav pill, LangOrb, sidebar peek). The semi-opaque
+   surface tokens we fall back to are tuned to be readable against
+   any underlying section so the visual collapse is graceful. */
+@media (hover: none) and (pointer: coarse) {
+  .eikon-nav-glass,
+  .eikon-peek-in,
+  .eikon-peek-out {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* ===========================================================================
+ * Mobile workbench tab strip
+ *
+ * Renders inside the PlaygroundShell Toolbar on `<md` viewports to swap
+ * between Preview / Files / Code as full-screen views (the
+ * react-resizable-panels horizontal split is unusable below ~768px —
+ * three panels at 12/20/25% minimums collapse into unreadable strips).
+ *
+ * Pure tokens here so the JSX stays declarative; layout/colour come
+ * from Tailwind classes on the buttons themselves.
+ * =========================================================================== */
+
+.eikon-mobile-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-3);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    color 180ms ease-out,
+    background-color 180ms ease-out,
+    border-color 180ms ease-out;
+  min-height: 32px;
+}
+
+.eikon-mobile-tab[aria-pressed='true'] {
+  background: rgb(148 163 184 / 0.15);
+  color: var(--color-brand-300, #cbd5e1);
+  border-color: rgb(148 163 184 / 0.4);
+}
+
+.eikon-mobile-tab:hover {
+  color: var(--fg-1);
+}
+
+/* ===========================================================================
+ * Touch-target floor — WCAG 2.2 AA recommends a 24×24 minimum, and a
+ * 44×44 target for primary actions. Every clickable element in
+ * preview-site keeps its visual size, but on touch viewports we pad
+ * the hit area out via a centered pseudo so taps register even on
+ * tightly-packed nav rows.
+ * =========================================================================== */
+@media (pointer: coarse) {
+  .eikon-tap-44 {
+    position: relative;
+  }
+  .eikon-tap-44::after {
+    content: '';
+    position: absolute;
+    inset: 50% 50% 50% 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+  }
+}

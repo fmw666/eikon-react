@@ -1,0 +1,394 @@
+/* ------------------------------------------------------------------
+ * eikon-reveal — scroll-triggered "rise into view" entrance
+ *
+ * Driven from React by <Reveal> in
+ * `landing/components/Reveal.tsx`. An IntersectionObserver flips
+ * `data-revealed="true"` on the wrapper the first time it crosses
+ * ~12% of the viewport, which lets the transition below lift the
+ * element from its initial dimmed/translated state into its
+ * resting state with a 720ms spring curve.
+ *
+ * Why a long curve (720ms) and a slow ease-out
+ * --------------------------------------------
+ *   The site already has fast micro-interactions everywhere
+ *   (pill hovers, nav magic-pill, theme orb spin). The section
+ *   reveals are the slow, "editorial" beats that punctuate the
+ *   scroll — too fast and they read as twitchy; too slow and they
+ *   feel laggy on a fast scroll. 720ms with `cubic-bezier(0.16,
+ *   1, 0.3, 1)` settles right at the boundary where the eye still
+ *   tracks the motion but the section feels deliberate, not jumpy.
+ *
+ * Variants
+ * --------
+ *   .eikon-reveal-rise        — fade + 28px translateY + scale 0.985
+ *                               Default. Use for typography-led
+ *                               sections (Hero, Philosophy, QA).
+ *   .eikon-reveal-rise-scale  — fade + 36px translateY + scale 0.94
+ *                               More aggressive "pop". Use for big
+ *                               card / grid sections (PlatformPicker,
+ *                               PainPoints) where the extra scale
+ *                               sells the surfaces as physical
+ *                               objects arriving on stage.
+ *   .eikon-reveal-zoom        — fade + scale only, no translate.
+ *                               Reads as "settling in place" rather
+ *                               than "rising up from below".
+ *   .eikon-reveal-left/right  — slide in horizontally. Reserve for
+ *                               side-rail panels where horizontal
+ *                               motion matches the reading axis.
+ *
+ * Per-element delay
+ * -----------------
+ * Pass `delay={ms}` on <Reveal> to write a `--eikon-reveal-delay`
+ * custom property. Used to stagger sibling reveals (title →
+ * subtitle → CTA) — siblings that arrive on the same frame would
+ * feel synchronised in a way that real entrances are not.
+ *
+ * Reduced motion
+ * --------------
+ * The reveal is suppressed to "instant final state, no transition"
+ * so the page is fully readable without animation. We intentionally
+ * also clear `transform` and `opacity` rather than just disabling
+ * the transition — leaving the element in its dimmed initial state
+ * after disabling motion would render it permanently invisible.
+ * ------------------------------------------------------------------ */
+
+.eikon-reveal {
+  --eikon-reveal-delay: 0ms;
+  --eikon-reveal-duration: 720ms;
+  --eikon-reveal-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  opacity: 0;
+  transition:
+    opacity var(--eikon-reveal-duration) var(--eikon-reveal-ease) var(--eikon-reveal-delay),
+    transform var(--eikon-reveal-duration) var(--eikon-reveal-ease) var(--eikon-reveal-delay);
+  will-change: opacity, transform;
+}
+
+.eikon-reveal-rise {
+  transform: translate3d(0, 28px, 0) scale(0.985);
+}
+
+.eikon-reveal-rise-scale {
+  transform: translate3d(0, 36px, 0) scale(0.94);
+}
+
+.eikon-reveal-zoom {
+  transform: scale(0.9);
+}
+
+.eikon-reveal-left {
+  transform: translate3d(-36px, 0, 0);
+}
+
+.eikon-reveal-right {
+  transform: translate3d(36px, 0, 0);
+}
+
+.eikon-reveal[data-revealed='true'] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-playground-* — cinematic "push-and-hold" for the workbench
+ *
+ * The PlaygroundSection is the home page’s interactive workbench
+ * (params + prompt sidebar + live frame, in one wide-screen card).
+ * Arrival on it is the visual climax of the page, so we compose a
+ * three-act director’s move tied to the visitor’s scroll progress
+ * — no JS, no scroll listener, no scroll-jacking. The wheel still
+ * scrolls; we only modulate visual properties.
+ *
+ * The story
+ * ---------
+ *   Act I — PUSH IN     (cover  0% → 28%)
+ *     The workbench enters from `scale(0.86) translateY(64px) opacity
+ *     0.4`. As the visitor scrolls into the section, the camera
+ *     dollies forward, the halo blooms behind the card, and the
+ *     two arrive together at a tiny `scale(1.02)` overshoot. The
+ *     overshoot is what makes the move read as a *push* (a lens
+ *     finding focus) rather than a fade-in (a thing appearing).
+ *
+ *   Act II — SETTLE     (cover 28% → 38%)
+ *     Both frame and halo relax from the overshoot back to their
+ *     rest scales (`scale(1)` and `scale(1.10)` respectively).
+ *     This is roughly two-tenths of a second of perceived motion
+ *     on a normal scroll — enough for the eye to register "the
+ *     thing has landed", not so long that the visitor feels the
+ *     animation taking up their attention.
+ *
+ *   Act III — HOLD      (cover 38% → 100%)
+ *     The frame stays at `scale(1)`, the halo stays at `scale(1.10)`,
+ *     for the entire remainder of the section’s view-progress.
+ *     This is *the whole point of the cinematic upgrade*: the
+ *     visitor scrolls through ~60% of the section’s total scroll
+ *     range with the workbench locked in full focus, instead of
+ *     the previous quick zoom-and-be-done that finished after the
+ *     first 30%. Hold keeps the visitor’s eyes on the workbench
+ *     while they’re actually using it (toggling params, watching
+ *     the preview update, copying the prompt), which is exactly
+ *     when a continuing motion would be a distraction.
+ *
+ * Why a single keyframe with multiple stops (instead of multiple
+ * scroll-driven animations chained on different ranges)
+ * -----------------------------------------------------------------
+ *   We could have run one animation on `cover 0% cover 28%` for
+ *   the push, a second on `cover 28% cover 38%` for the settle,
+ *   and a third on `cover 38% cover 100%` for the hold. That’s
+ *   three animations the compositor has to advance, three
+ *   `will-change` layers, three `@property` boundaries. A single
+ *   animation with internal stops is cheaper, easier to reason
+ *   about (one timeline, one motion curve), and produces the
+ *   same visual.
+ *
+ * Implementation
+ * --------------
+ *   CSS `animation-timeline: view()` plus `animation-range:
+ *   cover 0% cover 100%`. Internal keyframe percentages
+ *   (`28%`, `38%`) carve the act boundaries. `linear` timing
+ *   keeps the motion 1:1 with scroll position so the visitor’s
+ *   wheel directly drives the camera; cubic curves on a
+ *   scroll-driven animation read as "the page is ahead of /
+ *   behind my finger", which feels broken.
+ *
+ *   `prefers-reduced-motion` disables the keyframes entirely
+ *   (frame at scale 1 / opacity 1, halo at scale 1 / opacity 1).
+ *
+ * Browser support (May 2026)
+ * --------------------------
+ *   Chrome/Edge 115+, Firefox 137+ (Mar 2025), Safari 18+.
+ *   Older runtimes skip the `@supports` block and paint at the
+ *   default rest state — a still, unanimated workbench. No
+ *   broken layout, no card frozen at `scale(0.86)` — the
+ *   `from` state never surfaces if scroll-driven isn’t there.
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-playground-cinematic {
+  /* Act I, frame 0 — far back, slightly down, dim. */
+  from {
+    opacity: 0.4;
+    transform: scale(0.86) translateY(64px);
+  }
+  /* Act I → II — the lens lands with a tiny push past 1.0. The
+     overshoot is what gives the move its "the camera arrived"
+     punctuation; a flat `scale(1)` end-state would read as a
+     fade-in instead. */
+  28% {
+    opacity: 1;
+    transform: scale(1.02) translateY(-2px);
+  }
+  /* Act II — settled to rest. From here on the workbench is the
+     centre of attention, and the rest of the timeline is the hold. */
+  38% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  /* Act III — HOLD all the way to the end of the section’s
+     view-progress. The frame doesn’t move while the visitor is
+     actually using the workbench; the conic ring on the border
+     keeps the surface visibly "alive" without any extra motion
+     here being needed. */
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes eikon-playground-halo-cinematic {
+  /* Act I, frame 0 — halo small and dim, sitting behind where the
+     workbench is about to land. */
+  from {
+    opacity: 0.3;
+    transform: scale(0.72);
+  }
+  /* Act I → II — halo peaks slightly past its rest scale at the
+     same moment the frame’s overshoot fires. The two synchronised
+     overshoots make the workbench read as "lit up from behind" at
+     the exact instant the visitor’s eye lands on it. */
+  28% {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+  /* Act II — halo settles to its rest brightness. */
+  38% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  /* Act III — HOLD. Same energy as the frame: the workbench stays
+     lit while the visitor is using it. */
+  to {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-playground-shadow — cinematic "lift" companion
+ *
+ * A second scroll-driven animation layered on top of the frame’s
+ * transform/opacity move. Where `eikon-playground-cinematic` is the
+ * camera dolly, this is the *cast shadow* — the workbench card
+ * looks visibly heavier and more elevated as the lens lands on it.
+ *
+ * Why a separate animation instead of folding shadow into the main
+ * keyframes?
+ *   `box-shadow` interpolates as four numeric components and a
+ *   colour, so adding it as a fifth property to the cinematic
+ *   keyframes would force every frame of the dolly to also paint
+ *   a shadow update — including the long HOLD stretch where
+ *   nothing else is changing. By splitting it out we can stop
+ *   advancing the shadow animation once it reaches its hold value
+ *   (it’s a no-op from 38% onward) and keep the compositor’s work
+ *   on the dolly itself paint-cheap.
+ *
+ * Multi-stop shadow profile:
+ *   from   — far back: a thin, low-contrast contact shadow.
+ *            The card looks "anchored to the page surface", which
+ *            is what we want before the camera move begins.
+ *   28%    — peak shadow, fired at the same moment the dolly
+ *            overshoots scale(1.02). Two layers: a tall ambient
+ *            blur (180px) for the bowl of darkness under the
+ *            card, plus a tighter blue-tinted layer for body.
+ *   38%    — settle: shadow relaxes to a slightly tighter rest
+ *            value, paired with the dolly settling to scale(1).
+ *   to     — same as 38%; HOLD. The card stays floating.
+ *
+ * The shadow values intentionally avoid pure black; we mix in
+ * the slate `15 23 42` tint so the cast falls into the same
+ * cool family the rest of the page uses, instead of looking
+ * like a generic Material drop-shadow.
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-playground-shadow {
+  from {
+    box-shadow:
+      0 8px 24px -16px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(148, 163, 184, 0.04);
+  }
+  28% {
+    box-shadow:
+      0 80px 180px -28px rgba(0, 0, 0, 0.7),
+      0 32px 80px -32px rgba(15, 23, 42, 0.55),
+      0 0 0 1px rgba(148, 163, 184, 0.1);
+  }
+  38% {
+    box-shadow:
+      0 60px 140px -32px rgba(0, 0, 0, 0.6),
+      0 24px 60px -32px rgba(15, 23, 42, 0.45),
+      0 0 0 1px rgba(148, 163, 184, 0.08);
+  }
+  to {
+    box-shadow:
+      0 60px 140px -32px rgba(0, 0, 0, 0.6),
+      0 24px 60px -32px rgba(15, 23, 42, 0.45),
+      0 0 0 1px rgba(148, 163, 184, 0.08);
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-playground-vignette — focal "stage spotlight" for hold
+ *
+ * The third layer of the cinematic move, on top of the dolly and
+ * the cast shadow. A radial vignette sits absolutely positioned
+ * over the section background (above the dot grid, below the
+ * halo and the workbench card). Its opacity follows the same
+ * three-act timeline as the frame:
+ *
+ *   from   — invisible. No darkening before the move starts; we
+ *            don’t want the section to enter looking already
+ *            "moody" before the visitor knows why.
+ *   28%    — partial fade in (0.55), arriving with the dolly’s
+ *            overshoot. Reads as "the lights dim around the
+ *            workbench at the exact moment the camera lands".
+ *   38%    — full strength (0.72). The workbench is now the
+ *            stage; everything else is in shadow.
+ *   to     — held at full strength for the entire HOLD stretch.
+ *            Combined with the frame’s HOLD scale and the cast
+ *            shadow’s HOLD blur, the workbench is locked in as
+ *            the *only* visually loud thing on screen for the
+ *            ~62% of section view-progress where the visitor is
+ *            actually using it.
+ *
+ * Geometry note:
+ *   The vignette element is a child of the section with
+ *   `inset: 0`, so it tracks the section’s box exactly. Section
+ *   height (≈ 1300–1500px on desktop) is taller than the
+ *   viewport, so the vignette’s elliptical mask cuts the
+ *   visible viewport such that the workbench card sits in the
+ *   bright centre while the section’s top/bottom margins fade to
+ *   the dimmed edge — visually indistinguishable from a true
+ *   viewport-level vignette during the hold stretch, but
+ *   contained to this one section so neighbouring sections
+ *   above/below paint at full brightness as soon as the visitor
+ *   scrolls out.
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-playground-vignette {
+  from {
+    opacity: 0;
+  }
+  28% {
+    opacity: 0.55;
+  }
+  38% {
+    opacity: 0.72;
+  }
+  to {
+    opacity: 0.72;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .eikon-playground-frame {
+    animation:
+      eikon-playground-cinematic linear both,
+      eikon-playground-shadow linear both;
+    animation-timeline: view(), view();
+    animation-range:
+      cover 0% cover 100%,
+      cover 0% cover 100%;
+    /* `box-shadow` listed in `will-change` is a deliberate hint —
+       the compositor still rasterises a layer per shadow change
+       (shadows aren’t compositor-only properties), but the hint
+       keeps the frame on its own GPU layer so the shadow updates
+       don’t repaint the surrounding section content. */
+    will-change: transform, opacity, box-shadow;
+  }
+
+  .eikon-playground-halo {
+    animation: eikon-playground-halo-cinematic linear both;
+    animation-timeline: view();
+    animation-range: cover 0% cover 100%;
+    will-change: transform, opacity;
+  }
+
+  .eikon-playground-vignette {
+    animation: eikon-playground-vignette linear both;
+    animation-timeline: view();
+    animation-range: cover 0% cover 100%;
+    will-change: opacity;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-playground-frame,
+  .eikon-playground-halo,
+  .eikon-playground-vignette {
+    animation: none;
+  }
+  /* Reduced-motion users see no darkening: the spotlight effect
+     is an animation, not a static dimming, so without the
+     animation context it would just look like the section is
+     painted on a slightly darker page background. */
+  .eikon-playground-vignette {
+    opacity: 0;
+  }
+}

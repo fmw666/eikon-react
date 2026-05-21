@@ -1,0 +1,83 @@
+/* ---------------------------------------------------------------------------
+ * Responsive conventions — applies everywhere in preview-site
+ *
+ *   Breakpoints (Tailwind defaults, restated for clarity):
+ *     < 640px    : phone           — single column, decorations off
+ *     640-1023   : tablet          — 2-col where useful, decorations on
+ *     ≥ 1024     : desktop (lg)    — full marketing experience
+ *
+ *   Use `dvh` (dynamic viewport height) instead of `vh` for any layout
+ *   that fills the viewport — `vh` jumps when iOS Safari shows/hides
+ *   its top bar, `dvh` tracks the visible viewport in real time. We
+ *   fall back to `vh` for older browsers via @supports.
+ *
+ *   Hover-only affordances (lift on hover, mouse-follow spotlights,
+ *   diagonal shimmer) should sit inside `@media (hover: hover)` so
+ *   they don’t "stick" on touch devices after the first tap.
+ *
+ *   Decorative animations (cinematic dollies, marquees, conic rings,
+ *   aurora drifts) should respect `prefers-reduced-motion` AND
+ *   `prefers-reduced-data` — both are honoured below at file level.
+ * --------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+ * Base reset / typography
+ * --------------------------------------------------------------------------- */
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Forms on iOS Safari auto-zoom the page in when the focused control’s
+   computed `font-size` is < 16px. We size inputs at 16px on phones and
+   only shrink them back to the design’s `14px` on `pointer: fine` (i.e.
+   mouse / trackpad) screens where the auto-zoom heuristic doesn’t fire. */
+@media (pointer: coarse) and (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/*
+ * Reserve the vertical scrollbar gutter even when the page is short
+ * enough to not need one. Without this, navigating between a long
+ * route (home — with scroll) and a short one (changelog placeholder
+ * — without scroll) makes the viewport width change by the scrollbar
+ * width (~15px on Windows), which yanks every centred element
+ * (notably the Nav pill) sideways. `scrollbar-gutter: stable` is the
+ * modern, no-JS, no-overflow-hack fix for this.
+ *
+ * Scoped to `pointer: fine` (mouse / trackpad) viewports because
+ * touch UAs don’t paint a permanent scrollbar — keeping the gutter
+ * reserved there just steals ~15px of width on small phones.
+ */
+@media (pointer: fine) {
+  html {
+    scrollbar-gutter: stable;
+  }
+}
+
+body {
+  background: var(--surface-0);
+  color: var(--fg-1);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+/* Make the root container scrollable in landing mode (the playground itself
+   uses internal scrolling for files/code, but the landing page is a long
+   document). */
+#root {
+  height: auto;
+  min-height: 100%;
+}
