@@ -540,53 +540,57 @@ body {
 }
 
 /* ------------------------------------------------------------------
- * eikon-cursor-breath — terminal cursor with a "breathing" cadence
+ * eikon-cursor-blink — terminal cursor mimicking macOS Terminal.app
  *
  * Used by the Hero's decorative terminal teaser (`npx create-eikon-
- * react .`) to give the trailing block cursor a calm, sine-like
- * pulse instead of the harsh square-wave blink of a classic VT.
+ * react .`). The cadence is modelled on the native macOS Terminal
+ * cursor: the bar is **fully visible by default**, fades out for
+ * one short beat, stays hidden for a noticeable pause, then
+ * **reappears instantly** (no fade-in) — the eye-catching moment is
+ * the *reappearance*, not the disappearance.
  *
- * Rhythm:
+ * Rhythm (1.1s period):
  *
- *   0%   opacity 0.25   ← "exhale" — cursor is barely visible
- *   50%  opacity 1.00   ← "inhale" — cursor is fully present
- *   100% opacity 0.25
+ *   0% .. 55%   opacity 1   ← cursor is fully present (~605ms)
+ *   55% → 70%   opacity → 0 ← smooth fade out (~165ms)
+ *   70% .. 98%  opacity 0   ← held off-screen (~308ms)
+ *   98% → 100%  opacity → 1 ← snap back in (~22ms ≈ instant)
  *
- *   Total period 1.4s, `ease-in-out` so the transitions in and
- *   out of full opacity slow down — the bar lingers at both ends,
- *   which is what makes the rhythm read as breathing rather than a
- *   linear sawtooth fade.
+ * `ease-in-out` shapes the in-between segments so the fade reads as
+ * a deliberate retreat rather than a linear ramp. The 98%→100% slice
+ * is intentionally tiny so the return reads as a hard "pop" — that
+ * snap is what makes the cursor feel like a real macOS terminal
+ * cursor rather than a generic CSS pulse.
  *
- * Why not a hard blink:
+ * Why blink (this time) instead of breathe:
  *
- *   The terminal teaser sits in the Hero corner as a decoration,
- *   not as a real input. A hard 1/0 blink (the classic terminal
- *   look) is mechanical and reads as "waiting for keystrokes" —
- *   it would grab attention away from the slogan. A breathing
- *   cursor reads as "this thing is alive but at rest", which is
- *   the right cue for a decorative teaser.
- *
- * The `0.25` floor (rather than 0) keeps the cursor *always*
- * visible, just dimmer at the exhale — accessibility win for
- * users who'd otherwise lose the cursor between full-off frames.
+ *   The teaser is meant to read as "this is a terminal you can run
+ *   right now". A breathing pulse made it feel ornamental; the snap
+ *   blink gives it the unmistakable rhythm of an actual prompt
+ *   waiting for input, without slipping into the harsh 1Hz square
+ *   wave of a vintage VT.
  * ------------------------------------------------------------------ */
 
-@keyframes eikon-cursor-breath {
+@keyframes eikon-cursor-blink {
   0%,
-  100% {
-    opacity: 0.25;
+  55% {
+    opacity: 1;
   }
-  50% {
+  70%,
+  98% {
+    opacity: 0;
+  }
+  100% {
     opacity: 1;
   }
 }
 
-.eikon-cursor-breath {
-  animation: eikon-cursor-breath 1.4s ease-in-out infinite;
+.eikon-cursor-blink {
+  animation: eikon-cursor-blink 1.1s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .eikon-cursor-breath {
+  .eikon-cursor-blink {
     animation: none;
     opacity: 1;
   }
@@ -1875,7 +1879,7 @@ body {
   .eikon-marquee-track,
   .eikon-footer-shine,
   .eikon-footer-status-dot::after,
-  .eikon-cursor-breath,
+  .eikon-cursor-blink,
   .eikon-pulse-glow,
   .eikon-rail-glow::after {
     animation: none !important;

@@ -65,10 +65,7 @@ import {
   PlatformPicker,
   PLATFORM_PICKER_ANCHOR_ID,
 } from './sections/PlatformPicker';
-import {
-  PlaygroundSection,
-  PROMPT_OUTPUT_ANCHOR_ID,
-} from './sections/PlaygroundSection';
+import { PlaygroundSection } from './sections/PlaygroundSection';
 import { QASection } from './sections/QASection';
 import { TechStackWall } from './sections/TechStackWall';
 import { ThemeAndLangSync } from './theme/theme-store';
@@ -340,10 +337,7 @@ function HomeRoute() {
   //      dividing — keeps the rhythm consistent on slow scrolls.
   return (
     <main>
-      <Hero
-        onPrimaryCta={() => scrollToId(PLATFORM_PICKER_ANCHOR_ID)}
-        onFindIt={() => scrollToId(PROMPT_OUTPUT_ANCHOR_ID)}
-      />
+      <Hero onPrimaryCta={() => scrollToId(PLATFORM_PICKER_ANCHOR_ID)} />
       <Reveal variant="rise-scale">
         <PlatformPicker />
       </Reveal>

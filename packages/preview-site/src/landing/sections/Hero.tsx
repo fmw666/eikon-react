@@ -12,7 +12,7 @@
  *   │         subtitle                                              │
  *   │                                                               │
  *   │                                         ●●● $ npx create-…  ▎ │
- *   │ [primary CTA] [github CTA]                          ↓ find it │
+ *   │ [primary CTA] [github CTA]                         ⌥ find it │
  *   └──────────────────────────────────────────────────────────────┘
  *
  * The terminal teaser is absolutely positioned so it never competes
@@ -45,16 +45,10 @@ export const HERO_ANCHOR_ID = 'top';
 
 export function Hero({
   onPrimaryCta,
-  onFindIt,
 }: {
-  /** Click handler for the primary "Get started" CTA — scrolls to the
+  /** Click handler for the primary "go find it" CTA — scrolls to the
    *  platform picker. Wired by LandingPage so the Hero stays presentational. */
   onPrimaryCta: () => void;
-  /** Click handler for the down-arrow "find it" pill next to the
-   *  terminal teaser — scrolls to the PromptOutput section where the
-   *  real, fully-templated prompt lives. Wired by LandingPage so the
-   *  Hero stays presentational. */
-  onFindIt: () => void;
 }) {
   const { t } = useI18n();
 
@@ -198,15 +192,28 @@ export function Hero({
             otherwise overflow. */}
         <div className="mt-12 flex flex-wrap items-stretch gap-3 lg:absolute lg:bottom-40 lg:right-6 lg:mt-0 lg:flex-col lg:flex-nowrap lg:items-end">
           <TerminalCard command="npx create-eikon-react ." />
-          <button
-            type="button"
-            onClick={onFindIt}
-            className="eikon-shimmer-hover group inline-flex items-center gap-2 rounded-xl border border-[var(--border-1)] bg-[var(--surface-1)]/80 px-4 py-3 text-sm text-[var(--fg-2)] backdrop-blur transition hover:border-brand-500/40 hover:bg-[var(--surface-2)] hover:text-[var(--fg-1)]"
+          {/* "find it" pill — direct deep-link into the GitHub repo.
+              The narrative is "want to actually find it? go read the
+              source". Unlike the secondary CTA above (which hides
+              itself when the repo isn't configured), this pill is a
+              load-bearing piece of the Hero's bottom-right visual
+              anchor — hiding it would leave the corner feeling empty
+              and break the terminal/pill vertical pairing. So we
+              always render it; `SITE.github.url` already falls back
+              to `https://github.com` when owner/repo aren't filled
+              in (see site-config), which is the right behaviour for
+              a placeholder template: clicking still goes *somewhere*
+              reasonable until the user wires their real repo. */}
+          <a
+            href={SITE.github.url}
+            target="_blank"
+            rel="noreferrer"
+            className="eikon-shimmer-hover group inline-flex items-center gap-2 rounded-xl border border-[var(--border-1)] bg-[var(--surface-1)]/80 px-4 py-3 text-sm text-[var(--fg-2)] no-underline backdrop-blur transition hover:border-brand-500/40 hover:bg-[var(--surface-2)] hover:text-[var(--fg-1)]"
             aria-label={t('hero.findIt')}
           >
+            <GithubIcon className="h-3.5 w-3.5 transition group-hover:-translate-y-0.5" />
             <span className="font-mono">{t('hero.findIt')}</span>
-            <ArrowDownIcon className="h-3.5 w-3.5 transition group-hover:translate-y-0.5" />
-          </button>
+          </a>
         </div>
       </div>
     </section>
@@ -241,11 +248,12 @@ function GithubIcon({ className }: { className: string }) {
  *                    highlighting (a single `npx` line doesn't need it
  *                    and any colour beyond the sigil would compete
  *                    with the gradient title above).
- *   ▎              ← static cursor block. We don't blink it — the
- *                    rest of the page is intentionally still after
- *                    first paint (see the hero's "motion only on
- *                    input" principle), so a blinking cursor would
- *                    fight the mouse spotlight for attention.
+ *   │              ← slim cursor bar with a macOS-Terminal-style
+ *                    blink: stays fully visible, fades out for a
+ *                    beat, hides briefly, then *snaps* back in. The
+ *                    snap-on (not the fade-off) is the eye-catching
+ *                    moment, which is what makes the teaser read as
+ *                    a real prompt waiting for input.
  *
  * The card itself is just a rounded surface with the same
  * border/blur stack the rest of the landing uses, so it slots into
@@ -272,41 +280,24 @@ function TerminalCard({ command }: { command: string }) {
       <code className="whitespace-nowrap font-mono text-xs text-[var(--fg-2)] sm:text-sm">
         <span className="text-brand-500">$ </span>
         {command}
-        {/* Trailing block cursor — the `eikon-cursor-breath` class
-            gives it a calm 1.4s ease-in-out pulse so the bar feels
-            "alive but at rest" rather than mechanically blinking.
-            Decorative; not a real text input cursor (the whole
-            card is `role="img"` above), so the rhythm is set to a
-            breath, not the VT-classic 1Hz square wave. */}
+        {/* Trailing slim cursor — `eikon-cursor-blink` mimics the
+            native macOS Terminal.app cadence: fully visible by
+            default, fades out for one short beat, sits hidden for
+            a noticeable pause, then *snaps* back in (no fade-in).
+            The snap-on is the moment that sells "this is a real
+            prompt waiting for input". Geometry: `w-[0.18em]` makes
+            it a thin vertical bar (~1.5–2px at the surrounding
+            text size) instead of a wide block — closer to modern
+            line-cursors and less visually heavy next to the mono
+            command. We bump the colour from --fg-3 up to --fg-2
+            so the now-thinner bar still reads clearly against the
+            terminal surface. */}
         <span
           aria-hidden="true"
-          className="eikon-cursor-breath ml-0.5 inline-block h-[1em] w-[0.55em] translate-y-[2px] bg-[var(--fg-3)]"
+          className="eikon-cursor-blink ml-0.5 inline-block h-[1em] w-[0.18em] translate-y-[2px] bg-[var(--fg-2)]"
         />
       </code>
     </div>
   );
 }
 
-/**
- * Minimal stroke-based down arrow for the "find it" pill. We use a
- * line icon (not a chevron, not a filled triangle) so the visual
- * weight matches the rest of the landing's iconography (Github mark,
- * Nav arrows, prompt copy button) — all hairline glyphs at 1.5 stroke.
- */
-function ArrowDownIcon({ className }: { className: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M12 5v14" />
-      <path d="m6 13 6 6 6-6" />
-    </svg>
-  );
-}

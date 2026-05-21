@@ -57,7 +57,7 @@ const DICT = {
     'hero.title.line2Suffix': ' 开始。',
     'hero.subtitle':
       '一套预制好的项目骨架 + 技术栈 + AI 配置 + 质量标准 + 通用模块，让 AI 从「配环境」直接进入「写需求」。',
-    'hero.cta.primary': '立即开始',
+    'hero.cta.primary': '去找找',
     'hero.cta.secondary': '查看 GitHub',
     'hero.findIt': '找到它',
 
@@ -246,7 +246,7 @@ const DICT = {
     'hero.title.line2Suffix': '.',
     'hero.subtitle':
       'A pre-baked project skeleton + stack + AI rules + quality system + shared modules, so your AI agent jumps from "setup" straight to "ship".',
-    'hero.cta.primary': 'Get started',
+    'hero.cta.primary': 'go find it',
     'hero.cta.secondary': 'View on GitHub',
     'hero.findIt': 'find it',
 
