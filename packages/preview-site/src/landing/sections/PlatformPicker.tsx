@@ -364,7 +364,6 @@ function StackedStage({
                 }
                 style={{
                   transform: getCardTransform(slot),
-                  opacity: slot === 'center' ? 1 : 0.92,
                   zIndex:
                     slot === 'center' ? 30 : slot === 'right' ? 20 : 10,
                   willChange: 'transform',
