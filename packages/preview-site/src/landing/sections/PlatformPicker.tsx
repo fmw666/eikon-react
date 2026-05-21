@@ -364,24 +364,12 @@ function StackedStage({
                 }
                 style={{
                   transform: getCardTransform(slot),
-                  // Side cards carry the same low-brightness screen
-                  // scrim as the resting centre card; we only nudge
-                  // chassis opacity so the stack depth still reads.
-                  opacity: slot === 'center' ? 1 : 0.9,
-                  filter: 'none',
+                  opacity: slot === 'center' ? 1 : 0.92,
                   zIndex:
                     slot === 'center' ? 30 : slot === 'right' ? 20 : 10,
-                  // The button spans the WHOLE stage (`absolute inset-0`),
-                  // which means the centre card's button — sitting at
-                  // z-30 — used to swallow clicks on the sliver of each
-                  // side card peeking out from behind it. Disabling the
-                  // button's own hit-area and re-enabling it ONLY on the
-                  // scaled device silhouette inside `ScaledDeviceShell`
-                  // means a click on the visible part of a side card
-                  // actually lands on THAT card's button. The button's
-                  // onClick still fires via normal DOM bubbling, since
-                  // `pointer-events: none` only opts the element itself
-                  // out of hit-testing, not its descendants.
+                  willChange: 'transform',
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
                   pointerEvents: 'none',
                 }}
               >
@@ -456,20 +444,18 @@ function getSlot(idx: number, activeIdx: number): StackSlot {
  *  edges + screen-border gaps the visitor sees on left/right cards. */
 const STACK_SLOT_SCALE: Record<StackSlot, number> = {
   center: 1,
-  left: 0.78,
-  right: 0.78,
+  left: 0.82,
+  right: 0.82,
 };
 
 function getCardTransform(slot: StackSlot): string {
   if (slot === 'center') {
     return 'translate3d(0,0,0) rotate(0deg)';
   }
-  // Translate + rotate only — size comes from `STACK_SLOT_SCALE` in
-  // `ScaledDeviceShell` so hardware borders stay crisp.
   if (slot === 'left') {
-    return 'translate3d(-32%, 6%, 0) rotate(-6deg)';
+    return 'translate3d(-28%, 5%, 0) rotate(-4deg)';
   }
-  return 'translate3d(32%, 6%, 0) rotate(6deg)';
+  return 'translate3d(28%, 5%, 0) rotate(4deg)';
 }
 
 // =============================================================================
@@ -576,21 +562,6 @@ function ScaledDeviceShell({
       }}
     >
       {children}
-      {(!active || glassNonce === 0) && (
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-[3]"
-          style={{
-            backgroundColor: !active
-              ? SCREEN_DIM_SCRIM_INACTIVE
-              : SCREEN_DIM_SCRIM,
-            /* Trace the screen's own corner radius so the dim layer
-               doesn't leave a bright hairline between scrim and bezel
-               when the card is rotated/scaled. */
-            borderRadius: 'inherit',
-          }}
-        />
-      )}
     </div>
   );
 
@@ -637,32 +608,25 @@ function ScaledDeviceShell({
       >
         {renderScreen}
       </DeviceShell>
+      {(!active || glassNonce === 0) && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute z-[3]"
+          style={{
+            ...overlayStyle,
+            backgroundColor: !active
+              ? SCREEN_DIM_SCRIM_INACTIVE
+              : SCREEN_DIM_SCRIM,
+          }}
+        />
+      )}
       {active && glassNonce > 0 && (
-        <>
-          {/* Brighten overlay — starts at the same dim scrim every
-              resting screen uses, animates to transparent so the UI
-              underneath (already mounted) reads as "brightness
-              ramping up", not "powering on from black". Only mounts
-              after the visitor has switched at least once
-              (`glassNonce > 0`) so the default selection isn't
-              forced through a brighten cycle on first paint — all
-              three screens start at the resting dim level. */}
           <span
             key={`wake-${glassNonce}`}
             aria-hidden="true"
             className="eikon-screen-wake"
             style={overlayStyle}
           />
-          {/* Glass sweep — diagonal streak across the still-dim
-              panel before the brighten segment. Same timing as the
-              wake keyframes (420ms delay + 650ms sweep). */}
-          <span
-            key={`glass-${glassNonce}`}
-            aria-hidden="true"
-            className="eikon-glass-sweep"
-            style={overlayStyle}
-          />
-        </>
       )}
     </div>
   );
@@ -693,14 +657,14 @@ function ScaledDeviceShell({
           willChange: 'transform',
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
-          // Re-enable hit-testing ONLY on the actual device silhouette.
-          // The parent button opted out via `pointer-events: none` so
-          // that clicks on the empty stage corners (or on a sibling
-          // card's slice peeking out) don't get swallowed by whichever
-          // button happens to sit on top in the stacking order. The
-          // click still bubbles up to the button's onClick from here.
           pointerEvents: 'auto',
           cursor: 'pointer',
+          ...(slot !== 'center'
+            ? {
+                outline: '0.5px solid transparent',
+                filter: 'blur(0px)',
+              }
+            : null),
         }}
       >
         {/* Warm tungsten ambience — sits BEHIND the device, tracking
@@ -821,7 +785,6 @@ function LaptopHardwareShell({ children }: { children: ReactNode }) {
   const notchWidth = 110;
   const notchHeight = 12;
   const deckHeight = 220;
-  const deckOverhang = 28;
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -830,16 +793,12 @@ function LaptopHardwareShell({ children }: { children: ReactNode }) {
         style={{
           position: 'relative',
           padding: lidPadding,
+          paddingBottom: lidPadding - 2,
           background: `linear-gradient(180deg, ${LAPTOP_TOKENS.lidTop} 0%, ${LAPTOP_TOKENS.lidMid} 45%, ${LAPTOP_TOKENS.lidBottom} 100%)`,
-          borderRadius: 16,
+          borderRadius: '16px 16px 0 0',
           boxShadow: [
-            // Chamfered bevel — a single 0.5px highlight line wrapping
-            // the entire lid silhouette. Pulls the lid edge out of
-            // the dark hero background so it reads as a machined
-            // surface rather than a flat black rectangle.
-            'inset 0 0 0 0.5px rgba(255,255,255,0.14)',
+            'inset 0 0 0 1px rgba(255,255,255,0.08)',
             'inset 0 1px 0 rgba(255,255,255,0.08)',
-            'inset 0 -1px 0 rgba(0,0,0,0.55)',
             '0 36px 60px -28px rgba(0,0,0,0.7)',
           ].join(', '),
         }}
@@ -859,7 +818,7 @@ function LaptopHardwareShell({ children }: { children: ReactNode }) {
             background: '#000',
             borderRadius: '0 0 6px 6px',
             zIndex: 5,
-            boxShadow: 'inset 0 -0.5px 0 rgba(255,255,255,0.05)',
+            boxShadow: 'inset 0 -1px 0 rgba(255,255,255,0.05)',
           }}
         />
         {/* FaceTime camera dot inside the notch. */}
@@ -874,7 +833,7 @@ function LaptopHardwareShell({ children }: { children: ReactNode }) {
             height: 3,
             borderRadius: '50%',
             background: '#1a1a1f',
-            boxShadow: 'inset 0 0 0 0.5px rgba(255,255,255,0.2)',
+            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.15)',
             zIndex: 6,
           }}
         />
@@ -898,7 +857,6 @@ function LaptopHardwareShell({ children }: { children: ReactNode }) {
         aria-hidden="true"
         style={{
           height: 3,
-          marginInline: -deckOverhang,
           background: `linear-gradient(180deg, ${LAPTOP_TOKENS.hingeTop} 0%, ${LAPTOP_TOKENS.hingeMid} 50%, ${LAPTOP_TOKENS.hingeTop} 100%)`,
         }}
       />
@@ -921,22 +879,16 @@ function LaptopHardwareShell({ children }: { children: ReactNode }) {
       <div
         style={{
           position: 'relative',
-          marginInline: -deckOverhang,
           height: deckHeight,
           background: `linear-gradient(180deg, ${LAPTOP_TOKENS.deckTopRim} 0%, ${LAPTOP_TOKENS.deckMidUpper} 10%, ${LAPTOP_TOKENS.deckMid} 52%, ${LAPTOP_TOKENS.deckMidLower} 86%, ${LAPTOP_TOKENS.deckBottom} 100%)`,
-          borderRadius: '6px 6px 18px 18px',
+          borderRadius: '0 0 18px 18px',
           paddingTop: 22,
           paddingInline: 60,
           boxShadow: [
-            // Top chamfer — bright machined edge along the deck top.
             'inset 0 1px 0 rgba(255,255,255,0.16)',
-            // Front edge shadow — sells unibody thickness.
             'inset 0 -1.5px 0 rgba(0,0,0,0.5)',
-            // Outer drop shadow under the laptop.
             '0 22px 44px -22px rgba(0,0,0,0.65)',
           ].join(', '),
-          // Clip the sheen + grain overlays to the deck's rounded
-          // corners so they don't bleed past the unibody silhouette.
           overflow: 'hidden',
         }}
       >
@@ -1000,10 +952,8 @@ function LaptopHardwareShell({ children }: { children: ReactNode }) {
             height: 8,
             background: `linear-gradient(180deg, ${LAPTOP_TOKENS.keyWellTop} 0%, ${LAPTOP_TOKENS.keyWellBottom} 100%)`,
             borderRadius: '4px 4px 1px 1px',
-            boxShadow: [
-              'inset 0 1px 0 rgba(0,0,0,0.55)',
-              'inset 0 -0.5px 0 rgba(255,255,255,0.03)',
-            ].join(', '),
+            boxShadow:
+              'inset 0 1px 0 rgba(0,0,0,0.55), inset 0 -1px 0 rgba(255,255,255,0.03)',
           }}
         />
 
@@ -1044,14 +994,8 @@ function LaptopHardwareShell({ children }: { children: ReactNode }) {
                   style={{
                     background: `linear-gradient(180deg, ${LAPTOP_TOKENS.keyTop} 0%, ${LAPTOP_TOKENS.keyBottom} 100%)`,
                     borderRadius: 2,
-                    boxShadow: [
-                      // Top inset highlight — catches the deck's
-                      // ambient light, gives every key a chamfered cap.
-                      'inset 0 0.5px 0 rgba(255,255,255,0.12)',
-                      // Bottom inset shadow — pushes the key body
-                      // down into the well, sells depth.
-                      'inset 0 -0.5px 0 rgba(0,0,0,0.6)',
-                    ].join(', '),
+                    boxShadow:
+                      'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.5)',
                   }}
                 />
               ))}
@@ -1077,15 +1021,9 @@ function LaptopHardwareShell({ children }: { children: ReactNode }) {
             background: `linear-gradient(180deg, ${LAPTOP_TOKENS.trackpadTop} 0%, ${LAPTOP_TOKENS.trackpadMid} 50%, ${LAPTOP_TOKENS.trackpadBottom} 100%)`,
             borderRadius: 9,
             boxShadow: [
-              // Top edge highlight — strong, sells "glass catching
-              // room light along its upper edge".
               'inset 0 1px 0 rgba(255,255,255,0.22)',
-              // Bottom inset shadow — slight, sells curvature.
               'inset 0 -1px 0 rgba(0,0,0,0.45)',
-              // Outline — thin dark ring separating glass from deck.
-              'inset 0 0 0 0.5px rgba(0,0,0,0.5)',
-              // Outer drop — a 1px shadow under the pad, like glass
-              // sitting on the aluminium with hairline relief.
+              'inset 0 0 0 1px rgba(0,0,0,0.4)',
               '0 1px 1px rgba(0,0,0,0.3)',
             ].join(', '),
           }}
@@ -1166,7 +1104,7 @@ function IMacHardwareShell({ children }: { children: ReactNode }) {
           boxShadow: [
             'inset 0 1px 0 rgba(255,255,255,0.85)',
             'inset 0 -1px 0 rgba(0,0,0,0.18)',
-            'inset 0 0 0 1px rgba(0,0,0,0.06)',
+            'inset 0 0 0 1px rgba(0,0,0,0.08)',
             '0 30px 60px -28px rgba(0,0,0,0.45)',
           ].join(', '),
         }}

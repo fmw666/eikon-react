@@ -472,9 +472,9 @@ function MobileShell({
               borderRadius: geo.islandHeight / 2,
               background: PHONE_TOKENS.islandBg,
               boxShadow: [
-                'inset 0 0.5px 0 rgba(255,255,255,0.06)',
-                'inset 0 -0.5px 0 rgba(0,0,0,0.4)',
-                '0 0 0 0.5px rgba(0,0,0,0.7)',
+                'inset 0 1px 0 rgba(255,255,255,0.04)',
+                'inset 0 -1px 0 rgba(0,0,0,0.3)',
+                '0 0 0 1px rgba(0,0,0,0.6)',
               ].join(', '),
               pointerEvents: 'none',
               zIndex: 3,
@@ -542,11 +542,11 @@ function SideButton({
           side === 'left' ? '1.5px 0 0 1.5px' : '0 1.5px 1.5px 0',
         boxShadow: [
           side === 'left'
-            ? `inset -0.5px 0 0 rgba(0,0,0,0.5)`
-            : `inset 0.5px 0 0 rgba(0,0,0,0.5)`,
+            ? `inset -1px 0 0 rgba(0,0,0,0.4)`
+            : `inset 1px 0 0 rgba(0,0,0,0.4)`,
           side === 'left'
-            ? `-0.5px 0 0 ${PHONE_TOKENS.buttonHighlight}`
-            : `0.5px 0 0 ${PHONE_TOKENS.buttonHighlight}`,
+            ? `-1px 0 0 ${PHONE_TOKENS.buttonHighlight}`
+            : `1px 0 0 ${PHONE_TOKENS.buttonHighlight}`,
         ].join(', '),
         zIndex: 1,
       }}
@@ -715,8 +715,8 @@ function TrafficLights() {
     height: 12,
     borderRadius: '50%',
     background: color,
-    border: `0.5px solid ${APPLE_TOKENS.trafficStroke}`,
-    boxShadow: '0 0 0 0.5px rgba(0,0,0,0.04) inset',
+    border: `1px solid ${APPLE_TOKENS.trafficStroke}`,
+    boxShadow: '0 0 0 1px rgba(0,0,0,0.04) inset',
   });
   return (
     <span style={{ display: 'inline-flex', gap: 8 }}>
