@@ -363,10 +363,16 @@ export function PreviewFrame() {
         width: '100%',
         height: '100%',
         // Subtle desk-like backdrop so the shell's drop shadow has
-        // something to land on. Slightly cooler than #fafafa to give
-        // the warm Apple chrome a gentle complementary tint.
+        // something to land on. Tuned to a very faint warm cream
+        // (ivory → soft butter → pale wheat) so the bright "desk"
+        // sits gently inside the surrounding black playground chrome
+        // — a black + warm-ivory pairing reads as premium and stops
+        // the stage from feeling like a hard white cut-out against
+        // the dark theme. Saturation is held WAY down so the wash
+        // still reads as "off-white" rather than "yellow paper" and
+        // doesn't tint screenshots of the previewed app.
         background:
-          'radial-gradient(ellipse at top, #f7f7f9 0%, #ececef 80%, #e3e3e7 100%)',
+          'radial-gradient(ellipse at top, #fbf8ef 0%, #f3eedb 80%, #ebe4c5 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
