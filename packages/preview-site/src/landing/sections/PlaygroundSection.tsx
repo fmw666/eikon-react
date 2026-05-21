@@ -1,78 +1,153 @@
 /**
  * @file PlaygroundSection.tsx
- * @description Landing wrapper for the three-pane playground —
- * intentionally the *visual focal point* of the entire home page.
+ * @description The home page's interactive workbench — a single
+ * focal section that bundles every control the visitor needs
+ * (parameters, copyable prompt) alongside the live three-pane
+ * playground, so the *complete* "configure → preview → copy" loop
+ * is finished without leaving this one viewport.
  *
- * Hierarchy on the page:
+ * Layout (lg+):
  *
- *   Hero               (introduce the product, hand off downward)
- *   PlatformPicker     (supporting: pick a target, quiet flat cards)
- *   PlaygroundSection  ← THE HERO. Live tool. Biggest heading.
- *                        Surrounded by an ambient halo and a
- *                        visible accent frame. The whole layout
- *                        funnels here.
- *   PromptOutput       (supporting: copy-ready output of the above)
- *   …story content
+ *   ┌───── ◉ LIVE PLAYGROUND ─────────────────────────────────┐
+ *   │ Configure your stack                                      │
+ *   │ Every choice updates the preview and the command…         │
+ *   ├──────────────────────┬────────────────────────────────────┤
+ *   │ Parameters           │                                     │
+ *   │  · Design            │                                     │
+ *   │  · Layout            │                                     │
+ *   │  · UI / Toast        │      PlaygroundShell                │
+ *   │  · pm                │      (Files | Code | Preview)       │
+ *   │ ─────────────        │                                     │
+ *   │ Copy Prompt / CLI    │                                     │
+ *   │ ┌──────────────┐     │                                     │
+ *   │ │ npx …        │     │                                     │
+ *   │ └──────────────┘     │                                     │
+ *   └──────────────────────┴────────────────────────────────────┘
  *
- * Why so loud (relative to its neighbours):
+ * Below `lg` the two columns stack: the sidebar (params + prompt)
+ * sits above a fixed-height frame, so the section degrades to a
+ * legible single column on tablet/phone without losing any
+ * functionality.
  *
- *   The visitor came to *try* the template, not read about it. The
- *   playground frame is where that promise gets delivered. Every
- *   other surface on this page is intentionally dialled down so the
- *   eye lands here without competition: PlatformPicker dropped its
- *   3D + animated borders, PainPoints lost its mouse spotlight, the
- *   QASection's "live rail" is just a thin border now. The energy
- *   they used to spend on attention-grabbing decoration is
- *   concentrated into this one section instead — the LIVE eyebrow,
- *   the bigger heading, the ambient halo, the accented frame ring.
+ * Why a single workbench instead of three sibling sections
+ * --------------------------------------------------------
+ *   The previous home page split this into:
+ *     PlatformPicker → PlaygroundSection (params + frame) →
+ *     PromptOutput
+ *   which forced the visitor to scroll between three loosely-tied
+ *   surfaces to see the result of a single configuration choice.
+ *   The "click a toggle, scroll down to see the prompt update"
+ *   loop was real but felt disconnected — the visitor had to hold
+ *   "the panels are wired together" in their head.
+ *
+ *   Pulling params + frame + prompt into one workbench card makes
+ *   that wiring physical: every change happens within one
+ *   bordered surface, the visitor's eyes don't leave the box,
+ *   and the page itself reads as "the playground is the
+ *   destination". PlatformPicker stays upstream as its own
+ *   editorial section because it is also the page's
+ *   "what does this template ship?" overview — its rich
+ *   triple-card layout earns its keep there in a way that
+ *   would feel cramped inside this workbench's sidebar.
+ *
+ * Why we still don't scroll-jack
+ * ------------------------------
+ *   SuperWhisper-style sticky pinning would make this surface
+ *   *trap* the wheel until the visitor "completed" it. But every
+ *   sub-region inside the workbench has its own scrollbar (file
+ *   tree, code editor, preview iframe, prompt `<pre>`,
+ *   sidebar overflow) and the moment any of them needs to scroll,
+ *   a hijacked outer wheel collides with the inner one. Instead
+ *   we use a tall-but-bounded card (`clamp(640px, 82vh, 880px)`):
+ *   the workbench takes most of the viewport so the visitor's
+ *   eye naturally rests on it, but the page itself never stops
+ *   responding to the wheel — scroll past it the moment you're
+ *   done.
  *
  * Owns:
- *
- *   - LIVE eyebrow with pulsing dot (telegraphs "this is a real,
- *     working tool — try it now").
- *   - Large section heading + subtitle.
- *   - The params card (driven by `ParamsPanel`).
- *   - The playground frame (Toolbar + Files + Code + Preview),
- *     wrapped in a brand-tinted accent container with a soft radial
- *     halo behind it.
+ *   - LIVE eyebrow + heading + subtitle (editorial framing).
+ *   - The workbench card with the rotating conic-border ring.
+ *   - The two-pane internal layout (sidebar + main).
+ *   - Anchors for the two Hero CTAs:
+ *       · PLAYGROUND_ANCHOR_ID  — the section as a whole, scrolled
+ *                                 to from "Get started" once the
+ *                                 platform is chosen.
+ *       · PROMPT_OUTPUT_ANCHOR_ID — the sidebar's prompt sub-region,
+ *                                   scrolled to from the Hero's
+ *                                   "find it" pill.
  */
+
+import type { ReactNode } from 'react';
 
 import { ParamsPanel } from '@/shell/ParamsPanel';
 import { PlaygroundShell } from '@/shell/App';
 
 import { useI18n } from '../theme/i18n';
+import { PromptOutput } from './PromptOutput';
 
 /** Anchor used by the Hero CTA and by Nav's #playground link. */
 export const PLAYGROUND_ANCHOR_ID = 'playground';
+
+/**
+ * Anchor for the prompt sub-region inside the workbench sidebar.
+ * Re-exported here (instead of from `PromptOutput.tsx`) because the
+ * canonical location of the prompt block is now this workbench, not
+ * the standalone `PromptOutput` section that the home page no
+ * longer renders. The Hero's "find it" pill scrolls here.
+ */
+export const PROMPT_OUTPUT_ANCHOR_ID = 'prompt-output';
 
 export function PlaygroundSection() {
   const { t } = useI18n();
   return (
     <section
       id={PLAYGROUND_ANCHOR_ID}
-      className="relative isolate mx-auto w-full max-w-7xl px-6 py-24 sm:py-32"
+      // Wide-screen "break out" — the surrounding marketing sections
+      // (Hero, PlatformPicker, story half) all live inside `max-w-7xl`
+      // (1280px). The workbench is the home page's tool surface, so
+      // it deliberately escapes that gutter to read as "the page
+      // momentarily expands into work mode". `max-w-[1760px]` is wide
+      // enough to fill any laptop / desktop monitor commonly in use,
+      // but caps the card so it doesn't sprawl on 4K+ displays where
+      // a truly viewport-width card would put the sidebar and the
+      // preview *too far apart* for the eye to read them as one
+      // tool. Padding tightens at small sizes and grows at the
+      // larger breakpoints so the card never crashes into the
+      // viewport edge but also never wastes huge wings of negative
+      // space on Retina laptops.
+      className="relative isolate mx-auto w-full max-w-[1760px] px-4 py-20 sm:px-6 sm:py-24 lg:px-8 xl:px-12"
       aria-labelledby="playground-title"
     >
-      {/* Ambient halo — a single soft radial wash sitting *behind*
-          the section's content. It widens around the frame so the
-          playground reads as "lit from behind", visually separating
-          it from the calmer cards above and below. The alpha is
-          intentionally low so on a quick scroll-by the section
-          reads as "the page suddenly has a centre of mass" rather
-          than as a coloured rectangle.
+      {/* Ambient halo — radial slate wash sitting *behind* the
+          workbench. Pairs with the conic ring on the card to make
+          the whole surface read as "lit from behind", visually
+          separating it from the calmer cards above and below. The
+          alpha is intentionally low so on a quick scroll-by the
+          section reads as "the page suddenly has a centre of
+          mass" rather than as a coloured rectangle.
 
-          `eikon-aurora-drift` is a 12s ease-in-out translate cycle
-          that nudges the halo a few % up/down/left/right; on a
-          static screenshot the section reads the same, on a real
-          page the centre of mass slowly breathes. */}
+          `eikon-playground-halo` drives a three-act scroll-driven
+          bloom synchronised with the workbench card itself: the
+          halo opens from `scale(0.72) opacity 0.3` as the section
+          enters, peaks at `scale(1.18)` (a deliberate overshoot)
+          at 28% view-progress when the card itself "lands", then
+          settles to `scale(1.10)` and *holds there* for the rest
+          of the section's view-progress — exactly while the
+          visitor is using the workbench. Browsers without
+          `animation-timeline: view()` paint the halo at its
+          default rest state — no broken visuals, no JS fallback. */}
       <div
         aria-hidden="true"
-        className="eikon-aurora-drift pointer-events-none absolute inset-x-0 top-12 -z-0 mx-auto h-[640px] max-w-5xl"
+        // Halo width tracks the workbench card itself — when the
+        // section breaks out to ~1760px the halo expands with it,
+        // so the "lit from behind" wash still hugs the card's
+        // shoulders instead of leaving the wide card's outer
+        // thirds painted only by the page background.
+        className="eikon-playground-halo pointer-events-none absolute inset-x-0 top-12 -z-0 mx-auto h-[680px] max-w-[1640px]"
         style={{
           background:
-            'radial-gradient(60% 50% at 50% 40%, rgba(148, 163, 184, 0.10), transparent 70%)',
+            'radial-gradient(60% 50% at 50% 40%, rgba(148, 163, 184, 0.12), transparent 70%)',
           filter: 'blur(8px)',
-          animation: 'eikon-aurora-drift 12s ease-in-out infinite',
         }}
       />
 
@@ -97,61 +172,238 @@ export function PlaygroundSection() {
         }}
       />
 
-      <div className="relative">
-        {/* ---- Editorial heading ------------------------------------
-            This is the loudest title on the page on purpose. Bigger
-            than PlatformPicker above (text-2xl/3xl) and heavier than
-            PromptOutput below. The LIVE eyebrow with its pulsing
-            dot reinforces "real working tool" — pairs with the
-            breathing playground frame underneath. */}
-        <div className="mb-10 text-center sm:mb-12">
-          <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-400/30 bg-brand-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-brand-300">
-            <span className="eikon-pulse-glow inline-block h-1.5 w-1.5 rounded-full bg-brand-300 shadow-[0_0_8px_var(--accent-glow)]" />
-            {t('playground.eyebrow')}
-          </p>
-          <h2
-            id="playground-title"
-            className="text-4xl font-semibold tracking-tight text-[var(--fg-1)] sm:text-5xl"
-          >
-            {t('params.title')}
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm text-[var(--fg-3)] sm:text-base">
-            {t('params.subtitle')}
-          </p>
-        </div>
+      {/* Cinematic stage vignette — third layer of the "push and
+          hold" move. Sits *above* the grid and *below* the halo +
+          workbench, so it darkens the section's background paint
+          (grid, page surface) without ever touching the workbench
+          card or its halo high-light. Fades in from `opacity 0` to
+          ~0.72 across the same Act I → III timeline as the frame's
+          dolly: by the time the visitor is in the HOLD stretch
+          using the workbench, the surrounding section is dimmed
+          and the workbench is the only visually loud thing on
+          screen — a stage spotlight effect.
 
-        <ParamsPanel />
+          The vignette is contained to this section's box; once
+          the visitor scrolls past, neighbouring surfaces paint at
+          full brightness immediately. We don't try to dim the
+          whole viewport (would require a `position: fixed`
+          overlay coordinated across sections, and would leak past
+          this section's responsibility).
+            
+          On reduced-motion: the keyframe is disabled and opacity
+          forced to 0, so the section just paints its normal
+          background — the spotlight effect is an animation, not
+          a static "this section is dim" decision. */}
+      <div
+        aria-hidden="true"
+        className="eikon-playground-vignette pointer-events-none absolute inset-0"
+        style={{
+          // -1 places the vignette above the dot grid (-10) and
+          // below the halo (0) and the workbench frame (in DOM
+          // order, paints last). The section's `isolate` keeps
+          // the negative z-index from leaking under neighbouring
+          // sections — the darkening is bounded to this stage.
+          zIndex: -1,
+          // `farthest-corner` ellipse is intentional here: the
+          // workbench card spans almost the full section width,
+          // so a small fixed-size ellipse would clip the dark
+          // ring into the card's left/right edges. Letting the
+          // gradient size itself relative to the corners means
+          // the bright island always extends past the card no
+          // matter the viewport, while the darkening still kicks
+          // in clearly above/below and at the corners — the
+          // negative space outside the card is what gets dimmed,
+          // which is exactly the "stage spotlight" intent.
+          background:
+            'radial-gradient(ellipse farthest-corner at 50% 50%, transparent 45%, rgba(2, 6, 23, 0.7) 100%)',
+        }}
+      />
 
-        {/* Playground frame container.
+      {/* ---- Editorial heading ------------------------------------
+          The loudest title on the page on purpose. Bigger than
+          PlatformPicker above (text-2xl/3xl) and heavier than any
+          downstream section. The LIVE eyebrow with its pulsing
+          dot reinforces "real working tool", which pairs with the
+          breathing playground frame underneath.
 
-            The visible chrome is THE signature animation of the
-            home page: `eikon-conic-border` paints a 1px conic
-            gradient ring around the perimeter that rotates once
-            every 12 seconds, so the focal section has a quiet
-            "this is alive" pulse even when the visitor isn't
-            interacting. We layer a soft slate glow shadow
-            underneath for depth. The inner content is the
-            resizable three-pane shell at a fixed 700px tall —
-            enough vertical room for a full Toolbar + a healthy
-            device preview on a 13" laptop without crowding the
-            viewport.
+          Centred and spaced; we deliberately do NOT make it
+          sticky. The workbench card right below carries the
+          visual weight, and a sticky chapter heading would just
+          take screen real estate from the surface that actually
+          needs it. The visitor's eye lands on the heading once,
+          then falls into the workbench.
 
-            Why 12s and not faster:
-              - <8s reads as "frantic" and competes with the
-                playground content for attention.
-              - >15s reads as "broken / not animating".
-              - 12s lands at exactly the speed where the rotation
-                is visible on a slow scroll-pause but invisible
-                while the visitor is actively typing/clicking.
-        */}
-        <div
-          className="eikon-conic-border relative mt-8 rounded-2xl shadow-[0_24px_80px_-32px_rgb(0_0_0/0.55),0_0_0_1px_rgb(148_163_184/0.06)]"
-          style={{ height: 700 }}
+          The header is `mx-auto max-w-3xl` even though the
+          enclosing section breaks out to ~1760px — a heading
+          stretched to the full workbench width would read as a
+          tradeshow banner, not editorial. The card below is
+          allowed to fill the wide section; the heading is not. */}
+      <header className="mx-auto mb-10 max-w-3xl text-center sm:mb-12">
+        <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-400/30 bg-brand-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-brand-300">
+          <span className="eikon-pulse-glow inline-block h-1.5 w-1.5 rounded-full bg-brand-300 shadow-[0_0_8px_var(--accent-glow)]" />
+          {t('playground.eyebrow')}
+        </p>
+        <h2
+          id="playground-title"
+          className="text-4xl font-semibold tracking-tight text-[var(--fg-1)] sm:text-5xl"
         >
-          <div className="h-full overflow-hidden rounded-2xl">
+          {t('params.title')}
+        </h2>
+        <p className="mx-auto mt-4 max-w-2xl text-sm text-[var(--fg-3)] sm:text-base">
+          {t('params.subtitle')}
+        </p>
+      </header>
+
+      {/* ---- The workbench -----------------------------------------
+          A single bordered, conic-ringed card whose internal grid
+          carries the entire interaction loop: parameters and
+          prompt on the left, the live three-pane shell on the
+          right. The card height clamps to `min(82vh, 880px)` with
+          a `640px` floor — tall enough to dominate the visitor's
+          viewport (so the workbench reads as "the destination"),
+          short enough that the card never overflows the screen on
+          a 13" laptop or pushes the surrounding marketing context
+          completely out of view.
+
+          `eikon-conic-border` paints the slow 12s rotating slate
+          ring around the perimeter; `eikon-playground-frame`
+          drives a three-act cinematic move tied to scroll
+          position, *layered as two scroll-driven animations*:
+
+            1. PUSH IN  (cover  0% → 28%) — `scale(0.86)
+               translateY(64px) opacity 0.4` → `scale(1.02)
+               translateY(-2px) opacity 1`, while the cast
+               shadow swells from a thin contact line to a
+               180px ambient bowl. The lens dollies forward and
+               overshoots `1.0` slightly so the move reads as a
+               *push*, not a fade.
+            2. SETTLE   (cover 28% → 38%) — relax to `scale(1)`,
+               shadow tightens to its rest blur.
+            3. HOLD     (cover 38% →100%) — `scale(1)` locked,
+               shadow locked at its lifted rest value.
+               More than half of the section's total scroll
+               range is the workbench *staying* at peak presence
+               — the "放大并停留" cinematic feel.
+
+          The shadow is animated by a second scroll-driven
+          keyframe (`eikon-playground-shadow`) layered on the
+          same animation-timeline; we keep them as separate
+          animations because shadow interpolation has its own
+          paint cost and shouldn't piggy-back on every transform
+          frame. The Tailwind `shadow-[…]` class on this element
+          is the *fallback* — older browsers that skip the
+          `@supports (animation-timeline: view())` block paint
+          the rest-state shadow directly, so the workbench
+          never appears "flat" without the cinematic move.
+
+          `transform-origin: center` is intentional: the workbench
+          is now an independent focal card (no longer pinned to
+          the heading above), and a centred origin makes the push
+          read as the lens zooming in on the card itself rather
+          than as the card "growing out of" the heading — which
+          would leave the bottom of the card visibly stretched on
+          tall viewports. */}
+      <div
+        className="eikon-conic-border eikon-playground-frame relative overflow-hidden rounded-2xl shadow-[0_60px_140px_-32px_rgb(0_0_0/0.6),0_24px_60px_-32px_rgb(15_23_42/0.45),0_0_0_1px_rgb(148_163_184/0.08)] lg:h-[clamp(640px,82vh,880px)]"
+        style={{ transformOrigin: 'center' }}
+      >
+        <div className="flex h-full flex-col lg:flex-row">
+          {/* ─── Left: sidebar with params + copyable prompt ─────
+              Width clamped to a useful sidebar size on lg+
+              (320–400px, ~28vw). On <lg the layout flips to
+              vertical stack and the sidebar takes full width
+              above a fixed-height frame.
+
+              `overflow-y-auto` makes the sidebar scroll
+              internally on lg+ (when its content exceeds the
+              clamped card height) instead of pushing the page
+              into a full-window scroll — the Files/Code/Preview
+              on the right then keeps its own scroll behaviour
+              undisturbed. */}
+          <aside
+            aria-label="Workbench controls"
+            // Sidebar width scales with the now-wider workbench:
+            // `clamp(340px, 24vw, 440px)` keeps it readable but
+            // not greedy. At 1280px viewport ⇒ 340px (floor); at
+            // 1440px ⇒ 346px; at 1760px ⇒ 422px; at 1920px ⇒
+            // capped at 440px. The cap matters — without it the
+            // prompt sidebar on a 4K monitor would stretch past
+            // 500px and start to feel like a landing column,
+            // pulling visual weight away from the live preview.
+            className="flex min-h-0 flex-col gap-5 border-b border-[var(--border-1)] bg-[var(--surface-0)]/60 p-4 sm:p-5 lg:w-[clamp(340px,24vw,440px)] lg:shrink-0 lg:overflow-y-auto lg:border-b-0 lg:border-r"
+          >
+            <SidebarBlock title={t('playgroundPage.paramsTitle')}>
+              <ParamsPanel />
+            </SidebarBlock>
+
+            {/* The prompt block carries `PROMPT_OUTPUT_ANCHOR_ID`
+                so the Hero's "find it" pill still has a target —
+                the prompt simply lives inside the workbench now
+                rather than in its own downstream section.
+                `fill` makes this block consume any remaining
+                vertical room in the sidebar so the prompt's
+                <pre> isn't squashed to its content minimum. */}
+            <SidebarBlock
+              title={t('playgroundPage.promptTitle')}
+              id={PROMPT_OUTPUT_ANCHOR_ID}
+              fill
+            >
+              <PromptOutput compact />
+            </SidebarBlock>
+          </aside>
+
+          {/* ─── Right: live playground ─────────────────────────
+              The three-pane shell (Toolbar + Files + Code +
+              Preview). `min-h-0 min-w-0` lets the flex/grid
+              parent shrink it below its intrinsic content size
+              when the viewport is short, so the inner panes get
+              their own scrollbars instead of forcing the
+              workbench to overflow.
+
+              On <lg the right column gets a fixed 640px height —
+              tall enough to host a real preview without making
+              the stacked single-column layout feel cramped. */}
+          <main className="h-[640px] min-h-0 min-w-0 lg:h-auto lg:flex-1">
             <PlaygroundShell />
-          </div>
+          </main>
         </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * One labelled block inside the workbench sidebar. Renders a small
+ * uppercase eyebrow above its content; `fill` makes the block
+ * greedy on the cross-axis so the prompt card doesn't collapse
+ * to its <pre> minimum on tall sidebars.
+ *
+ * The optional `id` is forwarded to the wrapping <section> so
+ * external scroll targets (notably `PROMPT_OUTPUT_ANCHOR_ID` for
+ * the Hero "find it" pill) can land here directly.
+ */
+function SidebarBlock({
+  title,
+  id,
+  fill,
+  children,
+}: {
+  title: string;
+  id?: string;
+  fill?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      id={id}
+      className={'flex min-h-0 flex-col gap-2 ' + (fill ? 'flex-1' : '')}
+      aria-label={title}
+    >
+      <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--fg-3)]">
+        {title}
+      </h3>
+      <div className={'min-h-0 ' + (fill ? 'flex flex-1 flex-col' : '')}>
+        {children}
       </div>
     </section>
   );

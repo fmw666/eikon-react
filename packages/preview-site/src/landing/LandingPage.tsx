@@ -4,25 +4,35 @@
  *
  * Home route visual order (top → bottom):
  *
- *   1.  Nav               — sticky, with lang + Playground CTA.
- *   2.  Hero              — slogan + CTA.
- *   3.  PlatformPicker    — rich Web/Desktop/Mobile cards with
- *                           bullets + 3D tilt. Doubles as both the
- *                           primary choice axis AND the "what does
- *                           this template ship?" overview (formerly a
- *                           separate Outputs section).
- *   4.  PlaygroundSection — params card + 3-pane workspace.
- *   5.  PromptOutput      — copy-ready Prompt / CLI block.
- *   6.  TechStackWall     — marquee + tiered logo grid.
- *   7.  PainPoints        — 4-up "problem → solution" cards.
- *   8.  Philosophy        — author's tech-stack opinions.
- *   9.  QASection         — accordion FAQ + author-email CTA.
- *   10. Footer            — author / contact.
+ *   1. Nav               — sticky, with lang + Playground CTA.
+ *   2. Hero              — slogan + CTA.
+ *   3. PlatformPicker    — rich Web/Desktop/Mobile cards with
+ *                          bullets + 3D tilt. Doubles as both the
+ *                          primary choice axis AND the "what does
+ *                          this template ship?" overview (formerly a
+ *                          separate Outputs section).
+ *   4. PlaygroundSection — the workbench: params + copyable prompt
+ *                          on a left sidebar, the live three-pane
+ *                          shell (Files / Code / Preview) on the
+ *                          right. The complete "configure → preview
+ *                          → copy" loop happens inside this single
+ *                          card so the visitor's eye never has to
+ *                          leave the focal surface to see how their
+ *                          choices flow into the final command.
+ *   5. TechStackWall     — marquee + tiered logo grid.
+ *   6. PainPoints        — 4-up "problem → solution" cards.
+ *   7. Philosophy        — author's tech-stack opinions.
+ *   8. QASection         — accordion FAQ + author-email CTA.
+ *   9. Footer            — author / contact.
  *
- * The page is intentionally split into a "tool half" (sections 2-5)
- * and a "story half" (sections 6-9), separated by a thin divider.
+ * The page is intentionally split into a "tool half" (sections 2-4)
+ * and a "story half" (sections 5-8), separated by a thin divider.
  * Users who already trust the project see the tool first; users who
- * need convincing keep scrolling.
+ * need convincing keep scrolling. The PromptOutput surface used to
+ * live as its own section between the playground and the divider;
+ * it now sits inside the workbench's sidebar (see PlaygroundSection)
+ * so the visitor doesn't have to scroll between three loosely-tied
+ * surfaces to see the result of a single configuration toggle.
  *
  * Routing: three known top-level paths (`/`, `/playground`, `/changelog`)
  * are dispatched by a tiny path-checking shim. We avoid a real router
@@ -54,8 +64,10 @@ import {
   PlatformPicker,
   PLATFORM_PICKER_ANCHOR_ID,
 } from './sections/PlatformPicker';
-import { PlaygroundSection } from './sections/PlaygroundSection';
-import { PromptOutput, PROMPT_OUTPUT_ANCHOR_ID } from './sections/PromptOutput';
+import {
+  PlaygroundSection,
+  PROMPT_OUTPUT_ANCHOR_ID,
+} from './sections/PlaygroundSection';
 import { QASection } from './sections/QASection';
 import { TechStackWall } from './sections/TechStackWall';
 import { ThemeAndLangSync } from './theme/theme-store';
@@ -314,7 +326,6 @@ function HomeRoute() {
       />
       <PlatformPicker />
       <PlaygroundSection />
-      <PromptOutput />
       <SectionDivider />
       <TechStackWall />
       <PainPoints />
