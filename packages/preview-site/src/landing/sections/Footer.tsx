@@ -87,9 +87,22 @@ export function Footer() {
   // Mouse-follow spotlight — write cursor coordinates into CSS custom
   // properties on the host so the radial-gradient background tracks
   // the pointer without React re-renders. Cheap (composite-only).
+  //
+  // Gated on `pointer: fine` because the spotlight is a hover-only
+  // affordance: on a touch device the only way to fire `pointermove`
+  // is to drag a finger across the footer, which leaves the glow
+  // stuck wherever the finger left off — a stale "hot spot" that
+  // visitors read as a render bug.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    if (
+      typeof window === 'undefined' ||
+      typeof window.matchMedia !== 'function' ||
+      !window.matchMedia('(pointer: fine)').matches
+    ) {
+      return;
+    }
     const handleMove = (e: PointerEvent) => {
       const rect = el.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -169,7 +182,21 @@ export function Footer() {
         />
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-6 pb-12 pt-20 sm:pt-24">
+      <div
+        className="relative mx-auto max-w-7xl px-4 pt-16 sm:px-6 sm:pt-20 lg:pt-24"
+        style={{
+          // iOS home-indicator inset so the back-to-top pill / live
+          // status row never sit underneath the gesture bar.
+          //
+          // `max()` is the floor: on browsers without `env()`
+          // support the function resolves to its first arg
+          // (3rem), keeping the footer at LEAST the design's
+          // original `pb-12` rhythm. With `env()` support, the
+          // inset is added on top of a 2.5rem visual base.
+          paddingBottom:
+            'max(3rem, calc(2.5rem + env(safe-area-inset-bottom, 0px)))',
+        }}
+      >
         {/* Top: brand + Explore + Connect */}
         <div className="grid gap-12 gap-y-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
           {/* Brand block */}

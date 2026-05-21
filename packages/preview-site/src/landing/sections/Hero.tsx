@@ -104,7 +104,19 @@ export function Hero({
           being squeezed by the teaser. The teaser's `lg:bottom-20`
           + `lg:right-6` align it exactly with the bottom-right inner
           corner of the wrapper's padding box. */}
-      <div className="relative mx-auto max-w-7xl px-6 pb-32 pt-24 sm:pb-40 sm:pt-32">
+      {/*
+        VERTICAL RHYTHM
+        - `pt`: there's a ~80px tall floating Nav pill above this
+          section, and Hero is the *first* block the visitor sees.
+          `pt-24` (96px) on mobile gives the badge enough breathing
+          room from the pill so the page reads as "Nav | gap |
+          Hero" rather than "Nav-Hero" smashed together. Scales up
+          on `sm` / `lg` along with the title's clamp.
+        - `pb`: matched against PlatformPicker's `pt` below, so the
+          seam reads as a single deliberate gap (~144-176px combined
+          on mobile/sm, growing to ~256px on lg).
+      */}
+      <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 sm:px-6 sm:pb-32 sm:pt-28 lg:pb-40 lg:pt-32">
         {/* Text column */}
         <div className="flex flex-col items-start text-left">
           {/* Badge */}
@@ -127,7 +139,7 @@ export function Hero({
               `text-balance`, because we want the comma to be the
               line boundary in every viewport — that's the whole
               point of the editorial left-aligned look. */}
-          <h1 className="mt-8 max-w-4xl text-4xl font-semibold leading-[1.1] tracking-tight text-[var(--fg-1)] sm:text-6xl">
+          <h1 className="mt-7 max-w-4xl text-[clamp(2rem,8.5vw,2.5rem)] font-semibold leading-[1.12] tracking-tight text-[var(--fg-1)] sm:mt-8 sm:text-[clamp(2.75rem,6vw,3.75rem)] lg:text-6xl">
             <span className="block">{t('hero.title.line1')}</span>
             <span className="mt-2 block">
               {t('hero.title.line2Prefix')}
@@ -242,7 +254,13 @@ function GithubIcon({ className }: { className: string }) {
 function TerminalCard({ command }: { command: string }) {
   return (
     <div
-      className="eikon-shimmer-hover flex items-center gap-3 rounded-xl border border-[var(--border-1)] bg-[var(--surface-2)]/85 px-4 py-3 shadow-lg shadow-black/5 backdrop-blur dark:shadow-black/40"
+      // `max-w-full` + the inner `min-w-0` + `truncate` on the code
+      // line keep the card from forcing a horizontal scroll on
+      // viewports narrower than the command's natural width
+      // (320-340px iPhones with the `npx create-eikon-react .`
+      // string render OK without it but any longer command would
+      // overflow).
+      className="eikon-shimmer-hover flex max-w-full items-center gap-2.5 rounded-xl border border-[var(--border-1)] bg-[var(--surface-2)]/85 px-3 py-2.5 shadow-lg shadow-black/5 backdrop-blur dark:shadow-black/40 sm:gap-3 sm:px-4 sm:py-3"
       role="img"
       aria-label={`Terminal: ${command}`}
     >
@@ -251,7 +269,7 @@ function TerminalCard({ command }: { command: string }) {
         <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
         <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
       </div>
-      <code className="whitespace-nowrap font-mono text-sm text-[var(--fg-2)]">
+      <code className="whitespace-nowrap font-mono text-xs text-[var(--fg-2)] sm:text-sm">
         <span className="text-brand-500">$ </span>
         {command}
         {/* Trailing block cursor — the `eikon-cursor-breath` class

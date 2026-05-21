@@ -64,7 +64,10 @@ export default function ChangelogPage() {
   return (
     <main
       className="mx-auto flex w-full max-w-[1400px] flex-col gap-6 px-4 pb-12 sm:gap-8 sm:px-6 sm:pb-16 lg:px-8"
-      style={{ minHeight: 'calc(100vh - 5rem)' }}
+      // `100dvh` honours iOS Safari's collapsing toolbar so the page
+      // never overshoots the visible viewport on first paint. The
+      // 5rem subtraction matches the floating Nav region height.
+      style={{ minHeight: 'calc(100dvh - 5rem)' }}
     >
       <ChangelogPersistSync />
       <ChangelogContent />
@@ -461,17 +464,41 @@ function Workspace({
       : undefined;
 
   return (
-    // `items-stretch` (the default) lets the shorter column's
-    // background paint down to match the taller one — usually that's
-    // the tree extending its `#1e1e1e` strip under a longer diff, or
-    // the diff card extending down past a tiny one-file tree. Either
-    // way both columns appear as one continuous workspace.
-    <div className="flex w-full min-w-0">
-      {/* File tree column. 288px (`w-72`) on small screens stays
-          space-conscious; 320px (`lg:w-80`) on desktops gives a bit
-          more room before file paths like
-          `src/landing/changelog/ChangelogPage.tsx` start truncating. */}
-      <div className="w-72 min-w-0 shrink-0 lg:w-80">
+    // RESPONSIVE LAYOUT CONTRACT
+    //
+    //   `<md` (mobile/tablet) : VERTICAL stack — file tree on top
+    //                            with a capped height so it doesn't
+    //                            push the diff off-screen, diff
+    //                            below. Tap a file to select; the
+    //                            DiffView's internal scroll handles
+    //                            long patches.
+    //   `md+` (tablet/desktop): horizontal split — tree column on
+    //                            the left (288px → 320px), diff
+    //                            fills the rest. This is the
+    //                            original GitHub-style layout.
+    //
+    // `items-stretch` (the default) lets the shorter side's
+    // background paint to match the taller one — usually the tree
+    // extending its `#1e1e1e` strip down past a tiny diff, or vice
+    // versa. Either way both panes appear as one continuous
+    // workspace.
+    <div className="flex w-full min-w-0 flex-col md:flex-row">
+      {/* File tree.
+            <md : full-width, capped at ~30dvh so the diff is always
+                  visible without the visitor having to scroll past
+                  a long flat list of changed files. The tree scrolls
+                  internally above that cap.
+            md+ : 288px column, 320px on lg, fills row height. */}
+      <div
+        // Cap the mobile tree height so a multi-file diff doesn't
+        // hide the patch below the fold. `overflow-y-auto` lets
+        // the outer wrapper scroll when the tree's content-driven
+        // height exceeds the cap (the inner virtualised list takes
+        // over once it itself hits its own 720px ceiling). On
+        // `md+` we drop the cap so the tree fills its column
+        // naturally.
+        className="max-h-[min(30dvh,320px)] w-full min-w-0 shrink-0 overflow-y-auto border-b border-[var(--border-1)] md:max-h-none md:w-72 md:overflow-visible md:border-b-0 md:border-r lg:w-80"
+      >
         <ChangedFilesTree
           files={compare.files}
           selectedFile={selectedFile}

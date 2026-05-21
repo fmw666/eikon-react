@@ -157,11 +157,18 @@ export function Nav({ route, pending }: { route: AppRoute; pending: boolean }) {
 
       <header
         aria-label="Site"
-        className="pointer-events-none sticky top-0 z-40 w-full"
+        // `safe-area-inset-top` keeps the pill clear of iOS notches.
+        // We use `max()` with a 1.5rem floor so the visual top
+        // padding doesn't collapse to 0 on devices without an inset.
+        // `eikon-nav-glass` is a tagging class the responsive
+        // overrides in styles/index.css use to turn off the
+        // expensive backdrop-blur on touch viewports.
+        className="eikon-nav-glass pointer-events-none sticky top-0 z-40 w-full"
+        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
       >
         <div
           className={
-            'mx-auto flex max-w-7xl items-end justify-center gap-2.5 px-6 pt-6 pb-4 transition-transform duration-300 ease-out ' +
+            'mx-auto flex max-w-7xl items-end justify-center gap-2 px-3 pt-[max(1rem,env(safe-area-inset-top))] pb-3 transition-transform duration-300 ease-out sm:gap-2.5 sm:px-6 sm:pt-6 sm:pb-4 ' +
             (scrolled ? 'scale-[0.985]' : 'scale-100')
           }
         >
@@ -357,7 +364,7 @@ function NavPill({
   const showIndicator = targetKey !== null && indicator.width > 0;
 
   const railClass =
-    'relative inline-flex items-center gap-0.5 rounded-full border p-1 transition-[background-color,box-shadow,border-color,backdrop-filter] duration-300 ease-out ' +
+    'eikon-nav-glass relative inline-flex items-center gap-0 rounded-full border p-0.5 transition-[background-color,box-shadow,border-color,backdrop-filter] duration-300 ease-out sm:gap-0.5 sm:p-1 ' +
     (scrolled
       ? 'border-[var(--border-2)]/80 bg-[var(--surface-2)]/80 backdrop-blur-xl shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_8px_24px_rgb(0_0_0/0.28)]'
       : 'border-[var(--border-1)] bg-[var(--surface-2)] backdrop-blur-0 shadow-[inset_0_1px_0_rgb(255_255_255/0.04),0_2px_8px_rgb(0_0_0/0.08)]');
@@ -431,8 +438,13 @@ function LangOrb({
   children: ReactNode;
   scrolled: boolean;
 }) {
+  // Fixed 36×36 at every breakpoint — LangSwitcher is always
+  // rendered in `compact` mode, so the orb is a constant-size
+  // satellite next to the nav pill. The `.eikon-nav-glass` tag
+  // routes the touch-viewport `backdrop-filter: none` override
+  // in styles/index.css.
   const orbClass =
-    'relative inline-flex items-center justify-center rounded-full border p-0.5 transition-[background-color,box-shadow,border-color,backdrop-filter] duration-300 ease-out ' +
+    'eikon-nav-glass relative inline-flex h-9 w-9 items-center justify-center rounded-full border p-0.5 transition-[background-color,box-shadow,border-color,backdrop-filter] duration-300 ease-out ' +
     (scrolled
       ? 'border-[var(--border-2)]/80 bg-[var(--surface-2)]/80 backdrop-blur-xl shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_8px_24px_rgb(0_0_0/0.28)]'
       : 'border-[var(--border-1)] bg-[var(--surface-2)] backdrop-blur-0 shadow-[inset_0_1px_0_rgb(255_255_255/0.04),0_2px_8px_rgb(0_0_0/0.08)]');
@@ -506,7 +518,7 @@ function NavLink({
       // is held, giving the click a physical "tap" feel before the
       // route swap visually lands.
       className={
-        'relative z-[1] inline-flex items-center justify-center rounded-full px-3.5 py-1.5 text-sm font-medium no-underline outline-none transition-[color,transform] duration-200 ease-out active:scale-[0.94] focus-visible:ring-2 focus-visible:ring-[hsla(0,0%,100%,0.45)] focus-visible:ring-offset-0 ' +
+        'relative z-[1] inline-flex min-h-[36px] items-center justify-center rounded-full px-2.5 py-1.5 text-[13px] font-medium no-underline outline-none transition-[color,transform] duration-200 ease-out active:scale-[0.94] focus-visible:ring-2 focus-visible:ring-[hsla(0,0%,100%,0.45)] focus-visible:ring-offset-0 sm:px-3.5 sm:text-sm ' +
         (active
           ? 'text-[hsla(0,0%,100%,0.9)]'
           : 'text-[hsla(0,0%,100%,0.42)] hover:text-[hsla(0,0%,100%,0.9)]')
@@ -581,7 +593,7 @@ function PlaygroundCta({
       // hover lift on press, so the CTA *visibly* recoils into the
       // surface when clicked — feels like a physical button rather
       // than a div changing class.
-      className="group relative z-[1] ml-1 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-white to-zinc-200 px-3.5 py-1.5 text-sm font-medium text-zinc-900 no-underline shadow-[inset_0_1px_0_rgb(255_255_255/0.9),inset_0_-1px_0_rgb(0_0_0/0.08),0_1px_2px_rgb(0_0_0/0.25),0_4px_10px_rgb(0_0_0/0.15)] transition-[transform,box-shadow,background] duration-200 ease-out hover:-translate-y-px hover:from-white hover:to-zinc-100 hover:shadow-[inset_0_1px_0_rgb(255_255_255/1),inset_0_-1px_0_rgb(0_0_0/0.08),0_2px_4px_rgb(0_0_0/0.25),0_6px_14px_rgb(0_0_0/0.2)] active:translate-y-0 active:scale-[0.96]"
+      className="group relative z-[1] ml-0.5 inline-flex min-h-[36px] items-center gap-1.5 rounded-full bg-gradient-to-b from-white to-zinc-200 px-2.5 py-1.5 text-[13px] font-medium text-zinc-900 no-underline shadow-[inset_0_1px_0_rgb(255_255_255/0.9),inset_0_-1px_0_rgb(0_0_0/0.08),0_1px_2px_rgb(0_0_0/0.25),0_4px_10px_rgb(0_0_0/0.15)] transition-[transform,box-shadow,background] duration-200 ease-out hover:-translate-y-px hover:from-white hover:to-zinc-100 hover:shadow-[inset_0_1px_0_rgb(255_255_255/1),inset_0_-1px_0_rgb(0_0_0/0.08),0_2px_4px_rgb(0_0_0/0.25),0_6px_14px_rgb(0_0_0/0.2)] active:translate-y-0 active:scale-[0.96] sm:ml-1 sm:px-3.5 sm:text-sm"
     >
       <PlayIcon className="h-3 w-3 fill-zinc-900 text-zinc-900 transition-transform duration-200 ease-out group-hover:scale-110" />
       <span>{label}</span>

@@ -294,7 +294,7 @@ function prefersReducedMotion(): boolean {
 
 function PageFallback() {
   return (
-    <div className="flex h-[60vh] items-center justify-center text-sm text-[var(--fg-3)]">
+    <div className="flex h-[60dvh] items-center justify-center text-sm text-[var(--fg-3)]">
       <span
         aria-hidden="true"
         className="mr-2 inline-block h-3 w-3 rounded-full border-2 border-[var(--border-2)] border-t-[var(--fg-1)]"
@@ -344,7 +344,7 @@ function HomeRoute() {
  */
 function SectionDivider() {
   return (
-    <div className="mx-auto my-12 max-w-7xl px-6 sm:my-16">
+    <div className="mx-auto my-12 max-w-7xl px-4 sm:my-16 sm:px-6">
       <div
         className="h-px w-full"
         style={{

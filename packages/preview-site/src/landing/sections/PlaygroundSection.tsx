@@ -307,6 +307,13 @@ export function PlaygroundSection() {
           would leave the bottom of the card visibly stretched on
           tall viewports. */}
       <div
+        // Mobile: no fixed height — sidebar (params + prompt
+        // stacked) and the playground frame each own their own
+        // height; the card grows as tall as needed and the visitor
+        // scrolls past it. We still ship `overflow-hidden` so the
+        // rotating conic ring stays inside the rounded corners.
+        // Desktop: the original clamp keeps the workbench dominant
+        // without sprawling beyond ~880px on 4K monitors.
         className="eikon-conic-border eikon-playground-frame relative overflow-hidden rounded-2xl shadow-[0_60px_140px_-32px_rgb(0_0_0/0.6),0_24px_60px_-32px_rgb(15_23_42/0.45),0_0_0_1px_rgb(148_163_184/0.08)] lg:h-[clamp(640px,82vh,880px)]"
         style={{ transformOrigin: 'center' }}
       >
@@ -345,6 +352,11 @@ export function PlaygroundSection() {
                 title: t('playgroundPage.paramsTitle'),
                 icon: <SlidersIcon className="h-5 w-5" />,
                 children: <ParamsPanel />,
+                // Collapsed on mobile — the home workbench is
+                // already a "section" rather than a takeover, so
+                // a closed-by-default params accordion keeps the
+                // visitor moving down the page towards the prompt.
+                mobileDefaultOpen: false,
               },
               {
                 id: 'workbench-prompt',
@@ -353,6 +365,9 @@ export function PlaygroundSection() {
                 icon: <TerminalIcon className="h-5 w-5" />,
                 children: <PromptOutput compact />,
                 fill: true,
+                // Open on mobile — same rationale as the standalone
+                // playground page: the prompt is the artifact.
+                mobileDefaultOpen: true,
               },
             ]}
           />
@@ -365,10 +380,15 @@ export function PlaygroundSection() {
               their own scrollbars instead of forcing the
               workbench to overflow.
 
-              On <lg the right column gets a fixed 640px height —
-              tall enough to host a real preview without making
-              the stacked single-column layout feel cramped. */}
-          <main className="h-[640px] min-h-0 min-w-0 lg:h-auto lg:flex-1">
+              On <lg the right column takes `min(70dvh, 640px)`
+              with a 480px floor — tall enough to host a real
+              preview, but never larger than the visible viewport
+              (avoids "I can't see the rest of the workbench"
+              on short phones). The shell switches to its compact
+              tab-strip mode (`useIsCompactShell`) below 768px so
+              this height hosts a single full-bleed view, not
+              three competing strips. */}
+          <main className="h-[min(70dvh,640px)] min-h-[480px] min-w-0 lg:h-auto lg:min-h-0 lg:flex-1">
             <PlaygroundShell />
           </main>
         </div>

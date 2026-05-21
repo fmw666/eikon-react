@@ -70,10 +70,10 @@ export function QASection() {
 
   return (
     <section
-      className="mx-auto w-full max-w-6xl px-6 py-20 sm:py-24"
+      className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
       aria-labelledby="qa-title"
     >
-      <div className="grid grid-cols-1 gap-x-20 gap-y-14 lg:grid-cols-[1.5fr_1fr]">
+      <div className="grid grid-cols-1 gap-x-20 gap-y-12 sm:gap-y-14 lg:grid-cols-[1.5fr_1fr]">
         <div>
           {/* Eyebrow: tiny accent dot + uppercase label. The dot
               shares the brand glow used by Hero badge, tying the two
@@ -90,7 +90,12 @@ export function QASection() {
 
           <h2
             id="qa-title"
-            className="mt-5 max-w-[14ch] text-3xl font-semibold leading-[1.05] tracking-tight text-[var(--fg-1)] sm:text-4xl"
+            // 14ch is great on lg+ where the eye can use the
+            // dramatic line-break; on mobile that same constraint
+            // crushes the title into ~half of an already-narrow
+            // viewport. Lift the limit at `sm` so the title can
+            // breathe full-width on phones.
+            className="mt-5 text-3xl font-semibold leading-[1.05] tracking-tight text-[var(--fg-1)] sm:max-w-[14ch] sm:text-4xl"
           >
             {t('qa.title')}
           </h2>

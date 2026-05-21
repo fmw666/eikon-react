@@ -135,7 +135,7 @@ export function PromptOutput({ compact = false }: PromptOutputProps = {}) {
   return (
     <section
       id={PROMPT_OUTPUT_ANCHOR_ID}
-      className="mx-auto w-full max-w-7xl px-6 pb-24 sm:pb-28"
+      className="mx-auto w-full max-w-7xl px-4 pb-20 sm:px-6 sm:pb-24 lg:pb-28"
       aria-labelledby="prompt-title"
     >
       <div className="mb-6 flex flex-col gap-1.5 sm:flex-row sm:items-end sm:justify-between">

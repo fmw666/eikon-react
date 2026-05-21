@@ -200,7 +200,7 @@ export function PlatformPicker({ compact = false }: PlatformPickerProps = {}) {
   return (
     <section
       id={PLATFORM_PICKER_ANCHOR_ID}
-      className="mx-auto w-full max-w-6xl px-6 py-16 sm:py-20"
+      className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
       aria-labelledby="platform-title"
     >
       {/* ---- Editorial heading -----------------------------------------
@@ -239,7 +239,13 @@ export function PlatformPicker({ compact = false }: PlatformPickerProps = {}) {
         role="radiogroup"
         aria-label={t('platform.title')}
         onKeyDown={handleKeyDown}
-        className="relative grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        // Mobile: single column (3 stacked cards). We deliberately
+        // skip the `sm:grid-cols-2` intermediate state — three
+        // cards in a 2-col grid leave a lonely third card on the
+        // second row, which reads as a layout bug. Two columns
+        // would also crush the device-mockup hero strips below
+        // legibility on common tablet widths.
+        className="relative grid grid-cols-1 gap-4 lg:grid-cols-3"
       >
         {OPTIONS.map((opt, i) => {
           const active = opt.value === current;
@@ -264,9 +270,10 @@ export function PlatformPicker({ compact = false }: PlatformPickerProps = {}) {
         })}
       </div>
 
-      {/* Keyboard hint — quietly placed under the row so it doesn't
-          fight the heading for "look at me" attention. */}
-      <p className="mt-4 text-center text-[11px] text-[var(--fg-4)]">
+      {/* Keyboard hint — only meaningful for keyboard / mouse users.
+          Hidden on touch viewports where the suggestion would be
+          confusing (no arrow keys on a phone). */}
+      <p className="mt-4 hidden text-center text-[11px] text-[var(--fg-4)] [@media(hover:hover)]:block">
         <kbd className="rounded border border-[var(--border-1)] bg-[var(--surface-1)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--fg-3)]">
           ←
         </kbd>{' '}
@@ -410,6 +417,11 @@ const RichPlatformCard = forwardRef<HTMLButtonElement, RichPlatformCardProps>(
             telling the reader "this card is the *web* / *desktop* /
             *mobile* target". */}
         <div
+          // Aspect ratio is `5/3` at every breakpoint to match the
+          // mockups' own viewBox (`0 0 400 240`). Pick anything
+          // else (e.g. `16/9`) and the SVG's `preserveAspectRatio="meet"`
+          // shrinks the device down to fit, leaving fat letterbox
+          // bars and a mockup that reads smaller than the card.
           className={
             'relative aspect-[5/3] overflow-hidden border-b transition-colors duration-200 ' +
             (active

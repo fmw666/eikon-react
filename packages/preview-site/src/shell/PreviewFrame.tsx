@@ -47,9 +47,53 @@ function coercePlatform(raw: string): DevicePlatform {
  * Outer padding around the device shell so it doesn't sit flush against
  * the pane edges. iPhone-style chrome casts the most prominent shadow
  * and benefits from a touch more breathing room.
+ *
+ * Mobile viewports (≤ 640px) get tighter padding because every pixel
+ * the chrome eats is a pixel the simulated device screen loses — at
+ * 360px viewport width, a 24px gutter on each side leaves only 312px
+ * for the iPhone mockup that itself wants to render at 375px. We
+ * scale down to a 6-8px margin so the device is the dominant
+ * citizen and the user actually sees the rendered template.
  */
-function shellOuterPadding(platform: DevicePlatform): number {
+function pickShellPadding(platform: DevicePlatform, isMobileViewport: boolean): number {
+  if (isMobileViewport) {
+    return platform === 'mobile' ? 8 : 6;
+  }
   return platform === 'mobile' ? 24 : 16;
+}
+
+/**
+ * React hook wrapping `pickShellPadding` so the padding adapts in
+ * real time when the user rotates a phone (portrait ↔ landscape) or
+ * resizes the desktop window across the 640px breakpoint.
+ *
+ * SSR-safe: initialises from `matchMedia` synchronously when `window`
+ * exists (this is a Vite SPA, no SSR), otherwise defaults to the
+ * desktop padding.
+ */
+function useShellOuterPadding(platform: DevicePlatform): number {
+  const [isMobileViewport, setIsMobileViewport] = useState<boolean>(() => {
+    if (
+      typeof window === 'undefined' ||
+      typeof window.matchMedia !== 'function'
+    ) {
+      return false;
+    }
+    return window.matchMedia('(max-width: 640px)').matches;
+  });
+  useEffect(() => {
+    if (
+      typeof window === 'undefined' ||
+      typeof window.matchMedia !== 'function'
+    ) {
+      return;
+    }
+    const mq = window.matchMedia('(max-width: 640px)');
+    const handler = (e: MediaQueryListEvent) => setIsMobileViewport(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return pickShellPadding(platform, isMobileViewport);
 }
 
 /**
@@ -347,7 +391,7 @@ export function PreviewFrame() {
     () => coercePlatform(buildInputs.platform),
     [buildInputs.platform]
   );
-  const outerPadding = shellOuterPadding(platform);
+  const outerPadding = useShellOuterPadding(platform);
 
   // The iframe gets remounted when (hash, subUrl, reloadKey) change.
   // We hoist the iframe element here so DeviceShell's `children` render

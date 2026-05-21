@@ -2,12 +2,30 @@
 <html lang="zh">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      `viewport-fit=cover` lets iOS Safari extend the page underneath
+      the notch / home-indicator so `env(safe-area-inset-*)` resolves
+      to non-zero values — the Nav, PlaygroundPage, and any future
+      sticky bars use those inset values to stay clear of system
+      chrome. Without it, those env values would always be 0 on iOS
+      and the Nav pill would render under the dynamic island.
+    -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <meta
       name="description"
       content="Eikon-React — AI-ready React template. Pick a platform + design, copy a prompt, ship."
     />
     <meta name="theme-color" content="#0a0a0b" />
+    <!-- Treat as a PWA on iOS so the safe-area + status-bar behaviour
+         is consistent with what we already paint for. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <title>Eikon-React · AI-ready React template</title>
     <!--
       The theme toggle is currently hidden from the UI and the site

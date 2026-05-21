@@ -39,7 +39,7 @@ export function Philosophy() {
   const { t } = useI18n();
   return (
     <section
-      className="mx-auto w-full max-w-7xl px-6 py-20 sm:py-24"
+      className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
       aria-labelledby="philosophy-title"
     >
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_1.2fr]">

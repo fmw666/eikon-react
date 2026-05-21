@@ -210,7 +210,12 @@ function Menu({
       role="menu"
       aria-label={label}
       style={{ top: `calc(100% + ${MENU_OFFSET_PX}px)` }}
-      className="eikon-menu-pop absolute right-0 z-50 min-w-[160px] overflow-hidden rounded-xl border border-[var(--border-2)] bg-[var(--surface-1)]/95 py-1 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.45),0_2px_6px_rgba(0,0,0,0.15)] backdrop-blur-xl"
+      // `eikon-nav-glass` tags the surface so the global
+      // `@media (hover: none) and (pointer: coarse)` override
+      // (see styles/index.css) drops the expensive
+      // backdrop-blur-xl on touch viewports. The opaque
+      // surface-1/95 background underneath stays readable.
+      className="eikon-menu-pop eikon-nav-glass absolute right-0 z-50 min-w-[160px] overflow-hidden rounded-xl border border-[var(--border-2)] bg-[var(--surface-1)]/95 py-1 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.45),0_2px_6px_rgba(0,0,0,0.15)] backdrop-blur-xl"
     >
       {SUPPORTED_LANGS.map((l) => {
         const active = l === lang;

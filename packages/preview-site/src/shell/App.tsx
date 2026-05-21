@@ -1,10 +1,62 @@
-import { lazy, Suspense, type CSSProperties, type ReactElement } from 'react';
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useState,
+  type CSSProperties,
+  type ReactElement,
+} from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 
 import { FileExplorer } from './FileExplorer';
 import { PreviewFrame } from './PreviewFrame';
 import { computeOverlayMode, UrlSync, useShellStore, useUiStore } from './store';
 import { Toolbar } from './Toolbar';
+
+/**
+ * The breakpoint at which the playground swaps from the desktop
+ * three-pane resizable layout (Files | Code | Preview) to the
+ * mobile tab-strip layout (one full-bleed view at a time). Picked
+ * to match Tailwind's `md` breakpoint so the same threshold gates
+ * the Toolbar's compact mode (see `Toolbar.tsx`).
+ *
+ * Why `md` (768) and not `lg` (1024)
+ * ----------------------------------
+ * The resizable three-pane layout becomes operable around 720-760px
+ * — narrower than that and Files/Editor minimums (12% + 20% = 32% of
+ * width = ~230px combined) leave the Preview with too little room.
+ * Splitting at `md` gives a clear "tablet uses panels, phone uses
+ * tabs" affordance.
+ */
+const SHELL_MEDIA_QUERY = '(min-width: 768px)';
+
+function useIsCompactShell(): boolean {
+  // Mirror `CollapsibleSidebar.useIsLargeViewport` — initialise
+  // synchronously from `matchMedia` so the first paint commits to
+  // the right variant (this is a Vite SPA, no SSR).
+  const [isMd, setIsMd] = useState<boolean>(() => {
+    if (
+      typeof window === 'undefined' ||
+      typeof window.matchMedia !== 'function'
+    ) {
+      return true;
+    }
+    return window.matchMedia(SHELL_MEDIA_QUERY).matches;
+  });
+  useEffect(() => {
+    if (
+      typeof window === 'undefined' ||
+      typeof window.matchMedia !== 'function'
+    ) {
+      return;
+    }
+    const mq = window.matchMedia(SHELL_MEDIA_QUERY);
+    const handler = (e: MediaQueryListEvent) => setIsMd(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return !isMd;
+}
 
 // CodeView pulls in CodeMirror + a language pack (lazy-loaded inside the
 // component itself). The editor panel is closed by default, so deferring
@@ -39,6 +91,16 @@ export function PlaygroundShell() {
   const treeReadyHash = useUiStore((s) => s.treeReadyHash);
   const iframeReadyHash = useUiStore((s) => s.iframeReadyHash);
   const platform = useShellStore((s) => String(s.state.platform));
+  const isCompact = useIsCompactShell();
+
+  // Mobile view tab — only used by the compact branch. Always defaults
+  // to Preview because that's the single most useful pane to land on
+  // (the visitor is here to *see* the rendered template, not to read
+  // its source). State is local; persisting it would surprise users
+  // who'd expect every fresh visit to start on the preview.
+  const [mobileView, setMobileView] = useState<'preview' | 'files' | 'code'>(
+    'preview'
+  );
 
   // Bucket the Group id by which panels are visible so toggling Files /
   // Editor doesn't surprise-resize the preview to whatever the prior
@@ -63,47 +125,71 @@ export function PlaygroundShell() {
       */}
       <UrlSync />
 
-      <Toolbar />
+      <Toolbar
+        compact={isCompact}
+        mobileView={mobileView}
+        onChangeMobileView={setMobileView}
+      />
 
       <main className="relative flex min-h-0 flex-1">
-        <Group
-          id={groupId}
-          orientation="horizontal"
-          style={{ flex: 1, width: '100%', height: '100%' }}
-        >
-          {showFiles && (
-            <>
-              <Panel
-                id="files"
-                defaultSize="18%"
-                minSize="12%"
-                maxSize="40%"
-              >
-                <FileExplorer />
-              </Panel>
-              <Separator style={separatorStyle} />
-            </>
-          )}
+        {isCompact ? (
+          /* ── Mobile layout ─────────────────────────────────────────
+             Only one pane is mounted at a time. Mounting all three
+             (with `hidden`) would keep CodeMirror parsing and the
+             iframe building in the background — both expensive on
+             low-end Android. We trade the cost of a re-mount on tab
+             switch (cheap; iframe re-renders use the same cached
+             build) for a much lighter idle cost. */
+          <div className="flex h-full w-full min-h-0 min-w-0 flex-col">
+            {mobileView === 'preview' && <PreviewFrame />}
+            {mobileView === 'files' && <FileExplorer />}
+            {mobileView === 'code' && (
+              <Suspense fallback={<EditorFallback />}>
+                <CodeView />
+              </Suspense>
+            )}
+          </div>
+        ) : (
+          /* ── Desktop / tablet layout (md+) ──────────────────────── */
+          <Group
+            id={groupId}
+            orientation="horizontal"
+            style={{ flex: 1, width: '100%', height: '100%' }}
+          >
+            {showFiles && (
+              <>
+                <Panel
+                  id="files"
+                  defaultSize="18%"
+                  minSize="12%"
+                  maxSize="40%"
+                >
+                  <FileExplorer />
+                </Panel>
+                <Separator style={separatorStyle} />
+              </>
+            )}
 
-          {showEditor && (
-            <>
-              <Panel
-                id="editor"
-                defaultSize={showFiles ? '35%' : '45%'}
-                minSize="20%"
-              >
-                <Suspense fallback={<EditorFallback />}>
-                  <CodeView />
-                </Suspense>
-              </Panel>
-              <Separator style={separatorStyle} />
-            </>
-          )}
+            {showEditor && (
+              <>
+                <Panel
+                  id="editor"
+                  defaultSize={showFiles ? '35%' : '45%'}
+                  minSize="20%"
+                >
+                  <Suspense fallback={<EditorFallback />}>
+                    <CodeView />
+                  </Suspense>
+                </Panel>
+                <Separator style={separatorStyle} />
+              </>
+            )}
 
-          <Panel id="preview" minSize="25%">
-            <PreviewFrame />
-          </Panel>
-        </Group>
+            <Panel id="preview" minSize="25%">
+              <PreviewFrame />
+            </Panel>
+          </Group>
+        )}
 
         {overlayMode && (
           <PlaygroundLoadingOverlay mode={overlayMode} platform={platform} />
