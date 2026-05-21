@@ -670,7 +670,7 @@ function ScaledDeviceShell({
             its bounds (extends slightly outside via negative inset
             for a soft halo). Scales with the device so the falloff
             looks consistent across breakpoints. */}
-        <ActiveAmbience active={active} />
+        <ActiveAmbience active={active} platform={platform} />
 
         {/* Device shell + screen content. `position: relative` +
             `z-10` keeps the device on top of the ambience layer
@@ -1187,53 +1187,70 @@ function AppleLogo({ style }: { style?: CSSProperties }) {
 }
 
 // =============================================================================
-// Active ambience — warm tungsten halo behind the active card
+// Active ambience — screen-shaped warm glow behind the active card
 //
-// Two stacked passes (mirrors the lighting recipe the original SVG
-// mockups carry, just tuned for the playground's brighter shell):
+// Two blurred rectangles matching the real screen area within each
+// device (laptop lid, iMac panel, phone glass). The blur radius
+// makes light appear to radiate outward from the panel edges — the
+// same way a real lit screen bounces warm light onto the wall behind
+// it. Per-platform inset/offset values account for non-screen parts
+// (keyboard deck, iMac stand, phone bezel) so the glow tracks the
+// actual emitting surface rather than the full device bounding box.
 //
-//   1. Far-glow — a wide 3-zone radial wash. Painted on a rect
-//      that extends outside the device by ~28% so the long-tail
-//      fall-off dissolves into the card background without a
-//      visible edge.
-//   2. Close halo — a blurred warm fill sitting tight against the
-//      device, giving the chrome its own ambient rim.
-//
-// Both carry `.eikon-screen-glow` so they share the same 500 ms
+// Both layers carry `.eikon-screen-glow` so they share the 500 ms
 // "power-on" overshoot keyframe used elsewhere on the page.
 // =============================================================================
 
-function ActiveAmbience({ active }: { active: boolean }) {
+/** Per-platform screen-glow geometry. The glow shape tracks the real
+ *  screen rectangle within each device so light appears to radiate
+ *  outward from the lit panel rather than from a generic circle. */
+const AMBIENCE_SCREEN: Record<DevicePlatform, {
+  far: CSSProperties;
+  close: CSSProperties;
+}> = {
+  web: {
+    // Laptop screen is wide landscape in the upper ~75% of the device
+    // (deck + hinge occupy the bottom). Glow extends beyond the lid.
+    far: { top: '-10%', bottom: '18%', left: '-6%', right: '-6%', borderRadius: 14 },
+    close: { top: '-2%', bottom: '22%', left: '2%', right: '2%', borderRadius: 10 },
+  },
+  desktop: {
+    // iMac screen is in the upper ~65% (chin + neck + base below).
+    far: { top: '-10%', bottom: '24%', left: '-6%', right: '-6%', borderRadius: 14 },
+    close: { top: '-2%', bottom: '28%', left: '2%', right: '2%', borderRadius: 10 },
+  },
+  mobile: {
+    // Phone screen is tall portrait filling most of the device body.
+    far: { top: '-8%', bottom: '-8%', left: '-18%', right: '-18%', borderRadius: 20 },
+    close: { top: '0%', bottom: '0%', left: '-6%', right: '-6%', borderRadius: 16 },
+  },
+};
+
+function ActiveAmbience({ active, platform }: { active: boolean; platform: DevicePlatform }) {
   if (!active) return null;
+  const cfg = AMBIENCE_SCREEN[platform];
   return (
     <>
-      {/* Far-glow — extends only ~14% outside the device. Smaller than
-          the legacy SVG mockup's -28% wash because the playground's
-          `DeviceShell` already casts its own pixel-precise drop
-          shadow, so we just need a touch of warm amber spilling
-          around the chrome rather than a stage-wide gradient. */}
+      {/* Far glow — blurred rectangle matching the device's screen
+          shape. The large blur radius makes light appear to radiate
+          outward from the panel edges. */}
       <span
         aria-hidden="true"
         className="eikon-screen-glow pointer-events-none absolute"
         style={{
-          inset: '-14%',
-          background:
-            'radial-gradient(ellipse 60% 55% at 50% 50%, rgba(252,211,77,0.32) 0%, rgba(252,211,77,0.20) 14%, rgba(253,230,138,0.11) 32%, rgba(253,230,138,0.045) 58%, transparent 100%)',
-          borderRadius: '50%',
+          ...cfg.far,
+          background: 'rgba(252,211,77,0.22)',
+          filter: 'blur(38px)',
         }}
       />
-      {/* Close halo — tight blurred warm fill hugging the chrome.
-          Keep `borderRadius: 50%` so a phone's tall aspect doesn't
-          show a square halo even though the wrapper is the full
-          device bounding box. */}
+      {/* Close halo — tighter screen-shaped glow hugging the panel. */}
       <span
         aria-hidden="true"
         className="eikon-screen-glow pointer-events-none absolute"
         style={{
-          inset: '-4%',
-          background: 'rgba(253,230,138,0.14)',
-          filter: 'blur(20px)',
-          borderRadius: '40%',
+          ...cfg.close,
+          background: 'rgba(253,230,138,0.13)',
+          filter: 'blur(18px)',
         }}
       />
     </>
