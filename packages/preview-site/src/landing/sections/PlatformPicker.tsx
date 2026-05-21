@@ -1209,20 +1209,16 @@ const AMBIENCE_SCREEN: Record<DevicePlatform, {
   close: CSSProperties;
 }> = {
   web: {
-    // Laptop screen is wide landscape in the upper ~75% of the device
-    // (deck + hinge occupy the bottom). Glow extends beyond the lid.
-    far: { top: '-10%', bottom: '18%', left: '-6%', right: '-6%', borderRadius: 14 },
-    close: { top: '-2%', bottom: '22%', left: '2%', right: '2%', borderRadius: 10 },
+    far: { top: '-18%', bottom: '10%', left: '-14%', right: '-14%', borderRadius: 32 },
+    close: { top: '-4%', bottom: '20%', left: '-2%', right: '-2%', borderRadius: 18 },
   },
   desktop: {
-    // iMac screen is in the upper ~65% (chin + neck + base below).
-    far: { top: '-10%', bottom: '24%', left: '-6%', right: '-6%', borderRadius: 14 },
-    close: { top: '-2%', bottom: '28%', left: '2%', right: '2%', borderRadius: 10 },
+    far: { top: '-18%', bottom: '14%', left: '-14%', right: '-14%', borderRadius: 32 },
+    close: { top: '-4%', bottom: '24%', left: '-2%', right: '-2%', borderRadius: 18 },
   },
   mobile: {
-    // Phone screen is tall portrait filling most of the device body.
-    far: { top: '-8%', bottom: '-8%', left: '-18%', right: '-18%', borderRadius: 20 },
-    close: { top: '0%', bottom: '0%', left: '-6%', right: '-6%', borderRadius: 16 },
+    far: { top: '-16%', bottom: '-16%', left: '-28%', right: '-28%', borderRadius: 36 },
+    close: { top: '-4%', bottom: '-4%', left: '-10%', right: '-10%', borderRadius: 24 },
   },
 };
 
@@ -1231,26 +1227,26 @@ function ActiveAmbience({ active, platform }: { active: boolean; platform: Devic
   const cfg = AMBIENCE_SCREEN[platform];
   return (
     <>
-      {/* Far glow — blurred rectangle matching the device's screen
-          shape. The large blur radius makes light appear to radiate
-          outward from the panel edges. */}
+      {/* Far glow — large soft wash radiating from the screen shape. */}
       <span
         aria-hidden="true"
         className="eikon-screen-glow pointer-events-none absolute"
         style={{
           ...cfg.far,
-          background: 'rgba(252,211,77,0.22)',
-          filter: 'blur(38px)',
+          background:
+            'radial-gradient(ellipse 80% 70% at 50% 45%, rgba(252,211,77,0.18) 0%, rgba(253,230,138,0.08) 40%, transparent 80%)',
+          filter: 'blur(60px)',
         }}
       />
-      {/* Close halo — tighter screen-shaped glow hugging the panel. */}
+      {/* Close halo — subtler glow hugging the panel. */}
       <span
         aria-hidden="true"
         className="eikon-screen-glow pointer-events-none absolute"
         style={{
           ...cfg.close,
-          background: 'rgba(253,230,138,0.13)',
-          filter: 'blur(18px)',
+          background:
+            'radial-gradient(ellipse 90% 80% at 50% 45%, rgba(253,230,138,0.12) 0%, transparent 70%)',
+          filter: 'blur(24px)',
         }}
       />
     </>
