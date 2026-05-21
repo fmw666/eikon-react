@@ -83,29 +83,64 @@ import { type CSSProperties, type Ref } from 'react';
  * - `shadeLight`   HSL lightness for the dim layer
  * - `lightLight`   HSL lightness for the bright layer
  */
-const GRASS_BLADES = Array.from({ length: 390 }, (_, i) => {
-  const x = (i / 389) * 100;
-  const row = i % 3;
-  const baseHeight = row === 0 ? 14 : row === 1 ? 22 : 30;
-  const height = baseHeight + ((i * 17) % 10);
-  const sway = (((i * 13) % 13) - 6) * 0.25;
-  const hue = 88 + ((i * 23) % 42);
-  const sat = 26 + ((i * 17) % 24);
+// Simple deterministic hash for pseudo-random per-blade variation.
+function hash(seed: number): number {
+  let h = seed * 2654435761;
+  h = ((h >>> 16) ^ h) * 0x45d9f3b;
+  h = ((h >>> 16) ^ h) * 0x45d9f3b;
+  h = (h >>> 16) ^ h;
+  return (h >>> 0) / 4294967296; // 0..1
+}
+
+const BLADE_COUNT = 520;
+
+const GRASS_BLADES = Array.from({ length: BLADE_COUNT }, (_, i) => {
+  const h0 = hash(i);
+  const h1 = hash(i + 1000);
+  const h2 = hash(i + 2000);
+  const h3 = hash(i + 3000);
+  const h4 = hash(i + 4000);
+  const h5 = hash(i + 5000);
+  const h6 = hash(i + 6000);
+
+  // Position: base even distribution + jitter for clumping
+  const baseX = (i / (BLADE_COUNT - 1)) * 100;
+  const x = baseX + (h0 - 0.5) * 2.8;
+
+  // Row: weighted random (more mid/front, fewer back)
+  const rowRoll = h1;
+  const row = rowRoll < 0.25 ? 0 : rowRoll < 0.55 ? 1 : 2;
+
+  // Height: wider variation per row
+  const baseHeight = row === 0 ? 12 : row === 1 ? 20 : 28;
+  const height = baseHeight + h2 * (row === 0 ? 10 : row === 1 ? 14 : 16);
+
+  // Sway: much more varied, some blades lean hard
+  const sway = (h3 - 0.5) * (row === 2 ? 4.5 : row === 1 ? 3.5 : 2.5);
+
+  // Hue: wide spread — olive (75) through emerald (145), some yellowish
+  const hue = 75 + h4 * 70;
+
+  // Saturation: very varied — dry/pale (18%) to vibrant (58%)
+  const sat = 18 + h5 * 40;
+
   const strokeWidth =
-    row === 0 ? 0.65 : row === 1 ? 0.9 : 1.2;
-  const rowOpacity = row === 0 ? 0.65 : row === 1 ? 0.85 : 1;
+    row === 0 ? 0.5 + h6 * 0.3 : row === 1 ? 0.75 + h6 * 0.4 : 1.0 + h6 * 0.5;
+  const rowOpacity = row === 0 ? 0.55 + h6 * 0.15 : row === 1 ? 0.75 + h6 * 0.15 : 0.9 + h6 * 0.1;
+
   const shadeLight =
     row === 0
-      ? 8 + ((i * 5) % 6)
+      ? 6 + h2 * 8
       : row === 1
-        ? 14 + ((i * 5) % 7)
-        : 22 + ((i * 5) % 10);
+        ? 12 + h2 * 10
+        : 18 + h2 * 14;
   const lightLight =
     row === 0
-      ? 26 + ((i * 5) % 8)
+      ? 22 + h2 * 12
       : row === 1
-        ? 38 + ((i * 5) % 11)
-        : 50 + ((i * 5) % 14);
+        ? 34 + h2 * 16
+        : 44 + h2 * 20;
+
   return {
     x,
     height,
@@ -189,8 +224,10 @@ function GrassBlades({
       {SORTED_BLADES.map((g, i) => {
         const tipX = g.x + g.sway;
         const tipY = 60 - g.height;
-        const ctrlX = g.x + g.sway * 0.5;
-        const ctrlY = 60 - g.height * 0.55;
+        // Vary the control point height to create different curvatures
+        const bend = 0.45 + hash(i + 7000) * 0.25;
+        const ctrlX = g.x + g.sway * (0.3 + hash(i + 8000) * 0.4);
+        const ctrlY = 60 - g.height * bend;
         return (
           <path
             key={i}
