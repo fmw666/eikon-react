@@ -363,7 +363,7 @@ function StackedStage({
                   'focus-visible:ring-2 focus-visible:ring-brand-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-0)]'
                 }
                 style={{
-                  transform: getCardTransform(slot),
+                  transform: getCardTransform(slot, opt.value, current),
                   zIndex:
                     slot === 'center' ? 30 : slot === 'right' ? 20 : 10,
                   pointerEvents: 'none',
@@ -444,14 +444,19 @@ const STACK_SLOT_SCALE: Record<StackSlot, number> = {
   right: 0.82,
 };
 
-function getCardTransform(slot: StackSlot): string {
+function getCardTransform(slot: StackSlot, platform: DevicePlatform, centerPlatform: DevicePlatform): string {
   if (slot === 'center') {
     return 'translate3d(0,0,0) rotate(0deg)';
   }
+  const rot = platform === 'mobile' ? 8 : 4;
+  // When the center device is wide, push side cards further out
+  let tx = 28;
+  if (centerPlatform === 'desktop') tx = 34;
+  else if (centerPlatform === 'web' && platform === 'mobile') tx = 32;
   if (slot === 'left') {
-    return 'translate3d(-28%, 5%, 0) rotate(-4deg)';
+    return `translate3d(-${tx}%, 5%, 0) rotate(-${rot}deg)`;
   }
-  return 'translate3d(28%, 5%, 0) rotate(4deg)';
+  return `translate3d(${tx}%, 5%, 0) rotate(${rot}deg)`;
 }
 
 // =============================================================================
