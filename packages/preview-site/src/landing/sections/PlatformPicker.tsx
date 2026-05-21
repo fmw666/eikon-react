@@ -366,9 +366,6 @@ function StackedStage({
                   transform: getCardTransform(slot),
                   zIndex:
                     slot === 'center' ? 30 : slot === 'right' ? 20 : 10,
-                  willChange: 'transform',
-                  backfaceVisibility: 'hidden',
-                  WebkitBackfaceVisibility: 'hidden',
                   pointerEvents: 'none',
                 }}
               >
@@ -651,19 +648,14 @@ function ScaledDeviceShell({
         ref={innerRef}
         className="relative"
         style={{
-          transform: `scale(${layoutScale}) translateZ(0)`,
+          transform: `scale(${layoutScale})`,
           transformOrigin: 'center center',
+          transition: 'transform 420ms cubic-bezier(0.22, 1, 0.36, 1)',
           willChange: 'transform',
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
           pointerEvents: 'auto',
           cursor: 'pointer',
-          ...(slot !== 'center'
-            ? {
-                outline: '0.5px solid transparent',
-                filter: 'blur(0px)',
-              }
-            : null),
         }}
       >
         {/* Warm tungsten ambience — sits BEHIND the device, tracking

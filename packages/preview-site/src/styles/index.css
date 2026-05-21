@@ -568,13 +568,9 @@ body {
  * ------------------------------------------------------------------ */
 
 .eikon-stack-card {
-  transition:
-    transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
-    filter 360ms ease-out;
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
-  /* Promote each card to its own compositor layer before rotate()
-     so 1px bezel/inset shadows aren't re-sampled through a second
-     scale() pass (that was the "rough texture" on side cards). */
+  contain: layout style paint;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
