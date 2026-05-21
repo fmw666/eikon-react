@@ -25,7 +25,10 @@
  *   1. Word-reveal: the label is rendered twice, stacked vertically
  *      inside an `overflow-hidden` viewport. On hover, the top copy
  *      slides up by 110% and the bottom copy slides into place — a
- *      Codex signature.
+ *      Codex signature. When the label is a plain string, each
+ *      character animates independently with a small staggered
+ *      delay, so the flip cascades from left to right rather than
+ *      moving as a single block.
  *   2. Halo tightening: the offset shrinks by 1px and the ring
  *      thickens by 1px, so the button feels like it's "pulling in"
  *      under the cursor without changing size.
@@ -230,18 +233,91 @@ function isAnchor(props: CtaButtonProps): props is AnchorProps {
  * from peeking through during the transition — at line-height 1 the
  * gap is invisible, but a font with descenders still benefits from
  * the small over-travel.
+ *
+ * When `children` is a plain string we slice it into per-character
+ * spans and stagger each one with a small `transition-delay`, so the
+ * flip cascades left-to-right instead of moving as a single block.
+ * That's the "Codex signature" — a visual chase that the whole-word
+ * variant doesn't give us. The stagger only triggers on text, so any
+ * caller passing custom JSX (icons, gradients, nested markup) still
+ * gets the safe whole-block animation.
+ *
+ * We dual-target both `group-hover/cta` (the CtaButton's own group)
+ * and the generic `group-hover` (so non-CtaButton callers can wrap
+ * the component with a plain `group` class and get the same effect
+ * — see Hero's "find it" pill). The two never collide because each
+ * group context is scoped to its own ancestor chain.
+ *
+ * The base duration / per-character stagger live in module-scope
+ * constants so the timing reads as one decision rather than four
+ * scattered magic numbers; tweaking either re-tunes both copies in
+ * lockstep.
  */
-function WordReveal({ children }: { children: ReactNode }) {
+const REVEAL_DURATION_MS = 320;
+const REVEAL_STAGGER_MS = 28;
+
+export function WordReveal({ children }: { children: ReactNode }) {
+  if (typeof children !== 'string') {
+    return (
+      <span className="relative inline-flex items-center overflow-hidden">
+        <span className="block transition-transform duration-300 ease-out group-hover/cta:-translate-y-[110%] group-hover:-translate-y-[110%]">
+          {children}
+        </span>
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 flex items-center justify-center translate-y-[110%] transition-transform duration-300 ease-out group-hover/cta:translate-y-0 group-hover:translate-y-0"
+        >
+          {children}
+        </span>
+      </span>
+    );
+  }
+
+  // `Array.from` (not `.split('')`) keeps surrogate-paired glyphs
+  // (emoji, CJK extension B+) as a single visual unit so the
+  // stagger doesn't tear them in half.
+  const chars = Array.from(children);
+
   return (
     <span className="relative inline-flex items-center overflow-hidden">
-      <span className="block transition-transform duration-300 ease-out group-hover/cta:-translate-y-[110%]">
-        {children}
+      {/* Idle copy — readable by screen readers as one continuous
+          string (adjacent inline-blocks don't introduce word breaks). */}
+      <span className="inline-flex">
+        {chars.map((ch, i) => (
+          <span
+            key={`top-${i}`}
+            className="inline-block transition-transform ease-out will-change-transform group-hover/cta:-translate-y-[110%] group-hover:-translate-y-[110%]"
+            style={{
+              transitionDuration: `${REVEAL_DURATION_MS}ms`,
+              transitionDelay: `${i * REVEAL_STAGGER_MS}ms`,
+            }}
+          >
+            {ch === ' ' ? '\u00A0' : ch}
+          </span>
+        ))}
       </span>
+
+      {/* Active copy — hidden from a11y so the label is announced
+          exactly once. `inset-0` plus matching inline-flex layout
+          puts each character directly under its idle twin, so the
+          transition feels like the letter flipping in place rather
+          than the whole word repositioning. */}
       <span
         aria-hidden="true"
-        className="absolute inset-0 flex items-center justify-center translate-y-[110%] transition-transform duration-300 ease-out group-hover/cta:translate-y-0"
+        className="absolute inset-0 inline-flex items-center"
       >
-        {children}
+        {chars.map((ch, i) => (
+          <span
+            key={`bot-${i}`}
+            className="inline-block translate-y-[110%] transition-transform ease-out will-change-transform group-hover/cta:translate-y-0 group-hover:translate-y-0"
+            style={{
+              transitionDuration: `${REVEAL_DURATION_MS}ms`,
+              transitionDelay: `${i * REVEAL_STAGGER_MS}ms`,
+            }}
+          >
+            {ch === ' ' ? '\u00A0' : ch}
+          </span>
+        ))}
       </span>
     </span>
   );

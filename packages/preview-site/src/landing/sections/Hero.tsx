@@ -36,7 +36,7 @@
 
 import type { CSSProperties } from 'react';
 
-import { CtaButton } from '../components/CtaButton';
+import { CtaButton, WordReveal } from '../components/CtaButton';
 import { isGithubConfigured, SITE } from '../site-config';
 import { useI18n } from '../theme/i18n';
 
@@ -212,7 +212,12 @@ export function Hero({
             aria-label={t('hero.findIt')}
           >
             <GithubIcon className="h-3.5 w-3.5 transition group-hover:-translate-y-0.5" />
-            <span className="font-mono">{t('hero.findIt')}</span>
+            {/* Same per-character stagger flip as the primary CTA. The
+                `group` class on the anchor above is what `WordReveal`
+                latches onto via its `group-hover:` fallback selectors. */}
+            <span className="font-mono">
+              <WordReveal>{t('hero.findIt')}</WordReveal>
+            </span>
           </a>
         </div>
       </div>

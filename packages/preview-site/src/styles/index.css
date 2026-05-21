@@ -32,11 +32,11 @@
   --color-brand-900: oklch(0.27 0.03 235);
 
   --font-sans:
-    'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    'Helvetica Neue', Arial, sans-serif;
+    'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial,
+    sans-serif;
   --font-mono:
-    'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
-    'Liberation Mono', monospace;
+    'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono',
+    monospace;
 }
 
 /* ---------------------------------------------------------------------------
@@ -408,8 +408,7 @@ body {
     background-position: 0 0;
   }
   to {
-    background-position: var(--eikon-grid-step, 14px)
-      var(--eikon-grid-step, 14px);
+    background-position: var(--eikon-grid-step, 14px) var(--eikon-grid-step, 14px);
   }
 }
 
@@ -484,6 +483,341 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .eikon-shimmer-hover::before {
     display: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-glass-sweep — diagonal glass-flash on tab switch
+ *
+ * One-shot light streak that crosses a device screen the moment a
+ * new platform is selected. The visual language is intentionally a
+ * 1:1 reuse of `eikon-shimmer-hover` (same 110deg gradient stops,
+ * same `cubic-bezier(0.22, 1, 0.36, 1)`, same 800ms duration, same
+ * `mix-blend-mode: plus-lighter`, same single layer) — the streak
+ * the visitor learns from hovering CTAs is the same streak that
+ * passes over the screen when they flip platforms. We deviate from
+ * the hover version only in three small ways:
+ *
+ *   1. The trigger is MOUNT, not `:hover`. The host JSX re-keys the
+ *      span on every switch (see `glassNonce` in PlatformPicker),
+ *      so React unmounts/remounts and the keyframe runs from frame
+ *      0. We use `animation` instead of `transition` for the same
+ *      reason — `transition` would require a separate state flip.
+ *   2. Alpha is bumped slightly (0.18 → 0.42 on the side stops,
+ *      0.06 → 0.20 in the centre). The hover streak rides on a
+ *      bright lime CTA where 0.18 is plenty visible; the wake
+ *      streak rides on a near-black sleep panel (#0a0a0e) and the
+ *      hover-strength alphas vanish into the dark. The bumped
+ *      alphas still read as a "calm white-grey sheen", not a hot
+ *      flash — same family, dialled for the darker host.
+ *   3. No skew, no double layer, no blur. The hover streak is one
+ *      straight gradient and it works; we keep it that way for
+ *      visual continuity with the buttons.
+ *
+ * Timeline relationship with `eikon-screen-wake` (see that block):
+ *
+ *   t = 0      — wake overlay locks at the dim scrim. Streak
+ *                begins at translateX(-110%), just off-screen-left.
+ *   t = 0-800ms — streak crosses the still-dim panel. Because the
+ *                wake overlay holds the dim scrim through this window
+ *                and the streak composites with `plus-lighter`, the
+ *                visitor reads "light catching the dark glass of a
+ *                still-asleep screen".
+ *   t = 800ms   — streak parks at translateX(110%), off-screen-right.
+ *                Wake overlay starts ramping its background-color
+ *                from `#0a0a0e` toward transparent (panel "lights
+ *                up"). Editorial content fades in alongside.
+ *   t = 1600ms  — wake overlay fully transparent, content at full
+ *                opacity. The visitor experienced ONE sequence:
+ *                "light hits the glass → the screen powers on".
+ *
+ * `pointer-events: none` keeps clicks falling through to the device
+ * button underneath. `z-index: 5` puts the streak above the wake
+ * overlay (z: 4) so it can be seen on the black panel.
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-glass-sweep {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(110%);
+  }
+}
+
+.eikon-glass-sweep {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.eikon-glass-sweep::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(203, 213, 225, 0.42) 48%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(203, 213, 225, 0.42) 52%,
+    transparent 70%
+  );
+  transform: translateX(-110%);
+  mix-blend-mode: plus-lighter;
+  /* The 420ms delay waits out the `eikon-stack-card` transform
+     (also 420ms — see that block below) so the streak only starts
+     crossing once the just-selected card has slid into the centre
+     slot. Without the delay the streak would chase a moving
+     target: the card's `translateX` and the streak's `translateX`
+     would compose and the light would visibly drift across the
+     stage rather than across the screen.
+     Duration is 650ms — still slower than the CTA hover's 800ms
+     is NOT the goal anymore; we tightened to 650ms so the whole
+     boot sequence (slide → sweep → flare) lands in ~1.3s total
+     instead of ~1.9s, while the streak remains readable on the
+     near-black panel. */
+  animation: eikon-glass-sweep 650ms cubic-bezier(0.22, 1, 0.36, 1) 420ms forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-glass-sweep::before {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-screen-wake — "brightness ramps up" overlay
+ *
+ * Painted as an absolutely positioned overlay on top of an already-
+ * lit screen (white + editorial content visible underneath). The
+ * overlay starts at the resting low-brightness scrim
+ * `rgba(10, 10, 14, 0.76)` — the same look unselected cards keep via
+ * a static span in PlatformPicker — then dissolves to transparent
+ * via a single easeOutQuint segment. Element opacity stays at 1;
+ * only the scrim's background-alpha drops, so this reads as
+ * "brightness turning up", not "powering on from black".
+ *
+ * Sequence the visitor experiences. Total = 1300ms, made up of
+ * two back-to-back beats:
+ *
+ *   PHASE 1a — "card slides into place" (0 → 32.3%, 420ms)
+ *     Wake overlay locks at the dim scrim, paired with the
+ *     `eikon-stack-card` transform (also 420ms) that moves the
+ *     just-selected card from its side slot to the centre. The
+ *     screen is opaque black throughout, so during the slide the
+ *     visitor never sees the new editorial content flash up before
+ *     the panel "lights" — the active card travels as a dark
+ *     panel.
+ *
+ *   PHASE 1b — "light catches the dark glass" (32.3 → 82%, 650ms)
+ *     Card is parked at centre. The `eikon-glass-sweep` streak
+ *     (mounted on top, z: 5, with its own 420ms delay so it kicks
+ *     off exactly here) does a 650ms sweep across the still-dim
+ *     panel.
+ *
+ *   PHASE 2 — "panel flares on" (82 → 100%, ~230ms)
+ *     The streak has parked off-screen-right. The background
+ *     interpolates from `rgba(10,10,14,0.76)` to transparent
+ *     in ONE uninterrupted segment under `cubic-bezier(0.23, 1,
+ *     0.32, 1)` — easeOutQuint for a snappier opening beat with a
+ *     soft settle. No intermediate keyframes — one fluid OLED
+ *     phosphor activation, not a stepped ramp.
+ *
+ *     Editorial content fades in alongside via
+ *     `eikon-screen-content-fadein`, so the brightness flare and
+ *     the content arrival feel like one event, not two stacked
+ *     fades.
+ *
+ * Curve / timing notes:
+ *
+ *   - Host `animation: eikon-screen-wake 1300ms linear forwards`
+ *     is intentionally `linear` — the real curve work lives in
+ *     per-keyframe `animation-timing-function` overrides inside
+ *     the keyframes (linear during the 82% hold so it can't drift,
+ *     easeOutQuint over the 82→100% brighten).
+ *   - ~230ms brighten is toward the fast end of iPhone/Mac wake
+ *     (250–400ms band) — reads as an instant power-on, not a fade.
+ *
+ * Why an overlay (and not a `background-color` transition):
+ *
+ *   The screen's actual background is set inline via the
+ *   DeviceShell render-prop contract and switches instantly
+ *   between `#0a0a0e` (sleep) and `#fff` (powered on). A
+ *   `transition: background-color` on the same element wouldn't
+ *   interpolate cleanly through this curve, and would also slow
+ *   down the snap back to sleep when the platform deselects (which
+ *   we want INSTANT — like flipping the lid shut). A dedicated
+ *   overlay lets us keep the sleep→wake animation rich and the
+ *   wake→sleep transition crisp.
+ *
+ * Pointer-events:none keeps clicks falling through to the underlying
+ * device button. z-index sits at 4, deliberately one below the
+ * glass-sweep (z-5) so the streak paints ON TOP of the wake overlay
+ * for the full Phase 1b window.
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-screen-wake {
+  /* INVARIANT: opacity stays at 1 the entire animation. The
+     "lighting up" cue is carried 100% by `background-color`. This
+     is the only way to keep the panel reading as a SOLID surface
+     for the whole sleep→wake transition — every drop in element
+     opacity would let the underlying white screen and editorial
+     content bleed through proportionally, which the visitor reads
+     as a "transparent panel", never as a lighting one. The overlay
+     only ever "vanishes" by colour-interpolating its background
+     toward `rgba(255,255,255,0)` in the last frame; the alpha of
+     the COLOR drops, the alpha of the ELEMENT stays full. */
+
+  /* Why only THREE stops (0/80/100) and not the previous five-stop
+     ramp through dark-grey → mid-grey → light-grey:
+     `animation-timing-function` only applies BETWEEN consecutive
+     keyframes — a curve over five short stops becomes five short
+     segments of cubic-bezier, each with its own reset of velocity.
+     The eye reads that as a stepped staircase ("阶梯感"), not a
+     fluid OLED brighten. With just one segment carrying the whole
+     brighten (82→100), the browser's sRGB interpolation of
+     `rgba(10,10,14,0.76)` → `rgba(10,10,14,0)` becomes a single
+     uninterrupted curve — dark, then quickly mid-grey, then
+     nearly white, then clear — gated by ONE easing function, the
+     way Apple's UIKit/SwiftUI animations always do it.
+
+     The colour path goes through (rgb terms, alpha composited
+     onto white):
+       t=0.25 → ~rgb(117,117,120) – charcoal
+       t=0.50 → ~rgb(194,194,195) – light grey
+       t=0.75 → ~rgb(240,240,240) – near white
+       t=1.00 → underlying #fff
+     which, ridden on easeOutQuint over ~230ms, lands most of the
+     perceived brightness in the first ~80ms and settles the rest
+     quickly into the resting white. */
+
+  /* Phase 1 — dim scrim hold (matches SCREEN_DIM_SCRIM in
+     PlatformPicker) spanning card slide + shimmer (0 → 82%). */
+  0% {
+    opacity: 1;
+    background-color: rgba(10, 10, 14, 0.76);
+    animation-timing-function: linear;
+  }
+  82% {
+    opacity: 1;
+    background-color: rgba(10, 10, 14, 0.76);
+    /* Per-keyframe override — governs ONLY the 82→100% brighten
+       segment. easeOutQuint is slightly snappier than easeOutQuart
+       on the opening beat while keeping a soft settle into white. */
+    animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  /* Phase 2 — single uninterrupted brighten + dissolve (82 →
+     100%, ~230ms). The browser interpolates both rgb and alpha
+     together on the easeOutQuint curve set above. By 100% the
+     background is fully transparent and the actual screen takes
+     over cleanly. */
+  100% {
+    opacity: 1;
+    background-color: rgba(10, 10, 14, 0);
+  }
+}
+
+.eikon-screen-wake {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  /* Per-keyframe `animation-timing-function` does the real work
+     (see comments inside the keyframes); the value here is just
+     the host default for any frame that doesn't specify its own. */
+  animation: eikon-screen-wake 1300ms linear forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-screen-wake {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-screen-content-fadein — editorial content joins the wake
+ *
+ * Applied to the root of `ScreenContent`. The wake overlay sitting
+ * on top is FULLY OPAQUE end-to-end (it lights up via colour, not
+ * via alpha — see eikon-screen-wake notes), so for most of the
+ * timeline the content underneath is hidden no matter what. What
+ * this keyframe controls is the precise moment the content becomes
+ * visually present in the last ~150ms when the overlay's colour
+ * finally interpolates into transparent: the content must already
+ * be at full opacity and rest position by then, otherwise visitors
+ * see "overlay vanishes → content pops in" instead of a single
+ * coherent power-on.
+ *
+ * Timeline (1300ms total, matched to the wake duration so both
+ * effects land on the same final frame; same easeOutQuint as the
+ * panel's flare-on):
+ *
+ *   0 – 82%   — content fully hidden (opacity 0, nudged 6px down).
+ *               Mirrors the wake overlay's Phase 1 solid-black
+ *               hold — card slide (420ms) then shimmer (650ms).
+ *   82 – 100% — opacity ramps to 1 and the 6px translate releases
+ *               over ~230ms under easeOutQuint, in lockstep with the
+ *               wake overlay's flare-on.
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-screen-content-fadein {
+  0%,
+  82% {
+    opacity: 0;
+    transform: translateY(6px);
+    animation-timing-function: linear;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.eikon-screen-content-fadein {
+  animation: eikon-screen-content-fadein 1300ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-screen-content-fadein {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-stack-card — stacked tab-card transition for PlatformPicker
+ *
+ * The PlatformPicker landing stage stacks three device shells on top
+ * of each other; the active one sits centred and lifted to z-30, the
+ * two siblings fan to the left and right behind it (translated +
+ * scaled + rotated). This utility centralises the transition timing
+ * + easing so all three cards animate in lockstep when the active
+ * platform changes.
+ *
+ * `will-change` is intentional: the stage's children change
+ * transform + opacity on every switch, and listing both keeps the
+ * browser from re-promoting the layer on each tween (Chrome's
+ * default heuristics are conservative about transform-only layers).
+ * ------------------------------------------------------------------ */
+
+.eikon-stack-card {
+  transition:
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 360ms ease-out,
+    filter 360ms ease-out;
+  will-change: transform, opacity;
+  /* Promote each card to its own compositor layer before rotate()
+     so 1px bezel/inset shadows aren't re-sampled through a second
+     scale() pass (that was the "rough texture" on side cards). */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-stack-card {
+    transition: none;
   }
 }
 
@@ -803,10 +1137,8 @@ body {
 
   opacity: 0;
   transition:
-    opacity var(--eikon-reveal-duration) var(--eikon-reveal-ease)
-      var(--eikon-reveal-delay),
-    transform var(--eikon-reveal-duration) var(--eikon-reveal-ease)
-      var(--eikon-reveal-delay);
+    opacity var(--eikon-reveal-duration) var(--eikon-reveal-ease) var(--eikon-reveal-delay),
+    transform var(--eikon-reveal-duration) var(--eikon-reveal-ease) var(--eikon-reveal-delay);
   will-change: opacity, transform;
 }
 
@@ -1098,7 +1430,9 @@ body {
       eikon-playground-cinematic linear both,
       eikon-playground-shadow linear both;
     animation-timeline: view(), view();
-    animation-range: cover 0% cover 100%, cover 0% cover 100%;
+    animation-range:
+      cover 0% cover 100%,
+      cover 0% cover 100%;
     /* `box-shadow` listed in `will-change` is a deliberate hint —
        the compositor still rasterises a layer per shadow change
        (shadows aren't compositor-only properties), but the hint
@@ -1438,12 +1772,7 @@ body {
 }
 
 .eikon-footer-shine {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--color-brand-400) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, var(--color-brand-400) 50%, transparent 100%);
   animation: eikon-footer-shine 7s ease-in-out infinite;
   will-change: transform;
 }
@@ -1479,12 +1808,7 @@ body {
   font-size: clamp(2.5rem, 14vw, 11rem);
   line-height: 0.85;
   white-space: nowrap;
-  background: linear-gradient(
-    180deg,
-    var(--fg-1) 0%,
-    var(--fg-1) 35%,
-    transparent 95%
-  );
+  background: linear-gradient(180deg, var(--fg-1) 0%, var(--fg-1) 35%, transparent 95%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1546,11 +1870,7 @@ body {
 }
 
 .eikon-hunt-aura {
-  background: radial-gradient(
-    circle at 24% 28%,
-    var(--accent-glow),
-    transparent 65%
-  );
+  background: radial-gradient(circle at 24% 28%, var(--accent-glow), transparent 65%);
   opacity: 0.35;
   animation: eikon-hunt-aura-pulse 5.5s ease-in-out infinite;
 }
