@@ -76,15 +76,6 @@ interface PlatformOption {
   bulletKeys: ReadonlyArray<I18nKey>;
   /** Inline SVG icon used by the compact sidebar variant. */
   Icon: (props: { className: string }) => ReactNode;
-  /**
-   * Text density flavour for the in-screen editorial copy. The mobile
-   * shell's screen is much narrower than the browser/desktop ones, so
-   * its `ScreenContent` collapses the description and tightens the
-   * bullet list. We pass this in explicitly rather than relying on
-   * container queries — the project doesn't ship Tailwind's container-
-   * query plugin and this is one less moving piece to worry about.
-   */
-  density: 'wide' | 'narrow';
 }
 
 const OPTIONS: ReadonlyArray<PlatformOption> = [
@@ -100,7 +91,6 @@ const OPTIONS: ReadonlyArray<PlatformOption> = [
       'outputs.web.bullet3',
     ],
     Icon: WebIcon,
-    density: 'wide',
   },
   {
     value: 'desktop',
@@ -114,7 +104,6 @@ const OPTIONS: ReadonlyArray<PlatformOption> = [
       'outputs.desktop.bullet3',
     ],
     Icon: DesktopIcon,
-    density: 'wide',
   },
   {
     value: 'mobile',
@@ -128,7 +117,6 @@ const OPTIONS: ReadonlyArray<PlatformOption> = [
       'outputs.mobile.bullet3',
     ],
     Icon: MobileIcon,
-    density: 'narrow',
   },
 ];
 
@@ -381,8 +369,7 @@ function StackedStage({
                     title={t(opt.titleKey)}
                     desc={t(opt.descKey)}
                     bullets={opt.bulletKeys.map((k) => t(k))}
-                    ctaLabel={t('outputs.tryNow')}
-                    density={opt.density}
+                    platform={opt.value}
                   />
                 </ScaledDeviceShell>
               </button>
@@ -1280,113 +1267,240 @@ function ActiveAmbience({ active, platform }: { active: boolean; platform: Devic
  * that white surface so the trio reads as "real OS UI" rather than the
  * dark-themed mockups it replaces.
  *
- * Two layout flavours selected via `density`:
+ * Three platform-specific layouts selected via `platform`:
  *
- *   - `wide`   → browser / desktop. Full title, description, and three
- *                bullets at viewport-friendly font sizes.
- *   - `narrow` → phone. Description collapses; bullets shrink so the
- *                whole stack still reads at the ~30%-of-stage screen
- *                width the phone bezel allows.
+ *   - `web`     → landing page feel: nav bar + hero text + skeleton cards
+ *   - `desktop` → IDE/editor feel: sidebar file tree + main pane + terminal bullets
+ *   - `mobile`  → native app feel: header + feature list + tab bar
  */
 function ScreenContent({
   eyebrow,
   title,
   desc,
   bullets,
-  ctaLabel,
-  density,
+  platform,
 }: {
   eyebrow: string;
   title: string;
   desc: string;
   bullets: ReadonlyArray<string>;
-  ctaLabel: string;
-  density: 'wide' | 'narrow';
+  platform: DevicePlatform;
 }) {
-  const isWide = density === 'wide';
-  const appleFont: CSSProperties['fontFamily'] =
-    '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif';
+  if (platform === 'mobile') {
+    return <MobileScreenContent eyebrow={eyebrow} title={title} desc={desc} bullets={bullets} />;
+  }
+  if (platform === 'desktop') {
+    return <DesktopScreenContent title={title} desc={desc} bullets={bullets} />;
+  }
+  return <WebScreenContent eyebrow={eyebrow} title={title} desc={desc} bullets={bullets} />;
+}
+
+const SCREEN_FONT: CSSProperties['fontFamily'] =
+  '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif';
+
+/** Web — landing page feel: nav bar + hero + skeleton cards */
+function WebScreenContent({
+  eyebrow,
+  title,
+  desc,
+  bullets,
+}: {
+  eyebrow: string;
+  title: string;
+  desc: string;
+  bullets: ReadonlyArray<string>;
+}) {
   return (
     <div
-      className={
-        'relative flex h-full w-full flex-col overflow-hidden text-left ' +
-        (isWide ? 'gap-2 px-6 py-5 sm:px-8 sm:py-6' : 'gap-1.5 px-3 py-3')
-      }
-      style={{
-        fontFamily: appleFont,
-        background:
-          'radial-gradient(140% 90% at 50% -10%, rgba(252,211,77,0.10) 0%, transparent 55%)',
-      }}
+      className="relative flex h-full w-full flex-col overflow-hidden"
+      style={{ fontFamily: SCREEN_FONT, background: '#fff' }}
     >
-      <p
-        className={
-          'font-medium uppercase tracking-[0.22em] ' +
-          (isWide ? 'text-[10px] sm:text-[11px]' : 'text-[8px]')
-        }
-        style={{ color: '#86868b' }}
-      >
-        {eyebrow}
-      </p>
-      <h3
-        className={
-          'font-semibold leading-tight ' +
-          (isWide ? 'text-lg sm:text-xl md:text-2xl' : 'text-[11px]')
-        }
-        style={{ color: '#1d1d1f', letterSpacing: '-0.01em' }}
-      >
-        {title}
-      </h3>
-      <p
-        className={
-          'leading-relaxed ' +
-          (isWide
-            ? 'text-xs sm:text-sm md:text-[15px]'
-            : 'text-[9px] line-clamp-3')
-        }
-        style={{ color: '#515154' }}
-      >
-        {desc}
-      </p>
+      {/* Faux nav bar */}
+      <div className="flex items-center gap-4 border-b border-[#f0f0f0] px-6 py-3 sm:px-8">
+        <div className="h-4 w-4 rounded bg-[#e5e5ea]" />
+        <div className="h-2.5 w-16 rounded bg-[#e5e5ea]" />
+        <div className="h-2.5 w-12 rounded bg-[#e5e5ea]" />
+        <div className="h-2.5 w-14 rounded bg-[#e5e5ea]" />
+        <div className="ml-auto h-6 w-16 rounded-md bg-[#1d1d1f]" />
+      </div>
 
-      <ul
-        className={
-          'mt-1 flex flex-col ' +
-          (isWide ? 'gap-1.5 text-xs sm:gap-2 sm:text-sm' : 'gap-1 text-[9px]')
-        }
-        style={{ color: '#1d1d1f' }}
-      >
-        {bullets.map((b) => (
-          <li
-            key={b}
-            className={'flex items-start ' + (isWide ? 'gap-2' : 'gap-1')}
+      {/* Hero content */}
+      <div className="flex flex-1 flex-col px-6 py-5 sm:px-8 sm:py-6">
+        <p
+          className="mb-1.5 text-[10px] font-medium uppercase tracking-[0.22em] sm:text-[11px]"
+          style={{ color: '#86868b' }}
+        >
+          {eyebrow}
+        </p>
+        <h3
+          className="text-xl font-semibold leading-tight sm:text-2xl md:text-3xl"
+          style={{ color: '#1d1d1f', letterSpacing: '-0.02em' }}
+        >
+          {title}
+        </h3>
+        <p
+          className="mt-2 text-sm leading-relaxed sm:text-base"
+          style={{ color: '#515154' }}
+        >
+          {desc}
+        </p>
+
+        {/* Bullet features */}
+        <ul className="mt-3 flex flex-col gap-1.5 text-xs sm:gap-2 sm:text-sm" style={{ color: '#1d1d1f' }}>
+          {bullets.map((b) => (
+            <li key={b} className="flex items-start gap-2">
+              <span className="mt-0.5 inline-block h-3.5 w-3.5 shrink-0 rounded-full bg-[#f59e0b]/20" />
+              <span className="leading-snug">{b}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* Skeleton card grid */}
+        <div className="mt-auto grid grid-cols-3 gap-3 pt-4">
+          <div className="h-14 rounded-lg bg-[#f5f5f7] sm:h-16" />
+          <div className="h-14 rounded-lg bg-[#f5f5f7] sm:h-16" />
+          <div className="h-14 rounded-lg bg-[#f5f5f7] sm:h-16" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Desktop — IDE/editor feel: sidebar + main pane + status bar */
+function DesktopScreenContent({
+  title,
+  desc,
+  bullets,
+}: {
+  title: string;
+  desc: string;
+  bullets: ReadonlyArray<string>;
+}) {
+  return (
+    <div
+      className="relative flex h-full w-full overflow-hidden"
+      style={{ fontFamily: SCREEN_FONT, background: '#fff' }}
+    >
+      {/* Sidebar — file tree skeleton */}
+      <div className="flex w-[140px] shrink-0 flex-col gap-2 border-r border-[#f0f0f0] bg-[#fafafa] px-3 py-4 sm:w-[160px]">
+        <div className="h-2.5 w-16 rounded bg-[#e0e0e0]" />
+        <div className="ml-3 h-2 w-20 rounded bg-[#ebebeb]" />
+        <div className="ml-3 h-2 w-14 rounded bg-[#ebebeb]" />
+        <div className="ml-6 h-2 w-16 rounded bg-[#f0f0f0]" />
+        <div className="ml-3 h-2 w-18 rounded bg-[#ebebeb]" />
+        <div className="mt-2 h-2.5 w-14 rounded bg-[#e0e0e0]" />
+        <div className="ml-3 h-2 w-20 rounded bg-[#ebebeb]" />
+        <div className="ml-3 h-2 w-12 rounded bg-[#ebebeb]" />
+        <div className="ml-6 h-2 w-18 rounded bg-[#f0f0f0]" />
+      </div>
+
+      {/* Main pane */}
+      <div className="flex flex-1 flex-col">
+        <div className="flex-1 px-5 py-4 sm:px-6 sm:py-5">
+          <h3
+            className="text-xl font-semibold leading-tight sm:text-2xl md:text-3xl"
+            style={{ color: '#1d1d1f', letterSpacing: '-0.02em' }}
           >
-            <CheckIcon
-              className={
-                'shrink-0 ' +
-                (isWide ? 'mt-0.5 h-3.5 w-3.5' : 'mt-[2px] h-2.5 w-2.5')
-              }
-              style={{ color: '#f59e0b' }}
-            />
-            <span className="leading-snug">{b}</span>
-          </li>
-        ))}
-      </ul>
+            {title}
+          </h3>
+          <p
+            className="mt-2 text-sm leading-relaxed sm:text-base"
+            style={{ color: '#515154' }}
+          >
+            {desc}
+          </p>
 
-      <span
-        className={
-          'mt-auto inline-flex w-fit items-center rounded-md font-medium ' +
-          (isWide
-            ? 'gap-1.5 px-3 py-1.5 text-xs'
-            : 'gap-1 px-1.5 py-0.5 text-[9px]')
-        }
-        style={{
-          background: 'rgba(252,211,77,0.14)',
-          color: '#92400e',
-          border: '1px solid rgba(252,211,77,0.5)',
-        }}
-      >
-        {ctaLabel}
-      </span>
+          {/* Terminal-style bullet list */}
+          <div className="mt-4 rounded-lg bg-[#1d1d1f] px-4 py-3">
+            {bullets.map((b) => (
+              <p key={b} className="flex items-start gap-2 py-0.5 text-xs sm:text-sm">
+                <span style={{ color: '#f59e0b' }}>→</span>
+                <span style={{ color: '#e5e5ea' }}>{b}</span>
+              </p>
+            ))}
+          </div>
+        </div>
+
+        {/* Status bar */}
+        <div className="flex items-center gap-3 border-t border-[#f0f0f0] bg-[#fafafa] px-4 py-1.5">
+          <div className="h-2 w-2 rounded-full bg-[#34d399]" />
+          <div className="h-2 w-20 rounded bg-[#e0e0e0]" />
+          <div className="ml-auto h-2 w-12 rounded bg-[#e0e0e0]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Mobile — native app feel: header + list items + tab bar */
+function MobileScreenContent({
+  eyebrow,
+  title,
+  desc,
+  bullets,
+}: {
+  eyebrow: string;
+  title: string;
+  desc: string;
+  bullets: ReadonlyArray<string>;
+}) {
+  return (
+    <div
+      className="relative flex h-full w-full flex-col overflow-hidden"
+      style={{ fontFamily: SCREEN_FONT, background: '#fff' }}
+    >
+      {/* App header */}
+      <div className="px-4 pt-2 pb-3">
+        <p className="text-[9px] font-medium uppercase tracking-[0.18em]" style={{ color: '#86868b' }}>
+          {eyebrow}
+        </p>
+        <h3
+          className="mt-0.5 text-[15px] font-bold leading-tight"
+          style={{ color: '#1d1d1f', letterSpacing: '-0.01em' }}
+        >
+          {title}
+        </h3>
+        <p className="mt-1 text-[10px] leading-snug" style={{ color: '#515154' }}>
+          {desc}
+        </p>
+      </div>
+
+      {/* Feature list items with icons */}
+      <div className="flex flex-1 flex-col gap-2 px-3">
+        {bullets.map((b) => (
+          <div
+            key={b}
+            className="flex items-center gap-2.5 rounded-xl bg-[#f9f9fb] px-3 py-2.5"
+          >
+            <div className="h-7 w-7 shrink-0 rounded-lg bg-[#f59e0b]/15" />
+            <span className="text-[10px] leading-snug" style={{ color: '#1d1d1f' }}>{b}</span>
+          </div>
+        ))}
+
+        {/* Skeleton list items */}
+        <div className="flex items-center gap-2.5 rounded-xl bg-[#f9f9fb] px-3 py-2.5">
+          <div className="h-7 w-7 shrink-0 rounded-lg bg-[#f0f0f0]" />
+          <div className="flex flex-1 flex-col gap-1">
+            <div className="h-2 w-3/4 rounded bg-[#ebebeb]" />
+            <div className="h-1.5 w-1/2 rounded bg-[#f0f0f0]" />
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5 rounded-xl bg-[#f9f9fb] px-3 py-2.5">
+          <div className="h-7 w-7 shrink-0 rounded-lg bg-[#f0f0f0]" />
+          <div className="flex flex-1 flex-col gap-1">
+            <div className="h-2 w-2/3 rounded bg-[#ebebeb]" />
+            <div className="h-1.5 w-2/5 rounded bg-[#f0f0f0]" />
+          </div>
+        </div>
+      </div>
+
+      {/* Tab bar */}
+      <div className="flex items-center justify-around border-t border-[#f0f0f0] px-4 py-2">
+        <div className="h-4 w-4 rounded-[3px] bg-[#1d1d1f]" />
+        <div className="h-4 w-4 rounded-[3px] bg-[#d1d1d6]" />
+        <div className="h-4 w-4 rounded-[3px] bg-[#d1d1d6]" />
+        <div className="h-4 w-4 rounded-[3px] bg-[#d1d1d6]" />
+      </div>
     </div>
   );
 }
@@ -1516,30 +1630,6 @@ function MobileIcon({ className }: { className: string }) {
     >
       <rect x="6" y="2" width="12" height="20" rx="2.5" />
       <path d="M11 18h2" />
-    </svg>
-  );
-}
-
-function CheckIcon({
-  className,
-  style,
-}: {
-  className: string;
-  style?: CSSProperties;
-}) {
-  return (
-    <svg
-      className={className}
-      style={style}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M5 12l4.5 4.5L19 7" />
     </svg>
   );
 }
