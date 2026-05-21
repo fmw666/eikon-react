@@ -224,6 +224,28 @@ function mapToArray(
 }
 
 /**
+ * Count how many rows react-arborist would actually render given the
+ * current open/closed state of each folder. Files and collapsed
+ * folders count as 1 row each; expanded folders contribute their own
+ * row plus their visible children recursively. We use this to size
+ * the tree's outer container to its real content height rather than
+ * stretching it to fill the workspace card.
+ */
+function countVisible(
+  nodes: TreeNode[],
+  openState: Record<string, boolean>
+): number {
+  let n = 0;
+  for (const node of nodes) {
+    n++;
+    if (node.type === 'dir' && openState[node.id] && node.children) {
+      n += countVisible(node.children, openState);
+    }
+  }
+  return n;
+}
+
+/**
  * Path-traversal: returns folder ids leading to `targetId`. Mirrors
  * `FileExplorer`'s `ancestorsOf`; copied locally to keep the changelog
  * surface drop-in without importing playground internals.
@@ -473,26 +495,31 @@ export function ChangedFilesTree({
 }: ChangedFilesTreeProps) {
   const tree = useMemo(() => buildTree(files), [files]);
 
+  // We measure only the WIDTH from the container (react-arborist's
+  // FixedSizeList wants a pixel value). HEIGHT is derived from the
+  // visible-node count below, so the tree's rendered height matches
+  // its actual content — no `flex-1`-stretching, no
+  // ResizeObserver-induced layout loops. See `useEffect` below for
+  // why we don't read `getBoundingClientRect()` and why we floor.
   const wrapRef = useRef<HTMLDivElement | null>(null);
-  const [size, setSize] = useState<{ w: number; h: number }>({
-    w: 240,
-    h: 400,
-  });
+  const [width, setWidth] = useState<number>(240);
 
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
     let raf = 0;
-    const obs = new ResizeObserver(() => {
+    const obs = new ResizeObserver((entries) => {
       if (raf) return;
       raf = requestAnimationFrame(() => {
         raf = 0;
-        const rect = el.getBoundingClientRect();
-        setSize((prev) =>
-          prev.w === rect.width && prev.h === rect.height
-            ? prev
-            : { w: rect.width, h: rect.height }
-        );
+        const entry = entries[0];
+        if (!entry) return;
+        // `contentRect` is the untransformed layout size — `getBoundingClientRect()`
+        // would mix in the route-enter `scale(0.992)` transform and report
+        // a temporarily-smaller width during the cross-fade. Floor to whole
+        // pixels so sub-pixel jitter doesn't keep retriggering us.
+        const w = Math.floor(entry.contentRect.width);
+        setWidth((prev) => (prev === w ? prev : w));
       });
     });
     obs.observe(el);
@@ -524,6 +551,42 @@ export function ChangedFilesTree({
     return map;
   }, [tree, selectedFile]);
 
+  // Track the live "open" state for each folder so we can size the
+  // tree's outer container to its visible content rather than relying
+  // on the surrounding flex container to stretch it. react-arborist
+  // already owns this state internally; the `onToggle` callback is
+  // the public hook we use to mirror it here for sizing purposes.
+  const [openState, setOpenState] = useState<Record<string, boolean>>(
+    () => initialOpenState ?? {}
+  );
+  // Re-seed when the underlying tree shape changes (new compare result,
+  // newly-selected file's ancestors need to be auto-opened). We merge
+  // rather than replace so the user's manual toggles aren't blown away
+  // every time the selection changes.
+  useEffect(() => {
+    if (!initialOpenState) return;
+    setOpenState((prev) => ({ ...initialOpenState, ...prev }));
+  }, [initialOpenState]);
+  const handleToggle = useCallback((id: string) => {
+    setOpenState((prev) => ({ ...prev, [id]: !prev[id] }));
+  }, []);
+
+  const visibleCount = useMemo(
+    () => countVisible(tree, openState),
+    [tree, openState]
+  );
+  // Tree list area's height = exact pixels needed to render all
+  // currently-visible rows + the trailing 4px paddingBottom we pass
+  // to react-arborist. Capping at MAX_TREE_PX prevents enormous
+  // diffs (thousands of files) from stretching the whole workspace
+  // taller than the viewport; once we hit the cap, react-arborist's
+  // virtualised list takes over scrolling inside its own outer div.
+  const MAX_TREE_PX = 720;
+  const treeListHeight = Math.min(
+    visibleCount * ROW_HEIGHT + 4,
+    MAX_TREE_PX
+  );
+
   const totalFiles = files.length;
 
   return (
@@ -531,7 +594,13 @@ export function ChangedFilesTree({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
+        // No fixed `height: 100%` — height matches the visible
+        // content (header + computed tree list area) so the whole
+        // card hugs its diff and tree instead of leaving a dead
+        // "empty black" strip below short diffs. When the diff side
+        // is taller than the tree, the parent's default
+        // `items-stretch` lets this element's background continue
+        // down to match so the gutter line never looks truncated.
         background: COLOR_BG,
         color: COLOR_TEXT,
         borderRight: `1px solid ${COLOR_BORDER}`,
@@ -553,6 +622,7 @@ export function ChangedFilesTree({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          flexShrink: 0,
         }}
       >
         <span>Changed files</span>
@@ -561,9 +631,8 @@ export function ChangedFilesTree({
       <div
         ref={wrapRef}
         style={{
-          flex: 1,
+          height: treeListHeight,
           overflow: 'hidden',
-          minHeight: 0,
           paddingTop: 4,
         }}
       >
@@ -583,8 +652,8 @@ export function ChangedFilesTree({
             openByDefault={false}
             initialOpenState={initialOpenState}
             selection={selectedFile ?? undefined}
-            width={size.w}
-            height={size.h}
+            width={width}
+            height={treeListHeight - 4}
             indent={0}
             rowHeight={ROW_HEIGHT}
             paddingTop={0}
@@ -594,6 +663,7 @@ export function ChangedFilesTree({
             disableEdit
             disableMultiSelection
             onActivate={handleActivate}
+            onToggle={handleToggle}
           >
             {Row}
           </Tree>

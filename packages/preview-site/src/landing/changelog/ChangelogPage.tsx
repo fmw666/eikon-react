@@ -55,9 +55,12 @@ import type { CompareResult, GitHubRelease } from '@/lib/github';
 export default function ChangelogPage() {
   // Page is a flex column that owns the entire viewport-below-nav.
   // Children stack with a generous gap so each card reads as its own
-  // "block" rather than blurring into the next, and the workspace
-  // section uses `flex-1` to soak up whatever vertical space is left
-  // after the header / picker / banner — no magic `calc()` heights.
+  // "block" rather than blurring into the next. Each card is now
+  // content-sized (workspace + release notes both hug their data),
+  // so we add a trailing `flex-1` spacer to soak up any leftover
+  // vertical space — that keeps the page at least one viewport tall
+  // without forcing the workspace card to grow into a tall empty
+  // box on big monitors.
   return (
     <main
       className="mx-auto flex w-full max-w-[1400px] flex-col gap-6 px-4 pb-12 sm:gap-8 sm:px-6 sm:pb-16 lg:px-8"
@@ -65,6 +68,7 @@ export default function ChangelogPage() {
     >
       <ChangelogPersistSync />
       <ChangelogContent />
+      <div aria-hidden="true" className="flex-1" />
     </main>
   );
 }
@@ -177,27 +181,48 @@ function ChangelogContent() {
         <EmptyState />
       )}
 
-      {releasesState.status === 'ready' && releases.length > 0 && (
-        // `flex-1` lets the workspace soak up the remaining vertical
-        // space below the header + picker. `min-h-[560px]` is a tall-
-        // enough fallback for short-viewport laptops so the diff pane
-        // never collapses to a sliver. Dropped the previous explicit
-        // `calc(100vh - 18rem)` because it disagreed with the parent's
-        // flex column and left ~150px wasted under the workspace on
-        // typical 1080p displays.
-        <section
-          aria-label="Diff workspace"
-          className="flex min-h-[560px] flex-1 overflow-hidden rounded-xl border border-[var(--border-1)] bg-[var(--surface-1)] shadow-[0_1px_0_rgb(255_255_255/0.02)_inset,0_8px_24px_-12px_rgb(0_0_0/0.35)]"
-        >
-          <Workspace
-            compareState={compareState}
-            selectedFile={selectedFile}
-            onSelectFile={setSelectedFile}
-            baseTag={baseTag}
-            headTag={headTag}
-          />
-        </section>
-      )}
+      {releasesState.status === 'ready' &&
+        releases.length > 0 &&
+        // Hide the workspace card entirely on `identical` compares —
+        // the CompareSummary already tells the visitor "These two
+        // versions are identical.", and an empty workspace card on
+        // top of that just adds a redundant "No file differences"
+        // box that visually shouts louder than the actual message.
+        // For `loading` / `idle` / error pre-states we keep the
+        // workspace so the spinner has a home.
+        !(
+          compareState.status === 'ready' &&
+          compareState.data.status === 'identical'
+        ) && (
+          // Workspace card is content-sized. Both children — the
+          // file tree and the diff body — own their own height now
+          // (tree sums its visible rows; diff caps at 70vh and
+          // scrolls internally past that). Avoiding `flex-1` +
+          // `min-h` here means a 13-line diff no longer leaves a
+          // 260px black void beneath the patch, while a multi-
+          // thousand-line diff still can't push the card past the
+          // viewport. The `min-h-[280px]` floor keeps the loading /
+          // first-paint state from collapsing to a sliver that
+          // reads as broken UI. `bg-[#1e1e1e]` matches the tree's
+          // and diff's own background so the card reads as a single
+          // dark surface even when one side is shorter than the
+          // other (the leftover gutter is filled by the section's
+          // own background instead of looking like a separate empty
+          // box).
+          <section
+            aria-label="Diff workspace"
+            className="flex min-h-[280px] overflow-hidden rounded-xl border border-[var(--border-1)] shadow-[0_1px_0_rgb(255_255_255/0.02)_inset,0_8px_24px_-12px_rgb(0_0_0/0.35)]"
+            style={{ background: '#1e1e1e' }}
+          >
+            <Workspace
+              compareState={compareState}
+              selectedFile={selectedFile}
+              onSelectFile={setSelectedFile}
+              baseTag={baseTag}
+              headTag={headTag}
+            />
+          </section>
+        )}
 
       {/* Compare-side errors that don't deserve to demolish the whole
           page. A deleted upstream tag, a one-off network blip, or a
@@ -399,19 +424,24 @@ function Workspace({
 }) {
   const { t } = useI18n();
 
+  // Fallback states need an explicit `min-h-[240px]` because the
+  // surrounding workspace card is now content-sized (no more
+  // `flex-1 min-h-[560px]`), so an empty/loading state without its
+  // own minimum would collapse to the height of the spinner alone
+  // and the card would look broken between requests.
   if (compareState.status === 'loading') {
     return <WorkspaceSpinner label={t('changelog.compare.loading')} />;
   }
   if (compareState.status === 'idle') {
     return (
-      <div className="flex flex-1 items-center justify-center text-sm text-[var(--fg-3)]">
+      <div className="flex min-h-[240px] flex-1 items-center justify-center text-sm text-[var(--fg-3)]">
         {t('changelog.compare.pick')}
       </div>
     );
   }
   if (compareState.status === 'error') {
     return (
-      <div className="flex flex-1 items-center justify-center px-4 py-6 text-sm text-red-400">
+      <div className="flex min-h-[240px] flex-1 items-center justify-center px-4 py-6 text-sm text-red-400">
         {compareState.message}
       </div>
     );
@@ -431,7 +461,12 @@ function Workspace({
       : undefined;
 
   return (
-    <div className="flex h-full min-h-0 w-full min-w-0">
+    // `items-stretch` (the default) lets the shorter column's
+    // background paint down to match the taller one — usually that's
+    // the tree extending its `#1e1e1e` strip under a longer diff, or
+    // the diff card extending down past a tiny one-file tree. Either
+    // way both columns appear as one continuous workspace.
+    <div className="flex w-full min-w-0">
       {/* File tree column. 288px (`w-72`) on small screens stays
           space-conscious; 320px (`lg:w-80`) on desktops gives a bit
           more room before file paths like
@@ -460,7 +495,7 @@ function WorkspaceSpinner({ label }: { label: string }) {
     <div
       role="status"
       aria-busy="true"
-      className="flex flex-1 items-center justify-center text-sm text-[var(--fg-3)]"
+      className="flex min-h-[240px] flex-1 items-center justify-center text-sm text-[var(--fg-3)]"
     >
       <span
         aria-hidden="true"

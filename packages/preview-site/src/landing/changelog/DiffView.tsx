@@ -92,7 +92,14 @@ export function DiffView({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
+        // Height is content-driven, not `100%`. Stretching to fill
+        // the parent column was what produced the big "empty black"
+        // strip under short diffs (a 270px diff inside a 560px
+        // stretched workspace left ~260px of bare COLOR_BG below
+        // the hunks). With auto height the diff card hugs its
+        // hunks; the workspace section that wraps us is also
+        // content-sized, so the page looks finished instead of
+        // hollow when the diff is short.
         minWidth: 0,
         background: COLOR_BG,
         color: COLOR_TEXT,
@@ -190,9 +197,13 @@ export function DiffView({
       {/* Body */}
       <div
         style={{
-          flex: 1,
+          // Cap super-long diffs at ~70vh so a 5000-line patch
+          // doesn't stretch the page taller than the viewport; once
+          // we hit the cap, the body becomes its own scroll
+          // container. For short diffs the body hugs its content
+          // and the surrounding workspace card hugs us back.
+          maxHeight: 'min(70vh, 720px)',
           overflow: 'auto',
-          minHeight: 0,
           fontFamily:
             'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
           fontSize: 12,
