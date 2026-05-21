@@ -739,6 +739,107 @@ body {
 }
 
 /* ------------------------------------------------------------------
+ * eikon-reveal — scroll-triggered "rise into view" entrance
+ *
+ * Driven from React by <Reveal> in
+ * `landing/components/Reveal.tsx`. An IntersectionObserver flips
+ * `data-revealed="true"` on the wrapper the first time it crosses
+ * ~12% of the viewport, which lets the transition below lift the
+ * element from its initial dimmed/translated state into its
+ * resting state with a 720ms spring curve.
+ *
+ * Why a long curve (720ms) and a slow ease-out
+ * --------------------------------------------
+ *   The site already has fast micro-interactions everywhere
+ *   (pill hovers, nav magic-pill, theme orb spin). The section
+ *   reveals are the slow, "editorial" beats that punctuate the
+ *   scroll — too fast and they read as twitchy; too slow and they
+ *   feel laggy on a fast scroll. 720ms with `cubic-bezier(0.16,
+ *   1, 0.3, 1)` settles right at the boundary where the eye still
+ *   tracks the motion but the section feels deliberate, not jumpy.
+ *
+ * Variants
+ * --------
+ *   .eikon-reveal-rise        — fade + 28px translateY + scale 0.985
+ *                               Default. Use for typography-led
+ *                               sections (Hero, Philosophy, QA).
+ *   .eikon-reveal-rise-scale  — fade + 36px translateY + scale 0.94
+ *                               More aggressive "pop". Use for big
+ *                               card / grid sections (PlatformPicker,
+ *                               PainPoints) where the extra scale
+ *                               sells the surfaces as physical
+ *                               objects arriving on stage.
+ *   .eikon-reveal-zoom        — fade + scale only, no translate.
+ *                               Reads as "settling in place" rather
+ *                               than "rising up from below".
+ *   .eikon-reveal-left/right  — slide in horizontally. Reserve for
+ *                               side-rail panels where horizontal
+ *                               motion matches the reading axis.
+ *
+ * Per-element delay
+ * -----------------
+ * Pass `delay={ms}` on <Reveal> to write a `--eikon-reveal-delay`
+ * custom property. Used to stagger sibling reveals (title →
+ * subtitle → CTA) — siblings that arrive on the same frame would
+ * feel synchronised in a way that real entrances are not.
+ *
+ * Reduced motion
+ * --------------
+ * The reveal is suppressed to "instant final state, no transition"
+ * so the page is fully readable without animation. We intentionally
+ * also clear `transform` and `opacity` rather than just disabling
+ * the transition — leaving the element in its dimmed initial state
+ * after disabling motion would render it permanently invisible.
+ * ------------------------------------------------------------------ */
+
+.eikon-reveal {
+  --eikon-reveal-delay: 0ms;
+  --eikon-reveal-duration: 720ms;
+  --eikon-reveal-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  opacity: 0;
+  transition:
+    opacity var(--eikon-reveal-duration) var(--eikon-reveal-ease)
+      var(--eikon-reveal-delay),
+    transform var(--eikon-reveal-duration) var(--eikon-reveal-ease)
+      var(--eikon-reveal-delay);
+  will-change: opacity, transform;
+}
+
+.eikon-reveal-rise {
+  transform: translate3d(0, 28px, 0) scale(0.985);
+}
+
+.eikon-reveal-rise-scale {
+  transform: translate3d(0, 36px, 0) scale(0.94);
+}
+
+.eikon-reveal-zoom {
+  transform: scale(0.9);
+}
+
+.eikon-reveal-left {
+  transform: translate3d(-36px, 0, 0);
+}
+
+.eikon-reveal-right {
+  transform: translate3d(36px, 0, 0);
+}
+
+.eikon-reveal[data-revealed='true'] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------
  * eikon-playground-* — cinematic "push-and-hold" for the workbench
  *
  * The PlaygroundSection is the home page's interactive workbench
@@ -1405,6 +1506,265 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .eikon-footer-wordmark {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-hunt — the footer's "find the flower" invitation pill
+ *
+ * Two quiet animations carry the prompt's discover-the-meadow
+ * intent without ever spelling the answer out loud:
+ *
+ *   1. `eikon-hunt-aura` — a slow radial glow behind the pill,
+ *      breathing every ~5.5s. Uses `--accent-glow` so the prompt's
+ *      colour language matches the spotlight in the meadow it
+ *      points to.
+ *   2. `eikon-hunt-icon` — the small flower icon sways gently like
+ *      grass in wind. Hover pauses the sway and stands the flower
+ *      upright with a small scale-up — a quiet "you've caught it"
+ *      acknowledgement of pointer focus.
+ *
+ * Both are composite-only (transform / opacity), so the pill costs
+ * nothing to repaint at rest. `prefers-reduced-motion` and
+ * `prefers-reduced-data` silence every loop and fall back to a
+ * static design.
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-hunt-aura-pulse {
+  0%,
+  100% {
+    opacity: 0.32;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.eikon-hunt-aura {
+  background: radial-gradient(
+    circle at 24% 28%,
+    var(--accent-glow),
+    transparent 65%
+  );
+  opacity: 0.35;
+  animation: eikon-hunt-aura-pulse 5.5s ease-in-out infinite;
+}
+
+@keyframes eikon-hunt-icon-sway {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2.6deg);
+  }
+}
+
+.eikon-hunt-icon {
+  transform-origin: 50% 80%;
+  animation: eikon-hunt-icon-sway 4.6s ease-in-out infinite;
+}
+
+/* Hover acknowledgement: stop the sway and stand the bloom upright
+   with a tiny scale-up. Reads as "you've caught it" — the prompt
+   responding to the cursor finding it. */
+.group\/hunt:hover .eikon-hunt-icon {
+  animation-play-state: paused;
+  transform: rotate(0deg) scale(1.08);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-hunt-aura,
+  .eikon-hunt-icon {
+    animation: none;
+  }
+  .eikon-hunt-icon {
+    transform: rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-data: reduce) {
+  .eikon-hunt-aura,
+  .eikon-hunt-icon {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-footer-meadow — spotlight-revealed grass under the wordmark
+ *
+ * A thin SVG strip of grass blades that sits flush against the lower
+ * edge of the giant EIKON · REACT wordmark. Mostly invisible: a
+ * radial-gradient mask centred on the visitor's cursor (via two CSS
+ * custom properties updated in Footer.tsx's pointermove handler)
+ * reveals the grass only inside the spotlight's reach.
+ *
+ * The intended discovery moment:
+ *
+ *   1. Visitor lingers in the footer, sees the giant wordmark.
+ *   2. They drift their cursor over the wordmark and notice a
+ *      patch of grass "growing" under the letters wherever the
+ *      spotlight passes.
+ *   3. If they sweep the spotlight all the way to the right end
+ *      of "REACT" the single tiny pink flower reveals itself —
+ *      reward for the curious.
+ *
+ * The blades are stroked with `vector-effect: non-scaling-stroke`
+ * so their width stays crisp regardless of how much the SVG is
+ * stretched horizontally (`preserveAspectRatio="none"`).
+ *
+ * The mask uses pixel coordinates (not %) because the meadow is
+ * much shorter than the footer — feeding it footer-relative %
+ * coordinates would smear the spotlight vertically across the
+ * whole strip.
+ * ------------------------------------------------------------------ */
+
+.eikon-footer-meadow {
+  position: absolute;
+  inset-inline: 0;
+
+  /* Height is an explicit vw clamp mirroring the wordmark's
+     `clamp(2.5rem, 14vw, 11rem)` sizing — NOT an em unit. The
+     naive `em` approach silently failed because `em` resolves
+     against the meadow's *own* font-size (inherited from `body`,
+     ~16px), not the wordmark's font-size, so the meadow ended
+     up only ~8px tall and clipped the flower out of existence
+     via `mask-clip: border-box`.
+
+     `bottom: 0` parks the meadow's lower edge flush with the
+     wordmark wrapper's lower edge (which, with the wordmark's
+     `line-height: 0.85`, sits at ≈ the cap-line of EIKON ·
+     REACT). The meadow grows entirely UPWARD from that line:
+     soil + grass roots ride exactly on the brand text's
+     baseline, and the tallest front-row blades reach into the
+     lower ~half of the letters. Result: the wordmark reads as
+     literally growing out of the lawn rather than hovering
+     above a decorative strip beneath it. */
+  height: clamp(60px, 6.5vw, 90px);
+  bottom: 0;
+
+  pointer-events: none;
+  z-index: 1;
+
+  /* Default keeps the mask centre far off-canvas so nothing shows
+     before the first pointermove arrives. The pointermove handler
+     swaps in real pixel coordinates relative to this element. The
+     value is inherited by every child layer, so a single update
+     drives the shade / light / flower masks together. */
+  --eikon-meadow-mx: -9999px;
+  --eikon-meadow-my: -9999px;
+
+  opacity: 0;
+  transition: opacity 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Fade the whole stack in only while the visitor is actually hovering
+   the footer. The per-layer masks already restrict reveal to the
+   spotlight area; this transition just polishes the entry/exit so
+   the grass never pops on/off abruptly. */
+@media (hover: hover) and (pointer: fine) {
+  .group\/footer:hover .eikon-footer-meadow {
+    opacity: 1;
+  }
+}
+
+.eikon-footer-meadow__shade,
+.eikon-footer-meadow__light,
+.eikon-footer-meadow__flower {
+  position: absolute;
+  inset: 0;
+}
+
+/* Outer halo — wide soft reveal of the *dim* grass copy.
+   This is the "almost in shadow" perimeter: a faint patch of
+   grass visible well beyond where the bright highlight reaches,
+   so the spotlight has a soft outer edge instead of a hard cutout. */
+.eikon-footer-meadow__shade {
+  mask-image: radial-gradient(
+    circle 320px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    black 0%,
+    black 32%,
+    transparent 92%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 320px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    black 0%,
+    black 32%,
+    transparent 92%
+  );
+}
+
+/* Hot spot — tight reveal of the *bright* grass copy, stacked over
+   the shade layer. Because both layers share blade geometry the
+   bright copy slots cleanly over the dim copy where the masks
+   overlap → the same blade reads as lit at its base of the cursor
+   and shadowed at the rim. This is the meadow's "light falloff". */
+.eikon-footer-meadow__light {
+  mask-image: radial-gradient(
+    circle 135px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    black 0%,
+    black 28%,
+    transparent 80%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 135px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    black 0%,
+    black 28%,
+    transparent 80%
+  );
+}
+
+/* Flower reveal — medium radius, between shade and light. The
+   flower is a discoverable easter egg, not a hot-spot freebie:
+   the visitor has to sweep the spotlight to the wordmark's tail
+   end, but doesn't have to land on a pixel-precise spot. */
+.eikon-footer-meadow__flower {
+  mask-image: radial-gradient(
+    circle 210px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    black 0%,
+    black 40%,
+    transparent 86%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 210px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    black 0%,
+    black 40%,
+    transparent 86%
+  );
+}
+
+/* The end-of-meadow flower. Anchored a few percent in from the
+   right so it never hangs off the footer's bleed edge. Sized in
+   absolute px clamps (not % of meadow height) so the flower stays
+   readable at any viewport — and crucially, so its head never
+   spills above the meadow's top edge, where `mask-clip: border-box`
+   would silently chop the bloom in half. The bottom offset is
+   tuned so the flower head clears the front-row blade tips by a
+   small margin, reading as "popping out of the lawn". */
+.eikon-footer-flower {
+  position: absolute;
+  right: 5%;
+  bottom: clamp(8px, 1.2vw, 22px);
+  width: clamp(20px, 2.2vw, 30px);
+  height: auto;
+  filter: drop-shadow(0 1.5px 2px rgb(0 0 0 / 0.45));
+}
+
+/* Touch + reduced-motion: ship the page without the easter egg.
+   The reveal is driven by the cursor spotlight, which itself is
+   gated to fine-pointer devices, so on touch the meadow would
+   either stay frozen (one finger) or stay invisible (no pointermove).
+   Hiding the layer outright keeps SVG parse cost out of the paint
+   budget on phones. */
+@media (hover: none) {
+  .eikon-footer-meadow {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eikon-footer-meadow {
     transition: none;
   }
 }

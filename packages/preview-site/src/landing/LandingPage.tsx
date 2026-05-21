@@ -53,6 +53,7 @@ import {
   type Ref,
 } from 'react';
 
+import { Reveal } from './components/Reveal';
 import { Nav } from './nav/Nav';
 import { useAppRoute, type AppRoute } from './nav/route';
 import { loadChangelog, loadPlayground } from './nav/route-loaders';
@@ -318,20 +319,55 @@ function HomeRoute() {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  // Section-level scroll reveals. Each <Reveal> wraps a single
+  // section and lifts it into place when its top edge crosses
+  // ~12% of the viewport. Three deliberate notes about the rhythm:
+  //
+  //   1. The Hero is NOT wrapped. It's already covered by the
+  //      route-level `eikon-route-enter` curve that animates the
+  //      whole page in on first paint — adding a second curve on
+  //      top would double up the entrance and make the home feel
+  //      jittery rather than "wow".
+  //
+  //   2. Big card / grid sections (PlatformPicker, PainPoints)
+  //      use the more aggressive `rise-scale` variant so the
+  //      surfaces feel like physical objects arriving on stage,
+  //      not just text drifting up. Typography-led sections keep
+  //      the calmer `rise` default.
+  //
+  //   3. The divider has its own tiny reveal so the page never
+  //      shows the divider line "ahead of" the section it's
+  //      dividing — keeps the rhythm consistent on slow scrolls.
   return (
     <main>
       <Hero
         onPrimaryCta={() => scrollToId(PLATFORM_PICKER_ANCHOR_ID)}
         onFindIt={() => scrollToId(PROMPT_OUTPUT_ANCHOR_ID)}
       />
-      <PlatformPicker />
-      <PlaygroundSection />
-      <SectionDivider />
-      <TechStackWall />
-      <PainPoints />
-      <Philosophy />
-      <QASection />
-      <Footer />
+      <Reveal variant="rise-scale">
+        <PlatformPicker />
+      </Reveal>
+      <Reveal>
+        <PlaygroundSection />
+      </Reveal>
+      <Reveal variant="zoom">
+        <SectionDivider />
+      </Reveal>
+      <Reveal>
+        <TechStackWall />
+      </Reveal>
+      <Reveal variant="rise-scale">
+        <PainPoints />
+      </Reveal>
+      <Reveal>
+        <Philosophy />
+      </Reveal>
+      <Reveal>
+        <QASection />
+      </Reveal>
+      <Reveal>
+        <Footer />
+      </Reveal>
     </main>
   );
 }
