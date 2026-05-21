@@ -1298,7 +1298,7 @@ function ScreenContent({
 const SCREEN_FONT: CSSProperties['fontFamily'] =
   '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif';
 
-/** Web — landing page feel: nav bar + hero + skeleton cards */
+/** Web — landing page feel: nav + hero banner + feature cards */
 function WebScreenContent({
   eyebrow,
   title,
@@ -1315,58 +1315,68 @@ function WebScreenContent({
       className="relative flex h-full w-full flex-col overflow-hidden"
       style={{ fontFamily: SCREEN_FONT, background: '#fff' }}
     >
-      {/* Faux nav bar */}
-      <div className="flex items-center gap-4 border-b border-[#f0f0f0] px-6 py-3 sm:px-8">
-        <div className="h-4 w-4 rounded bg-[#e5e5ea]" />
-        <div className="h-2.5 w-16 rounded bg-[#e5e5ea]" />
-        <div className="h-2.5 w-12 rounded bg-[#e5e5ea]" />
-        <div className="h-2.5 w-14 rounded bg-[#e5e5ea]" />
-        <div className="ml-auto h-6 w-16 rounded-md bg-[#1d1d1f]" />
+      {/* Nav bar */}
+      <div className="flex items-center gap-5 border-b border-[#eee] px-7 py-3">
+        <div className="h-4 w-4 rounded-[4px] bg-gradient-to-br from-[#f59e0b] to-[#f97316]" />
+        <div className="h-2 w-14 rounded-full bg-[#e8e8ed]" />
+        <div className="h-2 w-10 rounded-full bg-[#e8e8ed]" />
+        <div className="h-2 w-12 rounded-full bg-[#e8e8ed]" />
+        <div className="ml-auto h-6 w-[52px] rounded-full bg-gradient-to-r from-[#f59e0b]/80 to-[#fb923c]/80" />
       </div>
 
-      {/* Hero content */}
-      <div className="flex flex-1 flex-col px-6 py-5 sm:px-8 sm:py-6">
+      {/* Hero section */}
+      <div className="flex flex-1 flex-col px-7 pt-6 pb-5 sm:px-9 sm:pt-7">
         <p
-          className="mb-1.5 text-[10px] font-medium uppercase tracking-[0.22em] sm:text-[11px]"
-          style={{ color: '#86868b' }}
+          className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] sm:text-xs"
+          style={{ color: '#f59e0b' }}
         >
           {eyebrow}
         </p>
         <h3
-          className="text-xl font-semibold leading-tight sm:text-2xl md:text-3xl"
-          style={{ color: '#1d1d1f', letterSpacing: '-0.02em' }}
+          className="text-[22px] font-bold leading-[1.15] sm:text-[26px] md:text-[30px]"
+          style={{ color: '#1d1d1f', letterSpacing: '-0.025em' }}
         >
           {title}
         </h3>
         <p
-          className="mt-2 text-sm leading-relaxed sm:text-base"
-          style={{ color: '#515154' }}
+          className="mt-3 text-[13px] leading-[1.6] sm:text-[15px]"
+          style={{ color: '#6e6e73' }}
         >
           {desc}
         </p>
 
-        {/* Bullet features */}
-        <ul className="mt-3 flex flex-col gap-1.5 text-xs sm:gap-2 sm:text-sm" style={{ color: '#1d1d1f' }}>
-          {bullets.map((b) => (
-            <li key={b} className="flex items-start gap-2">
-              <span className="mt-0.5 inline-block h-3.5 w-3.5 shrink-0 rounded-full bg-[#f59e0b]/20" />
-              <span className="leading-snug">{b}</span>
-            </li>
+        {/* Feature cards */}
+        <div className="mt-auto grid grid-cols-3 gap-3 pt-5">
+          {bullets.map((b, i) => (
+            <div
+              key={b}
+              className="flex flex-col gap-2 rounded-xl border border-[#f0f0f2] px-3 py-3 sm:px-4 sm:py-3.5"
+              style={{ background: i === 0 ? '#fffbf5' : '#fafafa' }}
+            >
+              <div
+                className="h-5 w-5 rounded-md sm:h-6 sm:w-6"
+                style={{
+                  background: i === 0
+                    ? 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)'
+                    : 'linear-gradient(135deg, #e8e8ed 0%, #d4d4d8 100%)',
+                  opacity: i === 0 ? 0.85 : 0.6,
+                }}
+              />
+              <span
+                className="text-[10px] leading-snug sm:text-[11px]"
+                style={{ color: '#3a3a3c' }}
+              >
+                {b}
+              </span>
+            </div>
           ))}
-        </ul>
-
-        {/* Skeleton card grid */}
-        <div className="mt-auto grid grid-cols-3 gap-3 pt-4">
-          <div className="h-14 rounded-lg bg-[#f5f5f7] sm:h-16" />
-          <div className="h-14 rounded-lg bg-[#f5f5f7] sm:h-16" />
-          <div className="h-14 rounded-lg bg-[#f5f5f7] sm:h-16" />
         </div>
       </div>
     </div>
   );
 }
 
-/** Desktop — IDE/editor feel: sidebar + main pane + status bar */
+/** Desktop — dashboard/editor feel: sidebar + content + status */
 function DesktopScreenContent({
   title,
   desc,
@@ -1381,58 +1391,90 @@ function DesktopScreenContent({
       className="relative flex h-full w-full overflow-hidden"
       style={{ fontFamily: SCREEN_FONT, background: '#fff' }}
     >
-      {/* Sidebar — file tree skeleton */}
-      <div className="flex w-[140px] shrink-0 flex-col gap-2 border-r border-[#f0f0f0] bg-[#fafafa] px-3 py-4 sm:w-[160px]">
-        <div className="h-2.5 w-16 rounded bg-[#e0e0e0]" />
-        <div className="ml-3 h-2 w-20 rounded bg-[#ebebeb]" />
-        <div className="ml-3 h-2 w-14 rounded bg-[#ebebeb]" />
-        <div className="ml-6 h-2 w-16 rounded bg-[#f0f0f0]" />
-        <div className="ml-3 h-2 w-18 rounded bg-[#ebebeb]" />
-        <div className="mt-2 h-2.5 w-14 rounded bg-[#e0e0e0]" />
-        <div className="ml-3 h-2 w-20 rounded bg-[#ebebeb]" />
-        <div className="ml-3 h-2 w-12 rounded bg-[#ebebeb]" />
-        <div className="ml-6 h-2 w-18 rounded bg-[#f0f0f0]" />
+      {/* Sidebar */}
+      <div className="flex w-[130px] shrink-0 flex-col border-r border-[#f0f0f2] bg-[#fafbfc] px-4 py-5 sm:w-[150px]">
+        <div className="mb-4 h-3 w-14 rounded-full bg-[#e8e8ed]" />
+        <div className="flex flex-col gap-[7px]">
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-[2px] bg-[#f59e0b]/50" />
+            <div className="h-[5px] w-16 rounded-full bg-[#ddd]" />
+          </div>
+          <div className="flex items-center gap-2 pl-3">
+            <div className="h-[5px] w-14 rounded-full bg-[#e8e8ed]" />
+          </div>
+          <div className="flex items-center gap-2 pl-3">
+            <div className="h-[5px] w-10 rounded-full bg-[#e8e8ed]" />
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <div className="h-2 w-2 rounded-[2px] bg-[#e0e0e0]" />
+            <div className="h-[5px] w-12 rounded-full bg-[#ddd]" />
+          </div>
+          <div className="flex items-center gap-2 pl-3">
+            <div className="h-[5px] w-16 rounded-full bg-[#e8e8ed]" />
+          </div>
+          <div className="flex items-center gap-2 pl-3">
+            <div className="h-[5px] w-8 rounded-full bg-[#e8e8ed]" />
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <div className="h-2 w-2 rounded-[2px] bg-[#e0e0e0]" />
+            <div className="h-[5px] w-14 rounded-full bg-[#ddd]" />
+          </div>
+        </div>
       </div>
 
       {/* Main pane */}
       <div className="flex flex-1 flex-col">
-        <div className="flex-1 px-5 py-4 sm:px-6 sm:py-5">
+        <div className="flex-1 px-6 py-5 sm:px-7 sm:py-6">
           <h3
-            className="text-xl font-semibold leading-tight sm:text-2xl md:text-3xl"
-            style={{ color: '#1d1d1f', letterSpacing: '-0.02em' }}
+            className="text-[22px] font-bold leading-[1.15] sm:text-[26px] md:text-[30px]"
+            style={{ color: '#1d1d1f', letterSpacing: '-0.025em' }}
           >
             {title}
           </h3>
           <p
-            className="mt-2 text-sm leading-relaxed sm:text-base"
-            style={{ color: '#515154' }}
+            className="mt-3 text-[13px] leading-[1.6] sm:text-[15px]"
+            style={{ color: '#6e6e73' }}
           >
             {desc}
           </p>
 
-          {/* Terminal-style bullet list */}
-          <div className="mt-4 rounded-lg bg-[#1d1d1f] px-4 py-3">
-            {bullets.map((b) => (
-              <p key={b} className="flex items-start gap-2 py-0.5 text-xs sm:text-sm">
-                <span style={{ color: '#f59e0b' }}>→</span>
-                <span style={{ color: '#e5e5ea' }}>{b}</span>
-              </p>
+          {/* Bullet list as inline tags / chips */}
+          <div className="mt-5 flex flex-col gap-2">
+            {bullets.map((b, i) => (
+              <div key={b} className="flex items-center gap-2.5">
+                <span
+                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-[9px] font-bold sm:h-6 sm:w-6 sm:text-[10px]"
+                  style={{
+                    background: i === 0 ? '#fef3c7' : '#f4f4f5',
+                    color: i === 0 ? '#d97706' : '#a1a1aa',
+                  }}
+                >
+                  {i + 1}
+                </span>
+                <span
+                  className="text-[12px] leading-snug sm:text-[13px]"
+                  style={{ color: '#3a3a3c' }}
+                >
+                  {b}
+                </span>
+              </div>
             ))}
           </div>
         </div>
 
         {/* Status bar */}
-        <div className="flex items-center gap-3 border-t border-[#f0f0f0] bg-[#fafafa] px-4 py-1.5">
-          <div className="h-2 w-2 rounded-full bg-[#34d399]" />
-          <div className="h-2 w-20 rounded bg-[#e0e0e0]" />
-          <div className="ml-auto h-2 w-12 rounded bg-[#e0e0e0]" />
+        <div className="flex items-center gap-3 border-t border-[#f0f0f2] bg-[#fafbfc] px-5 py-2">
+          <div className="h-[6px] w-[6px] rounded-full bg-[#34d399]" />
+          <div className="h-[5px] w-16 rounded-full bg-[#e0e0e0]" />
+          <div className="ml-auto h-[5px] w-10 rounded-full bg-[#e8e8ed]" />
+          <div className="h-[5px] w-6 rounded-full bg-[#e8e8ed]" />
         </div>
       </div>
     </div>
   );
 }
 
-/** Mobile — native app feel: header + list items + tab bar */
+/** Mobile — native app feel: large header + card list + tab bar */
 function MobileScreenContent({
   eyebrow,
   title,
@@ -1450,56 +1492,84 @@ function MobileScreenContent({
       style={{ fontFamily: SCREEN_FONT, background: '#fff' }}
     >
       {/* App header */}
-      <div className="px-4 pt-2 pb-3">
-        <p className="text-[9px] font-medium uppercase tracking-[0.18em]" style={{ color: '#86868b' }}>
+      <div className="px-6 pt-5 pb-3 sm:px-7 sm:pt-6">
+        <p
+          className="text-[10px] font-semibold uppercase tracking-[0.18em] sm:text-[11px]"
+          style={{ color: '#f59e0b' }}
+        >
           {eyebrow}
         </p>
         <h3
-          className="mt-0.5 text-[15px] font-bold leading-tight"
-          style={{ color: '#1d1d1f', letterSpacing: '-0.01em' }}
+          className="mt-1.5 text-[17px] font-bold leading-[1.2] sm:text-[19px]"
+          style={{ color: '#1d1d1f', letterSpacing: '-0.015em' }}
         >
           {title}
         </h3>
-        <p className="mt-1 text-[10px] leading-snug" style={{ color: '#515154' }}>
+        <p
+          className="mt-2 text-[11px] leading-[1.5] sm:text-[12px]"
+          style={{ color: '#6e6e73' }}
+        >
           {desc}
         </p>
       </div>
 
-      {/* Feature list items with icons */}
-      <div className="flex flex-1 flex-col gap-2 px-3">
-        {bullets.map((b) => (
+      {/* Feature list */}
+      <div className="flex flex-1 flex-col gap-2.5 px-5 pt-1 sm:px-6 sm:gap-3">
+        {bullets.map((b, i) => (
           <div
             key={b}
-            className="flex items-center gap-2.5 rounded-xl bg-[#f9f9fb] px-3 py-2.5"
+            className="flex items-center gap-3 rounded-2xl border px-4 py-3.5 sm:px-5"
+            style={{
+              borderColor: i === 0 ? '#fde68a' : '#f0f0f2',
+              background: i === 0 ? '#fffdf7' : '#fafbfc',
+            }}
           >
-            <div className="h-7 w-7 shrink-0 rounded-lg bg-[#f59e0b]/15" />
-            <span className="text-[10px] leading-snug" style={{ color: '#1d1d1f' }}>{b}</span>
+            <div
+              className="h-8 w-8 shrink-0 rounded-xl sm:h-9 sm:w-9"
+              style={{
+                background: i === 0
+                  ? 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)'
+                  : 'linear-gradient(135deg, #f0f0f2 0%, #e4e4e7 100%)',
+                opacity: i === 0 ? 0.8 : 0.7,
+              }}
+            />
+            <span
+              className="text-[11px] leading-snug sm:text-[12px]"
+              style={{ color: '#2c2c2e' }}
+            >
+              {b}
+            </span>
           </div>
         ))}
 
-        {/* Skeleton list items */}
-        <div className="flex items-center gap-2.5 rounded-xl bg-[#f9f9fb] px-3 py-2.5">
-          <div className="h-7 w-7 shrink-0 rounded-lg bg-[#f0f0f0]" />
-          <div className="flex flex-1 flex-col gap-1">
-            <div className="h-2 w-3/4 rounded bg-[#ebebeb]" />
-            <div className="h-1.5 w-1/2 rounded bg-[#f0f0f0]" />
-          </div>
-        </div>
-        <div className="flex items-center gap-2.5 rounded-xl bg-[#f9f9fb] px-3 py-2.5">
-          <div className="h-7 w-7 shrink-0 rounded-lg bg-[#f0f0f0]" />
-          <div className="flex flex-1 flex-col gap-1">
-            <div className="h-2 w-2/3 rounded bg-[#ebebeb]" />
-            <div className="h-1.5 w-2/5 rounded bg-[#f0f0f0]" />
+        {/* Skeleton items */}
+        <div className="flex items-center gap-3 rounded-2xl border border-[#f0f0f2] bg-[#fafbfc] px-4 py-3.5 sm:px-5">
+          <div className="h-8 w-8 shrink-0 rounded-xl bg-[#f0f0f2] sm:h-9 sm:w-9" />
+          <div className="flex flex-1 flex-col gap-1.5">
+            <div className="h-[5px] w-4/5 rounded-full bg-[#e8e8ed]" />
+            <div className="h-[4px] w-3/5 rounded-full bg-[#f0f0f2]" />
           </div>
         </div>
       </div>
 
       {/* Tab bar */}
-      <div className="flex items-center justify-around border-t border-[#f0f0f0] px-4 py-2">
-        <div className="h-4 w-4 rounded-[3px] bg-[#1d1d1f]" />
-        <div className="h-4 w-4 rounded-[3px] bg-[#d1d1d6]" />
-        <div className="h-4 w-4 rounded-[3px] bg-[#d1d1d6]" />
-        <div className="h-4 w-4 rounded-[3px] bg-[#d1d1d6]" />
+      <div className="mt-auto flex items-center justify-around border-t border-[#f0f0f2] px-6 py-3 sm:px-7">
+        <div className="flex flex-col items-center gap-[3px]">
+          <div className="h-4 w-4 rounded-[5px] bg-[#f59e0b]/60" />
+          <div className="h-[3px] w-5 rounded-full bg-[#f59e0b]/40" />
+        </div>
+        <div className="flex flex-col items-center gap-[3px]">
+          <div className="h-4 w-4 rounded-[5px] bg-[#e0e0e5]" />
+          <div className="h-[3px] w-5 rounded-full bg-[#e8e8ed]" />
+        </div>
+        <div className="flex flex-col items-center gap-[3px]">
+          <div className="h-4 w-4 rounded-[5px] bg-[#e0e0e5]" />
+          <div className="h-[3px] w-5 rounded-full bg-[#e8e8ed]" />
+        </div>
+        <div className="flex flex-col items-center gap-[3px]">
+          <div className="h-4 w-4 rounded-[5px] bg-[#e0e0e5]" />
+          <div className="h-[3px] w-5 rounded-full bg-[#e8e8ed]" />
+        </div>
       </div>
     </div>
   );
