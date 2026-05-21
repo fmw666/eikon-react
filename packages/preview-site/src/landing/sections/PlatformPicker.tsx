@@ -654,6 +654,7 @@ function ScaledDeviceShell({
           willChange: 'transform',
           backfaceVisibility: 'hidden',
           WebkitBackfaceVisibility: 'hidden',
+          filter: 'blur(0px)',
           pointerEvents: 'auto',
           cursor: 'pointer',
         }}
