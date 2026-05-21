@@ -615,10 +615,11 @@ body {
  * ------------------------------------------------------------------ */
 
 @keyframes eikon-screen-bootup {
-  0% {
+  0%,
+  60% {
     opacity: 0;
   }
-  30% {
+  85% {
     opacity: 1.05;
   }
   100% {
@@ -627,7 +628,7 @@ body {
 }
 
 .eikon-screen-glow {
-  animation: eikon-screen-bootup 500ms ease-out both;
+  animation: eikon-screen-bootup 700ms ease-out both;
 }
 
 @media (prefers-reduced-motion: reduce) {
