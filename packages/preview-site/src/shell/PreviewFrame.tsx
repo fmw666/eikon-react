@@ -3,7 +3,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { type ParamsStore } from '@/lib/params-store';
 
-import { DeviceShell, type DevicePlatform } from './DeviceShell';
+import { DeviceShell, type DevicePlatform } from './device-shell';
 import { useShellStore, useUiStore } from './store';
 
 type BuildStatus = 'ready' | 'building' | 'error';

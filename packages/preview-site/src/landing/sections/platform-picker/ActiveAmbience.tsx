@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-import type { DevicePlatform } from '@/shell/DeviceShell';
+import type { DevicePlatform } from '@/shell/device-shell';
 
 const AMBIENCE_SCREEN: Record<DevicePlatform, {
   far: CSSProperties;

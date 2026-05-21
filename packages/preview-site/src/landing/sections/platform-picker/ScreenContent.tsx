@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-import type { DevicePlatform } from '@/shell/DeviceShell';
+import type { DevicePlatform } from '@/shell/device-shell';
 
 const SCREEN_FONT: CSSProperties['fontFamily'] =
   '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif';

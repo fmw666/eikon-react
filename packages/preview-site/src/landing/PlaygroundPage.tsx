@@ -49,7 +49,7 @@ import {
   SlidersIcon,
   TargetIcon,
   TerminalIcon,
-} from './components/CollapsibleSidebar';
+} from './components/collapsible-sidebar';
 import { PlatformPicker } from './sections/platform-picker';
 import { PromptOutput } from './sections/PromptOutput';
 import { useI18n } from './theme/i18n';

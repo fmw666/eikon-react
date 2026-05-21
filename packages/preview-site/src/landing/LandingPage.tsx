@@ -57,7 +57,7 @@ import { Reveal } from './components/Reveal';
 import { Nav } from './nav/Nav';
 import { useAppRoute, type AppRoute } from './nav/route';
 import { loadChangelog, loadPlayground } from './nav/route-loaders';
-import { Footer } from './sections/Footer';
+import { Footer } from './sections/footer';
 import { Hero } from './sections/Hero';
 import { PainPoints } from './sections/PainPoints';
 import { Philosophy } from './sections/Philosophy';

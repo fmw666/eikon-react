@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import type { Platform } from '@/lib/params-schema';
-import type { DevicePlatform } from '@/shell/DeviceShell';
+import type { DevicePlatform } from '@/shell/device-shell';
 
 import type { I18nKey } from '../../theme/i18n';
 

@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 
-import { DeviceShell, type DevicePlatform } from '@/shell/DeviceShell';
+import { DeviceShell, type DevicePlatform } from '@/shell/device-shell';
 
 import { ActiveAmbience } from './ActiveAmbience';
 import {
