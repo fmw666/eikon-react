@@ -64,7 +64,7 @@ import { Philosophy } from './sections/Philosophy';
 import {
   PlatformPicker,
   PLATFORM_PICKER_ANCHOR_ID,
-} from './sections/PlatformPicker';
+} from './sections/platform-picker';
 import { PlaygroundSection } from './sections/PlaygroundSection';
 import { QASection } from './sections/QASection';
 import { TechStackWall } from './sections/TechStackWall';

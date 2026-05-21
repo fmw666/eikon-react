@@ -50,7 +50,7 @@ import {
   TargetIcon,
   TerminalIcon,
 } from './components/CollapsibleSidebar';
-import { PlatformPicker } from './sections/PlatformPicker';
+import { PlatformPicker } from './sections/platform-picker';
 import { PromptOutput } from './sections/PromptOutput';
 import { useI18n } from './theme/i18n';
 
