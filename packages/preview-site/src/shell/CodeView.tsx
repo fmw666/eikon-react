@@ -248,7 +248,7 @@ export function CodeView() {
           )}
         </span>
       </div>
-      <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+      <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
         {!selectedFile && (
           <div
             style={{

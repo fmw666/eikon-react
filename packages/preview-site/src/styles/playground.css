@@ -446,3 +446,12 @@
   opacity: 0.5;
   pointer-events: none;
 }
+
+/* Pin CodeMirror horizontal scrollbar to editor viewport bottom */
+.cm-editor {
+  height: 100%;
+}
+
+.cm-editor .cm-scroller {
+  overflow: auto !important;
+}
