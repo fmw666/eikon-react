@@ -117,7 +117,7 @@ function CompactPlatformRow({
       aria-checked={active}
       onClick={onSelect}
       className={
-        'flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition ' +
+        'flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition ' +
         (active
           ? 'border-brand-500/45 bg-brand-500/10'
           : 'border-[var(--border-1)] bg-[var(--surface-1)] hover:border-[var(--border-2)] hover:bg-[var(--surface-2)]')

@@ -248,7 +248,7 @@ function TabNav({
             tabIndex={active ? 0 : -1}
             onClick={() => onSelect(opt.value)}
             className={
-              'relative z-10 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-200 sm:px-4 sm:py-2 sm:text-sm ' +
+              'relative z-10 inline-flex cursor-pointer items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-200 sm:px-4 sm:py-2 sm:text-sm ' +
               (active
                 ? 'text-[var(--fg-1)]'
                 : 'text-[var(--fg-3)] hover:text-[var(--fg-1)]')
