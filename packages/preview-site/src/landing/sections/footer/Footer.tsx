@@ -124,25 +124,45 @@ export function Footer() {
     ) {
       return;
     }
-    const handleMove = (e: PointerEvent) => {
-      const rect = el.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      el.style.setProperty('--eikon-footer-mx', `${x}%`);
-      el.style.setProperty('--eikon-footer-my', `${y}%`);
+    let rect: DOMRect | null = null;
+    let meadowRect: DOMRect | null = null;
+    let rafId = 0;
+    let lastX = 0;
+    let lastY = 0;
 
+    const updateRects = () => {
+      rect = el.getBoundingClientRect();
       const meadowEl = meadowRef.current;
-      if (meadowEl) {
-        const mr = meadowEl.getBoundingClientRect();
-        meadowEl.style.setProperty(
-          '--eikon-meadow-mx',
-          `${e.clientX - mr.left}px`,
-        );
-        meadowEl.style.setProperty(
-          '--eikon-meadow-my',
-          `${e.clientY - mr.top}px`,
-        );
-      }
+      if (meadowEl) meadowRect = meadowEl.getBoundingClientRect();
+    };
+    updateRects();
+
+    const handleMove = (e: PointerEvent) => {
+      lastX = e.clientX;
+      lastY = e.clientY;
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        if (!rect) return;
+        const x = ((lastX - rect.left) / rect.width) * 100;
+        const y = ((lastY - rect.top) / rect.height) * 100;
+        el.style.setProperty('--eikon-footer-mx', `${x}%`);
+        el.style.setProperty('--eikon-footer-my', `${y}%`);
+
+        if (meadowRect) {
+          const meadowEl = meadowRef.current;
+          if (meadowEl) {
+            meadowEl.style.setProperty(
+              '--eikon-meadow-mx',
+              `${lastX - meadowRect.left}px`,
+            );
+            meadowEl.style.setProperty(
+              '--eikon-meadow-my',
+              `${lastY - meadowRect.top}px`,
+            );
+          }
+        }
+      });
     };
     const handleLeave = () => {
       el.style.setProperty('--eikon-footer-mx', '50%');
@@ -153,11 +173,19 @@ export function Footer() {
         meadowEl.style.setProperty('--eikon-meadow-my', '-9999px');
       }
     };
+
+    const handleScroll = () => updateRects();
+
     el.addEventListener('pointermove', handleMove);
     el.addEventListener('pointerleave', handleLeave);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', updateRects);
     return () => {
       el.removeEventListener('pointermove', handleMove);
       el.removeEventListener('pointerleave', handleLeave);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', updateRects);
+      if (rafId) cancelAnimationFrame(rafId);
     };
   }, []);
 
