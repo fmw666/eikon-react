@@ -188,14 +188,14 @@ export function CtaButton(props: CtaButtonProps) {
  */
 const PRIMARY_TOKENS = {
   surface:
-    'bg-[#c5f217] text-black ' +
-    'shadow-[0_0_28px_-6px_rgba(197,242,23,0.55)] ' +
-    'hover:shadow-[0_0_38px_-2px_rgba(197,242,23,0.9)]',
+    'bg-gradient-to-br from-[oklch(0.88_0.2_118)] to-[oklch(0.76_0.18_130)] text-[#1a2e05] ' +
+    'shadow-[0_0_28px_-6px_oklch(0.8_0.18_120/0.6),0_2px_6px_rgb(0_0_0/0.18)] ' +
+    'hover:shadow-[0_0_38px_-2px_oklch(0.8_0.18_120/0.85),0_4px_12px_rgb(0_0_0/0.22)]',
   ring:
-    'outline outline-1 outline-[#c5f217] outline-offset-[3px] ' +
+    'outline outline-1 outline-[oklch(0.82_0.16_120/0.7)] outline-offset-[3px] ' +
     'hover:outline-2 hover:outline-offset-[2px] ' +
     'focus-visible:outline-2 focus-visible:outline-offset-[2px]',
-  icon: 'inline-flex items-center text-black',
+  icon: 'inline-flex items-center text-[#1a2e05]/80',
 } as const;
 
 /**
