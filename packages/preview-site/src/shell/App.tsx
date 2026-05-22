@@ -93,18 +93,10 @@ export function PlaygroundShell() {
   const platform = useShellStore((s) => String(s.state.platform));
   const isCompact = useIsCompactShell();
 
-  // Mobile view tab — only used by the compact branch. Always defaults
-  // to Preview because that's the single most useful pane to land on
-  // (the visitor is here to *see* the rendered template, not to read
-  // its source). State is local; persisting it would surprise users
-  // who'd expect every fresh visit to start on the preview.
   const [mobileView, setMobileView] = useState<'preview' | 'files' | 'code'>(
     'preview'
   );
 
-  // Bucket the Group id by which panels are visible so toggling Files /
-  // Editor doesn't surprise-resize the preview to whatever the prior
-  // layout's split was.
   const groupId = `eikon-${showFiles ? 'f' : ''}${showEditor ? 'e' : ''}p`;
 
   const overlayMode = computeOverlayMode({
@@ -118,11 +110,6 @@ export function PlaygroundShell() {
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--border-1)] bg-[var(--surface-1)]">
-      {/*
-        URL sync is the ONLY consumer of the full param state. Mounted
-        once here so the rest of the shell does not re-render on every
-        param toggle.
-      */}
       <UrlSync />
 
       <Toolbar
@@ -133,13 +120,6 @@ export function PlaygroundShell() {
 
       <main className="relative flex min-h-0 flex-1">
         {isCompact ? (
-          /* ── Mobile layout ─────────────────────────────────────────
-             Only one pane is mounted at a time. Mounting all three
-             (with `hidden`) would keep CodeMirror parsing and the
-             iframe building in the background — both expensive on
-             low-end Android. We trade the cost of a re-mount on tab
-             switch (cheap; iframe re-renders use the same cached
-             build) for a much lighter idle cost. */
           <div className="flex h-full w-full min-h-0 min-w-0 flex-col">
             {mobileView === 'preview' && <PreviewFrame />}
             {mobileView === 'files' && <FileExplorer />}
@@ -150,7 +130,6 @@ export function PlaygroundShell() {
             )}
           </div>
         ) : (
-          /* ── Desktop / tablet layout (md+) ──────────────────────── */
           <Group
             id={groupId}
             orientation="horizontal"

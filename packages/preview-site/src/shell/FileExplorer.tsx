@@ -1,4 +1,4 @@
-import { Icon } from '@iconify/react';
+import { Icon, iconLoaded, loadIcons } from '@iconify/react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Tree, type NodeApi, type NodeRendererProps } from 'react-arborist';
 
@@ -45,6 +45,97 @@ function ancestorsOf(tree: FileNode[], targetId: string): string[] {
   }
   walk(tree, []);
   return out;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Icon preloading                                                           */
+/* ------------------------------------------------------------------------- */
+
+function allIconsReady(icons: string[]): boolean {
+  return icons.every((name) => iconLoaded(name));
+}
+
+function collectIconsDeep(nodes: FileNode[]): string[] {
+  const icons: string[] = [];
+  function walk(list: FileNode[]) {
+    for (const n of list) {
+      if (n.type === 'dir') {
+        icons.push(getFolderIcon(n.name, false));
+        icons.push(getFolderIcon(n.name, true));
+        if (n.children) walk(n.children);
+      } else {
+        icons.push(getFileIcon(n.name));
+      }
+    }
+  }
+  walk(nodes);
+  return [...new Set(icons)];
+}
+
+function useIconsReady(nodes: FileNode[] | null): boolean {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!nodes || nodes.length === 0) {
+      setReady(true);
+      return;
+    }
+    const icons = collectIconsDeep(nodes);
+    if (allIconsReady(icons)) {
+      setReady(true);
+      return;
+    }
+    setReady(false);
+    const unsub = loadIcons(icons, (_loaded, _missing, pending) => {
+      if (pending.length === 0) setReady(true);
+    });
+    return () => { unsub(); };
+  }, [nodes]);
+
+  return ready;
+}
+
+function TreeSpinner({ delay = 400 }: { delay?: number }) {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setShow(true), delay);
+    return () => clearTimeout(t);
+  }, [delay]);
+  if (!show) return null;
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        minHeight: 80,
+        animation: 'eikon-fade-in 300ms ease both',
+      }}
+    >
+      <svg
+        width={18}
+        height={18}
+        viewBox="0 0 24 24"
+        style={{ animation: 'spin 0.8s linear infinite', color: COLOR_TEXT_MUTED }}
+      >
+        <circle
+          cx={12}
+          cy={12}
+          r={10}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeDasharray="50 20"
+          strokeLinecap="round"
+        />
+      </svg>
+      <style>{`
+        @keyframes spin{to{transform:rotate(360deg)}}
+        @keyframes eikon-fade-in{from{opacity:0}to{opacity:1}}
+      `}</style>
+    </div>
+  );
 }
 
 /* ------------------------------------------------------------------------- */
@@ -285,6 +376,8 @@ export function FileExplorer() {
     return map;
   }, [tree, selectedFile]);
 
+  const iconsReady = useIconsReady(tree);
+
   return (
     <div
       style={{
@@ -347,26 +440,29 @@ export function FileExplorer() {
             {error}
           </div>
         )}
-        {tree && (
-          <Tree<FileNode>
-            data={tree}
-            openByDefault={false}
-            initialOpenState={initialOpenState}
-            selection={selectedFile ?? undefined}
-            width={size.w}
-            height={size.h}
-            indent={0 /* we render our own indent in Row for guide lines */}
-            rowHeight={ROW_HEIGHT}
-            paddingTop={0}
-            paddingBottom={4}
-            disableDrag
-            disableDrop
-            disableEdit
-            disableMultiSelection
-            onActivate={handleActivate}
-          >
-            {Row}
-          </Tree>
+        {tree && !iconsReady && <TreeSpinner />}
+        {tree && iconsReady && (
+          <div style={{ animation: 'eikon-fade-in 200ms ease both', height: '100%' }}>
+            <Tree<FileNode>
+              data={tree}
+              openByDefault={false}
+              initialOpenState={initialOpenState}
+              selection={selectedFile ?? undefined}
+              width={size.w}
+              height={size.h}
+              indent={0}
+              rowHeight={ROW_HEIGHT}
+              paddingTop={0}
+              paddingBottom={4}
+              disableDrag
+              disableDrop
+              disableEdit
+              disableMultiSelection
+              onActivate={handleActivate}
+            >
+              {Row}
+            </Tree>
+          </div>
         )}
       </div>
     </div>

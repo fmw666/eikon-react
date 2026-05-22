@@ -21,8 +21,8 @@ const FOLDER_NAME_MAP: Record<string, [string, string]> = {
     'vscode-icons:folder-type-public-opened',
   ],
   scripts: [
-    'vscode-icons:folder-type-scripts',
-    'vscode-icons:folder-type-scripts-opened',
+    'vscode-icons:folder-type-script',
+    'vscode-icons:folder-type-script-opened',
   ],
   test: [
     'vscode-icons:folder-type-test',
@@ -46,8 +46,8 @@ const FOLDER_NAME_MAP: Record<string, [string, string]> = {
     'vscode-icons:folder-type-shared-opened',
   ],
   features: [
-    'vscode-icons:folder-type-light-app',
-    'vscode-icons:folder-type-light-app-opened',
+    'vscode-icons:folder-type-module',
+    'vscode-icons:folder-type-module-opened',
   ],
   hooks: [
     'vscode-icons:folder-type-hook',
@@ -57,18 +57,18 @@ const FOLDER_NAME_MAP: Record<string, [string, string]> = {
     'vscode-icons:folder-type-tools',
     'vscode-icons:folder-type-tools-opened',
   ],
-  lib: ['vscode-icons:folder-type-lib', 'vscode-icons:folder-type-lib-opened'],
+  lib: ['vscode-icons:folder-type-library', 'vscode-icons:folder-type-library-opened'],
   routes: [
-    'vscode-icons:folder-type-routes',
-    'vscode-icons:folder-type-routes-opened',
+    'vscode-icons:folder-type-route',
+    'vscode-icons:folder-type-route-opened',
   ],
   styles: [
     'vscode-icons:folder-type-css',
     'vscode-icons:folder-type-css-opened',
   ],
   assets: [
-    'vscode-icons:folder-type-assets',
-    'vscode-icons:folder-type-assets-opened',
+    'vscode-icons:folder-type-asset',
+    'vscode-icons:folder-type-asset-opened',
   ],
   docs: [
     'vscode-icons:folder-type-docs',
