@@ -392,9 +392,17 @@ function SectionDivider() {
 function QuoteStrip() {
   return (
     <div className="mx-auto my-8 max-w-4xl px-4 py-12 text-center sm:my-12 sm:py-16">
-      <blockquote className="text-xl font-medium italic leading-relaxed tracking-tight text-[var(--fg-2)] sm:text-2xl lg:text-3xl">
-        <span className="bg-gradient-to-br from-[var(--fg-2)] to-[var(--fg-4)] bg-clip-text text-transparent">
-          &ldquo;The best AI scaffolding is the one you never have to explain.&rdquo;
+      <blockquote className="text-xl font-medium italic leading-relaxed tracking-tight sm:text-2xl lg:text-3xl">
+        <span
+          className="bg-clip-text text-transparent"
+          style={{
+            backgroundImage:
+              'linear-gradient(90deg, var(--fg-3) 0%, var(--fg-1) 20%, var(--fg-3) 40%, var(--fg-3) 100%)',
+            backgroundSize: '250% 100%',
+            animation: 'eikon-text-shimmer 10s infinite',
+          }}
+        >
+          &ldquo;The best AI scaffolding is the one you never have to explain.<span className="not-italic">&rdquo;</span>
         </span>
       </blockquote>
       <div

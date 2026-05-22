@@ -88,3 +88,25 @@
     transform: translate3d(-3%, 2%, 0);
   }
 }
+
+@keyframes eikon-text-shimmer {
+  0% {
+    background-position: 100% center;
+    animation-timing-function: linear;
+  }
+  30% {
+    background-position: -60% center;
+    animation-timing-function: ease-in;
+  }
+  42% {
+    background-position: 100% center;
+    animation-timing-function: cubic-bezier(0.8, 0, 0.2, 1);
+  }
+  72% {
+    background-position: -60% center;
+    animation-timing-function: linear;
+  }
+  100% {
+    background-position: -60% center;
+  }
+}
