@@ -71,9 +71,24 @@ export function QASection() {
 
   return (
     <section
-      className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
+      className="relative mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
       aria-labelledby="qa-title"
     >
+      {/* Subtle grid backdrop — anchored to top-right, masked to a
+          small patch so it reads as spatial texture, not wallpaper. */}
+      <div
+        aria-hidden="true"
+        className="eikon-grid-drift pointer-events-none absolute inset-0 -z-10 opacity-[0.4] dark:opacity-[0.22]"
+        style={{
+          backgroundImage:
+            'linear-gradient(to right, var(--border-1) 1px, transparent 1px), linear-gradient(to bottom, var(--border-1) 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+          maskImage:
+            'radial-gradient(ellipse 35% 45% at 95% 15%, black 10%, transparent 60%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 35% 45% at 95% 15%, black 10%, transparent 60%)',
+        }}
+      />
       <div className="grid grid-cols-1 gap-x-20 gap-y-12 sm:gap-y-14 lg:grid-cols-[1.5fr_1fr]">
         <div>
           {/* Eyebrow: tiny accent dot + uppercase label. The dot

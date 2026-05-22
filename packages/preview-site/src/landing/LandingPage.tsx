@@ -350,6 +350,9 @@ function HomeRoute() {
       <Reveal>
         <TechStackWall />
       </Reveal>
+      <Reveal variant="zoom">
+        <QuoteStrip />
+      </Reveal>
       <Reveal variant="rise-scale">
         <PainPoints />
       </Reveal>
@@ -380,6 +383,25 @@ function SectionDivider() {
         style={{
           background:
             'linear-gradient(to right, transparent, var(--border-1), transparent)',
+        }}
+      />
+    </div>
+  );
+}
+
+function QuoteStrip() {
+  return (
+    <div className="mx-auto my-8 max-w-4xl px-4 py-12 text-center sm:my-12 sm:py-16">
+      <blockquote className="text-xl font-medium italic leading-relaxed tracking-tight text-[var(--fg-2)] sm:text-2xl lg:text-3xl">
+        <span className="bg-gradient-to-br from-[var(--fg-2)] to-[var(--fg-4)] bg-clip-text text-transparent">
+          &ldquo;The best AI scaffolding is the one you never have to explain.&rdquo;
+        </span>
+      </blockquote>
+      <div
+        className="mx-auto mt-6 h-px w-16"
+        style={{
+          background:
+            'linear-gradient(to right, transparent, var(--border-2), transparent)',
         }}
       />
     </div>

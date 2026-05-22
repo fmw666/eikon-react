@@ -65,10 +65,25 @@ export function TechStackWall() {
   const { t } = useI18n();
   return (
     <section
-      className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
+      className="relative mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
       aria-labelledby="stack-title"
     >
+      {/* Subtle radial backdrop wash */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background:
+            'radial-gradient(ellipse 60% 50% at 50% 40%, var(--accent-glow), transparent 70%)',
+          opacity: 0.4,
+        }}
+      />
+
       <div className="mb-10 text-center">
+        <p className="mb-3 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--fg-4)]">
+          <span className="inline-block h-1 w-1 rounded-full bg-brand-500 shadow-[0_0_8px_var(--accent-glow)]" />
+          {t('stack.eyebrow')}
+        </p>
         <h2
           id="stack-title"
           className="text-3xl font-semibold tracking-tight text-[var(--fg-1)] sm:text-4xl"
@@ -164,8 +179,9 @@ function Tier({
 }) {
   const { t } = useI18n();
   return (
-    <div className="rounded-xl border border-[var(--border-1)] bg-[var(--surface-1)] p-5">
-      <div className="text-xs font-medium uppercase tracking-wider text-[var(--fg-3)]">
+    <div className="rounded-xl border border-[var(--border-1)] bg-gradient-to-b from-[var(--surface-1)] to-[var(--surface-0)] p-5 shadow-[0_1px_3px_rgb(0_0_0/0.06),0_6px_20px_-6px_rgb(0_0_0/0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--border-2)] hover:shadow-[0_2px_6px_rgb(0_0_0/0.08),0_12px_32px_-6px_rgb(0_0_0/0.14)]">
+      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-[var(--fg-3)]">
+        <span className="inline-block h-1 w-1 rounded-full bg-brand-500 shadow-[0_0_6px_var(--accent-glow)]" />
         {t(titleKey)}
       </div>
       <ul className="mt-4 flex flex-col gap-3">

@@ -102,6 +102,7 @@ const DICT = {
     'prompt.copied': '已复制',
     'prompt.copyFailed': '复制失败',
 
+    'stack.eyebrow': '技术栈',
     'stack.title': '内置的完整技术栈',
     'stack.subtitle': '主流、稳定、AI 友好 —— 拿来就能用',
     'stack.tier.core': '核心运行时',
@@ -109,6 +110,7 @@ const DICT = {
     'stack.tier.quality': '质量与测试',
     'stack.tier.platform': '跨端与基础设施',
 
+    'pain.eyebrow': '痛点',
     'pain.title': '为什么需要它',
     'pain.subtitle': '把 AI 协作中每次都要重复折腾的问题，一次解决',
     'pain.1.title': '每次配项目都从零开始',
@@ -296,6 +298,7 @@ const DICT = {
     'prompt.copied': 'Copied!',
     'prompt.copyFailed': 'Copy failed',
 
+    'stack.eyebrow': 'Stack',
     'stack.title': 'A full stack, batteries included',
     'stack.subtitle':
       'Mainstream, stable, AI-friendly — pick it up and start shipping',
@@ -304,6 +307,7 @@ const DICT = {
     'stack.tier.quality': 'Quality & testing',
     'stack.tier.platform': 'Cross-platform & infra',
 
+    'pain.eyebrow': 'Pain Points',
     'pain.title': 'Why you might want this',
     'pain.subtitle':
       "Solve the things you'd otherwise re-fight with your AI every project",
