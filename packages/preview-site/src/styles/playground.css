@@ -420,33 +420,6 @@
   }
 }
 
-/* ------------------------------------------------------------------
- * eikon-prompt-gutter — left-edge brand accent for prompt code blocks
- * ------------------------------------------------------------------ */
-
-.eikon-prompt-gutter {
-  position: relative;
-}
-
-.eikon-prompt-gutter::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 12px;
-  bottom: 12px;
-  width: 2px;
-  border-radius: 1px;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    var(--color-brand-400, oklch(0.75 0.05 235)) 30%,
-    var(--color-brand-300, oklch(0.85 0.04 235)) 70%,
-    transparent
-  );
-  opacity: 0.5;
-  pointer-events: none;
-}
-
 /* Pin CodeMirror horizontal scrollbar to editor viewport bottom */
 .cm-editor {
   height: 100%;
@@ -454,4 +427,210 @@
 
 .cm-editor .cm-scroller {
   overflow: auto !important;
+}
+
+/* ------------------------------------------------------------------
+ * eikon-inline-slot — interactive word within the params sentence
+ *
+ * Each slot is a clickable token embedded in prose. The visual
+ * language: a subtle tinted background pill that "warms up" on
+ * hover and "lights up" when open — the slot reads as a piece of
+ * live UI sitting inside natural language.
+ * ------------------------------------------------------------------ */
+
+.eikon-inline-slot {
+  position: relative;
+  cursor: pointer;
+  padding: 1px 6px;
+  margin: 0 1px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--surface-3) 50%, transparent);
+  border-bottom: 1.5px dashed var(--border-2);
+  transition:
+    background-color 240ms var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1)),
+    border-color 240ms var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1)),
+    box-shadow 240ms var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.eikon-inline-slot:hover {
+  background: color-mix(in srgb, var(--surface-3) 80%, transparent);
+  border-bottom-color: var(--color-brand-400, oklch(0.75 0.05 235));
+  box-shadow: 0 1px 4px -1px var(--accent-glow);
+}
+
+.eikon-inline-slot[data-open] {
+  background: color-mix(
+    in srgb,
+    var(--color-brand-400, oklch(0.75 0.05 235)) 10%,
+    transparent
+  );
+  border-bottom-style: solid;
+  border-bottom-color: var(--color-brand-400, oklch(0.75 0.05 235));
+  box-shadow: 0 2px 8px -2px var(--accent-glow);
+}
+
+/* Chevron micro-rotation on open */
+.eikon-inline-slot .eikon-slot-chevron {
+  display: inline-block;
+  transition: transform 200ms var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.eikon-inline-slot[data-open] .eikon-slot-chevron {
+  transform: rotate(180deg);
+}
+
+/* ------------------------------------------------------------------
+ * eikon-slot-dropdown — floating option list below a slot
+ * ------------------------------------------------------------------ */
+
+.eikon-slot-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  translate: -50% 0;
+  z-index: 50;
+  min-width: 140px;
+  max-width: 240px;
+  max-height: 220px;
+  overflow-y: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border-1);
+  background: var(--surface-0);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  box-shadow:
+    0 12px 40px -8px rgba(0, 0, 0, 0.28),
+    0 4px 12px -4px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(148, 163, 184, 0.06);
+  padding: 5px;
+  animation: eikon-menu-pop 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: top center;
+}
+
+.eikon-slot-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--fg-2);
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.eikon-slot-dropdown button:hover {
+  background: var(--surface-2);
+  color: var(--fg-1);
+}
+
+.eikon-slot-dropdown button[data-active] {
+  color: var(--color-brand-400, oklch(0.75 0.05 235));
+  font-weight: 500;
+  background: color-mix(
+    in srgb,
+    var(--color-brand-400, oklch(0.75 0.05 235)) 8%,
+    transparent
+  );
+}
+
+/* ------------------------------------------------------------------
+ * eikon-boolean-chip — toggleable pill for boolean params
+ *
+ * Matches the slot's visual language: tinted background on activate,
+ * brand glow on hover, smooth state transitions.
+ * ------------------------------------------------------------------ */
+
+.eikon-boolean-chip {
+  cursor: pointer;
+  border-color: var(--border-1);
+  color: var(--fg-4);
+  background: transparent;
+  transition:
+    background-color 260ms var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1)),
+    border-color 260ms var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1)),
+    color 260ms var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1)),
+    box-shadow 260ms var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform 260ms var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.eikon-boolean-chip:hover {
+  color: var(--fg-2);
+  border-color: color-mix(in srgb, var(--color-brand-400, oklch(0.75 0.05 235)) 40%, var(--border-1));
+  box-shadow: 0 1px 4px -1px var(--accent-glow);
+}
+
+.eikon-boolean-chip[data-checked] {
+  border-color: color-mix(in srgb, var(--color-brand-400, oklch(0.75 0.05 235)) 40%, transparent);
+  background: color-mix(in srgb, var(--color-brand-400, oklch(0.75 0.05 235)) 10%, transparent);
+  color: var(--color-brand-400, oklch(0.75 0.05 235));
+  box-shadow: 0 1px 6px -2px var(--accent-glow);
+}
+
+.eikon-boolean-chip[data-checked]:hover {
+  box-shadow: 0 2px 8px -2px var(--accent-glow);
+}
+
+.eikon-boolean-chip .eikon-boolean-indicator {
+  display: inline-block;
+  transition: transform 260ms var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.eikon-boolean-chip[data-checked] .eikon-boolean-indicator {
+  transform: scale(1.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-slot-dropdown {
+    animation: none;
+  }
+  .eikon-inline-slot,
+  .eikon-inline-slot .eikon-slot-chevron,
+  .eikon-boolean-chip,
+  .eikon-boolean-chip .eikon-boolean-indicator {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-toggle-float — boolean control hover / active micro-depth
+ *
+ * Applied to the ParamsPanel toggle rows. On hover, a soft shadow
+ * lifts the control off the surface; on active (checked) state, a
+ * brand-tinted left accent replaces the generic border.
+ * ------------------------------------------------------------------ */
+
+.eikon-toggle-float {
+  transition:
+    box-shadow 280ms var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1)),
+    border-color 280ms var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1)),
+    border-left-color 280ms var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.eikon-toggle-float:hover {
+  box-shadow: 0 2px 8px -2px var(--accent-glow);
+}
+
+.eikon-toggle-float[data-active='true'] {
+  border-left-width: 2px;
+  border-left-color: var(--color-brand-400, oklch(0.75 0.05 235));
+}
+
+/* ------------------------------------------------------------------
+ * eikon-section-divider — gradient line between param groups
+ *
+ * Replaces the flat 1px `bg-[var(--border-1)]` divider with a line
+ * that fades from transparent edges to brand-400/30 at centre.
+ * ------------------------------------------------------------------ */
+
+.eikon-section-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-brand-400, oklch(0.75 0.05 235)) 50%,
+    transparent
+  );
+  opacity: 0.25;
 }

@@ -120,45 +120,13 @@ export function CollapsibleSidebar({
   defaultPinned = true,
 }: CollapsibleSidebarProps) {
   const isLg = useIsLargeViewport();
-  // The hook is no-op when `enabled: false` (no keyboard listener,
-  // no peek timers), so on mobile we save the global keydown
-  // listener and avoid spurious peek state from synthetic events.
   const controller = useSidebarMode({
     storageKey,
     defaultPinned,
     enabled: isLg,
   });
 
-  // We intentionally mount EITHER the mobile stack OR the desktop
-  // panel — never both — to avoid duplicate DOM IDs (the prompt
-  // section carries `PROMPT_OUTPUT_ANCHOR_ID`, which the Hero's
-  // "find it" pill scrolls to via `getElementById`). Mounting both
-  // would resolve the id to whichever element is first in document
-  // order, often the `display: none` mobile copy, which then
-  // silently breaks `scrollIntoView`.
   if (!isLg) {
-    // Mobile (< lg): vertical accordion. Touch viewports get every
-    // section, but each is a collapsible disclosure so the page
-    // doesn't open onto a one-screen-tall list of expanded forms
-    // (the original stacked layout was easily ~3-4 screens on a
-    // 6"-class phone, which buried the Prompt output below the
-    // fold and made the visitor feel they'd lost the playground).
-    //
-    // OPEN-STATE POLICY
-    //
-    //   By default we open:
-    //     - the FIRST section (the target / platform picker — the
-    //       single most useful thing to land on, since changing
-    //       platform is the visitor's primary mode of exploration)
-    //     - the LAST `fill` section (typically the prompt output —
-    //       the artifact the visitor came here to copy)
-    //
-    //   Heavy sections in the middle (params) start collapsed.
-    //   Visitors who want them just tap to expand.
-    //
-    //   We keep state local — visitors don't need persistence
-    //   here, and avoiding localStorage on the home workbench
-    //   means the marketing page stays "pure rendering".
     return (
       <MobileSidebarAccordion
         ariaLabel={ariaLabel}

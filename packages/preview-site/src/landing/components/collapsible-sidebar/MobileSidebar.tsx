@@ -130,10 +130,14 @@ export function SidebarSection({ section }: { section: SidebarSectionSpec }) {
       className={'flex min-h-0 flex-col gap-2 ' + (section.fill ? 'flex-1' : '')}
       aria-label={section.title}
     >
-      <h3 className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--fg-3)]">
-        <span className="text-[var(--fg-4)]">{section.icon}</span>
-        <span>{section.title}</span>
-      </h3>
+      {!section.hideTitle && (
+        <h3 className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--fg-3)]">
+          {!section.hideFromRail && (
+            <span className="text-[var(--fg-4)]">{section.icon}</span>
+          )}
+          <span>{section.title}</span>
+        </h3>
+      )}
       <div className={'min-h-0 ' + (section.fill ? 'flex flex-1 flex-col' : '')}>
         {section.children}
       </div>

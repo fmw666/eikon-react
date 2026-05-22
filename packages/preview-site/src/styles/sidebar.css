@@ -124,6 +124,85 @@
     0 0 28px -6px var(--accent-glow);
 }
 
+/* ── Slim rail ───────────────────────────────────────────────────────
+   Minimal 32px collapsed state. A single centered chevron + a thin
+   right-edge accent line that glows on hover/active. The whole strip
+   is one click target. */
+
+.eikon-rail-slim {
+  background: color-mix(in srgb, var(--surface-0) 60%, transparent);
+  transition: background-color 320ms var(--ease-silk);
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  user-select: none;
+}
+
+.eikon-rail-slim:hover,
+.eikon-rail-slim[data-active] {
+  background: color-mix(in srgb, var(--surface-1) 70%, transparent);
+}
+
+.eikon-rail-slim .eikon-rail-chevron {
+  opacity: 0.4;
+  transition:
+    opacity 280ms var(--ease-silk),
+    transform 280ms var(--ease-silk);
+}
+
+.eikon-rail-slim:hover .eikon-rail-chevron,
+.eikon-rail-slim[data-active] .eikon-rail-chevron {
+  opacity: 1;
+  transform: translateX(1px);
+}
+
+.eikon-rail-slim .eikon-rail-edge {
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--color-brand-400, oklch(0.75 0.05 235)) 50%,
+    transparent
+  );
+  opacity: 0.25;
+  border-radius: 1px;
+  transition: opacity 400ms var(--ease-silk);
+  will-change: opacity;
+}
+
+.eikon-rail-slim:hover .eikon-rail-edge {
+  opacity: 0.55;
+}
+
+.eikon-rail-slim[data-active] .eikon-rail-edge {
+  opacity: 0;
+  transition: opacity 80ms ease-out;
+}
+
+@keyframes eikon-rail-shimmer {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.7;
+  }
+  60% {
+    opacity: 0.25;
+  }
+  80% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.15;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-rail-slim .eikon-rail-chevron,
+  .eikon-rail-slim .eikon-rail-edge {
+    transition: none;
+    animation: none;
+  }
+}
+
 /* ── Peek panel: entrance / exit ──────────────────────────────────
    Both keyframes are pure-glide (no overshoot). The entrance
    translates 14px from the left and rises in opacity + blur; the
@@ -135,14 +214,10 @@
   0% {
     opacity: 0;
     transform: translate3d(-14px, 0, 0);
-    backdrop-filter: blur(0px) saturate(100%);
-    -webkit-backdrop-filter: blur(0px) saturate(100%);
   }
   100% {
     opacity: 1;
     transform: translate3d(0, 0, 0);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
   }
 }
 
@@ -150,27 +225,27 @@
   0% {
     opacity: 1;
     transform: translate3d(0, 0, 0);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
   }
   100% {
     opacity: 0;
     transform: translate3d(-10px, 0, 0);
-    backdrop-filter: blur(0px) saturate(100%);
-    -webkit-backdrop-filter: blur(0px) saturate(100%);
   }
 }
 
 .eikon-peek-in {
   animation: eikon-peek-in 380ms var(--ease-glide) both;
   transform-origin: left center;
-  will-change: transform, opacity, backdrop-filter;
+  will-change: transform, opacity;
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
 }
 
 .eikon-peek-out {
   animation: eikon-peek-out 260ms var(--ease-silk) both;
   transform-origin: left center;
-  will-change: transform, opacity, backdrop-filter;
+  will-change: transform, opacity;
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
   pointer-events: none;
 }
 

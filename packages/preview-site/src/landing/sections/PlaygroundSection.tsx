@@ -352,10 +352,7 @@ export function PlaygroundSection() {
                 title: t('playgroundPage.paramsTitle'),
                 icon: <SlidersIcon className="h-5 w-5" />,
                 children: <ParamsPanel />,
-                // Collapsed on mobile — the home workbench is
-                // already a "section" rather than a takeover, so
-                // a closed-by-default params accordion keeps the
-                // visitor moving down the page towards the prompt.
+                hideFromRail: true,
                 mobileDefaultOpen: false,
               },
               {
@@ -365,8 +362,8 @@ export function PlaygroundSection() {
                 icon: <TerminalIcon className="h-5 w-5" />,
                 children: <PromptOutput compact />,
                 fill: true,
-                // Open on mobile — same rationale as the standalone
-                // playground page: the prompt is the artifact.
+                hideTitle: true,
+                hideFromRail: true,
                 mobileDefaultOpen: true,
               },
             ]}

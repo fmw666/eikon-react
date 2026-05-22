@@ -87,22 +87,25 @@ export function PromptOutput({ compact = false }: PromptOutputProps = {}) {
   // ---- Card body (shared by both layouts) ------------------------------
   const card = (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-[var(--border-1)] bg-[var(--surface-1)]">
-      <div className="flex items-center justify-between gap-3 border-b border-[var(--border-1)] bg-[var(--surface-2)] px-3 py-2">
-        <div
-          role="tablist"
-          aria-label={t('prompt.title')}
-          className="inline-flex overflow-hidden rounded-md border border-[var(--border-1)] bg-[var(--surface-1)] p-0.5"
-        >
-          <ModeTab
-            active={mode === 'prompt'}
-            onClick={() => setMode('prompt')}
-            label={t('prompt.tab.prompt')}
-          />
-          <ModeTab
-            active={mode === 'cli'}
-            onClick={() => setMode('cli')}
-            label={t('prompt.tab.cli')}
-          />
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--border-1)] bg-gradient-to-r from-[var(--surface-2)] via-[var(--surface-2)] to-[var(--surface-1)] px-3 py-2">
+        <div className="flex items-center gap-3">
+          {compact && <TerminalDots />}
+          <div
+            role="tablist"
+            aria-label={t('prompt.title')}
+            className="inline-flex overflow-hidden rounded-md border border-[var(--border-1)] bg-[var(--surface-1)] p-0.5"
+          >
+            <ModeTab
+              active={mode === 'prompt'}
+              onClick={() => setMode('prompt')}
+              label={t('prompt.tab.prompt')}
+            />
+            <ModeTab
+              active={mode === 'cli'}
+              onClick={() => setMode('cli')}
+              label={t('prompt.tab.cli')}
+            />
+          </div>
         </div>
 
         <CopyButton
@@ -116,15 +119,27 @@ export function PromptOutput({ compact = false }: PromptOutputProps = {}) {
         />
       </div>
 
-      <pre
-        aria-label={mode === 'prompt' ? 'prompt' : 'cli-command'}
-        className={
-          'eikon-prompt-gutter m-0 min-h-0 flex-1 overflow-auto whitespace-pre-wrap break-words font-mono leading-relaxed text-[var(--fg-1)] ' +
-          (compact ? 'px-4 py-3 text-xs' : 'max-h-[420px] px-5 py-4 text-[13px]')
-        }
-      >
-        <PromptHighlighter text={displayText} mode={mode} />
-      </pre>
+      <div className="relative min-h-0 flex-1">
+        {compact && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(ellipse at 100% 100%, oklch(0.65 0.06 235 / 0.03), transparent 60%)',
+            }}
+          />
+        )}
+        <pre
+          aria-label={mode === 'prompt' ? 'prompt' : 'cli-command'}
+          className={
+            'relative m-0 h-full min-h-0 overflow-auto whitespace-pre-wrap break-words font-mono tracking-[-0.01em] text-[var(--fg-2)] selection:bg-brand-400/20 ' +
+            (compact ? 'px-4 py-3 text-[13px] leading-[1.85]' : 'max-h-[420px] px-5 py-4 text-sm leading-[1.8]')
+          }
+        >
+          <PromptHighlighter text={displayText} mode={mode} />
+        </pre>
+      </div>
     </div>
   );
 
@@ -253,7 +268,6 @@ function PromptHighlighter({
   text: string;
   mode: Mode;
 }) {
-  // Split around `<proj_name>` so we can wrap exactly that token.
   const parts = text.split(/(<proj_name>)/g);
   return (
     <>
@@ -262,7 +276,7 @@ function PromptHighlighter({
           return (
             <span
               key={i}
-              className="rounded bg-brand-500/15 px-1 py-0.5 text-brand-400"
+              className="rounded-sm bg-brand-500/12 px-1 py-px font-semibold text-brand-400"
             >
               &lt;proj_name&gt;
             </span>
@@ -271,14 +285,24 @@ function PromptHighlighter({
         if (mode === 'cli' && i === 0) {
           return (
             <span key={i}>
-              <span className="select-none text-[var(--fg-4)]">$ </span>
-              {p}
+              <span className="select-none font-semibold text-[var(--fg-4)]">$ </span>
+              <span className="text-[var(--fg-1)]">{p}</span>
             </span>
           );
         }
         return <span key={i}>{p}</span>;
       })}
     </>
+  );
+}
+
+function TerminalDots() {
+  return (
+    <span className="flex items-center gap-1.5" aria-hidden="true">
+      <span className="h-[7px] w-[7px] rounded-full bg-[#ff5f57]/70" />
+      <span className="h-[7px] w-[7px] rounded-full bg-[#febc2e]/70" />
+      <span className="h-[7px] w-[7px] rounded-full bg-[#28c840]/70" />
+    </span>
   );
 }
 

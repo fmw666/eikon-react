@@ -16,7 +16,7 @@ export const LG_MEDIA_QUERY = '(min-width: 1024px)';
 /** Width of the rail in collapsed state. Tuned to fit a 20px icon
  *  plus generous tap target on both sides while still reading as
  *  "edge ornament" rather than "second sidebar". */
-export const RAIL_WIDTH_PX = 48;
+export const RAIL_WIDTH_PX = 32;
 
 /**
  * One labelled block inside the sidebar. The optional icon shows up
@@ -49,6 +49,11 @@ export interface SidebarSectionSpec {
    * a wall of closed disclosures.
    */
   mobileDefaultOpen?: boolean;
+  /** Hide the section heading (title + icon) in the desktop panel.
+   *  The content renders directly without an `<h3>` above it. */
+  hideTitle?: boolean;
+  /** Hide this section's icon from the collapsed rail. */
+  hideFromRail?: boolean;
 }
 
 export interface CollapsibleSidebarProps {

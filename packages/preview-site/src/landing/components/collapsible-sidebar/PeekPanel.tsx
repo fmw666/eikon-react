@@ -107,7 +107,7 @@ export function PeekPanel({
       if (panelRef.current?.contains(target)) return;
       // Don't dismiss when the user clicked the rail itself —
       // that's how they just opened us in the first place.
-      if ((target as HTMLElement).closest?.('.eikon-rail-glow')) return;
+      if ((target as HTMLElement).closest?.('.eikon-rail-slim')) return;
       closePeekNow();
     };
     document.addEventListener('mousedown', handler);
@@ -128,7 +128,7 @@ export function PeekPanel({
       ref={panelRef}
       {...panelProps}
       data-state={phase}
-      className={`${animationClass} absolute top-0 z-30 h-full border border-l-0 border-[var(--border-1)] bg-[var(--surface-0)]/85 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.6),0_8px_24px_-8px_rgb(15_23_42/0.4)] backdrop-saturate-150 ${panelClassName}`}
+      className={`${animationClass} absolute top-0 z-30 h-full border-r border-[var(--border-1)] bg-[var(--surface-0)]/95 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.6),0_8px_24px_-8px_rgb(15_23_42/0.4)] ${panelClassName}`}
       style={{
         left: `${RAIL_WIDTH_PX}px`,
         width: 'clamp(320px, 24vw, 420px)',

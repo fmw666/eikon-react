@@ -25,17 +25,9 @@ export function PanelContent({ controller, sections, floating }: PanelContentPro
 
   return (
     <>
-      {/* Header strip — title + action buttons. Pin toggle is the
-          star: clicking it from peek state promotes the panel to
-          pinned (sidebar stays open and starts participating in
-          layout); clicking it from pinned state demotes back to
-          collapsed. Esc / [ keyboard shortcuts work in parallel.
-          The pin icon uses `.eikon-pin-icon[data-pinned]` for the
-          silky 480ms rotation tween (longer than the bg fade — the
-          icon keeps turning after the colour settles, which reads
-          as "the action committed"). */}
-      <div className="flex items-center justify-between gap-2 border-b border-[var(--border-1)]/60 px-4 py-3 lg:px-5">
+      <div className="relative flex items-center justify-between gap-2 px-4 py-3 lg:px-5">
         <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--fg-3)]">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-400/60 shadow-[0_0_6px_var(--accent-glow)]" />
           <SlidersIcon className="h-3.5 w-3.5" />
           <span>{t('sidebar.controlsLabel')}</span>
         </div>
@@ -78,11 +70,16 @@ export function PanelContent({ controller, sections, floating }: PanelContentPro
             </button>
           )}
         </div>
+        <span
+          aria-hidden="true"
+          className="absolute inset-x-4 bottom-0 h-px lg:inset-x-5"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent, var(--border-1) 30%, var(--border-1) 70%, transparent)',
+          }}
+        />
       </div>
 
-      {/* Scrollable content area — same overflow behaviour as the
-          old static sidebar, so long content (params on a tall
-          variant) scrolls internally rather than pushing the page. */}
       <div className="flex h-[calc(100%-49px)] min-h-0 flex-col gap-5 overflow-y-auto p-4 sm:p-5">
         {sections.map((section) => (
           <SidebarSection key={section.id} section={section} />

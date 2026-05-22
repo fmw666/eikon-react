@@ -117,8 +117,7 @@ export default function PlaygroundPage() {
             title: t('playgroundPage.paramsTitle'),
             icon: <SlidersIcon className="h-5 w-5" />,
             children: <ParamsPanel />,
-            // Stays collapsed on mobile — the full param set is
-            // long, and visitors who want to tweak just expand it.
+            hideFromRail: true,
             mobileDefaultOpen: false,
           },
           {
@@ -127,9 +126,8 @@ export default function PlaygroundPage() {
             icon: <TerminalIcon className="h-5 w-5" />,
             children: <PromptOutput compact />,
             fill: true,
-            // Open on mobile — this is the artifact the visitor
-            // came here to copy. Default-open via the `fill`
-            // fallback would also work; we're explicit for clarity.
+            hideTitle: true,
+            hideFromRail: true,
             mobileDefaultOpen: true,
           },
         ]}
