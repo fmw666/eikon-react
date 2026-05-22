@@ -392,3 +392,57 @@
     opacity: 0;
   }
 }
+
+/* ------------------------------------------------------------------
+ * eikon-separator — panel drag handle with brand glow on interact
+ * ------------------------------------------------------------------ */
+
+.eikon-separator {
+  background: var(--border-1);
+  transition:
+    background-color 320ms var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1)),
+    box-shadow 320ms var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.eikon-separator:hover {
+  background: var(--color-brand-400, oklch(0.75 0.05 235));
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.eikon-separator:active {
+  background: var(--color-brand-300, oklch(0.85 0.04 235));
+  box-shadow: 0 0 14px 2px var(--accent-glow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-separator {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * eikon-prompt-gutter — left-edge brand accent for prompt code blocks
+ * ------------------------------------------------------------------ */
+
+.eikon-prompt-gutter {
+  position: relative;
+}
+
+.eikon-prompt-gutter::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  border-radius: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--color-brand-400, oklch(0.75 0.05 235)) 30%,
+    var(--color-brand-300, oklch(0.85 0.04 235)) 70%,
+    transparent
+  );
+  opacity: 0.5;
+  pointer-events: none;
+}

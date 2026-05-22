@@ -166,7 +166,7 @@ export function PlaygroundShell() {
                 >
                   <FileExplorer />
                 </Panel>
-                <Separator style={separatorStyle} />
+                <Separator className="eikon-separator" style={separatorStyle} />
               </>
             )}
 
@@ -181,7 +181,7 @@ export function PlaygroundShell() {
                     <CodeView />
                   </Suspense>
                 </Panel>
-                <Separator style={separatorStyle} />
+                <Separator className="eikon-separator" style={separatorStyle} />
               </>
             )}
 
@@ -214,7 +214,6 @@ export default function App() {
 
 const separatorStyle: CSSProperties = {
   width: 4,
-  background: 'var(--border-1)',
   cursor: 'col-resize',
 };
 

@@ -119,7 +119,7 @@ export function PromptOutput({ compact = false }: PromptOutputProps = {}) {
       <pre
         aria-label={mode === 'prompt' ? 'prompt' : 'cli-command'}
         className={
-          'm-0 min-h-0 flex-1 overflow-auto whitespace-pre-wrap break-words font-mono leading-relaxed text-[var(--fg-1)] ' +
+          'eikon-prompt-gutter m-0 min-h-0 flex-1 overflow-auto whitespace-pre-wrap break-words font-mono leading-relaxed text-[var(--fg-1)] ' +
           (compact ? 'px-4 py-3 text-xs' : 'max-h-[420px] px-5 py-4 text-[13px]')
         }
       >

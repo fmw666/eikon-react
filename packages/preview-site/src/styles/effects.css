@@ -91,6 +91,16 @@
   }
 }
 
+@keyframes eikon-conic-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  50% {
+    box-shadow: 0 0 24px -4px var(--accent-glow);
+  }
+}
+
 .eikon-conic-border {
   position: relative;
   border: 1px solid transparent;
@@ -105,7 +115,9 @@
         var(--color-brand-700) 360deg
       )
       border-box;
-  animation: eikon-conic-spin 12s linear infinite;
+  animation:
+    eikon-conic-spin 12s linear infinite,
+    eikon-conic-breathe 4s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
