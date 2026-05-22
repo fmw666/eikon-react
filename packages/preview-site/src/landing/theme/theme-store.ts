@@ -17,7 +17,7 @@
  * decide to wire `?theme=` / `?lang=` query params into template-react.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { create } from 'zustand';
 
 import { DEFAULT_LANG, type Lang, isLang } from './i18n';
@@ -123,6 +123,22 @@ export function ThemeAndLangSync(): null {
     } catch {
       // ignore
     }
+  }, [lang]);
+
+  // Trigger text-only fade-in animation on language switch.
+  const isFirstLang = useRef(true);
+  useEffect(() => {
+    if (isFirstLang.current) {
+      isFirstLang.current = false;
+      return;
+    }
+    const root = document.documentElement;
+    root.classList.add('eikon-lang-switching');
+    const timer = setTimeout(() => root.classList.remove('eikon-lang-switching'), 400);
+    return () => {
+      clearTimeout(timer);
+      root.classList.remove('eikon-lang-switching');
+    };
   }, [lang]);
 
   return null;

@@ -200,3 +200,37 @@
     animation: none;
   }
 }
+
+/* ------------------------------------------------------------------
+ * Language switch — text-only fade-in
+ *
+ * When `.eikon-lang-switching` is toggled on <html>, all text-bearing
+ * elements play a quick fade-in. Layout, borders, backgrounds, and
+ * device shells remain completely static — only textual content
+ * transitions.
+ * ------------------------------------------------------------------ */
+
+@keyframes eikon-lang-text-in {
+  from {
+    opacity: 0;
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+.eikon-lang-switching h1,
+.eikon-lang-switching h2,
+.eikon-lang-switching h3,
+.eikon-lang-switching h4,
+.eikon-lang-switching p,
+.eikon-lang-switching li,
+.eikon-lang-switching blockquote,
+.eikon-lang-switching a,
+.eikon-lang-switching label,
+.eikon-lang-switching dt,
+.eikon-lang-switching dd {
+  animation: eikon-lang-text-in 350ms ease-out both;
+}
