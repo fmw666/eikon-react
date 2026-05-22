@@ -195,18 +195,28 @@ function TabNav({
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
   const [flashKey, setFlashKey] = useState(0);
   const isInitial = useRef(true);
+  const [enableTransition, setEnableTransition] = useState(false);
+
+  const recalcIndicator = () => {
+    const el = tabRefs.current[activeIdx];
+    if (!el) return;
+    setIndicator({
+      left: el.offsetLeft,
+      width: el.offsetWidth,
+    });
+  };
 
   useLayoutEffect(() => {
-    const el = tabRefs.current[activeIdx];
-    const container = containerRef.current;
-    if (!el || !container) return;
-    const cRect = container.getBoundingClientRect();
-    const eRect = el.getBoundingClientRect();
-    setIndicator({
-      left: eRect.left - cRect.left,
-      width: eRect.width,
-    });
-  }, [activeIdx, tabRefs]);
+    recalcIndicator();
+    if (!enableTransition) {
+      requestAnimationFrame(() => setEnableTransition(true));
+    }
+  }, [activeIdx, tabRefs, enableTransition]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.fonts.ready.then(() => recalcIndicator());
+  }, [activeIdx]);
 
   useEffect(() => {
     if (isInitial.current) {
@@ -227,7 +237,12 @@ function TabNav({
       className="relative mx-auto mb-6 flex w-fit items-center gap-1 rounded-full border border-[var(--border-1)] bg-[var(--surface-1)] p-1 sm:gap-1.5"
     >
       <span
-        className="pointer-events-none absolute top-1 bottom-1 rounded-full bg-[var(--surface-3)] shadow-[inset_0_1px_0_rgb(255_255_255/0.05),0_1px_3px_rgb(0_0_0/0.15)] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+        className={
+          'pointer-events-none absolute top-1 bottom-1 rounded-full bg-[var(--surface-3)] shadow-[inset_0_1px_0_rgb(255_255_255/0.05),0_1px_3px_rgb(0_0_0/0.15)]' +
+          (enableTransition
+            ? ' transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]'
+            : '')
+        }
         style={{ left: indicator.left, width: indicator.width }}
       >
         {flashKey > 0 && (
