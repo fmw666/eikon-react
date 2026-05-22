@@ -62,16 +62,20 @@ export function Hero({
             mask coordinates align with the text's left edge. */}
         <div
           aria-hidden="true"
-          className="eikon-grid-drift pointer-events-none absolute inset-0 -z-10 opacity-[0.55] dark:opacity-[0.35]"
+          className="eikon-grid-drift pointer-events-none absolute -left-16 inset-y-0 right-0 -z-10"
           style={
             {
-              backgroundImage:
-                'linear-gradient(to right, var(--border-1) 1px, transparent 1px), linear-gradient(to bottom, var(--border-1) 1px, transparent 1px)',
-              backgroundSize: '40px 40px',
+              backgroundImage: `
+                radial-gradient(circle 1.5px at center, var(--border-2) 0%, transparent 100%),
+                linear-gradient(to right, var(--border-2) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--border-2) 1px, transparent 1px)
+              `.trim(),
+              backgroundSize: '48px 48px',
               maskImage:
-                'radial-gradient(ellipse 40% 55% at 0% 0%, black 10%, transparent 60%)',
+                'radial-gradient(ellipse 45% 60% at 5% 45%, black 15%, transparent 65%)',
               WebkitMaskImage:
-                'radial-gradient(ellipse 40% 55% at 0% 0%, black 10%, transparent 60%)',
+                'radial-gradient(ellipse 45% 60% at 5% 45%, black 15%, transparent 65%)',
+              opacity: 0.6,
               '--eikon-grid-step': '40px',
             } as CSSProperties
           }

@@ -402,8 +402,8 @@ function QuoteStrip() {
             animation: 'eikon-text-shimmer 10s infinite',
           }}
         >
-          &ldquo;The best AI scaffolding is the one you never have to explain.<span className="not-italic">&rdquo;</span>
-        </span>
+          &ldquo;The best AI scaffolding is the one you never have to explain
+        </span><span className="not-italic text-[var(--fg-3)]">&rdquo;</span>
       </blockquote>
       <div
         className="mx-auto mt-6 h-px w-16"

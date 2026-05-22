@@ -54,7 +54,7 @@ const DICT = {
     'hero.title.line1': '每一个伟大的产品，',
     'hero.title.line2Prefix': '都从',
     'hero.title.highlight': '同一段 Prompt',
-    'hero.title.line2Suffix': ' 开始。',
+    'hero.title.line2Suffix': ' 开始',
     'hero.subtitle':
       '一套预制好的项目骨架 + 技术栈 + AI 配置 + 质量标准 + 通用模块，让 AI 从「配环境」直接进入「写需求」。',
     'hero.cta.primary': '去找找',
@@ -248,7 +248,7 @@ const DICT = {
     'hero.title.line1': 'Every great product',
     'hero.title.line2Prefix': 'starts with ',
     'hero.title.highlight': 'the same prompt',
-    'hero.title.line2Suffix': '.',
+    'hero.title.line2Suffix': '',
     'hero.subtitle':
       'A pre-baked project skeleton + stack + AI rules + quality system + shared modules, so your AI agent jumps from "setup" straight to "ship".',
     'hero.cta.primary': 'go find it',
