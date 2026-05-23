@@ -43,7 +43,7 @@ export function ParamsPanel() {
   return (
     <div
       key={platform}
-      className="text-[13px] leading-[2] text-[var(--fg-3)]"
+      className="relative z-10 rounded-xl border border-[var(--border-1)]/40 bg-[var(--surface-1)]/25 p-3.5 text-[13px] leading-[2] text-[var(--fg-3)] backdrop-blur-sm"
       style={{ animation: 'eikon-params-fade 200ms ease-out' }}
     >
       <p className="flex flex-wrap items-center gap-x-1 gap-y-2">

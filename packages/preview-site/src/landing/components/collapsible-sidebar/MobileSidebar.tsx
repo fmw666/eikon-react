@@ -127,18 +127,18 @@ export function SidebarSection({ section }: { section: SidebarSectionSpec }) {
   return (
     <section
       id={section.anchorId ?? section.id}
-      className={'flex min-h-0 flex-col gap-2 ' + (section.fill ? 'flex-1' : '')}
+      className={'flex min-h-0 flex-col gap-3.5 ' + (section.fill ? 'flex-1 overflow-hidden' : 'shrink-0')}
       aria-label={section.title}
     >
       {!section.hideTitle && (
-        <h3 className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--fg-3)]">
+        <h3 className="flex shrink-0 items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--fg-3)]">
           {!section.hideFromRail && (
             <span className="text-[var(--fg-4)]">{section.icon}</span>
           )}
           <span>{section.title}</span>
         </h3>
       )}
-      <div className={'min-h-0 ' + (section.fill ? 'flex flex-1 flex-col' : '')}>
+      <div className={'min-h-0 ' + (section.fill ? 'flex flex-1 flex-col overflow-y-auto' : '')}>
         {section.children}
       </div>
     </section>
