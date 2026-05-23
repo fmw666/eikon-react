@@ -368,6 +368,20 @@ export function FileExplorer() {
     [openFile]
   );
 
+  // Pass `selection` only on initial tree load so react-arborist
+  // highlights the previously-opened file. Once the user interacts,
+  // internal selection state (driven by Row's `node.select()`) takes
+  // over. We snapshot the selected file at tree-load time to avoid
+  // react-arborist's useEffect re-firing scrollToItem on every
+  // selection change — which fights with the layout shift when the
+  // editor panel appears.
+  const initialSelection = useRef<string | undefined>(undefined);
+  const treeKey = tree; // identity-stable per fetch
+  useMemo(() => {
+    initialSelection.current = selectedFile ?? undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [treeKey]);
+
   const initialOpenState = useMemo(() => {
     if (!tree || !selectedFile) return undefined;
     const ancestors = ancestorsOf(tree, selectedFile);
@@ -447,7 +461,7 @@ export function FileExplorer() {
               data={tree}
               openByDefault={false}
               initialOpenState={initialOpenState}
-              selection={selectedFile ?? undefined}
+              selection={initialSelection.current}
               width={size.w}
               height={size.h}
               indent={0}

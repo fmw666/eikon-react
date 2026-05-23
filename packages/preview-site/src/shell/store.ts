@@ -326,8 +326,6 @@ export const useUiStore = create<UiStore>((set) => ({
       showEditor: v ? s.showEditor || !!s.selectedFile : false,
     })),
   setShowEditor: (v) => set({ showEditor: v }),
-  // Auto-open the editor when the user picks a file from the tree — most of
-  // the time the panel is closed and clicking should "do the obvious thing".
   openFile: (relPath) =>
     set({ selectedFile: relPath, showEditor: true }),
   // Symmetric: closing the file also collapses the editor panel. Leaving an

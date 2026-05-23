@@ -40,6 +40,8 @@
  * both.
  */
 
+import { useEffect } from 'react';
+
 import { PlaygroundShell } from '@/shell/App';
 import { ParamsPanel } from '@/shell/ParamsPanel';
 
@@ -56,44 +58,28 @@ import { useI18n } from './theme/i18n';
 
 export default function PlaygroundPage() {
   const { t } = useI18n();
-  // Fill the viewport below the (transparent, floating) nav region.
-  // `NAV_REGION_HEIGHT_REM` is the single source of truth for the
-  // nav's total visual height — keep this calc in sync if the nav's
-  // top/bottom padding ever changes.
-  //
-  // We use `100dvh` (dynamic viewport height) so iOS Safari's
-  // collapsing toolbar doesn't make the playground page taller than
-  // the visible viewport. `100vh` falls back automatically on
-  // browsers that don't support `dvh`.
-  const fillHeight = `calc(100dvh - ${NAV_REGION_HEIGHT_REM}rem)`;
+
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    html.style.overflow = 'hidden';
+    html.style.scrollbarGutter = 'auto';
+    body.style.overflow = 'hidden';
+    return () => {
+      html.style.overflow = '';
+      html.style.scrollbarGutter = '';
+      body.style.overflow = '';
+    };
+  }, []);
+
+  const fillHeight = `calc(100dvh - ${NAV_REGION_HEIGHT_REM}rem - 0.75rem)`;
   return (
-    // RESPONSIVE LAYOUT CONTRACT
-    //
-    //   `<lg`  : vertical stack — `CollapsibleSidebar` renders its
-    //            mobile branch (always-open accordion of every
-    //            section), the playground frame sits below it at
-    //            ~60dvh so the visitor sees both without horizontal
-    //            scroll. `min-h-[100dvh-NAV]` keeps the page at
-    //            least viewport-tall but allows the sidebar's
-    //            inherent content to grow past it.
-    //   `lg+`  : horizontal row — sidebar (rail or pinned panel)
-    //            on the left, playground fills the rest. The page
-    //            itself is bounded to one viewport so the resizable
-    //            three-pane shell inside the playground has a known
-    //            parent height.
-    //
-    // `relative` anchors the peek panel's `position: absolute`
-    // overlay (peek only fires on lg+). `gap-4` only matters on
-    // lg+ — on mobile we use `gap-y-4` so the stacked sections
-    // breathe vertically without leaking horizontal whitespace.
     <div
-      className="relative flex flex-col gap-y-4 px-4 pb-6 sm:px-6 lg:flex-row lg:gap-x-4 lg:gap-y-0 lg:pb-6"
+      className="relative flex flex-col gap-y-4 px-4 pb-6 sm:px-6 lg:flex-row lg:gap-x-4 lg:gap-y-0 lg:overflow-hidden lg:pb-0"
       style={{
         minHeight: fillHeight,
-        // Only pin the height on lg+ so the home stack can grow as
-        // tall as its accordion content needs to. Inline custom
-        // property keeps the `lg:` query handler in one place.
         ['--eikon-pg-fill' as string]: fillHeight,
+        height: fillHeight,
       }}
     >
       <CollapsibleSidebar
@@ -143,7 +129,7 @@ export default function PlaygroundPage() {
             lg+ : flex-1, fills the remaining horizontal space and
                   inherits the row's pinned height. */}
       <main
-        className="h-[min(70dvh,calc(100dvh-6rem))] min-h-[480px] min-w-0 flex-1 lg:h-auto lg:min-h-0"
+        className="h-[min(70dvh,calc(100dvh-6rem))] min-h-[480px] min-w-0 flex-1 lg:h-full lg:min-h-0"
       >
         <PlaygroundShell />
       </main>
