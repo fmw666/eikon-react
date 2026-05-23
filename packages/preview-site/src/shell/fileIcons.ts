@@ -120,7 +120,7 @@ const FILE_NAME_MAP: Record<string, string> = {
   'tsup.config.ts': 'vscode-icons:file-type-light-config',
   LICENSE: 'vscode-icons:file-type-license',
   'LICENSE.md': 'vscode-icons:file-type-license',
-  'README.md': 'vscode-icons:file-type-info',
+  'README.md': 'vscode-icons:file-type-markdown',
   'CHANGELOG.md': 'vscode-icons:file-type-changelog',
   Dockerfile: 'vscode-icons:file-type-docker',
 };
@@ -170,12 +170,14 @@ export function getFolderIcon(name: string, isOpen: boolean): string {
 
 export function getFileIcon(name: string): string {
   if (FILE_NAME_MAP[name]) return FILE_NAME_MAP[name]!;
-  // Handle compound extensions like `.d.ts` before falling back to single
-  // extension matching, otherwise `.d.ts` would resolve to plain ts.
-  if (name.toLowerCase().endsWith('.d.ts')) return EXT_MAP['.d.ts']!;
+  const lower = name.toLowerCase();
+  for (const [key, icon] of Object.entries(FILE_NAME_MAP)) {
+    if (key.toLowerCase() === lower) return icon;
+  }
+  if (lower.endsWith('.d.ts')) return EXT_MAP['.d.ts']!;
   const dot = name.lastIndexOf('.');
   if (dot >= 0) {
-    const ext = name.slice(dot).toLowerCase();
+    const ext = lower.slice(dot);
     if (EXT_MAP[ext]) return EXT_MAP[ext]!;
   }
   return FILE_DEFAULT;
