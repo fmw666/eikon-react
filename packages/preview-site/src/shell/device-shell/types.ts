@@ -28,8 +28,8 @@ export interface ScreenDims {
 }
 
 export const MOBILE_SCREEN: Record<FrameSize, ScreenDims> = {
-  small: { width: 375, height: 667 },
-  standard: { width: 390, height: 844 },
+  small: { width: 375, height: 812 },
+  standard: { width: 393, height: 852 },
   large: { width: 430, height: 932 },
 };
 

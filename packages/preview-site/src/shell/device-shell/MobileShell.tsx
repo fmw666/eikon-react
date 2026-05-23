@@ -137,6 +137,7 @@ export function MobileShell({
         height: outerHeight,
         maxWidth: '100%',
         maxHeight: '100%',
+        transition: 'width 420ms cubic-bezier(0.16, 1, 0.3, 1), height 420ms cubic-bezier(0.16, 1, 0.3, 1)',
         background: `linear-gradient(180deg, ${PHONE_TOKENS.bodyTop} 0%, ${PHONE_TOKENS.bodyMid} 45%, ${PHONE_TOKENS.bodyBottom} 100%)`,
         borderRadius: geo.cornerRadius,
         boxShadow: [

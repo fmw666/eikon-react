@@ -31,6 +31,7 @@ export function DesktopShell({
         height: screen.height + TITLE_BAR_HEIGHT,
         maxWidth: '100%',
         maxHeight: '100%',
+        transition: 'width 420ms cubic-bezier(0.16, 1, 0.3, 1), height 420ms cubic-bezier(0.16, 1, 0.3, 1)',
         background: '#fff',
         borderRadius: radius,
         boxShadow: APPLE_TOKENS.bodyShadow,

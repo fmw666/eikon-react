@@ -1,10 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { type ParamsStore } from '@/lib/params-store';
 
 import { DeviceShell, type DevicePlatform } from './device-shell';
+import { MOBILE_SCREEN, DESKTOP_SCREEN } from './device-shell/types';
+import { PHONE_GEOMETRY } from './device-shell/MobileShell';
+import { TITLE_BAR_HEIGHT } from './device-shell/DesktopShell';
+import { CHROME_TAB_BAR_HEIGHT, CHROME_TOOLBAR_HEIGHT } from './device-shell/WebShell';
 import { useShellStore, useUiStore } from './store';
+import type { FrameSize } from './store';
 
 type BuildStatus = 'ready' | 'building' | 'error';
 
@@ -94,6 +100,75 @@ function useShellOuterPadding(platform: DevicePlatform): number {
     return () => mq.removeEventListener('change', handler);
   }, []);
   return pickShellPadding(platform, isMobileViewport);
+}
+
+function getShellNaturalSize(platform: DevicePlatform, size: FrameSize): { width: number; height: number } {
+  if (platform === 'mobile') {
+    const screen = MOBILE_SCREEN[size];
+    const geo = PHONE_GEOMETRY[size];
+    // MobileShell uses content-box with padding:bezel, so rendered size
+    // = (screen + bezel*2) [content] + bezel*2 [padding]
+    return {
+      width: screen.width + geo.bezel * 4,
+      height: screen.height + geo.bezel * 4,
+    };
+  }
+  const screen = DESKTOP_SCREEN[size];
+  if (platform === 'desktop') {
+    return { width: screen.width, height: screen.height + TITLE_BAR_HEIGHT };
+  }
+  return { width: screen.width, height: screen.height + CHROME_TAB_BAR_HEIGHT + CHROME_TOOLBAR_HEIGHT };
+}
+
+function ScaledShellWrapper({ platform, size, children }: { platform: DevicePlatform; size: FrameSize; children: ReactNode }) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [enableTransition, setEnableTransition] = useState(false);
+  const prevPlatformRef = useRef(platform);
+  const natural = getShellNaturalSize(platform, size);
+
+  // Disable transition on platform change so scale snaps instantly
+  useLayoutEffect(() => {
+    if (prevPlatformRef.current !== platform) {
+      prevPlatformRef.current = platform;
+      setEnableTransition(false);
+    }
+  }, [platform]);
+
+  useLayoutEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+    const recalc = () => {
+      // Use offsetWidth/offsetHeight instead of getBoundingClientRect()
+      // because the workbench card has a scroll-driven scale animation
+      // and BCR reflects ancestor transforms, giving wrong values.
+      const w = wrapper.offsetWidth;
+      const h = wrapper.offsetHeight;
+      if (!w || !h) return;
+      const s = Math.min(1, w / natural.width, h / natural.height);
+      setScale(s);
+    };
+    recalc();
+    const ro = new ResizeObserver(recalc);
+    ro.observe(wrapper);
+    return () => ro.disconnect();
+  }, [natural.width, natural.height]);
+
+  // Enable transition after layout settles
+  useEffect(() => {
+    if (!enableTransition) {
+      const timer = setTimeout(() => setEnableTransition(true), 400);
+      return () => clearTimeout(timer);
+    }
+  }, [enableTransition]);
+
+  return (
+    <div ref={wrapperRef} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+      <div style={{ flexShrink: 0, transform: `scale(${scale})`, transformOrigin: 'center center', transition: enableTransition ? 'transform 420ms cubic-bezier(0.16, 1, 0.3, 1)' : 'none' }}>
+        {children}
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -192,6 +267,18 @@ export function PreviewFrame() {
   const [templateRev, setTemplateRev] = useState<string | null>(null);
   const requestSeq = useRef(0);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const prevPlatformRef = useRef(buildInputs.platform);
+  const platformChangedRef = useRef(false);
+
+  // Reset sub-route when platform changes — the new build may not
+  // have the same routes, and the iframe remounts anyway (shell swap).
+  useEffect(() => {
+    if (prevPlatformRef.current !== buildInputs.platform) {
+      prevPlatformRef.current = buildInputs.platform;
+      setSubUrl('');
+      platformChangedRef.current = true;
+    }
+  }, [buildInputs.platform]);
 
   // ---- /api/template-rev polling (HMR-like) ------------------------------
   useEffect(() => {
@@ -260,7 +347,10 @@ export function PreviewFrame() {
       }
       // Capture wherever the user has navigated inside the previous
       // variant so we can re-mount the new variant at the same place.
-      const sub = readIframeSubUrl(iframeRef.current);
+      // Skip when the platform just changed — old routes likely don't
+      // exist in the new build.
+      const sub = platformChangedRef.current ? '' : readIframeSubUrl(iframeRef.current);
+      platformChangedRef.current = false;
       setSubUrl(sub);
       setLastReadyHash(next.hash);
       // Broadcast the current ready hash so sibling panels (file explorer,
@@ -421,10 +511,11 @@ export function PreviewFrame() {
         alignItems: 'center',
         justifyContent: 'center',
         padding: outerPadding,
-        overflow: 'auto',
+        overflow: 'hidden',
       }}
     >
       {iframeSrc && (
+        <ScaledShellWrapper platform={platform} size={frameSize}>
         <DeviceShell
           platform={platform}
           size={frameSize}
@@ -452,6 +543,7 @@ export function PreviewFrame() {
             />
           )}
         </DeviceShell>
+        </ScaledShellWrapper>
       )}
 
       {/*
