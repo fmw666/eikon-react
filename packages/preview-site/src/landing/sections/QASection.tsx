@@ -73,6 +73,7 @@ export function QASection() {
     <section
       className="relative mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
       aria-labelledby="qa-title"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 800px' }}
     >
       {/* Subtle grid backdrop — anchored to top-right, masked to a
           small patch so it reads as spatial texture, not wallpaper. */}

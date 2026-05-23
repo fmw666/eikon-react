@@ -28,7 +28,6 @@ const INNER_BASE_STYLE: CSSProperties = {
   willChange: 'transform',
   backfaceVisibility: 'hidden',
   WebkitBackfaceVisibility: 'hidden',
-  filter: 'blur(0px)',
   pointerEvents: 'auto',
   cursor: 'pointer',
 };

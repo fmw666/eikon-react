@@ -286,7 +286,7 @@ export function WordReveal({ children }: { children: ReactNode }) {
         {chars.map((ch, i) => (
           <span
             key={`top-${i}`}
-            className="inline-block transition-transform ease-out will-change-transform group-hover/cta:-translate-y-[110%] group-hover:-translate-y-[110%]"
+            className="inline-block transition-transform ease-out group-hover/cta:-translate-y-[110%] group-hover:-translate-y-[110%]"
             style={{
               transitionDuration: `${REVEAL_DURATION_MS}ms`,
               transitionDelay: `${i * REVEAL_STAGGER_MS}ms`,
@@ -309,7 +309,7 @@ export function WordReveal({ children }: { children: ReactNode }) {
         {chars.map((ch, i) => (
           <span
             key={`bot-${i}`}
-            className="inline-block translate-y-[110%] transition-transform ease-out will-change-transform group-hover/cta:translate-y-0 group-hover:translate-y-0"
+            className="inline-block translate-y-[110%] transition-transform ease-out group-hover/cta:translate-y-0 group-hover:translate-y-0"
             style={{
               transitionDuration: `${REVEAL_DURATION_MS}ms`,
               transitionDelay: `${i * REVEAL_STAGGER_MS}ms`,

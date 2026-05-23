@@ -171,6 +171,7 @@ export function Nav({ route, pending }: { route: AppRoute; pending: boolean }) {
             'mx-auto flex max-w-7xl items-end justify-center gap-2 px-3 pt-[max(1rem,env(safe-area-inset-top))] pb-3 transition-transform duration-300 ease-out sm:gap-2.5 sm:px-6 sm:pt-6 sm:pb-4 ' +
             (scrolled ? 'scale-[0.985]' : 'scale-100')
           }
+          data-scrolled={scrolled || undefined}
         >
           {/* Main island: route navigation. */}
           <div className="pointer-events-auto">
@@ -364,10 +365,10 @@ function NavPill({
   const showIndicator = targetKey !== null && indicator.width > 0;
 
   const railClass =
-    'eikon-nav-glass relative inline-flex items-center gap-0 rounded-full border p-0.5 transition-[background-color,box-shadow,border-color,backdrop-filter] duration-300 ease-out sm:gap-0.5 sm:p-1 ' +
+    'eikon-nav-glass relative inline-flex items-center gap-0 rounded-full border p-0.5 transition-[background-color,box-shadow,border-color] duration-300 ease-out sm:gap-0.5 sm:p-1 ' +
     (scrolled
-      ? 'border-[var(--border-2)]/80 bg-[var(--surface-2)]/80 backdrop-blur-xl shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_8px_24px_rgb(0_0_0/0.28)]'
-      : 'border-[var(--border-1)] bg-[var(--surface-2)] backdrop-blur-0 shadow-[inset_0_1px_0_rgb(255_255_255/0.04),0_2px_8px_rgb(0_0_0/0.08)]');
+      ? 'border-[var(--border-2)]/80 bg-[var(--surface-2)]/80 shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_8px_24px_rgb(0_0_0/0.28)]'
+      : 'border-[var(--border-1)] bg-[var(--surface-2)] shadow-[inset_0_1px_0_rgb(255_255_255/0.04),0_2px_8px_rgb(0_0_0/0.08)]');
 
   return (
     <nav
@@ -444,10 +445,10 @@ function LangOrb({
   // routes the touch-viewport `backdrop-filter: none` override
   // in styles/index.css.
   const orbClass =
-    'eikon-nav-glass relative inline-flex h-9 w-9 items-center justify-center rounded-full border p-0.5 transition-[background-color,box-shadow,border-color,backdrop-filter] duration-300 ease-out ' +
+    'eikon-nav-glass relative inline-flex h-9 w-9 items-center justify-center rounded-full border p-0.5 transition-[background-color,box-shadow,border-color] duration-300 ease-out ' +
     (scrolled
-      ? 'border-[var(--border-2)]/80 bg-[var(--surface-2)]/80 backdrop-blur-xl shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_8px_24px_rgb(0_0_0/0.28)]'
-      : 'border-[var(--border-1)] bg-[var(--surface-2)] backdrop-blur-0 shadow-[inset_0_1px_0_rgb(255_255_255/0.04),0_2px_8px_rgb(0_0_0/0.08)]');
+      ? 'border-[var(--border-2)]/80 bg-[var(--surface-2)]/80 shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_8px_24px_rgb(0_0_0/0.28)]'
+      : 'border-[var(--border-1)] bg-[var(--surface-2)] shadow-[inset_0_1px_0_rgb(255_255_255/0.04),0_2px_8px_rgb(0_0_0/0.08)]');
 
   return <div className={orbClass}>{children}</div>;
 }

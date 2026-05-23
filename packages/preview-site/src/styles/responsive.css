@@ -74,6 +74,17 @@
   }
 }
 
+/* Desktop: apply backdrop-blur only when scrolled (data-scrolled on
+   the Nav container). When not scrolled, no backdrop-filter property
+   is painted at all — avoids creating a compositor layer for blur(0). */
+@media (hover: hover) {
+  [data-scrolled] .eikon-nav-glass {
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    transition: backdrop-filter 300ms ease-out, -webkit-backdrop-filter 300ms ease-out;
+  }
+}
+
 /* ===========================================================================
  * Mobile workbench tab strip
  *

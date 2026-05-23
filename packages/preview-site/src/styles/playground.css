@@ -61,7 +61,6 @@
   transition:
     opacity var(--eikon-reveal-duration) var(--eikon-reveal-ease) var(--eikon-reveal-delay),
     transform var(--eikon-reveal-duration) var(--eikon-reveal-ease) var(--eikon-reveal-delay);
-  will-change: opacity, transform;
 }
 
 .eikon-reveal-rise {

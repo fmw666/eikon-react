@@ -213,6 +213,8 @@ export function Footer() {
         {
           '--eikon-footer-mx': '50%',
           '--eikon-footer-my': '50%',
+          contentVisibility: 'auto',
+          containIntrinsicSize: 'auto 500px',
         } as CSSProperties
       }
     >

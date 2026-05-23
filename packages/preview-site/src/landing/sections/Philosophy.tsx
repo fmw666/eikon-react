@@ -41,6 +41,7 @@ export function Philosophy() {
     <section
       className="relative rounded-3xl bg-[var(--surface-2)]/60 px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
       aria-labelledby="philosophy-title"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 700px' }}
     >
       <div className="mx-auto w-full max-w-7xl">
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_1.2fr]">

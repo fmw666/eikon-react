@@ -20,7 +20,6 @@
  */
 
 import { Icon } from '@iconify/react';
-
 import { useI18n, type I18nKey } from '../theme/i18n';
 
 interface LogoSpec {
@@ -67,6 +66,7 @@ export function TechStackWall() {
     <section
       className="relative mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
       aria-labelledby="stack-title"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}
     >
       {/* Subtle radial backdrop wash */}
       <div

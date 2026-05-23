@@ -53,6 +53,7 @@ export function PainPoints() {
     <section
       className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
       aria-labelledby="pain-title"
+      style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 500px' }}
     >
       <div className="mb-12 text-center">
         <p className="mb-3 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.22em] text-[var(--fg-4)]">
