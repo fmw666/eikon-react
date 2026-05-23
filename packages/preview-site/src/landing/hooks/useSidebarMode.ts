@@ -108,6 +108,8 @@ export interface SidebarController {
   pin: () => void;
   unpin: () => void;
   togglePin: () => void;
+  /** Unpin and fully collapse in one action (the "close sidebar" gesture). */
+  collapse: () => void;
   /**
    * Imperatively start a peek (used by click-to-open on the rail
    * itself, where the user has clearly opted in and shouldn't have
@@ -197,6 +199,13 @@ export function useSidebarMode({
     clearTimers();
     setPinned(false);
     setPeeking(true);
+    writePin(storageKey, false);
+  }, [clearTimers, storageKey]);
+
+  const collapse = useCallback(() => {
+    clearTimers();
+    setPinned(false);
+    setPeeking(false);
     writePin(storageKey, false);
   }, [clearTimers, storageKey]);
 
@@ -297,6 +306,7 @@ export function useSidebarMode({
     isOpen: pinned || peeking,
     pin,
     unpin,
+    collapse,
     togglePin,
     openPeekNow,
     closePeekNow,

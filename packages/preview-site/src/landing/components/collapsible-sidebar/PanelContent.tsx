@@ -21,7 +21,7 @@ interface PanelContentProps {
 
 export function PanelContent({ controller, sections, floating }: PanelContentProps) {
   const { t } = useI18n();
-  const { isPinned, togglePin, unpin, closePeekNow } = controller;
+  const { isPinned, togglePin, collapse, closePeekNow } = controller;
 
   return (
     <>
@@ -64,7 +64,7 @@ export function PanelContent({ controller, sections, floating }: PanelContentPro
               type="button"
               aria-label={t('sidebar.collapse')}
               title={`${t('sidebar.collapse')}  [ `}
-              onClick={unpin}
+              onClick={collapse}
               className={`eikon-rail-icon eikon-panel-btn-fade absolute inset-0 flex items-center justify-center rounded-md text-[var(--fg-4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 ${
                 isPinned ? '' : 'opacity-0 pointer-events-none'
               }`}
