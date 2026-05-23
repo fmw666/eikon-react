@@ -8,8 +8,8 @@
  *   │  Base ▼ v0.1.0  ⇄  Head ▼ v0.2.0     [↻ Refresh]            │
  *   └─────────────────────────────────────────────────────────────┘
  *
- * The two dropdowns are siblings, separated by a swap button that
- * flips them. We deliberately render the dropdowns as a native
+ * The two dropdowns are siblings, separated by a directional arrow
+ * indicating the compare direction (base → head). We deliberately render the dropdowns as a native
  * `<details>`/`<summary>` pair instead of pulling in a headless
  * combobox library — this surface has at most ~50 items, no search,
  * no async loading per row, no keyboard-shortcut requirements beyond
@@ -35,7 +35,6 @@ interface VersionPickerProps {
   headTag: string | null;
   onChangeBase: (tag: string) => void;
   onChangeHead: (tag: string) => void;
-  onSwap: () => void;
   onRefresh: () => void;
   refreshing?: boolean;
   /**
@@ -54,16 +53,12 @@ export function VersionPicker({
   headTag,
   onChangeBase,
   onChangeHead,
-  onSwap,
   onRefresh,
   refreshing,
   showRefresh = true,
 }: VersionPickerProps) {
   const { t, lang } = useI18n();
 
-  // The default lookup falls back to "(version)" placeholder text when
-  // the parent hasn't picked yet — happens between mount and the
-  // bootstrap effect that auto-selects the latest two releases.
   const baseRelease = useMemo(
     () => releases.find((r) => r.tagName === baseTag) ?? null,
     [releases, baseTag]
@@ -73,8 +68,31 @@ export function VersionPicker({
     [releases, headTag]
   );
 
-  // Disable swap when either side hasn't resolved to a real release.
-  const canSwap = baseRelease !== null && headRelease !== null;
+  // Releases are ordered newest-first. Base must be strictly older
+  // than head, and cannot be the newest release (there'd be nothing
+  // newer to compare against).
+  const disabledForBase = useMemo(() => {
+    const set = new Set<string>();
+    if (releases.length > 0) set.add(releases[0]!.tagName);
+    if (headTag) {
+      const headIdx = releases.findIndex((r) => r.tagName === headTag);
+      if (headIdx >= 0) {
+        for (let i = 0; i <= headIdx; i++) set.add(releases[i]!.tagName);
+      }
+    }
+    return set;
+  }, [releases, headTag]);
+
+  const disabledForHead = useMemo(() => {
+    const set = new Set<string>();
+    if (baseTag) {
+      const baseIdx = releases.findIndex((r) => r.tagName === baseTag);
+      if (baseIdx >= 0) {
+        for (let i = baseIdx; i < releases.length; i++) set.add(releases[i]!.tagName);
+      }
+    }
+    return set;
+  }, [releases, baseTag]);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -83,27 +101,23 @@ export function VersionPicker({
         selected={baseRelease}
         releases={releases}
         onSelect={onChangeBase}
-        excludeTag={headTag}
+        disabledTags={disabledForBase}
         lang={lang}
       />
 
-      <button
-        type="button"
-        onClick={onSwap}
-        disabled={!canSwap}
-        title={t('changelog.picker.swap')}
-        aria-label={t('changelog.picker.swap')}
-        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[var(--border-1)] bg-[var(--surface-2)] text-[var(--fg-3)] transition-colors hover:text-[var(--fg-1)] disabled:cursor-not-allowed disabled:opacity-40"
+      <span
+        aria-hidden="true"
+        className="inline-flex h-8 w-8 shrink-0 items-center justify-center text-[var(--fg-3)]"
       >
-        <SwapIcon />
-      </button>
+        <ArrowRightIcon />
+      </span>
 
       <Dropdown
         label={t('changelog.picker.head')}
         selected={headRelease}
         releases={releases}
         onSelect={onChangeHead}
-        excludeTag={baseTag}
+        disabledTags={disabledForHead}
         lang={lang}
       />
 
@@ -131,8 +145,7 @@ interface DropdownProps {
   selected: GitHubRelease | null;
   releases: GitHubRelease[];
   onSelect: (tag: string) => void;
-  /** Tag to dim out (already used on the other side of the compare). */
-  excludeTag: string | null;
+  disabledTags: Set<string>;
   lang: string;
 }
 
@@ -141,7 +154,7 @@ function Dropdown({
   selected,
   releases,
   onSelect,
-  excludeTag,
+  disabledTags,
   lang,
 }: DropdownProps) {
   const detailsRef = useRef<HTMLDetailsElement | null>(null);
@@ -188,7 +201,7 @@ function Dropdown({
               key={r.tagName}
               release={r}
               isSelected={selected?.tagName === r.tagName}
-              isExcluded={excludeTag === r.tagName}
+              isExcluded={disabledTags.has(r.tagName)}
               onClick={() => {
                 onSelect(r.tagName);
                 if (detailsRef.current) detailsRef.current.open = false;
@@ -316,7 +329,7 @@ function ChevronDown() {
   );
 }
 
-function SwapIcon() {
+function ArrowRightIcon() {
   return (
     <svg
       width={14}
@@ -329,8 +342,7 @@ function SwapIcon() {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M3 5h7m0 0L7.5 2.5M10 5L7.5 7.5" />
-      <path d="M11 9H4m0 0l2.5-2.5M4 9l2.5 2.5" />
+      <path d="M2.5 7h9M8 3.5L11.5 7 8 10.5" />
     </svg>
   );
 }

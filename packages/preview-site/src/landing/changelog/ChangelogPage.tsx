@@ -84,26 +84,18 @@ function ChangelogContent() {
   const setPair = useChangelogStore((s) => s.setPair);
   const setBaseTag = useChangelogStore((s) => s.setBaseTag);
   const setHeadTag = useChangelogStore((s) => s.setHeadTag);
-  const swap = useChangelogStore((s) => s.swap);
   const selectedFile = useChangelogStore((s) => s.selectedFile);
   const setSelectedFile = useChangelogStore((s) => s.setSelectedFile);
 
   const releases = releasesState.status === 'ready' ? releasesState.data : [];
 
-  // Bootstrap default selection when releases finish loading. Picks
-  // the newest pair so the visitor sees "what's new" without clicking
-  // anything. Only runs when there's no persisted selection AND the
-  // currently-stored tag is invalid (e.g. a tag was deleted upstream).
+  // Bootstrap default selection: always show the latest pair
+  // (previous version → newest version) on page load.
   useEffect(() => {
-    if (releases.length === 0) return;
-    const tags = new Set(releases.map((r) => r.tagName));
-    const baseValid = baseTag && tags.has(baseTag);
-    const headValid = headTag && tags.has(headTag);
-    if (baseValid && headValid) return;
+    if (releases.length < 2) return;
     const defaultHead = releases[0]!.tagName;
-    const defaultBase = releases[1]?.tagName ?? defaultHead;
+    const defaultBase = releases[1]!.tagName;
     setPair(defaultBase, defaultHead);
-    // Run only on releases payload changes; the rest are derived.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [releases]);
 
@@ -152,7 +144,6 @@ function ChangelogContent() {
           headTag={headTag}
           onChangeBase={setBaseTag}
           onChangeHead={setHeadTag}
-          onSwap={swap}
           onRefresh={handleRefresh}
           refreshing={
             releasesState.status === 'loading' ||
