@@ -1,7 +1,9 @@
 import {
   type CSSProperties,
   type ReactNode,
+  memo,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -17,7 +19,21 @@ import {
 } from './constants';
 import { IMacHardwareShell, LaptopHardwareShell } from './HardwareShells';
 
-export function ScaledDeviceShell({
+const OVERLAY_STYLE_MOBILE: CSSProperties = { inset: 10, borderRadius: 32 };
+const OVERLAY_STYLE_OTHER: CSSProperties = { inset: 0, borderRadius: 12 };
+
+const INNER_BASE_STYLE: CSSProperties = {
+  transformOrigin: 'center center',
+  transition: 'transform 420ms cubic-bezier(0.22, 1, 0.36, 1)',
+  willChange: 'transform',
+  backfaceVisibility: 'hidden',
+  WebkitBackfaceVisibility: 'hidden',
+  filter: 'blur(0px)',
+  pointerEvents: 'auto',
+  cursor: 'pointer',
+};
+
+export const ScaledDeviceShell = memo(function ScaledDeviceShell({
   slot,
   platform,
   active,
@@ -57,6 +73,14 @@ export function ScaledDeviceShell({
 
   const layoutScale = scale * STACK_SLOT_SCALE[slot];
 
+  const innerStyle = useMemo<CSSProperties>(
+    () => ({ ...INNER_BASE_STYLE, transform: `scale(${layoutScale})` }),
+    [layoutScale]
+  );
+
+  const overlayStyle =
+    platform === 'mobile' ? OVERLAY_STYLE_MOBILE : OVERLAY_STYLE_OTHER;
+
   const renderScreen = (screenStyle: CSSProperties) => (
     <div
       style={{
@@ -69,11 +93,6 @@ export function ScaledDeviceShell({
       {children}
     </div>
   );
-
-  const overlayStyle: CSSProperties =
-    platform === 'mobile'
-      ? { inset: 10, borderRadius: 32 }
-      : { inset: 0, borderRadius: 12 };
 
   const softwareShell = (
     <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -122,24 +141,10 @@ export function ScaledDeviceShell({
       ref={wrapperRef}
       className="absolute inset-0 flex items-center justify-center"
     >
-      <div
-        ref={innerRef}
-        className="relative"
-        style={{
-          transform: `scale(${layoutScale})`,
-          transformOrigin: 'center center',
-          transition: 'transform 420ms cubic-bezier(0.22, 1, 0.36, 1)',
-          willChange: 'transform',
-          backfaceVisibility: 'hidden',
-          WebkitBackfaceVisibility: 'hidden',
-          filter: 'blur(0px)',
-          pointerEvents: 'auto',
-          cursor: 'pointer',
-        }}
-      >
+      <div ref={innerRef} className="relative" style={innerStyle}>
         <ActiveAmbience active={active} platform={platform} />
         <div className="relative z-10">{body}</div>
       </div>
     </div>
   );
-}
+});

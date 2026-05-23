@@ -1,4 +1,5 @@
 import {
+  memo,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -13,6 +14,7 @@ import type { I18nKey } from '../../theme/i18n';
 import { type PlatformOption, getCardTransform, getSlot } from './constants';
 import { ScaledDeviceShell } from './ScaledDeviceShell';
 import { ScreenContent } from './ScreenContent';
+import { usePlatformKeyboard } from './usePlatformKeyboard';
 
 export function StackedStage({
   current,
@@ -45,8 +47,6 @@ export function StackedStage({
   }, [current]);
 
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useRef(false);
 
   const handleSelect = useCallback(
     (p: Platform) => {
@@ -55,62 +55,21 @@ export function StackedStage({
     [current, onSelect]
   );
 
-  // Track section visibility with IntersectionObserver
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        isInView.current = entry.isIntersecting;
-      },
-      { threshold: 0.3 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const { sectionRef, handleTabsKeyDown } = usePlatformKeyboard({
+    activeIdx,
+    options,
+    onSelect,
+    tabRefs,
+  });
 
-  // Page-level keydown listener: switch platform when section is in viewport
-  const activeIdxRef = useRef(activeIdx);
-  activeIdxRef.current = activeIdx;
-  const onSelectRef = useRef(onSelect);
-  onSelectRef.current = onSelect;
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (!isInView.current) return;
-      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-      // Don't hijack input fields
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-      e.preventDefault();
-      const dir = e.key === 'ArrowLeft' ? -1 : 1;
-      const next =
-        (activeIdxRef.current + dir + options.length) % options.length;
-      onSelectRef.current(options[next].value);
-      tabRefs.current[next]?.focus();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [options]);
-
-  const handleTabsKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLDivElement>) => {
-      const key = e.key;
-      if (
-        key !== 'ArrowLeft' &&
-        key !== 'ArrowRight' &&
-        key !== 'ArrowUp' &&
-        key !== 'ArrowDown'
-      ) {
-        return;
-      }
-      e.preventDefault();
-      const dir = key === 'ArrowLeft' || key === 'ArrowUp' ? -1 : 1;
-      const next = (activeIdx + dir + options.length) % options.length;
-      onSelect(options[next].value);
-      tabRefs.current[next]?.focus();
-    },
-    [activeIdx, onSelect, options]
+  // Pre-compute translated bullets so ScreenContent sees stable array refs
+  const bulletsByPlatform = useMemo(
+    () =>
+      Object.fromEntries(
+        options.map((opt) => [opt.value, opt.bulletKeys.map((k) => t(k))])
+      ) as Record<Platform, string[]>,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [options, lang]
   );
 
   return (
@@ -190,7 +149,7 @@ export function StackedStage({
                     eyebrow={t(opt.compactTitleKey)}
                     title={t(opt.titleKey)}
                     desc={t(opt.descKey)}
-                    bullets={opt.bulletKeys.map((k) => t(k))}
+                    bullets={bulletsByPlatform[opt.value]}
                     platform={opt.value}
                   />
                 </ScaledDeviceShell>
@@ -211,12 +170,11 @@ export function StackedStage({
         </p>
       </div>
 
-      <span className="sr-only" aria-hidden="true" data-lang={lang} />
     </section>
   );
 }
 
-function TabNav({
+const TabNav = memo(function TabNav({
   options,
   current,
   activeIdx,
@@ -233,7 +191,6 @@ function TabNav({
   onSelect: (p: Platform) => void;
   t: (key: I18nKey) => string;
 }) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
   const [flashKey, setFlashKey] = useState(0);
   const isInitial = useRef(true);
@@ -256,7 +213,6 @@ function TabNav({
   }, [activeIdx, tabRefs, enableTransition]);
 
   useEffect(() => {
-    if (typeof document === 'undefined') return;
     document.fonts.ready.then(() => recalcIndicator());
   }, [activeIdx]);
 
@@ -272,7 +228,6 @@ function TabNav({
 
   return (
     <div
-      ref={containerRef}
       role="tablist"
       aria-label={t('platform.title')}
       onKeyDown={onKeyDown}
@@ -318,4 +273,4 @@ function TabNav({
       })}
     </div>
   );
-}
+});

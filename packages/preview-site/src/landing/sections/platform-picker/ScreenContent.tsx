@@ -1,11 +1,11 @@
-import type { CSSProperties } from 'react';
+import { memo, type CSSProperties } from 'react';
 
 import type { DevicePlatform } from '@/shell/device-shell';
 
 const SCREEN_FONT: CSSProperties['fontFamily'] =
   '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif';
 
-export function ScreenContent({
+export const ScreenContent = memo(function ScreenContent({
   eyebrow,
   title,
   desc,
@@ -25,7 +25,7 @@ export function ScreenContent({
     return <DesktopScreenContent title={title} desc={desc} bullets={bullets} />;
   }
   return <WebScreenContent eyebrow={eyebrow} title={title} desc={desc} bullets={bullets} />;
-}
+});
 
 function WebScreenContent({
   eyebrow,
