@@ -59,16 +59,9 @@ interface ChangelogStore {
   baseTag: string | null;
   headTag: string | null;
   selectedFile: string | null;
-  /**
-   * Set both tags atomically. Used by the bootstrap effect that picks
-   * sensible initial values from the releases list (e.g. "current
-   * release" vs "previous release") AND by `swap` to flip them.
-   */
   setPair: (baseTag: string | null, headTag: string | null) => void;
   setBaseTag: (tag: string | null) => void;
   setHeadTag: (tag: string | null) => void;
-  /** Flip base ↔ head — handy for "I picked them backwards" moments. */
-  swap: () => void;
   setSelectedFile: (path: string | null) => void;
 }
 
@@ -100,12 +93,6 @@ export const useChangelogStore = create<ChangelogStore>((set, get) => {
       set((s) => ({
         headTag: tag,
         selectedFile: tag === s.headTag ? s.selectedFile : null,
-      })),
-    swap: () =>
-      set((s) => ({
-        baseTag: s.headTag,
-        headTag: s.baseTag,
-        selectedFile: null,
       })),
     setSelectedFile: (path) => set({ selectedFile: path }),
   };
