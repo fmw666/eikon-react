@@ -56,8 +56,7 @@
   .eikon-footer-shine,
   .eikon-footer-status-dot::after,
   .eikon-cursor-blink,
-  .eikon-pulse-glow,
-  .eikon-rail-glow::after {
+  .eikon-pulse-glow {
     animation: none !important;
   }
 }

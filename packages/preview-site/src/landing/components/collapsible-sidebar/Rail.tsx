@@ -1,5 +1,4 @@
 import type { SidebarController } from '../../hooks/useSidebarMode';
-import type { SidebarSectionSpec } from './types';
 import { ChevronRightIcon } from './icons';
 
 /* ============================================================
@@ -9,11 +8,10 @@ import { ChevronRightIcon } from './icons';
 
 interface RailProps {
   controller: SidebarController;
-  sections: SidebarSectionSpec[];
   railClassName: string;
 }
 
-export function Rail({ controller, sections: _sections, railClassName }: RailProps) {
+export function Rail({ controller, railClassName }: RailProps) {
   const { triggerProps, openPeekNow, isPeeking } = controller;
 
   return (
@@ -24,8 +22,8 @@ export function Rail({ controller, sections: _sections, railClassName }: RailPro
       className={`eikon-rail-slim relative flex h-full w-full cursor-pointer flex-col items-center justify-center ${railClassName}`}
     >
       {/* Centered expand chevron */}
-      <span className="eikon-rail-chevron flex h-6 w-6 items-center justify-center rounded-md text-[var(--fg-4)]">
-        <ChevronRightIcon className="h-3 w-3" />
+      <span className="eikon-rail-chevron flex h-7 w-7 items-center justify-center rounded-md text-[var(--fg-3)]">
+        <ChevronRightIcon className="h-4 w-4" />
       </span>
 
       {/* Right-edge accent line */}

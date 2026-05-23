@@ -60,69 +60,6 @@
   --ease-snap: cubic-bezier(0.7, 0, 0.2, 1);
 }
 
-@keyframes eikon-rail-glow {
-  0%,
-  100% {
-    background-position: 0 -40%;
-  }
-  50% {
-    background-position: 0 140%;
-  }
-}
-
-.eikon-rail-glow {
-  position: relative;
-}
-
-.eikon-rail-glow::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: -1px;
-  bottom: 0;
-  width: 1px;
-  pointer-events: none;
-  background-image: linear-gradient(
-    180deg,
-    transparent 0%,
-    var(--color-brand-500, #64748b) 50%,
-    transparent 100%
-  );
-  background-size: 100% 60%;
-  background-repeat: no-repeat;
-  opacity: 0.22;
-  /* The opacity transition is what makes hovering the rail feel
-     silky — without it the glow "pops" to 0.6 on hover. 520ms is
-     intentionally long for an opacity tween (long enough to read
-     as "the rail brightens", not "the rail toggled on"). */
-  transition: opacity 520ms var(--ease-silk);
-  animation: eikon-rail-glow 18s ease-in-out infinite;
-}
-
-.eikon-rail-glow[data-active]::after,
-.eikon-rail-glow:hover::after {
-  opacity: 0.7;
-}
-
-/* Background + box-shadow swell. Two intentional choices:
-   1. 360ms is in the silky range (eye perceives gradient, not snap).
-   2. The shadow blur radius is large (28px), so the rail looks
-      "lit from behind" rather than "outlined". Tighter shadows
-      always feel snappier; softer shadows feel silkier. */
-.eikon-rail-magnet {
-  box-shadow: inset 0 0 0 0 transparent;
-  transition:
-    box-shadow 360ms var(--ease-silk),
-    background-color 360ms var(--ease-silk);
-}
-
-.eikon-rail-magnet:hover,
-.eikon-rail-magnet[data-active] {
-  background-color: color-mix(in srgb, var(--surface-1) 78%, transparent);
-  box-shadow:
-    inset 0 0 0 1px var(--border-2),
-    0 0 28px -6px var(--accent-glow);
-}
 
 /* ── Slim rail ───────────────────────────────────────────────────────
    Minimal 32px collapsed state. A single centered chevron + a thin
@@ -143,7 +80,8 @@
 }
 
 .eikon-rail-slim .eikon-rail-chevron {
-  opacity: 0.4;
+  opacity: 0.35;
+  animation: eikon-rail-breathe 2.4s ease-in-out infinite;
   transition:
     opacity 280ms var(--ease-silk),
     transform 280ms var(--ease-silk);
@@ -151,6 +89,7 @@
 
 .eikon-rail-slim:hover .eikon-rail-chevron,
 .eikon-rail-slim[data-active] .eikon-rail-chevron {
+  animation: none;
   opacity: 1;
   transform: translateX(1px);
 }
@@ -165,7 +104,6 @@
   opacity: 0.25;
   border-radius: 1px;
   transition: opacity 400ms var(--ease-silk);
-  will-change: opacity;
 }
 
 .eikon-rail-slim:hover .eikon-rail-edge {
@@ -177,21 +115,15 @@
   transition: opacity 80ms ease-out;
 }
 
-@keyframes eikon-rail-shimmer {
-  0% {
-    opacity: 0;
-  }
-  30% {
-    opacity: 0.7;
-  }
-  60% {
-    opacity: 0.25;
-  }
-  80% {
-    opacity: 0.5;
-  }
+@keyframes eikon-rail-breathe {
+  0%,
   100% {
-    opacity: 0.15;
+    opacity: 0.35;
+    transform: scale(1) translateX(0);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.25) translateX(1.5px);
   }
 }
 
@@ -249,6 +181,16 @@
   pointer-events: none;
 }
 
+/* Hold state: panel stays fully visible, no animation. Used during
+   the 'absorbing' phase (peek→pinned) where the float panel remains
+   on screen while the wrapper width grows underneath. */
+.eikon-peek-hold {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+}
+
 /* Icon micro-interactions — the rail’s quick-jump buttons should
    feel like they "lean toward the cursor". A subtle scale + bg fade
    over 280ms with the silk curve does this without ever crossing
@@ -273,7 +215,6 @@
 
 .eikon-rail-icon-glyph {
   transition: transform 320ms var(--ease-silk);
-  will-change: transform;
 }
 
 /* Pin button rotates with extra easing for the "click feels good"
@@ -282,11 +223,19 @@
    settled, which the eye reads as "the action committed". */
 .eikon-pin-icon {
   transition: transform 480ms var(--ease-silk);
-  will-change: transform;
 }
 
 .eikon-pin-icon[data-pinned='true'] {
   transform: rotate(-45deg);
+}
+
+/* Panel static styles — width, transition, and backdrop extracted from
+   inline React style to avoid re-creating the style object every render. */
+.eikon-sidebar-panel {
+  width: clamp(320px, 24vw, 420px);
+  transition: left 380ms var(--ease-silk);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
 }
 
 /* Wrapper width transition. 420ms is in the silky range; the
@@ -298,17 +247,32 @@
   transition: width 420ms var(--ease-glide);
 }
 
+/* ── Rail cross-fade ──────────────────────────────────────────────
+   The rail fades in/out during the pin↔collapse transition so it's
+   visible as soon as the wrapper begins shrinking. 280ms with a
+   slight delay ensures the rail appears after the panel content has
+   started fading/clipping away — no overlap of two full-opacity
+   states competing for the same 32px strip. */
+
+.eikon-rail-reveal {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 280ms var(--ease-silk);
+  transition-delay: 140ms;
+}
+
+.eikon-rail-reveal[data-visible] {
+  opacity: 1;
+  pointer-events: auto;
+  transition-delay: 100ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .eikon-rail-glow::after {
-    animation: none;
-    opacity: 0.35;
-    transition: none;
-  }
-  .eikon-rail-magnet,
   .eikon-rail-icon,
   .eikon-rail-icon-glyph,
   .eikon-pin-icon,
-  .eikon-sidebar-width {
+  .eikon-sidebar-width,
+  .eikon-rail-reveal {
     transition: none;
   }
   .eikon-peek-in,

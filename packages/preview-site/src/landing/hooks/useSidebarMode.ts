@@ -196,7 +196,7 @@ export function useSidebarMode({
   const unpin = useCallback(() => {
     clearTimers();
     setPinned(false);
-    setPeeking(false);
+    setPeeking(true);
     writePin(storageKey, false);
   }, [clearTimers, storageKey]);
 
