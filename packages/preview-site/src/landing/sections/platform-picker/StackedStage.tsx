@@ -45,12 +45,53 @@ export function StackedStage({
   }, [current]);
 
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const sectionRef = useRef<HTMLElement>(null);
+  const isInView = useRef(false);
+
   const handleSelect = useCallback(
     (p: Platform) => {
       if (p !== current) onSelect(p);
     },
     [current, onSelect]
   );
+
+  // Track section visibility with IntersectionObserver
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isInView.current = entry.isIntersecting;
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Page-level keydown listener: switch platform when section is in viewport
+  const activeIdxRef = useRef(activeIdx);
+  activeIdxRef.current = activeIdx;
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!isInView.current) return;
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      // Don't hijack input fields
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      e.preventDefault();
+      const dir = e.key === 'ArrowLeft' ? -1 : 1;
+      const next =
+        (activeIdxRef.current + dir + options.length) % options.length;
+      onSelectRef.current(options[next].value);
+      tabRefs.current[next]?.focus();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [options]);
 
   const handleTabsKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -74,6 +115,7 @@ export function StackedStage({
 
   return (
     <section
+      ref={sectionRef}
       id={anchorId}
       className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
       aria-labelledby="platform-title"
