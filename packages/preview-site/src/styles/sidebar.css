@@ -229,6 +229,12 @@
   transform: rotate(-45deg);
 }
 
+/* Panel header buttons fade in/out instead of hard mount/unmount
+   so the close → collapse swap during pin transitions is smooth. */
+.eikon-panel-btn-fade {
+  transition: opacity 240ms var(--ease-silk);
+}
+
 /* Panel static styles — width, transition, and backdrop extracted from
    inline React style to avoid re-creating the style object every render. */
 .eikon-sidebar-panel {

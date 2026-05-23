@@ -126,7 +126,7 @@ export function DesktopCollapsibleSidebar({
         showRail: !wide,
         showPanel: phase !== 'hidden',
         panelAtOrigin: phase === 'pinned' || phase === 'absorbing' || phase === 'releasing',
-        panelIsFloating: phase !== 'pinned',
+        panelIsFloating: phase !== 'pinned' && phase !== 'absorbing',
       };
     }, [phase]);
 

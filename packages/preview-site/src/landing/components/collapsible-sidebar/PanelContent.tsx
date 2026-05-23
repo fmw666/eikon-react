@@ -47,28 +47,32 @@ export function PanelContent({ controller, sections, floating }: PanelContentPro
               data-pinned={isPinned ? 'true' : 'false'}
             />
           </button>
-          {floating && (
+          <div className="relative h-7 w-7">
             <button
               type="button"
               aria-label={t('sidebar.close')}
               title={t('sidebar.close')}
               onClick={closePeekNow}
-              className="eikon-rail-icon flex h-7 w-7 items-center justify-center rounded-md text-[var(--fg-4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60"
+              className={`eikon-rail-icon eikon-panel-btn-fade absolute inset-0 flex items-center justify-center rounded-md text-[var(--fg-4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 ${
+                floating ? '' : 'opacity-0 pointer-events-none'
+              }`}
+              tabIndex={floating ? 0 : -1}
             >
               <CloseIcon className="h-3.5 w-3.5" />
             </button>
-          )}
-          {isPinned && (
             <button
               type="button"
               aria-label={t('sidebar.collapse')}
               title={`${t('sidebar.collapse')}  [ `}
               onClick={unpin}
-              className="eikon-rail-icon flex h-7 w-7 items-center justify-center rounded-md text-[var(--fg-4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60"
+              className={`eikon-rail-icon eikon-panel-btn-fade absolute inset-0 flex items-center justify-center rounded-md text-[var(--fg-4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 ${
+                isPinned ? '' : 'opacity-0 pointer-events-none'
+              }`}
+              tabIndex={isPinned ? 0 : -1}
             >
               <ChevronLeftIcon className="h-3.5 w-3.5" />
             </button>
-          )}
+          </div>
         </div>
         <span
           aria-hidden="true"
