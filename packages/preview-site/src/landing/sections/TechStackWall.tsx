@@ -14,12 +14,20 @@
  * of these names; for project-specific brands we use generic symbols
  * (e.g. the `lucide:` set) so we never ship a broken icon ref.
  *
+ * Every icon referenced here is pre-registered offline via the side-effect
+ * `import '../icons'` below, so the page does not pay for ~20 network
+ * round-trips to `api.iconify.design` on first paint. If you add a new
+ * `icon: '...'` reference, also add it to
+ * `scripts/generate-landing-icons.mjs` and re-run `pnpm run icons:generate`.
+ *
  * The marquee is implemented in CSS only — we duplicate the children
  * once inline so a single keyframe (`eikon-marquee`) translates -50%
  * for a seamless loop. No JS, no rAF, plays at 60fps everywhere.
  */
 
 import { Icon } from '@iconify/react';
+
+import '../icons';
 import { useI18n, type I18nKey } from '../theme/i18n';
 
 interface LogoSpec {

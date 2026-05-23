@@ -10,12 +10,15 @@
  *
  * The icons are loaded from `lucide:` via Iconify — chosen because
  * lucide ships consistent stroke widths and is already a transitive
- * dep of `@iconify/react` (no extra install).
+ * dep of `@iconify/react` (no extra install). Each icon is pre-registered
+ * offline through the side-effect `import '../icons'` below so the
+ * landing page never round-trips to `api.iconify.design` for them.
  */
 
 import { Icon } from '@iconify/react';
 import { type ReactNode } from 'react';
 
+import '../icons';
 import { useI18n, type I18nKey } from '../theme/i18n';
 
 interface Pain {

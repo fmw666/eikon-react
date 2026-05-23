@@ -35,7 +35,11 @@ export default defineConfig({
          *                      is already lazy-loaded via React.lazy).
          *   - `arborist`     : react-arborist (only needed when Files panel
          *                      is shown).
-         *   - `iconify`      : @iconify/react + its registry.
+         *   - `iconify`      : @iconify/react + its registry, co-bundled
+         *                      with `src/landing/icons.ts` (the offline
+         *                      `addIcon()` registrations for landing-page
+         *                      logos) so the icon runtime and its data
+         *                      ship as one cohesive chunk.
          *   - `panels`       : react-resizable-panels (small, but isolating
          *                      it keeps the main vendor chunk leaner).
          *   - `react`        : react / react-dom — long-lived cache.
@@ -43,6 +47,15 @@ export default defineConfig({
          * Anything else falls into the default vendor bundle.
          */
         manualChunks(id) {
+          // Co-bundle the offline icon registrations with the iconify
+          // runtime so a single chunk download yields a fully usable
+          // Iconify (no follow-up CDN fetches).
+          if (
+            id.endsWith('/src/landing/icons.ts') ||
+            id.endsWith('\\src\\landing\\icons.ts')
+          ) {
+            return 'iconify';
+          }
           if (!id.includes('node_modules')) return undefined;
           if (
             id.includes('@codemirror') ||
