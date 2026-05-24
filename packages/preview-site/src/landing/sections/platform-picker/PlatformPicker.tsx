@@ -1,9 +1,9 @@
-import type { ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { coercePlatform, type Platform } from '@/lib/params-schema';
+import { coercePlatform } from '@/lib/params-schema';
 import { useShellStore } from '@/shell/store';
 
-import { useI18n, type I18nKey } from '../../theme/i18n';
+import { useI18n } from '../../theme/i18n';
 import { type PlatformOption } from './constants';
 import { WebIcon, DesktopIcon, MobileIcon } from './icons';
 import { StackedStage } from './StackedStage';
@@ -63,25 +63,12 @@ export function PlatformPicker({ compact = false }: PlatformPickerProps = {}) {
 
   if (compact) {
     return (
-      <div
-        role="radiogroup"
-        aria-label={t('platform.title')}
-        className="flex flex-col gap-1.5"
-      >
-        {OPTIONS.map((opt) => {
-          const active = opt.value === current;
-          return (
-            <CompactPlatformRow
-              key={opt.value}
-              active={active}
-              title={t(opt.compactTitleKey)}
-              desc={t(opt.compactDescKey)}
-              Icon={opt.Icon}
-              onSelect={() => setParam('platform', opt.value)}
-            />
-          );
-        })}
-      </div>
+      <CompactPlatformNav
+        options={OPTIONS}
+        current={current}
+        onSelect={(p) => setParam('platform', p)}
+        t={t}
+      />
     );
   }
 
@@ -97,56 +84,94 @@ export function PlatformPicker({ compact = false }: PlatformPickerProps = {}) {
   );
 }
 
-function CompactPlatformRow({
-  active,
-  title,
-  desc,
-  Icon,
+function CompactPlatformNav({
+  options,
+  current,
   onSelect,
+  t,
 }: {
-  active: boolean;
-  title: string;
-  desc: string;
-  Icon: (props: { className: string }) => ReactNode;
-  onSelect: () => void;
+  options: ReadonlyArray<PlatformOption>;
+  current: string;
+  onSelect: (p: string) => void;
+  t: (key: string) => string;
 }) {
+  const activeIdx = options.findIndex((o) => o.value === current);
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+  const [enableTransition, setEnableTransition] = useState(false);
+  const [flashKey, setFlashKey] = useState(0);
+  const isInitial = useRef(true);
+
+  const recalc = () => {
+    const el = tabRefs.current[activeIdx];
+    if (!el) return;
+    setIndicator({ left: el.offsetLeft, width: el.offsetWidth });
+  };
+
+  useLayoutEffect(() => {
+    recalc();
+    if (!enableTransition) {
+      requestAnimationFrame(() => setEnableTransition(true));
+    }
+  }, [activeIdx, enableTransition]);
+
+  useEffect(() => {
+    document.fonts.ready.then(() => recalc());
+  }, [activeIdx]);
+
+  useEffect(() => {
+    if (isInitial.current) {
+      isInitial.current = false;
+      return;
+    }
+    setFlashKey(0);
+    const timer = setTimeout(() => setFlashKey((n) => n + 1), 300);
+    return () => clearTimeout(timer);
+  }, [activeIdx]);
+
   return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={active}
-      onClick={onSelect}
-      className={
-        'flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition ' +
-        (active
-          ? 'border-brand-500/45 bg-brand-500/10'
-          : 'border-[var(--border-1)] bg-[var(--surface-1)] hover:border-[var(--border-2)] hover:bg-[var(--surface-2)]')
-      }
+    <div
+      role="radiogroup"
+      aria-label={t('platform.title')}
+      className="eikon-compact-picker relative flex rounded-xl border border-[var(--border-1)] bg-[var(--surface-1)]/80 p-1"
     >
       <span
+        aria-hidden="true"
         className={
-          'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition ' +
-          (active
-            ? 'border-brand-500/40 bg-brand-500/15 text-brand-400'
-            : 'border-[var(--border-1)] bg-[var(--surface-2)] text-[var(--fg-2)]')
+          'pointer-events-none absolute top-1 bottom-1 rounded-[10px] bg-[var(--surface-3)]' +
+          ' shadow-[inset_0_1px_0_rgb(255_255_255/0.07),0_1px_4px_rgb(0_0_0/0.2),0_0_12px_-3px_var(--accent-glow)]' +
+          (enableTransition
+            ? ' transition-all duration-[380ms] ease-[cubic-bezier(0.32,0.72,0,1)]'
+            : '')
         }
+        style={{ left: indicator.left, width: indicator.width }}
       >
-        <Icon className="h-4.5 w-4.5" />
+        {flashKey > 0 && (
+          <span key={flashKey} className="eikon-tab-flash" aria-hidden="true" />
+        )}
       </span>
-      <div className="min-w-0 flex-1">
-        <div
-          className={
-            'text-sm font-medium ' +
-            (active ? 'text-[var(--fg-1)]' : 'text-[var(--fg-2)]')
-          }
-        >
-          {title}
-        </div>
-        <div className="truncate text-xs text-[var(--fg-3)]">{desc}</div>
-      </div>
-      {active && (
-        <span className="inline-flex h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500 shadow-[0_0_10px_var(--accent-glow)]" />
-      )}
-    </button>
+      {options.map((opt, i) => {
+        const active = opt.value === current;
+        return (
+          <button
+            key={opt.value}
+            ref={(el) => { tabRefs.current[i] = el; }}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => onSelect(opt.value)}
+            className={
+              'relative z-10 flex flex-1 items-center justify-center gap-2 rounded-[10px] px-3 py-2.5 text-[13px] font-medium transition-colors duration-200 ' +
+              (active
+                ? 'text-[var(--fg-1)]'
+                : 'text-[var(--fg-4)] hover:text-[var(--fg-2)]')
+            }
+          >
+            <opt.Icon className={'h-4 w-4' + (active ? ' text-brand-400' : '')} />
+            <span>{t(opt.compactTitleKey)}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 }

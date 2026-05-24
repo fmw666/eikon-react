@@ -617,6 +617,25 @@
 }
 
 /* ------------------------------------------------------------------
+ * eikon-compact-picker — premium segmented control for sidebar
+ *
+ * Mirrors the full-page TabNav's physical-depth pill treatment:
+ * surface-3 indicator with inset top highlight + drop shadow +
+ * brand underglow. Includes the diagonal glass flash on switch.
+ * ------------------------------------------------------------------ */
+
+.eikon-compact-picker {
+  backdrop-filter: blur(8px) saturate(130%);
+  -webkit-backdrop-filter: blur(8px) saturate(130%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-compact-picker span[aria-hidden='true'] {
+    transition: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------
  * eikon-section-divider — gradient line between param groups
  *
  * Replaces the flat 1px `bg-[var(--border-1)]` divider with a line
