@@ -54,11 +54,14 @@
 
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   type CSSProperties,
   type ReactNode,
   type Ref,
 } from 'react';
+
+import { getLastNavTimestamp } from '../nav/route';
 
 export type RevealVariant =
   | 'rise'
@@ -106,12 +109,34 @@ export function Reveal({
 }: RevealProps) {
   const ref = useRef<HTMLElement | null>(null);
 
+  // Synchronous reveal for elements in viewport during a route nav.
+  // Runs before paint so the VT "new state" capture shows them visible.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof window === 'undefined') return;
+
+    const mountedDuringNav = Date.now() - getLastNavTimestamp() < 600;
+    if (!mountedDuringNav) return;
+
+    const rect = el.getBoundingClientRect();
+    const vh = window.innerHeight || document.documentElement.clientHeight || 0;
+    const minVisiblePx = rect.height * threshold;
+    const visible =
+      rect.top < vh - minVisiblePx && rect.bottom > minVisiblePx;
+
+    if (visible) {
+      el.style.transition = 'none';
+      el.setAttribute('data-revealed', 'true');
+    }
+  }, [threshold]);
+
+  // Restore transition property after paint so future reveals (if any)
+  // still animate, and set up IntersectionObserver for below-fold items.
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    // SSR / no-IO environment → reveal instantly. We never leave
-    // an element stuck in the dimmed initial state.
     if (
       typeof window === 'undefined' ||
       typeof IntersectionObserver === 'undefined'
@@ -120,23 +145,22 @@ export function Reveal({
       return;
     }
 
+    // Already revealed by the layout effect above — just restore transition.
+    if (el.getAttribute('data-revealed') === 'true') {
+      requestAnimationFrame(() => {
+        el.style.transition = '';
+      });
+      return;
+    }
+
     let cancelled = false;
     let observer: IntersectionObserver | null = null;
 
-    // Try to reveal synchronously if the element is already in view.
-    // The double-RAF below ensures the initial transform/opacity
-    // are committed to the compositor BEFORE we flip the attribute —
-    // without the wait, the browser would composite start + end in
-    // the same frame and skip the transition entirely.
     const tryRevealInPlace = (): boolean => {
       if (cancelled) return false;
       const rect = el.getBoundingClientRect();
       const vh =
-        window.innerHeight ||
-        document.documentElement.clientHeight ||
-        0;
-      // Same effective threshold as the IO config below so the
-      // sync check and the observer agree on what "in view" means.
+        window.innerHeight || document.documentElement.clientHeight || 0;
       const minVisiblePx = rect.height * threshold;
       const visible =
         rect.top < vh - minVisiblePx && rect.bottom > minVisiblePx;
@@ -163,11 +187,6 @@ export function Reveal({
           },
           {
             threshold,
-            // Trigger slightly before the section fully arrives —
-            // an 8% bottom-margin shrink makes the reveal start as
-            // the section's top edge approaches the lower viewport
-            // rim, so users don't see a "popcorn" effect on fast
-            // scrolls.
             rootMargin: '0px 0px -8% 0px',
           }
         );

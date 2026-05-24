@@ -4,6 +4,19 @@ export type AppRoute = 'home' | 'changelog' | 'playground';
 
 const NAVIGATE_EVENT = 'eikon:navigate';
 
+/**
+ * Timestamp of the last programmatic navigation. Used by Reveal to
+ * skip entrance animations on elements already in viewport right
+ * after a route swap (the route-level transition already provides
+ * the "page enters" animation — stacking section reveals on top
+ * creates perceptible jitter).
+ */
+let lastNavTimestamp = 0;
+
+export function getLastNavTimestamp(): number {
+  return lastNavTimestamp;
+}
+
 const ROUTE_ORDER: Record<AppRoute, number> = {
   home: 0,
   changelog: 1,
@@ -64,8 +77,11 @@ export function navigate(
     ROUTE_ORDER[nextRoute] >= ROUTE_ORDER[prevRoute] ? 'forward' : 'back';
   document.documentElement.dataset.navDirection = direction;
 
+  lastNavTimestamp = Date.now();
+
   if (supportsViewTransitions) {
     document.startViewTransition(() => {
+      window.scrollTo({ top: 0, behavior: 'auto' });
       window.dispatchEvent(new Event(NAVIGATE_EVENT));
     });
   } else {
@@ -95,7 +111,10 @@ export function usePopstateViewTransition(): void {
         ROUTE_ORDER[nextRoute] >= ROUTE_ORDER[prevRoute] ? 'forward' : 'back';
       document.documentElement.dataset.navDirection = direction;
 
+      lastNavTimestamp = Date.now();
+
       document.startViewTransition(() => {
+        window.scrollTo({ top: 0, behavior: 'auto' });
         window.dispatchEvent(new Event(NAVIGATE_EVENT));
       });
     };

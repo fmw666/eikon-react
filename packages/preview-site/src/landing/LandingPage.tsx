@@ -47,6 +47,7 @@ import {
   Suspense,
   useDeferredValue,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
@@ -91,7 +92,12 @@ export default function LandingPage() {
       <ThemeAndLangSync />
       <Nav route={route} pending={isRoutePending} />
       {supportsViewTransitions ? (
-        <ViewTransitionRouter route={committedRoute} />
+        // VT path: use `route` directly — the browser holds the old page
+        // as a raster screenshot while React renders the new content.
+        // Using `committedRoute` (deferred) here would make the VT capture
+        // stale content as the "new state", then React pops the real
+        // content in later without animation.
+        <ViewTransitionRouter route={route} />
       ) : (
         <RouteCrossFader route={committedRoute} />
       )}
@@ -111,7 +117,6 @@ function ViewTransitionRouter({ route }: { route: AppRoute }) {
   useEffect(() => {
     if (route === prevRoute.current) return;
     prevRoute.current = route;
-    window.scrollTo({ top: 0, behavior: 'auto' });
     wrapperRef.current?.focus({ preventScroll: true });
   }, [route]);
 
@@ -120,7 +125,6 @@ function ViewTransitionRouter({ route }: { route: AppRoute }) {
       ref={wrapperRef}
       tabIndex={-1}
       className="outline-none"
-      style={{ viewTransitionName: 'page-content' }}
     >
       {renderRouteBody(route)}
     </div>
@@ -154,18 +158,7 @@ function RouteCrossFader({ route }: { route: AppRoute }) {
 
     const reduced = prefersReducedMotion();
 
-    // Always scroll-snap first. Both layers will then fade from
-    // (0, 0), which is the only origin that reads as "the page
-    // changed", rather than "the page changed AND moved".
-    if (typeof window !== 'undefined') {
-      window.scrollTo({ top: 0, behavior: 'auto' });
-    }
-
     if (reduced) {
-      // Single-layer swap for users who opted out of motion. The
-      // outgoing slot is cleared in case a previous transition left
-      // one behind (rare but possible if the user re-enabled motion
-      // mid-session — defensive cleanup).
       setOutgoing(null);
       nextIdRef.current += 1;
       setCurrent({ id: nextIdRef.current, route });
@@ -173,14 +166,19 @@ function RouteCrossFader({ route }: { route: AppRoute }) {
     }
 
     // Cross-fade swap: demote `current` to `outgoing`, mount a fresh
-    // `current` slot for the new route. If a prior outgoing was
-    // still mid-fade, React will unmount it (its `animationend`
-    // listener never fires, but the DOM node is gone so there's
-    // nothing to clean up — no leak).
+    // `current` slot for the new route.
     setOutgoing(current);
     nextIdRef.current += 1;
     setCurrent({ id: nextIdRef.current, route });
   }, [route, current]);
+
+  // Scroll to top before paint once the outgoing layer covers viewport.
+  // The absolute-positioned outgoing layer hides the scroll jump.
+  useLayoutEffect(() => {
+    if (outgoing) {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }, [outgoing]);
 
   // Move keyboard focus into the freshly-mounted incoming wrapper on
   // each switch. Skip the very first mount — we don't want to snatch
@@ -250,16 +248,7 @@ function prefersReducedMotion(): boolean {
 }
 
 function PageFallback() {
-  return (
-    <div className="flex h-[60dvh] items-center justify-center text-sm text-[var(--fg-3)]">
-      <span
-        aria-hidden="true"
-        className="mr-2 inline-block h-3 w-3 rounded-full border-2 border-[var(--border-2)] border-t-[var(--fg-1)]"
-        style={{ animation: 'eikon-preview-spin 0.8s linear infinite' }}
-      />
-      Loading…
-    </div>
-  );
+  return <div className="h-[60dvh]" />;
 }
 
 function HomeRoute() {
