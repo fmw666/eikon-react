@@ -376,7 +376,7 @@ function Field({
         disabled={disabled}
         required={required}
         className={cn(
-          'rounded-md border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-sm',
+          'rounded-md border-[length:var(--surface-border-width)] border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-sm shadow-[var(--surface-inset-shadow)]',
           'placeholder:text-[var(--color-muted-foreground)]',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]',
           'disabled:cursor-not-allowed disabled:opacity-60'

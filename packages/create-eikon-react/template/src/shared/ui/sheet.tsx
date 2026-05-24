@@ -169,34 +169,34 @@ const STATIC_MOTION = {
  */
 function panelClass(side: SheetSide): string {
   const base =
-    'fixed z-50 flex flex-col bg-[var(--color-card)] text-[var(--color-card-foreground)] shadow-xl';
+    'fixed z-50 flex flex-col bg-[var(--color-card)] text-[var(--color-card-foreground)] shadow-xl ring-[length:var(--surface-ring-width)] ring-[var(--surface-ring-color)] [backdrop-filter:var(--surface-backdrop)]';
   switch (side) {
     case 'left':
       return cn(
         base,
         'inset-y-0 left-0 h-full w-[80vw] max-w-xs',
-        'border-r border-[var(--color-border)]',
+        'border-r-[length:var(--surface-border-width)] border-[var(--color-border)]',
         'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]'
       );
     case 'right':
       return cn(
         base,
         'inset-y-0 right-0 h-full w-[80vw] max-w-xs',
-        'border-l border-[var(--color-border)]',
+        'border-l-[length:var(--surface-border-width)] border-[var(--color-border)]',
         'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pr-[env(safe-area-inset-right)]'
       );
     case 'top':
       return cn(
         base,
         'inset-x-0 top-0 max-h-[80vh]',
-        'border-b border-[var(--color-border)]',
+        'border-b-[length:var(--surface-border-width)] border-[var(--color-border)]',
         'pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]'
       );
     case 'bottom':
       return cn(
         base,
         'inset-x-0 bottom-0 max-h-[80vh]',
-        'border-t border-[var(--color-border)]',
+        'border-t-[length:var(--surface-border-width)] border-[var(--color-border)]',
         'pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]'
       );
   }

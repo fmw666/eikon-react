@@ -42,7 +42,7 @@ interface TaskFormProps {
 // =================================================================================================
 
 const INPUT_CLASS =
-  'w-full rounded-md border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-sm ' +
+  'w-full rounded-md border-[length:var(--surface-border-width)] border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-sm shadow-[var(--surface-inset-shadow)] ' +
   'text-[var(--color-foreground)] placeholder:text-[var(--color-muted-foreground)] ' +
   'transition-shadow focus:outline-none focus:ring-2 focus:ring-[var(--color-ring)] ' +
   'disabled:cursor-not-allowed disabled:opacity-60';

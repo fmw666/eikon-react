@@ -162,7 +162,7 @@ function DialogContent({
               {...contentAnim}
               className={cn(
                 'fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2',
-                'rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-xl',
+                'rounded-lg border-[length:var(--surface-border-width)] border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-xl ring-[length:var(--surface-ring-width)] ring-[var(--surface-ring-color)] [backdrop-filter:var(--surface-backdrop)]',
                 'text-[var(--color-card-foreground)]',
                 className
               )}
