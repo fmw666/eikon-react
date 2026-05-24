@@ -519,7 +519,7 @@ function NavLink({
       // is held, giving the click a physical "tap" feel before the
       // route swap visually lands.
       className={
-        'relative z-[1] inline-flex min-h-[36px] items-center justify-center rounded-full px-2.5 py-1.5 text-[13px] font-medium no-underline outline-none transition-[color,transform] duration-200 ease-out active:scale-[0.94] focus-visible:ring-2 focus-visible:ring-[hsla(0,0%,100%,0.45)] focus-visible:ring-offset-0 sm:px-3.5 sm:text-sm ' +
+        'relative z-[1] inline-flex min-h-[36px] items-center justify-center rounded-full px-2 py-1.5 text-[12px] font-medium no-underline outline-none transition-[color,transform] duration-200 ease-out active:scale-[0.94] focus-visible:ring-2 focus-visible:ring-[hsla(0,0%,100%,0.45)] focus-visible:ring-offset-0 sm:px-3.5 sm:text-sm ' +
         (active
           ? 'text-[hsla(0,0%,100%,0.9)]'
           : 'text-[hsla(0,0%,100%,0.42)] hover:text-[hsla(0,0%,100%,0.9)]')
@@ -594,7 +594,7 @@ function PlaygroundCta({
       // hover lift on press, so the CTA *visibly* recoils into the
       // surface when clicked — feels like a physical button rather
       // than a div changing class.
-      className="group relative z-[1] ml-0.5 inline-flex min-h-[36px] items-center gap-1.5 rounded-full bg-gradient-to-b from-white to-zinc-200 px-2.5 py-1.5 text-[13px] font-medium text-zinc-900 no-underline shadow-[inset_0_1px_0_rgb(255_255_255/0.9),inset_0_-1px_0_rgb(0_0_0/0.08),0_1px_2px_rgb(0_0_0/0.25),0_4px_10px_rgb(0_0_0/0.15)] transition-[transform,box-shadow,background] duration-200 ease-out hover:-translate-y-px hover:from-white hover:to-zinc-100 hover:shadow-[inset_0_1px_0_rgb(255_255_255/1),inset_0_-1px_0_rgb(0_0_0/0.08),0_2px_4px_rgb(0_0_0/0.25),0_6px_14px_rgb(0_0_0/0.2)] active:translate-y-0 active:scale-[0.96] sm:ml-1 sm:px-3.5 sm:text-sm"
+      className="group relative z-[1] ml-0.5 inline-flex min-h-[36px] items-center gap-1 rounded-full bg-gradient-to-b from-white to-zinc-200 px-2 py-1.5 text-[12px] font-medium text-zinc-900 no-underline shadow-[inset_0_1px_0_rgb(255_255_255/0.9),inset_0_-1px_0_rgb(0_0_0/0.08),0_1px_2px_rgb(0_0_0/0.25),0_4px_10px_rgb(0_0_0/0.15)] transition-[transform,box-shadow,background] duration-200 ease-out hover:-translate-y-px hover:from-white hover:to-zinc-100 hover:shadow-[inset_0_1px_0_rgb(255_255_255/1),inset_0_-1px_0_rgb(0_0_0/0.08),0_2px_4px_rgb(0_0_0/0.25),0_6px_14px_rgb(0_0_0/0.2)] active:translate-y-0 active:scale-[0.96] sm:ml-1 sm:gap-1.5 sm:px-3.5 sm:text-sm"
     >
       <PlayIcon className="h-3 w-3 fill-zinc-900 text-zinc-900 transition-transform duration-200 ease-out group-hover:scale-110" />
       <span>{label}</span>

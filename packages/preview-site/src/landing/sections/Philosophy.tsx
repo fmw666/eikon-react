@@ -39,12 +39,12 @@ export function Philosophy() {
   const { t } = useI18n();
   return (
     <section
-      className="relative rounded-3xl bg-[var(--surface-2)]/60 px-4 py-16 sm:px-6 sm:py-20 lg:py-24"
+      className="relative rounded-2xl bg-[var(--surface-2)]/60 px-4 py-16 sm:rounded-3xl sm:px-6 sm:py-20 lg:py-24"
       aria-labelledby="philosophy-title"
       style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 700px' }}
     >
       <div className="mx-auto w-full max-w-7xl">
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_1.2fr]">
+      <div className="grid grid-cols-1 gap-10 sm:gap-12 lg:grid-cols-[1fr_1.2fr]">
         {/* Left: title + intro */}
         <div className="lg:sticky lg:top-24 lg:self-start">
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-1)] bg-[var(--surface-1)] px-3 py-1 text-xs text-[var(--fg-3)]">

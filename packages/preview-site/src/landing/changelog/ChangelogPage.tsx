@@ -283,7 +283,7 @@ function DemoBanner() {
         </span>
         <span className="leading-relaxed text-[var(--fg-3)]">
           {t('changelog.demo.subtitle')}{' '}
-          <code className="rounded border border-[var(--border-1)] bg-[var(--surface-1)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--fg-2)]">
+          <code className="break-all rounded border border-[var(--border-1)] bg-[var(--surface-1)] px-1.5 py-0.5 font-mono text-[11px] text-[var(--fg-2)]">
             src/landing/site-config.ts
           </code>
         </span>

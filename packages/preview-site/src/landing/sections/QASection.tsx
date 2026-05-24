@@ -117,7 +117,7 @@ export function QASection() {
             {t('qa.title')}
           </h2>
 
-          <ul className="mt-14 flex flex-col">
+          <ul className="mt-10 flex flex-col sm:mt-14">
             {QAS.map((item, idx) => (
               <QAItem
                 key={item.qKey}
@@ -194,7 +194,7 @@ function QAItem({
         type="button"
         aria-expanded={isOpen}
         onClick={onToggle}
-        className="flex w-full items-center justify-between gap-6 py-6 pl-5 pr-1 text-left"
+        className="flex w-full items-center justify-between gap-4 py-5 pl-4 pr-1 text-left sm:gap-6 sm:py-6 sm:pl-5"
       >
         <span
           className={
@@ -221,7 +221,7 @@ function QAItem({
         <div className="overflow-hidden">
           <p
             className={
-              'pb-7 pl-5 pr-12 text-sm leading-relaxed text-[var(--fg-3)] transition-opacity duration-300 ' +
+              'pb-6 pl-4 pr-4 text-sm leading-relaxed text-[var(--fg-3)] transition-opacity duration-300 sm:pb-7 sm:pl-5 sm:pr-12 ' +
               (isOpen ? 'opacity-100 delay-[120ms]' : 'opacity-0')
             }
           >

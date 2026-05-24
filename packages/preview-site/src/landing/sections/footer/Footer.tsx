@@ -275,7 +275,7 @@ export function Footer() {
         }}
       >
         {/* Top: easter-egg invitation + Explore + Connect */}
-        <div className="grid gap-12 gap-y-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
+        <div className="grid gap-10 gap-y-10 sm:grid-cols-2 sm:gap-12 sm:gap-y-14 lg:grid-cols-[1.4fr_1fr_1fr]">
           {/* HuntCard — the interactive prompt that replaced the
               former plain brand block. It nudges visitors toward
               the wordmark meadow easter egg without ever spelling
@@ -328,7 +328,7 @@ export function Footer() {
         {brandTokens.length > 0 && (
           <div
             aria-hidden="true"
-            className="relative mt-20 flex justify-center sm:mt-24"
+            className="relative mt-14 flex justify-center sm:mt-20 lg:mt-24"
           >
             <div className="relative" id={MEADOW_ANCHOR_ID}>
               <div className="eikon-footer-wordmark">
@@ -352,7 +352,7 @@ export function Footer() {
         )}
 
         {/* Bottom microcopy row */}
-        <div className="mt-12 flex flex-col gap-4 border-t border-[var(--border-1)] pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 flex flex-col gap-4 border-t border-[var(--border-1)] pt-5 sm:mt-12 sm:flex-row sm:items-center sm:justify-between sm:pt-6">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] text-[var(--fg-4)]">
             <span className="inline-flex items-center gap-2">
               <span

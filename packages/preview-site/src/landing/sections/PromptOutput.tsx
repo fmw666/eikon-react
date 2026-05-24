@@ -134,7 +134,7 @@ export function PromptOutput({ compact = false }: PromptOutputProps = {}) {
           aria-label={mode === 'prompt' ? 'prompt' : 'cli-command'}
           className={
             'relative m-0 h-full min-h-0 overflow-auto whitespace-pre-wrap break-words font-mono tracking-[-0.01em] text-[var(--fg-2)] selection:bg-brand-400/20 ' +
-            (compact ? 'px-4 py-3 text-[13px] leading-[1.85]' : 'max-h-[420px] px-5 py-4 text-sm leading-[1.8]')
+            (compact ? 'px-4 py-3 text-[13px] leading-[1.85]' : 'max-h-[420px] px-4 py-3.5 text-[13px] leading-[1.8] sm:px-5 sm:py-4 sm:text-sm')
           }
         >
           <PromptHighlighter text={displayText} mode={mode} />

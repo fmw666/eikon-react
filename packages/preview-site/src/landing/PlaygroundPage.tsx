@@ -62,9 +62,12 @@ export default function PlaygroundPage() {
   useEffect(() => {
     const html = document.documentElement;
     const body = document.body;
-    html.style.overflow = 'hidden';
-    html.style.scrollbarGutter = 'auto';
-    body.style.overflow = 'hidden';
+    const isLg = window.matchMedia('(min-width: 1024px)').matches;
+    if (isLg) {
+      html.style.overflow = 'hidden';
+      html.style.scrollbarGutter = 'auto';
+      body.style.overflow = 'hidden';
+    }
     return () => {
       html.style.overflow = '';
       html.style.scrollbarGutter = '';
@@ -75,11 +78,10 @@ export default function PlaygroundPage() {
   const fillHeight = `calc(100dvh - ${NAV_REGION_HEIGHT_REM}rem - 0.75rem)`;
   return (
     <div
-      className="relative flex flex-col gap-y-4 px-4 pb-6 sm:px-6 lg:flex-row lg:gap-x-4 lg:gap-y-0 lg:overflow-hidden lg:pb-0"
+      className="relative flex flex-col gap-y-4 px-4 pb-6 sm:px-6 lg:h-[var(--eikon-pg-fill)] lg:flex-row lg:gap-x-4 lg:gap-y-0 lg:overflow-hidden lg:pb-0"
       style={{
         minHeight: fillHeight,
         ['--eikon-pg-fill' as string]: fillHeight,
-        height: fillHeight,
       }}
     >
       <CollapsibleSidebar
@@ -129,7 +131,7 @@ export default function PlaygroundPage() {
             lg+ : flex-1, fills the remaining horizontal space and
                   inherits the row's pinned height. */}
       <main
-        className="h-[min(70dvh,calc(100dvh-6rem))] min-h-[480px] min-w-0 flex-1 lg:h-full lg:min-h-0"
+        className="h-[min(65dvh,calc(100dvh-6rem))] min-h-[380px] min-w-0 flex-1 sm:h-[min(70dvh,calc(100dvh-6rem))] sm:min-h-[480px] lg:h-full lg:min-h-0"
       >
         <PlaygroundShell />
       </main>

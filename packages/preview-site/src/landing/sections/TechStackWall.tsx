@@ -150,7 +150,7 @@ function Marquee({ logos }: { logos: ReadonlyArray<LogoSpec> }) {
         {[0, 1].map((copyIdx) => (
           <div
             key={copyIdx}
-            className="flex shrink-0 items-center gap-12 pr-12"
+            className="flex shrink-0 items-center gap-6 pr-6 sm:gap-12 sm:pr-12"
             aria-hidden={copyIdx === 1}
           >
             {logos.map((l, i) => (

@@ -385,7 +385,7 @@ export function PlaygroundSection() {
               tab-strip mode (`useIsCompactShell`) below 768px so
               this height hosts a single full-bleed view, not
               three competing strips. */}
-          <main className="h-[min(70dvh,640px)] min-h-[480px] min-w-0 lg:h-auto lg:min-h-0 lg:flex-1">
+          <main className="h-[min(65dvh,640px)] min-h-[400px] min-w-0 sm:h-[min(70dvh,640px)] sm:min-h-[480px] lg:h-auto lg:min-h-0 lg:flex-1">
             <PlaygroundShell />
           </main>
         </div>

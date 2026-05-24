@@ -111,7 +111,7 @@ export function StackedStage({
       {/* Stage: three device shells stacked */}
       <div className="relative mx-auto max-w-4xl">
         <div
-          className="relative aspect-[5/3] w-full"
+          className="relative aspect-[4/3] w-full sm:aspect-[5/3]"
           style={{ perspective: '1400px' }}
         >
           {options.map((opt, i) => {

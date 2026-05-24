@@ -113,7 +113,7 @@ export function LangSwitcher({ compact = false }: { compact?: boolean } = {}) {
           title={t('nav.language')}
           onClick={() => setOpen((v) => !v)}
           className={
-            'group inline-flex h-6 w-6 items-center justify-center rounded-full transition-colors duration-200 ease-out ' +
+            'eikon-tap-44 group inline-flex h-6 w-6 items-center justify-center rounded-full transition-colors duration-200 ease-out ' +
             (open
               ? 'text-[hsla(0,0%,100%,0.9)]'
               : 'text-[hsla(0,0%,100%,0.42)] hover:text-[hsla(0,0%,100%,0.9)]')

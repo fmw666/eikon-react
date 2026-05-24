@@ -57,7 +57,7 @@ export function Hero({
       id={HERO_ANCHOR_ID}
       className="relative isolate overflow-hidden"
     >
-      <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 sm:px-6 sm:pb-32 sm:pt-28 lg:pb-40 lg:pt-32">
+      <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-16 sm:px-6 sm:pb-32 sm:pt-28 lg:pb-40 lg:pt-32">
         {/* Grid backdrop — anchored to the content container so its
             mask coordinates align with the text's left edge. */}
         <div
@@ -159,7 +159,7 @@ export function Hero({
             gracefully drop below the terminal on extra-narrow
             screens (≤320px) where the two side-by-side would
             otherwise overflow. */}
-        <div className="mt-12 flex flex-wrap items-stretch gap-3 lg:absolute lg:bottom-40 lg:right-6 lg:mt-0 lg:flex-col lg:flex-nowrap lg:items-end">
+        <div className="mt-10 flex flex-wrap items-stretch gap-2.5 sm:mt-12 sm:gap-3 lg:absolute lg:bottom-40 lg:right-6 lg:mt-0 lg:flex-col lg:flex-nowrap lg:items-end">
           <TerminalCard command="npx create-eikon-react ." />
           {/* "find it" pill — direct deep-link into the GitHub repo.
               The narrative is "want to actually find it? go read the

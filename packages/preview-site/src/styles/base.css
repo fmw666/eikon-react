@@ -44,23 +44,8 @@ body,
   }
 }
 
-/*
- * Reserve the vertical scrollbar gutter even when the page is short
- * enough to not need one. Without this, navigating between a long
- * route (home — with scroll) and a short one (changelog placeholder
- * — without scroll) makes the viewport width change by the scrollbar
- * width (~15px on Windows), which yanks every centred element
- * (notably the Nav pill) sideways. `scrollbar-gutter: stable` is the
- * modern, no-JS, no-overflow-hack fix for this.
- *
- * Scoped to `pointer: fine` (mouse / trackpad) viewports because
- * touch UAs don’t paint a permanent scrollbar — keeping the gutter
- * reserved there just steals ~15px of width on small phones.
- */
-@media (pointer: fine) {
-  html {
-    scrollbar-gutter: stable;
-  }
+html {
+  overflow-x: clip;
 }
 
 body {
