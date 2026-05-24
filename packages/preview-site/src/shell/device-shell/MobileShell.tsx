@@ -297,16 +297,48 @@ export function MobileShell({
               width: geo.islandWidth,
               height: geo.islandHeight,
               borderRadius: geo.islandHeight / 2,
-              background: PHONE_TOKENS.islandBg,
+              background: `radial-gradient(ellipse 80% 100% at 50% 110%, rgba(30,30,40,0.6) 0%, ${PHONE_TOKENS.islandBg} 70%)`,
               boxShadow: [
-                'inset 0 1px 0 rgba(255,255,255,0.04)',
-                'inset 0 -1px 0 rgba(0,0,0,0.3)',
-                '0 0 0 1px rgba(0,0,0,0.6)',
+                'inset 0 1.5px 1px rgba(255,255,255,0.06)',
+                'inset 0 -1px 1px rgba(0,0,0,0.4)',
+                '0 0.5px 0 rgba(255,255,255,0.08)',
+                '0 0 0 0.5px rgba(0,0,0,0.8)',
               ].join(', '),
               pointerEvents: 'none',
               zIndex: 3,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
-          />
+          >
+            {/* Front camera lens */}
+            <div
+              style={{
+                position: 'absolute',
+                right: geo.islandHeight * 0.38,
+                width: geo.islandHeight * 0.3,
+                height: geo.islandHeight * 0.3,
+                borderRadius: '50%',
+                background: 'radial-gradient(circle at 35% 35%, rgba(40,45,60,0.9) 0%, rgba(8,8,12,1) 60%)',
+                boxShadow: [
+                  'inset 0 0.5px 1px rgba(255,255,255,0.12)',
+                  '0 0 0 0.5px rgba(60,65,80,0.4)',
+                  '0 0 2px 0.5px rgba(0,0,0,0.5)',
+                ].join(', '),
+              }}
+            >
+              {/* Lens highlight / iris ring */}
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: '20%',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle at 40% 38%, rgba(25,35,60,0.7) 0%, rgba(5,5,10,0.95) 70%)',
+                  boxShadow: 'inset 0 0 1px rgba(80,120,180,0.25)',
+                }}
+              />
+            </div>
+          </div>
         )}
 
         <div

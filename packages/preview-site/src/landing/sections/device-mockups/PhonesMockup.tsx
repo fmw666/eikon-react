@@ -186,6 +186,9 @@ function Phone({
       <rect x="6" y="6" width="108" height="208" rx="14" fill={wallFill} />
       {/* Dynamic island */}
       <rect x="44" y="12" width="32" height="10" rx="5" fill="#0a0a14" />
+      {/* Island camera lens */}
+      <circle cx="68" cy="17" r="2.5" fill="#0c0c14" stroke="rgba(60,65,80,0.35)" strokeWidth="0.5" />
+      <circle cx="68" cy="17" r="1.2" fill="rgba(20,30,50,0.8)" />
       {/* Status bar — time + icons placeholders */}
       <rect x="14" y="14" width="14" height="3" rx="1" fill="#e5e7eb" opacity="0.8" />
       <rect x="92" y="14" width="14" height="3" rx="1" fill="#e5e7eb" opacity="0.6" />
