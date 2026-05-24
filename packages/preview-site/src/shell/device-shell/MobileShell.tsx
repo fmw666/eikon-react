@@ -72,9 +72,9 @@ export const PHONE_GEOMETRY: Record<FrameSize, PhoneGeometry> = {
     bezel: 11,
     innerGap: 2,
     cornerRadius: 52,
-    islandWidth: 118,
-    islandHeight: 34,
-    islandTop: 10,
+    islandWidth: 126,
+    islandHeight: 37,
+    islandTop: 11,
     buttons: {
       thickness: 3,
       muteHeight: 26,
@@ -90,10 +90,9 @@ export const PHONE_GEOMETRY: Record<FrameSize, PhoneGeometry> = {
     bezel: 12,
     innerGap: 2,
     cornerRadius: 56,
-    islandWidth: 126,
-    islandHeight: 36,
-    islandTop: 11,
-    buttons: {
+    islandWidth: 138,
+    islandHeight: 40,
+    islandTop: 7,    buttons: {
       thickness: 3,
       muteHeight: 28,
       volumeHeight: 62,
@@ -106,7 +105,7 @@ export const PHONE_GEOMETRY: Record<FrameSize, PhoneGeometry> = {
   },
 };
 
-export const STATUS_BAR_HEIGHT = 44;
+export const STATUS_BAR_HEIGHT = 54;
 export const HOME_INDICATOR_AREA = 28;
 
 export function MobileShell({
@@ -124,6 +123,10 @@ export function MobileShell({
   const innerRadius = Math.max(geo.cornerRadius - geo.bezel, 18);
   const outerWidth = screen.width + geo.bezel * 2;
   const outerHeight = screen.height + geo.bezel * 2;
+  const islandCenterY = geo.islandHeight > 0
+    ? geo.islandTop + geo.islandHeight / 2
+    : STATUS_BAR_HEIGHT / 2;
+  const statusPadTop = Math.max(0, 2 * (islandCenterY - STATUS_BAR_HEIGHT / 2));
 
   // The body div is a single piece of "titanium": a vertical 3-stop
   // gradient with a 1px outer highlight on top and a 1px outer shadow
@@ -264,19 +267,13 @@ export function MobileShell({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            // Left/right padding pushes the time and icons clear of the
-            // Dynamic Island. The island lives at ~50% width centred, so
-            // 24px gives them room to breathe without overlapping.
-            padding: '14px 26px 0 26px',
+            padding: `${statusPadTop}px 38px 0 38px`,
             color: PHONE_TOKENS.statusFg,
             fontFamily:
               '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
-            fontSize: 15,
+            fontSize: 17,
             fontWeight: 600,
-            letterSpacing: -0.1,
-            // Status bar text uses difference-blend so it stays legible
-            // over both light and dark previewed content without us
-            // having to peek into the iframe.
+            letterSpacing: -0.4,
             mixBlendMode: 'difference',
             pointerEvents: 'none',
             zIndex: 2,
@@ -306,7 +303,22 @@ export function MobileShell({
               pointerEvents: 'none',
               zIndex: 3,
             }}
-          />
+          >
+            {/* Front camera lens — right side of island */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                right: geo.islandHeight * 0.32,
+                transform: 'translateY(-50%)',
+                width: geo.islandHeight * 0.34,
+                height: geo.islandHeight * 0.34,
+                borderRadius: '50%',
+                background: 'radial-gradient(circle at 38% 38%, #1a1d24 0%, #08080a 70%)',
+                boxShadow: 'inset 0 0.5px 0.5px rgba(255,255,255,0.08), 0 0 0 0.5px rgba(40,44,52,0.5)',
+              }}
+            />
+          </div>
         )}
 
         <div
@@ -382,64 +394,68 @@ export function SideButton({
 }
 
 export function StatusBarIcons() {
-  // Three glyphs: signal bars, wifi, battery. Drawn as inline SVG so
-  // they scale crisply at any DPR and never need an external font.
-  // Sizes/spacing tuned to match the iOS 17+ status bar (slightly
-  // tighter than the previous design — gap shrunk from 6 to 5 px and
-  // the battery is now 24 × 11 to match a real device).
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
       <svg
-        width="17"
-        height="10"
-        viewBox="0 0 17 10"
+        width="20"
+        height="13"
+        viewBox="0 0 20 13"
         fill="currentColor"
         aria-hidden="true"
       >
-        <rect x="0" y="6" width="3" height="4" rx="0.8" />
-        <rect x="4.5" y="4" width="3" height="6" rx="0.8" />
-        <rect x="9" y="2" width="3" height="8" rx="0.8" />
-        <rect x="13.5" y="0" width="3" height="10" rx="0.8" />
+        <rect x="0" y="9" width="3.5" height="4" rx="1.2" />
+        <rect x="5" y="6" width="3.5" height="7" rx="1.2" />
+        <rect x="10" y="3" width="3.5" height="10" rx="1.2" />
+        <rect x="15" y="0" width="3.5" height="13" rx="1.2" />
       </svg>
-      <svg width="15" height="10" viewBox="0 0 15 10" aria-hidden="true">
-        <path
-          d="M7.5 8.4a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Zm0-3.2a3.4 3.4 0 0 1 2.4 1 .65.65 0 0 0 .92-.92A4.7 4.7 0 0 0 7.5 3.9a4.7 4.7 0 0 0-3.32 1.38.65.65 0 0 0 .92.92A3.4 3.4 0 0 1 7.5 5.2Zm0-3.2a6.6 6.6 0 0 1 4.66 1.92.65.65 0 0 0 .92-.92A7.9 7.9 0 0 0 7.5 0.7 7.9 7.9 0 0 0 1.92 3a.65.65 0 0 0 .92.92A6.6 6.6 0 0 1 7.5 2Z"
-          fill="currentColor"
-        />
-      </svg>
-      <span
-        style={{
-          position: 'relative',
-          width: 24,
-          height: 11,
-          border: '1px solid currentColor',
-          borderRadius: 3,
-          opacity: 0.6,
-        }}
+      <svg
+        width="17"
+        height="13"
+        viewBox="0 0 16 12"
+        fill="currentColor"
+        aria-hidden="true"
       >
-        <span
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            right: -2.5,
-            top: 3,
-            bottom: 3,
-            width: 1.2,
-            background: 'currentColor',
-            borderRadius: 0.6,
-          }}
+        <circle cx="8" cy="10.8" r="1.3" />
+        <path d="M8 7.2c1.1 0 2.1.45 2.83 1.17a.75.75 0 1 1-1.06 1.06A2.25 2.25 0 0 0 8 8.7c-.66 0-1.28.26-1.77.73a.75.75 0 1 1-1.06-1.06A3.75 3.75 0 0 1 8 7.2Z" />
+        <path d="M8 4c1.93 0 3.68.78 4.95 2.05a.75.75 0 0 1-1.06 1.06A5.25 5.25 0 0 0 8 5.5c-1.52 0-2.87.61-3.89 1.61a.75.75 0 0 1-1.06-1.06A6.75 6.75 0 0 1 8 4Z" />
+        <path d="M8 .8c2.76 0 5.26 1.12 7.07 2.93a.75.75 0 0 1-1.06 1.06A8.25 8.25 0 0 0 8 2.3 8.25 8.25 0 0 0 1.99 4.79a.75.75 0 0 1-1.06-1.06A9.75 9.75 0 0 1 8 .8Z" />
+      </svg>
+      <svg
+        width="28"
+        height="13"
+        viewBox="0 0 28 13"
+        aria-hidden="true"
+      >
+        <rect
+          x="0.75"
+          y="0.75"
+          width="23.5"
+          height="11.5"
+          rx="3.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.3"
+          opacity="0.5"
         />
-        <span
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            inset: 1.2,
-            background: 'currentColor',
-            borderRadius: 1.5,
-            opacity: 0.95,
-          }}
+        <rect
+          x="25.2"
+          y="3.8"
+          width="2"
+          height="5.4"
+          rx="1"
+          fill="currentColor"
+          opacity="0.5"
         />
-      </span>
+        <rect
+          x="2.5"
+          y="2.5"
+          width="20"
+          height="8"
+          rx="2.2"
+          fill="currentColor"
+          opacity="0.9"
+        />
+      </svg>
     </span>
   );
 }
