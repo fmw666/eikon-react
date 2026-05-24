@@ -238,7 +238,7 @@
 /* Panel static styles — width, transition, and backdrop extracted from
    inline React style to avoid re-creating the style object every render. */
 .eikon-sidebar-panel {
-  width: clamp(320px, 24vw, 420px);
+  width: clamp(340px, 24vw, 440px);
   transition: left 380ms var(--ease-silk);
   backdrop-filter: blur(24px) saturate(160%);
   -webkit-backdrop-filter: blur(24px) saturate(160%);

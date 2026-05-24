@@ -78,7 +78,7 @@ export default function PlaygroundPage() {
   const fillHeight = `calc(100dvh - ${NAV_REGION_HEIGHT_REM}rem - 0.75rem)`;
   return (
     <div
-      className="relative flex flex-col gap-y-4 px-4 pb-6 sm:px-6 lg:h-[var(--eikon-pg-fill)] lg:flex-row lg:gap-x-4 lg:gap-y-0 lg:overflow-hidden lg:pb-0"
+      className="relative flex flex-col gap-y-4 px-4 pb-6 sm:px-6 lg:h-[var(--eikon-pg-fill)] lg:flex-row lg:gap-y-0 lg:overflow-hidden lg:pb-0 lg:pl-0"
       style={{
         minHeight: fillHeight,
         ['--eikon-pg-fill' as string]: fillHeight,
