@@ -126,29 +126,33 @@
  * LandingPage renders *two* layers during each transition:
  *
  *     ┌─ outgoing (absolute, z-10, .eikon-route-leave) ─┐
- *     │     fades out, settles up by 6px                │
+ *     │     fades out fast, lifts 4px                   │
  *     └─────────────────────────────────────────────────┘
  *     ┌─ incoming (normal flow, .eikon-route-enter) ────┐
- *     │     fades in, settles down from 12px below      │
+ *     │     120ms delay, then fades in from 6px below   │
  *     └─────────────────────────────────────────────────┘
  *
- * The two animations are deliberately tuned to OVERLAP — the leave
- * is 320ms and the enter is 480ms, so the entire first 320ms is
- * a true cross-fade (both layers visible at intermediate alpha).
- * The eye reads this as "old material dissolves while new material
- * emerges", not "page A disappears, then page B appears" — which is
- * the difference between a film cut and a film dissolve.
+ * Timing strategy: sequential dissolve, not parallel cross-fade.
+ * The leave is 180ms; the enter starts after a 120ms delay. This
+ * means the outgoing layer is nearly gone (or fully gone) before
+ * the incoming layer becomes visible — eliminating the "two pages
+ * overlapping" artifact that occurs when both are at intermediate
+ * alpha simultaneously.
  *
  * Motion vocabulary:
  *
- *   - leave : 320ms `cubic-bezier(0.4, 0, 1, 1)` — accelerate-out
- *             curve, so the outgoing layer "falls away" rather than
- *             lingers. Pairs with a tiny `-6px translateY` so it
- *             reads as "lifting off the page".
- *   - enter : 480ms `cubic-bezier(0.16, 1, 0.3, 1)` — overshoot-free
- *             material-exit curve. Starts at `12px translateY +
- *             0.992 scale` so the new page reads as "rising into
- *             place" with a touch of depth, then settles flat.
+ *   - leave : 180ms `cubic-bezier(0.4, 0, 1, 1)` — fast accelerate-
+ *             out so the old page vanishes decisively. Minimal
+ *             `-4px translateY` keeps the motion subtle.
+ *   - enter : 340ms `cubic-bezier(0.16, 1, 0.3, 1)` after 120ms
+ *             delay. Starts at `6px translateY + 0.998 scale` — a
+ *             barely-perceptible rise that reads as "the new page
+ *             settling into place" without calling attention to the
+ *             mechanism.
+ *
+ * Total perceived transition: ~460ms (180 leave + 120 gap + 340
+ * enter, with partial overlap). Feels faster than the raw sum
+ * because the user’s eye has only one page to track at any moment.
  *
  * Both are purely `transform` + `opacity` — composite-only animations
  * that never touch layout, paint, or scroll position. The outgoing
@@ -165,7 +169,7 @@
 @keyframes eikon-route-enter {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.992);
+    transform: translateY(6px) scale(0.998);
   }
   to {
     opacity: 1;
@@ -174,7 +178,7 @@
 }
 
 .eikon-route-enter {
-  animation: eikon-route-enter 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: eikon-route-enter 340ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
   will-change: opacity, transform;
 }
 
@@ -185,18 +189,105 @@
   }
   to {
     opacity: 0;
-    transform: translateY(-6px) scale(0.996);
+    transform: translateY(-4px) scale(0.998);
   }
 }
 
 .eikon-route-leave {
-  animation: eikon-route-leave 320ms cubic-bezier(0.4, 0, 1, 1) both;
+  animation: eikon-route-leave 180ms cubic-bezier(0.4, 0, 1, 1) both;
   will-change: opacity, transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .eikon-route-enter,
   .eikon-route-leave {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * View Transitions API — directional slide + fade
+ *
+ * When the browser supports `document.startViewTransition()`, the
+ * RouteCrossFader is bypassed entirely — the browser takes a raster
+ * snapshot of the old page and animates it as a pseudo-element on
+ * the compositor while React renders only the new page. This is
+ * fundamentally cheaper than keeping two live subtrees around.
+ *
+ * Direction is set via `data-nav-direction` on <html> before each
+ * transition fires. Forward (home→changelog→playground) slides left;
+ * backward slides right — giving the nav a spatial "stack" feel.
+ *
+ * The Nav has its own `view-transition-name` so the browser treats
+ * it as a persistent shared element that stays put (no cross-fade,
+ * no motion) while only the page content transitions beneath it.
+ * ------------------------------------------------------------------ */
+
+/* Nav persistence — stays completely static during transition.
+   Target only the outermost <header> that has the class (the pill
+   and orb also carry eikon-nav-glass but <header> is the single
+   root that contains the entire nav region). */
+header.eikon-nav-glass {
+  view-transition-name: nav-bar;
+}
+
+::view-transition-old(nav-bar),
+::view-transition-new(nav-bar) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Page content transition animations */
+@keyframes vt-slide-out-forward {
+  to {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.98);
+  }
+}
+
+@keyframes vt-slide-in-forward {
+  from {
+    opacity: 0;
+    transform: translateX(30px) scale(0.98);
+  }
+}
+
+@keyframes vt-slide-out-back {
+  to {
+    opacity: 0;
+    transform: translateX(30px) scale(0.98);
+  }
+}
+
+@keyframes vt-slide-in-back {
+  from {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.98);
+  }
+}
+
+/* Forward direction (default) */
+::view-transition-old(page-content) {
+  animation: vt-slide-out-forward 220ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+::view-transition-new(page-content) {
+  animation: vt-slide-in-forward 280ms cubic-bezier(0.0, 0, 0.2, 1) 60ms both;
+}
+
+/* Backward direction */
+[data-nav-direction='back']::view-transition-old(page-content) {
+  animation-name: vt-slide-out-back;
+}
+
+[data-nav-direction='back']::view-transition-new(page-content) {
+  animation-name: vt-slide-in-back;
+}
+
+/* Disable for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(page-content),
+  ::view-transition-new(page-content) {
     animation: none;
   }
 }

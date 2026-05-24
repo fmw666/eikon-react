@@ -55,7 +55,12 @@ import {
 
 import { Reveal } from './components/Reveal';
 import { Nav } from './nav/Nav';
-import { useAppRoute, type AppRoute } from './nav/route';
+import {
+  supportsViewTransitions,
+  useAppRoute,
+  usePopstateViewTransition,
+  type AppRoute,
+} from './nav/route';
 import { loadChangelog, loadPlayground } from './nav/route-loaders';
 import { Footer } from './sections/footer';
 import { Hero } from './sections/Hero';
@@ -70,51 +75,55 @@ import { QASection } from './sections/QASection';
 import { TechStackWall } from './sections/TechStackWall';
 import { ThemeAndLangSync } from './theme/theme-store';
 
-// Both /playground and /changelog are heavy routes (CodeMirror, react-
-// arborist, the markdown notes block). Lazy-loading keeps the cold JS
-// for the marketing home small — visitors who never click through to
-// these tools don't pay for the extra code.
-//
-// Loader fns live in `./nav/route-loaders.ts` so the Nav can re-use
-// the same identity for hover-time prefetch (see `ROUTE_PREFETCH`
-// over there). Sharing the loader function reference is what
-// guarantees the hover `import()` and the click-time `React.lazy`
-// hit the same chunk promise — the second resolves from cache.
 const PlaygroundPage = lazy(loadPlayground);
 const ChangelogPage = lazy(loadChangelog);
 
 export default function LandingPage() {
-  // `route` is the *intent* — updates synchronously on link click, so
-  // the Nav can flip its active highlight + magic-pill indicator in
-  // the same frame. The user immediately sees their click landing.
-  //
-  // `committedRoute` is the *commit* — kept one step behind via
-  // `useDeferredValue` so React can hold the old subtree mounted
-  // while the new route's lazy chunk loads. This is what kills the
-  // Suspense-fallback flicker: instead of "old page disappears →
-  // Loading spinner → new page", the user sees "click → old page
-  // stays + LoadingBar crawls → new page cross-fades in".
-  //
-  // `isRoutePending` is the gap between intent and commit: the
-  // LoadingBar uses it to nprogress its way across the top of the
-  // viewport.
-  //
-  // Scroll-snap-to-top is intentionally NOT handled here. The
-  // RouteCrossFader does it the instant the cross-fade starts so
-  // both layers (outgoing + incoming) fade from the same vertical
-  // origin — if we scrolled here instead, the outgoing layer
-  // would still be at the user's previous scroll position while
-  // the new one entered from top, which looks broken.
   const route = useAppRoute();
   const committedRoute = useDeferredValue(route);
   const isRoutePending = route !== committedRoute;
+
+  // Wire popstate → View Transitions so back/forward also animate.
+  usePopstateViewTransition();
 
   return (
     <>
       <ThemeAndLangSync />
       <Nav route={route} pending={isRoutePending} />
-      <RouteCrossFader route={committedRoute} />
+      {supportsViewTransitions ? (
+        <ViewTransitionRouter route={committedRoute} />
+      ) : (
+        <RouteCrossFader route={committedRoute} />
+      )}
     </>
+  );
+}
+
+/**
+ * Single-slot router for browsers with View Transitions API.
+ * The browser snapshot handles exit animation — we only render
+ * the incoming page. Scroll-snap happens in the VT callback.
+ */
+function ViewTransitionRouter({ route }: { route: AppRoute }) {
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const prevRoute = useRef(route);
+
+  useEffect(() => {
+    if (route === prevRoute.current) return;
+    prevRoute.current = route;
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    wrapperRef.current?.focus({ preventScroll: true });
+  }, [route]);
+
+  return (
+    <div
+      ref={wrapperRef}
+      tabIndex={-1}
+      className="outline-none"
+      style={{ viewTransitionName: 'page-content' }}
+    >
+      {renderRouteBody(route)}
+    </div>
   );
 }
 
@@ -122,58 +131,8 @@ export default function LandingPage() {
 type RouteSlot = { id: number; route: AppRoute };
 
 /**
- * Two-layer route container that cross-fades between SPA routes.
- *
- * Why two layers, not one
- * -----------------------
- * The previous one-layer implementation re-keyed a single wrapper
- * by route name. React tore down the old subtree the *instant* the
- * key changed and only then ran the enter animation on the new
- * one — visually this is a hard cut followed by a renaissance, not
- * a transition. Users described it as "loading is not smooth and
- * not connected".
- *
- * The fix is to stop unmounting the previous subtree on click and
- * instead keep it on screen for the duration of its own *exit*
- * animation. We do that by maintaining two render slots:
- *
- *   - `current`  : the live route (normal flow, `eikon-route-enter`).
- *   - `outgoing` : the previously-live route, demoted into an
- *                  absolutely-positioned overlay (`z-10`, `inert`,
- *                  `pointer-events-none`) that runs the exit
- *                  animation and unmounts itself on `animationend`.
- *
- * The exit (320ms) and enter (480ms) curves overlap by 320ms — for
- * the entire dissolve window both layers are visible at intermediate
- * alpha. That's what turns "page A vanished, page B appeared" into
- * "page A dissolved into page B".
- *
- * Behaviour notes
- * ---------------
- *   - Scroll snap fires at the *start* of the cross-fade, before
- *     either layer animates, so both fade from the same vertical
- *     origin. Otherwise the outgoing layer would fade out from the
- *     user's previous scroll position.
- *
- *   - Rapid-fire navigation (A → B → C mid-fade) is safe: the
- *     useEffect simply replaces any in-flight outgoing slot with
- *     the *new* outgoing (formerly the in-flight current). The
- *     previous outgoing is unmounted immediately, which is the
- *     correct behaviour — we don't queue dissolves, we always
- *     reflect the latest state.
- *
- *   - `prefers-reduced-motion`: we skip the cross-fade entirely
- *     and do a single-layer swap. The CSS keyframes are already
- *     no-op'd, but the JS guard avoids paying the double-render
- *     cost on every navigation for those users.
- *
- *   - A11y: the incoming wrapper is `tabIndex={-1}` and gets
- *     `focus({ preventScroll: true })` on each switch (skipping
- *     the very first mount) so keyboard and screen-reader users
- *     get teleported into the new page in lockstep with the
- *     visual scroll snap. The outgoing layer carries `inert` so
- *     stray focus / pointer events on the dissolving page are
- *     swallowed.
+ * Fallback two-layer cross-fader for browsers without View Transitions.
+ * When the API is available, `ViewTransitionRouter` above is used instead.
  */
 function RouteCrossFader({ route }: { route: AppRoute }) {
   const [current, setCurrent] = useState<RouteSlot>(() => ({
