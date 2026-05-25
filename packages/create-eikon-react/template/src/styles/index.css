@@ -153,6 +153,34 @@
 /* Dark mode tokens are activated via the `.dark` class on <html>. */
 @variant dark (&:where(.dark, .dark *));
 
+/* ----------------------------------------------------------------------------
+ * Make Tailwind shadow utilities reactive to `.dark` overrides.
+ *
+ * Tailwind v4 inlines the @theme `--shadow-*` value into the generated
+ * `.shadow-sm/.shadow-md/.shadow-lg` utility classes at BUILD time:
+ *
+ *   .shadow-sm { --tw-shadow: <literal @theme value>; }
+ *
+ * That literal is the LIGHT-mode value, so any `.dark { --shadow-sm: ... }`
+ * override (we use those for material / skeuomorphism / neumorphism /
+ * glassmorphism / liquid-glass / claymorphism / aurora / neo-brutalism)
+ * silently fails for components that use the `shadow-sm` utility — only
+ * components that go through `[box-shadow:var(--shadow-sm)]` see the swap.
+ *
+ * Result without this rule: cards rendered in dark-mode neumorphism keep
+ * their light-mode dual shadow — `oklch(1 0 0 / 0.75)` on the top-left —
+ * which reads as an ugly bright halo against the dark background.
+ *
+ * The rules below re-point the utility's internal `--tw-shadow` variable
+ * at the live `var(--shadow-*)` cascade INSIDE `.dark`, so design presets
+ * that override `--shadow-*` for dark mode actually take effect on every
+ * `.shadow-*` consumer (Card, Button, etc.) without each component having
+ * to be rewritten with arbitrary-value syntax.
+ * --------------------------------------------------------------------------*/
+.dark .shadow-sm { --tw-shadow: var(--shadow-sm); }
+.dark .shadow-md { --tw-shadow: var(--shadow-md); }
+.dark .shadow-lg { --tw-shadow: var(--shadow-lg); }
+
 .dark {
   --color-background: oklch(0.16 0.01 260);
   --color-foreground: oklch(0.97 0 0);
@@ -1022,9 +1050,19 @@
   --surface-hover-shadow: 9px 9px 18px oklch(0.14 0.008 250 / 0.6), -9px -9px 18px oklch(0.38 0.008 250 / 0.2);
   --surface-active-shadow: inset 4px 4px 8px oklch(0.14 0.008 250 / 0.55), inset -4px -4px 8px oklch(0.38 0.008 250 / 0.12);
 
-  --shadow-sm: 3px 3px 7px oklch(0.14 0.008 250 / 0.55), -3px -3px 7px oklch(0.38 0.008 250 / 0.12);
-  --shadow-md: 5px 5px 12px oklch(0.14 0.008 250 / 0.6), -5px -5px 12px oklch(0.38 0.008 250 / 0.15);
-  --shadow-lg: 9px 9px 20px oklch(0.14 0.008 250 / 0.6), -9px -9px 20px oklch(0.38 0.008 250 / 0.18);
+  /* Resting shadows are tuned separately from the (motion-triggered)
+   * hover/active surface shadows above. On dark backgrounds the eye is
+   * highly sensitive to any colour brighter than the surface, so even a
+   * very-low-opacity top-left highlight reads as an ugly white halo
+   * around the card. We drop the highlight side entirely here and lean
+   * on a single, strong, slightly-spread dark drop shadow to carry the
+   * "extruded plastic" feel for the resting state. The hover/active
+   * shadows above still use the classic dual-light/dark pair because
+   * the brief motion-triggered halo reads as intentional feedback
+   * rather than visual noise. */
+  --shadow-sm: 3px 4px 10px 1px oklch(0.08 0.008 250 / 0.7);
+  --shadow-md: 5px 6px 14px 1px oklch(0.08 0.008 250 / 0.72);
+  --shadow-lg: 9px 10px 24px 2px oklch(0.08 0.008 250 / 0.72);
 
   --scrollbar-thumb: oklch(0.38 0.01 250);
   --scrollbar-thumb-hover: oklch(0.52 0.012 250);
