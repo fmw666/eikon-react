@@ -45,7 +45,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         whileHover={wantsHover ? { y: -2 } : undefined}
         transition={{ type: 'spring', stiffness: 300, damping: 24 }}
         className={cn(
-          'rounded-lg border-[length:var(--surface-border-width)] border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-card-foreground)] shadow-sm ring-[length:var(--surface-ring-width)] ring-[var(--surface-ring-color)] [backdrop-filter:var(--surface-backdrop)]',
+          'rounded-lg border-[length:var(--surface-border-width)] border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-card-foreground)] shadow-sm ring-[length:var(--surface-ring-width)] ring-[var(--surface-ring-color)] [backdrop-filter:var(--surface-backdrop)] transition-shadow duration-200',
+          hoverable &&
+            'hover:[box-shadow:var(--surface-hover-shadow)] active:[box-shadow:var(--surface-active-shadow)]',
           className
         )}
         {...props}
