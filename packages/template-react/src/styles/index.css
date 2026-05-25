@@ -1018,13 +1018,13 @@
   --color-destructive-foreground: oklch(0.98 0 0);
   --color-ring: oklch(0.68 0.12 250);
 
-  --surface-inset-shadow: inset 2px 2px 5px oklch(0.1 0.005 250 / 0.65), inset -2px -2px 5px oklch(0.28 0.006 250 / 0.18);
+  --surface-inset-shadow: inset 2px 2px 5px oklch(0.1 0.005 250 / 0.65), inset -2px -2px 5px oklch(0.26 0.005 250 / 0.08);
   --surface-hover-shadow: 8px 8px 20px oklch(0.1 0.005 250 / 0.65), -8px -8px 20px oklch(0.28 0.006 250 / 0.18);
-  --surface-active-shadow: inset 4px 4px 10px oklch(0.1 0.005 250 / 0.6), inset -4px -4px 10px oklch(0.28 0.006 250 / 0.15);
+  --surface-active-shadow: inset 4px 4px 10px oklch(0.1 0.005 250 / 0.6), inset -4px -4px 10px oklch(0.26 0.005 250 / 0.08);
 
-  --shadow-sm: 3px 3px 8px oklch(0.1 0.005 250 / 0.6), -3px -3px 8px oklch(0.28 0.006 250 / 0.15);
-  --shadow-md: 5px 5px 14px oklch(0.1 0.005 250 / 0.65), -5px -5px 14px oklch(0.28 0.006 250 / 0.18);
-  --shadow-lg: 10px 10px 24px oklch(0.1 0.005 250 / 0.65), -10px -10px 24px oklch(0.28 0.006 250 / 0.2);
+  --shadow-sm: 3px 3px 8px oklch(0.1 0.005 250 / 0.6), -3px -3px 8px oklch(0.26 0.005 250 / 0.06);
+  --shadow-md: 5px 5px 14px oklch(0.1 0.005 250 / 0.65), -5px -5px 14px oklch(0.26 0.005 250 / 0.08);
+  --shadow-lg: 10px 10px 24px oklch(0.1 0.005 250 / 0.65), -10px -10px 24px oklch(0.26 0.005 250 / 0.1);
 
   --scrollbar-thumb: oklch(0.32 0.008 250);
   --scrollbar-thumb-hover: oklch(0.48 0.01 250);
