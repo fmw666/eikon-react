@@ -763,8 +763,8 @@
   --color-primary-foreground: oklch(1 0 0);
   --color-secondary: oklch(0.92 0.01 220);
   --color-secondary-foreground: oklch(0.13 0 0);
-  --color-accent: oklch(0.65 0.2 145);
-  --color-accent-foreground: oklch(1 0 0);
+  --color-accent: oklch(0.92 0.04 145);
+  --color-accent-foreground: oklch(0.13 0 0);
   --color-destructive: oklch(0.55 0.22 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.55 0.22 230);
@@ -803,8 +803,8 @@
   --color-primary-foreground: oklch(0.13 0.005 220);
   --color-secondary: oklch(0.22 0.005 220);
   --color-secondary-foreground: oklch(0.97 0 0);
-  --color-accent: oklch(0.72 0.18 145);
-  --color-accent-foreground: oklch(0.13 0.005 220);
+  --color-accent: oklch(0.28 0.045 145);
+  --color-accent-foreground: oklch(0.97 0 0);
   --color-destructive: oklch(0.6 0.2 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.68 0.2 230);
@@ -832,8 +832,8 @@
   --color-primary-foreground: oklch(1 0 0);
   --color-secondary: oklch(0.93 0.015 270);
   --color-secondary-foreground: oklch(0.18 0.015 270);
-  --color-accent: oklch(0.55 0.18 330);
-  --color-accent-foreground: oklch(1 0 0);
+  --color-accent: oklch(0.92 0.04 330);
+  --color-accent-foreground: oklch(0.18 0.015 270);
   --color-destructive: oklch(0.55 0.22 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.5 0.22 270);
@@ -874,8 +874,8 @@
   --color-primary-foreground: oklch(0.15 0.01 270);
   --color-secondary: oklch(0.25 0.01 270);
   --color-secondary-foreground: oklch(0.95 0.005 270);
-  --color-accent: oklch(0.7 0.16 330);
-  --color-accent-foreground: oklch(0.15 0.01 270);
+  --color-accent: oklch(0.28 0.045 330);
+  --color-accent-foreground: oklch(0.95 0.005 270);
   --color-destructive: oklch(0.65 0.2 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.72 0.2 270);
@@ -910,8 +910,8 @@
   --color-primary-foreground: oklch(0.98 0.005 50);
   --color-secondary: oklch(0.88 0.02 55);
   --color-secondary-foreground: oklch(0.2 0.015 50);
-  --color-accent: oklch(0.6 0.14 30);
-  --color-accent-foreground: oklch(0.98 0.005 30);
+  --color-accent: oklch(0.92 0.035 30);
+  --color-accent-foreground: oklch(0.2 0.015 50);
   --color-destructive: oklch(0.5 0.2 20);
   --color-destructive-foreground: oklch(0.98 0 0);
   --color-ring: oklch(0.5 0.12 50);
@@ -960,8 +960,8 @@
   --color-primary-foreground: oklch(0.16 0.01 50);
   --color-secondary: oklch(0.26 0.01 50);
   --color-secondary-foreground: oklch(0.94 0.005 55);
-  --color-accent: oklch(0.65 0.12 30);
-  --color-accent-foreground: oklch(0.16 0.01 50);
+  --color-accent: oklch(0.28 0.04 30);
+  --color-accent-foreground: oklch(0.94 0.005 55);
   --color-destructive: oklch(0.6 0.18 20);
   --color-destructive-foreground: oklch(0.98 0 0);
   --color-ring: oklch(0.65 0.12 50);
@@ -1087,8 +1087,8 @@
   --color-primary-foreground: oklch(1 0 0);
   --color-secondary: oklch(0.94 0.012 290 / 0.4);
   --color-secondary-foreground: oklch(0.18 0.015 290);
-  --color-accent: oklch(0.6 0.2 340);
-  --color-accent-foreground: oklch(1 0 0);
+  --color-accent: oklch(0.92 0.04 340 / 0.55);
+  --color-accent-foreground: oklch(0.18 0.015 290);
   --color-destructive: oklch(0.55 0.22 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.52 0.22 290);
@@ -1127,8 +1127,8 @@
   --color-primary-foreground: oklch(0.12 0.015 290);
   --color-secondary: oklch(0.22 0.012 290 / 0.4);
   --color-secondary-foreground: oklch(0.96 0.005 290);
-  --color-accent: oklch(0.7 0.18 340);
-  --color-accent-foreground: oklch(0.12 0.015 290);
+  --color-accent: oklch(0.27 0.045 340 / 0.55);
+  --color-accent-foreground: oklch(0.96 0.005 290);
   --color-destructive: oklch(0.65 0.2 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.72 0.2 290);
@@ -1164,8 +1164,8 @@
   --color-primary-foreground: oklch(1 0 0);
   --color-secondary: oklch(0.95 0.005 240 / 0.45);
   --color-secondary-foreground: oklch(0.18 0.01 240);
-  --color-accent: oklch(0.6 0.18 200);
-  --color-accent-foreground: oklch(1 0 0);
+  --color-accent: oklch(0.92 0.035 200 / 0.55);
+  --color-accent-foreground: oklch(0.18 0.01 240);
   --color-destructive: oklch(0.55 0.22 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.55 0.2 240);
@@ -1213,8 +1213,8 @@
   --color-primary-foreground: oklch(0.1 0.008 240);
   --color-secondary: oklch(0.2 0.008 240 / 0.4);
   --color-secondary-foreground: oklch(0.96 0.005 240);
-  --color-accent: oklch(0.7 0.16 200);
-  --color-accent-foreground: oklch(0.1 0.008 240);
+  --color-accent: oklch(0.27 0.04 200 / 0.55);
+  --color-accent-foreground: oklch(0.96 0.005 240);
   --color-destructive: oklch(0.65 0.2 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.72 0.18 240);
@@ -1251,8 +1251,8 @@
   --color-primary-foreground: oklch(1 0 0);
   --color-secondary: oklch(0.93 0.015 350);
   --color-secondary-foreground: oklch(0.22 0.012 350);
-  --color-accent: oklch(0.65 0.18 280);
-  --color-accent-foreground: oklch(1 0 0);
+  --color-accent: oklch(0.92 0.04 280);
+  --color-accent-foreground: oklch(0.22 0.012 350);
   --color-destructive: oklch(0.55 0.2 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.62 0.2 350);
@@ -1295,8 +1295,8 @@
   --color-primary-foreground: oklch(0.16 0.01 350);
   --color-secondary: oklch(0.26 0.012 350);
   --color-secondary-foreground: oklch(0.95 0.005 350);
-  --color-accent: oklch(0.7 0.16 280);
-  --color-accent-foreground: oklch(0.16 0.01 350);
+  --color-accent: oklch(0.28 0.045 280);
+  --color-accent-foreground: oklch(0.95 0.005 350);
   --color-destructive: oklch(0.6 0.18 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.72 0.18 350);
@@ -1332,8 +1332,15 @@
   --color-primary-foreground: oklch(1 0 0);
   --color-secondary: oklch(0.93 0.015 170);
   --color-secondary-foreground: oklch(0.18 0.015 170);
-  --color-accent: oklch(0.65 0.2 310);
-  --color-accent-foreground: oklch(1 0 0);
+  /* Accent is consumed by shadcn convention as the hover/highlighted-row
+   * tint (TaskCard hover, Command selected row, MobileDrawer nav-item
+   * hover) — so it must be a soft *tint*, not a vivid fill. We keep the
+   * magenta hue 310 so the cool turquoise surface picks up just a whisper
+   * of the dual-hue aurora warmth on hover; the actual vivid magenta
+   * "flare" lives in --surface-hover-shadow / --shadow-* below, which is
+   * where the design-language statement actually belongs. */
+  --color-accent: oklch(0.93 0.03 310);
+  --color-accent-foreground: oklch(0.18 0.015 170);
   --color-destructive: oklch(0.55 0.22 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.6 0.22 170);
@@ -1372,8 +1379,8 @@
   --color-primary-foreground: oklch(0.12 0.012 170);
   --color-secondary: oklch(0.2 0.012 170);
   --color-secondary-foreground: oklch(0.95 0.005 170);
-  --color-accent: oklch(0.72 0.18 310);
-  --color-accent-foreground: oklch(0.12 0.012 170);
+  --color-accent: oklch(0.28 0.045 310);
+  --color-accent-foreground: oklch(0.95 0.005 170);
   --color-destructive: oklch(0.65 0.2 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.72 0.2 170);
@@ -1410,7 +1417,16 @@
   --color-primary-foreground: oklch(0.1 0 0);
   --color-secondary: oklch(0.78 0.2 155);
   --color-secondary-foreground: oklch(0.1 0 0);
-  --color-accent: oklch(0.72 0.22 25);
+  /* Accent is the shadcn hover/highlighted-row tint (TaskCard, Command,
+   * MobileDrawer). Brutalism's design comment names "hot coral accent" as
+   * the third member of the clashing-fills trio, but in practice no button
+   * / badge / fill surface consumes accent — it's only ever the hover bg.
+   * A full-saturation coral floods the whole card on hover and reads as a
+   * red panic-state, which clashes with the intent (hover = "I'm hovered",
+   * not "danger"). The brutalist drama still comes through via the 3px→7px
+   * hard black shadow pop on hover (--surface-hover-shadow); we just keep
+   * the coral *hue* as a whisper-tint behind it. */
+  --color-accent: oklch(0.92 0.045 25);
   --color-accent-foreground: oklch(0.1 0 0);
   --color-destructive: oklch(0.6 0.25 25);
   --color-destructive-foreground: oklch(1 0 0);
@@ -1465,8 +1481,8 @@
   --color-primary-foreground: oklch(0.1 0 0);
   --color-secondary: oklch(0.75 0.2 155);
   --color-secondary-foreground: oklch(0.1 0 0);
-  --color-accent: oklch(0.72 0.22 25);
-  --color-accent-foreground: oklch(0.1 0 0);
+  --color-accent: oklch(0.27 0.05 25);
+  --color-accent-foreground: oklch(0.97 0.03 90);
   --color-destructive: oklch(0.6 0.25 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.97 0.03 90);
