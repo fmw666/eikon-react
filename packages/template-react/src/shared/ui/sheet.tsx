@@ -174,14 +174,14 @@ function panelClass(side: SheetSide): string {
     case 'left':
       return cn(
         base,
-        'inset-y-0 left-0 h-full w-[80vw] max-w-xs',
+        'inset-y-0 left-0 h-full w-[86vw] max-w-[20rem]',
         'border-r-[length:var(--surface-border-width)] border-[var(--color-border)]',
         'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]'
       );
     case 'right':
       return cn(
         base,
-        'inset-y-0 right-0 h-full w-[80vw] max-w-xs',
+        'inset-y-0 right-0 h-full w-[86vw] max-w-[20rem]',
         'border-l-[length:var(--surface-border-width)] border-[var(--color-border)]',
         'pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pr-[env(safe-area-inset-right)]'
       );
@@ -296,7 +296,7 @@ function SheetContent({
               )}
               {children}
               <DialogPrimitive.Close
-                className="absolute right-3 top-3 rounded-md p-1 opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
+                className="absolute right-3 top-3.5 inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--color-muted-foreground)] opacity-70 transition-[opacity,background-color,color] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)] hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
                 aria-label="Close"
               >
                 <X className="h-4 w-4" />
@@ -320,7 +320,7 @@ function SheetHeader({
   return (
     <div
       className={cn(
-        'flex flex-col gap-1.5 border-b border-[var(--color-border)] px-5 py-4',
+        'flex flex-col gap-2 border-b border-[var(--color-border)] px-5 py-6 pr-16',
         className
       )}
       {...props}
@@ -334,7 +334,7 @@ function SheetBody({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('flex-1 overflow-y-auto px-3 py-3', className)}
+      className={cn('flex-1 overflow-y-auto px-3 py-5', className)}
       {...props}
     />
   );
@@ -361,7 +361,7 @@ const SheetTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn('text-base font-semibold tracking-tight', className)}
+    className={cn('text-xl font-semibold tracking-tight', className)}
     {...props}
   />
 ));

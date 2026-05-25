@@ -36,7 +36,14 @@ import { useTranslation } from 'react-i18next';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
 // --- Third-party Libraries ---
-import { Menu } from 'lucide-react';
+import {
+  CheckSquare,
+  Home,
+  type LucideIcon,
+  Menu,
+  Plus,
+  Sparkles,
+} from 'lucide-react';
 
 // --- Absolute Imports ---
 import { SignInButton } from '@/features/auth';
@@ -46,6 +53,7 @@ import {
   SheetBody,
   SheetClose,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -64,6 +72,7 @@ interface NavLinkSpec {
   /** i18n key for the label. Falls back to literal English when i18n is stripped. */
   key: string;
   fallback: string;
+  icon: LucideIcon;
   end?: boolean;
 }
 
@@ -72,16 +81,23 @@ interface NavLinkSpec {
 // =================================================================================================
 
 const navLinks: NavLinkSpec[] = [
-  { to: '/', key: 'nav.home', fallback: 'Home', end: true },
-  { to: '/counter', key: 'nav.counter', fallback: 'Counter' },
-  { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks' },
+  { to: '/', key: 'nav.home', fallback: 'Home', icon: Home, end: true },
+  { to: '/counter', key: 'nav.counter', fallback: 'Counter', icon: Plus },
+  { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks', icon: CheckSquare },
   // @eikon:feature(examples) begin
   // Examples is a DEV-ONLY showcase. The route only registers when
   // `import.meta.env.DEV` is true (see app/router.tsx); the CLI strips
   // this entry from scaffolded projects so end users never see a
   // broken link in their drawer.
   ...(import.meta.env.DEV
-    ? [{ to: '/examples', key: 'nav.examples', fallback: 'Examples' }]
+    ? [
+        {
+          to: '/examples',
+          key: 'nav.examples',
+          fallback: 'Examples',
+          icon: Sparkles,
+        },
+      ]
     : []),
   // @eikon:feature(examples) end
 ];
@@ -133,35 +149,82 @@ function MobileDrawerRootLayout() {
             >
               <Menu className="h-5 w-5" />
             </SheetTrigger>
-            <SheetContent
-              description={t('nav.menuDescription', {
-                defaultValue: 'Primary navigation for the application',
-              })}
-            >
+            <SheetContent>
               <SheetHeader>
-                <SheetTitle>Eikon App</SheetTitle>
+                <div className="flex items-center gap-3">
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      'grid h-9 w-9 shrink-0 place-items-center rounded-xl text-sm font-bold tracking-tight',
+                      'bg-[var(--color-primary)] text-[var(--color-primary-foreground)]',
+                      'shadow-[0_4px_14px_-4px_var(--color-primary)]'
+                    )}
+                  >
+                    E
+                  </span>
+                  <SheetTitle>Eikon App</SheetTitle>
+                </div>
+                <SheetDescription className="text-[0.8125rem] leading-relaxed">
+                  {t('nav.menuDescription', {
+                    defaultValue: 'Jump to any section of the app.',
+                  })}
+                </SheetDescription>
               </SheetHeader>
               <SheetBody>
+                <p
+                  className={cn(
+                    'px-2 pb-3 text-[0.6875rem] font-semibold uppercase tracking-[0.14em]',
+                    'text-[var(--color-muted-foreground)]/80'
+                  )}
+                >
+                  {t('nav.sectionLabel', { defaultValue: 'Navigation' })}
+                </p>
                 <nav className="flex flex-col gap-1">
-                  {navLinks.map((link) => (
-                    <SheetClose key={link.to} asChild>
-                      <NavLink
-                        to={link.to}
-                        end={link.end}
-                        className={({ isActive }) =>
-                          cn(
-                            'flex items-center rounded-md px-3 text-sm transition-colors',
-                            'min-h-[var(--touch-target-min,44px)]',
-                            'text-[var(--color-muted-foreground)] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)]',
-                            isActive &&
-                              'bg-[var(--color-primary)]/12 text-[var(--color-primary)]'
-                          )
-                        }
-                      >
-                        {t(link.key, { defaultValue: link.fallback })}
-                      </NavLink>
-                    </SheetClose>
-                  ))}
+                  {navLinks.map((link) => {
+                    const Icon = link.icon;
+                    return (
+                      <SheetClose key={link.to} asChild>
+                        <NavLink
+                          to={link.to}
+                          end={link.end}
+                          className={({ isActive }) =>
+                            cn(
+                              'group flex items-center gap-3 rounded-xl px-2 py-2 text-[0.9375rem] transition-colors',
+                              isActive
+                                ? 'bg-[var(--color-accent)]/60'
+                                : 'hover:bg-[var(--color-accent)]/40'
+                            )
+                          }
+                        >
+                          {({ isActive }) => (
+                            <>
+                              <span
+                                aria-hidden="true"
+                                className={cn(
+                                  'grid h-9 w-9 shrink-0 place-items-center rounded-lg transition-colors',
+                                  isActive
+                                    ? 'bg-[var(--color-primary)]/15 text-[var(--color-primary)]'
+                                    : 'bg-[var(--color-muted)]/70 text-[var(--color-muted-foreground)] group-hover:bg-[var(--color-muted)] group-hover:text-[var(--color-foreground)]'
+                                )}
+                              >
+                                <Icon className="h-[18px] w-[18px]" />
+                              </span>
+                              <span
+                                className={cn(
+                                  'truncate transition-colors',
+                                  isActive
+                                    ? 'font-semibold text-[var(--color-foreground)]'
+                                    : 'font-medium text-[var(--color-foreground)]/85 group-hover:text-[var(--color-foreground)]'
+                                )}
+                              >
+                                {t(link.key, { defaultValue: link.fallback })}
+                              </span>
+                            </>
+                          )}
+                        </NavLink>
+                      </SheetClose>
+                    );
+                  })}
                 </nav>
               </SheetBody>
             </SheetContent>
