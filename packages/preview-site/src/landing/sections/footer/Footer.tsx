@@ -83,6 +83,7 @@ export function Footer() {
   const containerRef = useRef<HTMLElement | null>(null);
   const spotlightRef = useRef<HTMLDivElement | null>(null);
   const [footerLit, setFooterLit] = useState(false);
+  const [gyroActive, setGyroActive] = useState(false);
   const handleLitChange = useCallback((lit: boolean) => setFooterLit(lit), []);
   // Brand wordmark derived from site config: split on the hyphen so
   // forks that rename the project (e.g. "Acme · Stack") still get
@@ -198,6 +199,125 @@ export function Footer() {
       window.removeEventListener('resize', updateRects);
       if (rafId) cancelAnimationFrame(rafId);
       if (scrollRafId) cancelAnimationFrame(scrollRafId);
+    };
+  }, []);
+
+  // Gyroscope-driven spotlight for mobile (touch) devices.
+  // Maps device tilt to spotlight position, giving the same flashlight
+  // reveal as the desktop pointer-follow but driven by physical motion.
+  useEffect(() => {
+    const el = containerRef.current;
+    const spot = spotlightRef.current;
+    if (!el || !spot) return;
+    if (
+      typeof window === 'undefined' ||
+      typeof window.matchMedia !== 'function' ||
+      window.matchMedia('(pointer: fine)').matches
+    ) {
+      return;
+    }
+
+    const SPOT_HALF = 360;
+    let rafId = 0;
+    let smoothX = 0.5;
+    let smoothY = 0.5;
+    let targetX = 0.5;
+    let targetY = 0.5;
+    let listening = false;
+    let animating = false;
+
+    const clamp = (v: number, min: number, max: number) =>
+      Math.max(min, Math.min(max, v));
+
+    const startListening = () => {
+      if (listening) return;
+      listening = true;
+      el.classList.add('eikon-footer-gyro');
+      setGyroActive(true);
+      window.addEventListener('deviceorientation', handleOrientation);
+      tick();
+    };
+
+    const handleOrientation = (e: DeviceOrientationEvent) => {
+      const gamma = e.gamma ?? 0;
+      const beta = e.beta ?? 55;
+      targetX = clamp((gamma + 25) / 50, 0, 1);
+      targetY = clamp((beta - 40) / 30, 0, 1);
+    };
+
+    const tick = () => {
+      if (!listening) return;
+      animating = true;
+      rafId = requestAnimationFrame(() => {
+        smoothX += (targetX - smoothX) * 0.12;
+        smoothY += (targetY - smoothY) * 0.12;
+
+        const rect = el.getBoundingClientRect();
+        const localX = smoothX * rect.width;
+        const localY = smoothY * rect.height;
+        spot.style.transform = `translate3d(${localX - SPOT_HALF}px,${localY - SPOT_HALF}px,0)`;
+
+        const meadowEl = meadowRef.current;
+        if (meadowEl) {
+          const meadowRect = meadowEl.getBoundingClientRect();
+          const mx = smoothX * meadowRect.width;
+          const my = smoothY * meadowRect.height;
+          meadowEl.style.setProperty('--eikon-meadow-mx', `${mx}px`);
+          meadowEl.style.setProperty('--eikon-meadow-my', `${my}px`);
+        }
+
+        tick();
+      });
+    };
+
+    // iOS 13+ requires permission from a user gesture
+    const needsPermission =
+      typeof (DeviceOrientationEvent as any).requestPermission === 'function';
+
+    if (needsPermission) {
+      const handleTap = () => {
+        (DeviceOrientationEvent as any)
+          .requestPermission()
+          .then((state: string) => {
+            if (state === 'granted') startListening();
+          })
+          .catch(() => {});
+        el.removeEventListener('touchstart', handleTap);
+      };
+      el.addEventListener('touchstart', handleTap, { once: true });
+    } else {
+      // Android / other — check if events actually fire
+      const probe = (e: DeviceOrientationEvent) => {
+        if (e.gamma !== null) {
+          window.removeEventListener('deviceorientation', probe);
+          startListening();
+        }
+      };
+      window.addEventListener('deviceorientation', probe);
+    }
+
+    // Only activate animation when footer is in viewport (battery)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting && listening) {
+          listening = false;
+          window.removeEventListener('deviceorientation', handleOrientation);
+        } else if (entry.isIntersecting && !listening && animating) {
+          listening = true;
+          window.addEventListener('deviceorientation', handleOrientation);
+          tick();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+
+    return () => {
+      listening = false;
+      window.removeEventListener('deviceorientation', handleOrientation);
+      if (rafId) cancelAnimationFrame(rafId);
+      observer.disconnect();
+      el.classList.remove('eikon-footer-gyro');
     };
   }, []);
 
@@ -366,6 +486,12 @@ export function Footer() {
               </div>
               <Meadow ref={meadowRef} onLitChange={handleLitChange} />
             </div>
+            {/* Mobile tilt hint — shown only on touch, fades out once gyro activates */}
+            {!gyroActive && (
+              <p className="eikon-footer-tilt-hint">
+                {t('footer.tiltHint')}
+              </p>
+            )}
           </div>
         )}
 
