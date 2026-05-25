@@ -277,35 +277,12 @@
 .eikon-footer-meadow {
   position: absolute;
   inset-inline: 0;
-
-  /* Height is an explicit vw clamp mirroring the wordmark’s
-     `clamp(2.5rem, 14vw, 11rem)` sizing — NOT an em unit. The
-     naive `em` approach silently failed because `em` resolves
-     against the meadow’s *own* font-size (inherited from `body`,
-     ~16px), not the wordmark’s font-size, so the meadow ended
-     up only ~8px tall and clipped the flower out of existence
-     via `mask-clip: border-box`.
-
-     `bottom: 0` parks the meadow’s lower edge flush with the
-     wordmark wrapper’s lower edge (which, with the wordmark’s
-     `line-height: 0.85`, sits at ≈ the cap-line of EIKON ·
-     REACT). The meadow grows entirely UPWARD from that line:
-     soil + grass roots ride exactly on the brand text’s
-     baseline, and the tallest front-row blades reach into the
-     lower ~half of the letters. Result: the wordmark reads as
-     literally growing out of the lawn rather than hovering
-     above a decorative strip beneath it. */
   height: clamp(60px, 6.5vw, 90px);
   bottom: -12px;
-
   pointer-events: none;
   z-index: 1;
+  contain: content;
 
-  /* Default keeps the mask centre far off-canvas so nothing shows
-     before the first pointermove arrives. The pointermove handler
-     swaps in real pixel coordinates relative to this element. The
-     value is inherited by every child layer, so a single update
-     drives the shade / light / flower masks together. */
   --eikon-meadow-mx: -9999px;
   --eikon-meadow-my: -9999px;
 
@@ -328,6 +305,7 @@
 .eikon-footer-meadow__flower {
   position: absolute;
   inset: 0;
+  transform: translateZ(0);
 }
 
 /* Outer halo — wide soft reveal of the *dim* grass copy.

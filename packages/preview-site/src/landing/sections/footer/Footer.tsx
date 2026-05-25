@@ -81,6 +81,7 @@ import { Meadow } from './Meadow';
 export function Footer() {
   const { t } = useI18n();
   const containerRef = useRef<HTMLElement | null>(null);
+  const spotlightRef = useRef<HTMLDivElement | null>(null);
   const [footerLit, setFooterLit] = useState(false);
   const handleLitChange = useCallback((lit: boolean) => setFooterLit(lit), []);
   // Brand wordmark derived from site config: split on the hyphen so
@@ -98,25 +99,20 @@ export function Footer() {
   // meadow-local pixel coordinates into a second pair of CSS vars.
   const meadowRef = useRef<HTMLDivElement | null>(null);
 
-  // Mouse-follow spotlight — write cursor coordinates into CSS custom
-  // properties on the host so the radial-gradient background tracks
-  // the pointer without React re-renders. Cheap (composite-only).
+  // Mouse-follow spotlight — GPU composite-only via transform.
   //
-  // Gated on `pointer: fine` because the spotlight is a hover-only
-  // affordance: on a touch device the only way to fire `pointermove`
-  // is to drag a finger across the footer, which leaves the glow
-  // stuck wherever the finger left off — a stale "hot spot" that
-  // visitors read as a render bug.
+  // The spotlight is a fixed-size div with a static radial gradient
+  // centred on itself. We move it with translate3d so the browser
+  // only composites (no gradient recalculation, no repaint).
   //
-  // The same handler doubles as the driver for the meadow easter egg:
-  // the grass / flower layer reveals only inside the spotlight's
-  // radius, so we feed it meadow-local pixel coordinates here. On
-  // pointerleave we shove the meadow's mask centre far off-canvas
-  // so the grass collapses back to fully hidden — otherwise the
-  // last cursor position would linger as a stale patch of grass.
+  // Gated on `pointer: fine` — touch devices skip the effect entirely.
+  //
+  // The same handler drives the meadow easter-egg masks via CSS vars
+  // on the meadow element (small area, acceptable repaint cost).
   useEffect(() => {
     const el = containerRef.current;
-    if (!el) return;
+    const spot = spotlightRef.current;
+    if (!el || !spot) return;
     if (
       typeof window === 'undefined' ||
       typeof window.matchMedia !== 'function' ||
@@ -127,8 +123,11 @@ export function Footer() {
     let rect: DOMRect | null = null;
     let meadowRect: DOMRect | null = null;
     let rafId = 0;
+    let scrollRafId = 0;
     let lastX = 0;
     let lastY = 0;
+
+    const SPOT_HALF = 360;
 
     const updateRects = () => {
       rect = el.getBoundingClientRect();
@@ -136,6 +135,7 @@ export function Footer() {
       if (meadowEl) meadowRect = meadowEl.getBoundingClientRect();
     };
     updateRects();
+    spot.style.transform = `translate3d(${(rect!.width / 2) - SPOT_HALF}px,${(rect!.height / 2) - SPOT_HALF}px,0)`;
 
     const handleMove = (e: PointerEvent) => {
       lastX = e.clientX;
@@ -144,10 +144,9 @@ export function Footer() {
       rafId = requestAnimationFrame(() => {
         rafId = 0;
         if (!rect) return;
-        const x = ((lastX - rect.left) / rect.width) * 100;
-        const y = ((lastY - rect.top) / rect.height) * 100;
-        el.style.setProperty('--eikon-footer-mx', `${x}%`);
-        el.style.setProperty('--eikon-footer-my', `${y}%`);
+        const localX = lastX - rect.left;
+        const localY = lastY - rect.top;
+        spot.style.transform = `translate3d(${localX - SPOT_HALF}px,${localY - SPOT_HALF}px,0)`;
 
         if (meadowRect) {
           const meadowEl = meadowRef.current;
@@ -165,8 +164,8 @@ export function Footer() {
       });
     };
     const handleLeave = () => {
-      el.style.setProperty('--eikon-footer-mx', '50%');
-      el.style.setProperty('--eikon-footer-my', '50%');
+      if (!rect) return;
+      spot.style.transform = `translate3d(${rect.width / 2 - SPOT_HALF}px,${rect.height / 2 - SPOT_HALF}px,0)`;
       const meadowEl = meadowRef.current;
       if (meadowEl) {
         meadowEl.style.setProperty('--eikon-meadow-mx', '-9999px');
@@ -174,18 +173,31 @@ export function Footer() {
       }
     };
 
-    const handleScroll = () => updateRects();
+    const handleEnter = () => {
+      updateRects();
+    };
+
+    const handleScroll = () => {
+      if (scrollRafId) return;
+      scrollRafId = requestAnimationFrame(() => {
+        scrollRafId = 0;
+        updateRects();
+      });
+    };
 
     el.addEventListener('pointermove', handleMove);
+    el.addEventListener('pointerenter', handleEnter);
     el.addEventListener('pointerleave', handleLeave);
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', updateRects);
     return () => {
       el.removeEventListener('pointermove', handleMove);
+      el.removeEventListener('pointerenter', handleEnter);
       el.removeEventListener('pointerleave', handleLeave);
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', updateRects);
       if (rafId) cancelAnimationFrame(rafId);
+      if (scrollRafId) cancelAnimationFrame(scrollRafId);
     };
   }, []);
 
@@ -211,8 +223,6 @@ export function Footer() {
       className={`group/footer relative isolate mt-16 overflow-hidden bg-[var(--surface-1)]${footerLit ? ' eikon-footer-lit' : ''}`}
       style={
         {
-          '--eikon-footer-mx': '50%',
-          '--eikon-footer-my': '50%',
           contentVisibility: 'auto',
           containIntrinsicSize: 'auto 500px',
         } as CSSProperties
@@ -247,14 +257,22 @@ export function Footer() {
               'radial-gradient(ellipse 55% 70% at 50% 85%, black 25%, transparent 80%)',
           }}
         />
-        {/* Cursor-follow spotlight. Pure background-image, no extra
-            paint cost — the radial-gradient origin is driven by CSS
-            custom properties updated in the pointermove handler. */}
+        {/* Cursor-follow spotlight — a fixed-size element moved with
+            transform (GPU composite-only, zero repaint). */}
         <div
-          className="absolute inset-0"
+          ref={spotlightRef}
+          className="eikon-footer-spotlight"
           style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: 720,
+            height: 720,
+            borderRadius: '50%',
             background:
-              'radial-gradient(circle 360px at var(--eikon-footer-mx) var(--eikon-footer-my), var(--accent-glow), transparent 70%)',
+              'radial-gradient(circle 360px, var(--accent-glow), transparent 70%)',
+            willChange: 'transform',
+            pointerEvents: 'none',
           }}
         />
       </div>
