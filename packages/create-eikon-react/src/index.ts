@@ -55,7 +55,6 @@ const VARIANT_CHOICES = {
     'material',
     'skeuomorphism',
     'neumorphism',
-    'glassmorphism',
     'liquid-glass',
     'claymorphism',
     'aurora',

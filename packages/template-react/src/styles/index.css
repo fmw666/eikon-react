@@ -1,34 +1,34 @@
-@import 'tailwindcss';
+﻿@import 'tailwindcss';
 
 /* ----------------------------------------------------------------------------
  * Theme tokens (Tailwind v4 CSS-first config).
  *
  * Token namespaces consumed by Tailwind v4 utilities:
- *   --color-*         → bg-*, text-*, border-* utilities (palette below)
- *   --radius-*        → rounded-* utilities
- *   --font-*          → font-sans / font-serif / font-mono utilities
- *   --font-weight-*   → font-normal / font-medium / font-semibold / font-bold
- *   --text-*          → text-xs / text-sm / text-base / text-lg / ... (font-size)
- *   --text-*--line-height → paired line-height for each text-* utility
- *   --leading-*       → leading-tight / leading-normal / leading-relaxed
- *   --tracking-*      → tracking-tight / tracking-normal / tracking-wide
- *   --spacing         → base step for ALL p-N / m-N / gap-N / size-* utilities
- *   --shadow-*        → shadow-sm / shadow-md / shadow-lg
+ *   --color-*         â†’ bg-*, text-*, border-* utilities (palette below)
+ *   --radius-*        â†’ rounded-* utilities
+ *   --font-*          â†’ font-sans / font-serif / font-mono utilities
+ *   --font-weight-*   â†’ font-normal / font-medium / font-semibold / font-bold
+ *   --text-*          â†’ text-xs / text-sm / text-base / text-lg / ... (font-size)
+ *   --text-*--line-height â†’ paired line-height for each text-* utility
+ *   --leading-*       â†’ leading-tight / leading-normal / leading-relaxed
+ *   --tracking-*      â†’ tracking-tight / tracking-normal / tracking-wide
+ *   --spacing         â†’ base step for ALL p-N / m-N / gap-N / size-* utilities
+ *   --shadow-*        â†’ shadow-sm / shadow-md / shadow-lg
  *
- * Non-utility tokens (consumed directly via `var(--…)` in @layer base):
- *   --scrollbar-*     → drives the global `::-webkit-scrollbar` + Firefox
+ * Non-utility tokens (consumed directly via `var(--â€¦)` in @layer base):
+ *   --scrollbar-*     â†’ drives the global `::-webkit-scrollbar` + Firefox
  *                       `scrollbar-color` rules in @layer base. Each
- *                       design preset rebinds these to match its brand —
+ *                       design preset rebinds these to match its brand â€”
  *                       `apple` gets a soft cool-gray tube; `vercel` gets
  *                       a near-square monochrome bar; `linear` gets a
  *                       narrow architectural thumb; etc. NOT a Tailwind
- *                       namespace — no utilities are generated — but
+ *                       namespace â€” no utilities are generated â€” but
  *                       lives in @theme so presets can override it in
  *                       lock-step with the palette / typography tokens.
  *
  * Strategy: the base @theme below stays minimal (colour palette + radii +
  * font-sans). Each design preset further down then overrides typography,
- * density, and shadow tokens to express its design language — e.g. `apple`
+ * density, and shadow tokens to express its design language â€” e.g. `apple`
  * widens spacing and uses SF Pro at 17px; `vercel` tightens spacing and
  * drops base font-size to 14px; `anthropic` increases line-height for
  * editorial readability. Tokens not overridden by a preset fall back to
@@ -73,10 +73,10 @@
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
     'Courier New', monospace;
 
-  /* Surface treatment (not a Tailwind namespace — consumed directly by
+  /* Surface treatment (not a Tailwind namespace â€” consumed directly by
    * components via var()). Each design preset overrides these to express
    * its morphism character: neumorphism zeroes the border + uses inset
-   * shadow, glassmorphism adds backdrop-blur, neo-brutalism thickens the
+   * shadow, liquid-glass adds backdrop-blur, neo-brutalism thickens the
    * border to 3px, etc. */
   --surface-border-width: 1px;
   --surface-backdrop: none;
@@ -86,7 +86,7 @@
   --surface-hover-shadow: 0 4px 12px -2px oklch(0 0 0 / 0.1);
   --surface-active-shadow: 0 1px 2px oklch(0 0 0 / 0.08);
 
-  /* Scrollbar (not a Tailwind namespace — see header comment). The
+  /* Scrollbar (not a Tailwind namespace â€” see header comment). The
    * `border` trick on the thumb creates a faux padding inside the track:
    * the border is painted in the (usually transparent) track colour via
    * `background-clip: padding-box`, so the visible thumb reads narrower
@@ -102,7 +102,7 @@
   /* @eikon:variant(platform=mobile) begin */
   /* Mobile touch-target floor (not a Tailwind namespace). Apple HIG
    * recommends 44pt; Android Material recommends 48dp. We pick 44px
-   * as a portable lower bound — design presets that want a denser
+   * as a portable lower bound â€” design presets that want a denser
    * mobile feel can override per-preset. Mobile layouts apply this via
    * `min-h-[var(--touch-target-min,44px)]`; layouts that ship to
    * non-mobile platforms keep the Tailwind fallback (`44px`), so
@@ -122,9 +122,9 @@
  * sticky CTA at the bottom of an onboarding screen).
  *
  * Defining these at the @utility tier (Tailwind v4) makes them available
- * with the standard variant chain — e.g. `md:safe-pt`, `dark:safe-pt`.
+ * with the standard variant chain â€” e.g. `md:safe-pt`, `dark:safe-pt`.
  *
- * Stripped from `--platform web` / `desktop` scaffolds — the few platform-
+ * Stripped from `--platform web` / `desktop` scaffolds â€” the few platform-
  * agnostic layouts that actually reach for safe-area insets (Centered)
  * use `env(...)` inline so they don't depend on these utility classes.
  * --------------------------------------------------------------------------*/
@@ -163,12 +163,12 @@
  *
  * That literal is the LIGHT-mode value, so any `.dark { --shadow-sm: ... }`
  * override (we use those for material / skeuomorphism / neumorphism /
- * glassmorphism / liquid-glass / claymorphism / aurora / neo-brutalism)
- * silently fails for components that use the `shadow-sm` utility — only
+ * liquid-glass / claymorphism / aurora / neo-brutalism)
+ * silently fails for components that use the `shadow-sm` utility â€” only
  * components that go through `[box-shadow:var(--shadow-sm)]` see the swap.
  *
  * Result without this rule: cards rendered in dark-mode neumorphism keep
- * their light-mode dual shadow — `oklch(1 0 0 / 0.75)` on the top-left —
+ * their light-mode dual shadow â€” `oklch(1 0 0 / 0.75)` on the top-left â€”
  * which reads as an ugly bright halo against the dark background.
  *
  * The rules below re-point the utility's internal `--tw-shadow` variable
@@ -266,7 +266,7 @@
  * either apply to different selectors or are merged into a single @theme).
  *
  * Each `design=...` block ships **both** an `@theme` override for light mode
- * AND a `.dark` override for dark mode — otherwise the base `.dark { ... }`
+ * AND a `.dark` override for dark mode â€” otherwise the base `.dark { ... }`
  * block above would punch through the preset and revert primary/accent back
  * to the default palette. Adding a new preset means filling in both halves.
  * --------------------------------------------------------------------------*/
@@ -280,12 +280,12 @@
 
 /* @eikon:variant(design=default) begin */
 /* default keeps the base @theme + base .dark above; nothing extra.
- * A neutral, brand-agnostic violet — good baseline when you don't want to
+ * A neutral, brand-agnostic violet â€” good baseline when you don't want to
  * commit to a brand voice yet. */
 /* @eikon:variant(design=default) end */
 
 /* @eikon:variant(design=apple) begin */
-/* Apple Human Interface Guidelines — systemBlue (#007AFF) + SF Pro.
+/* Apple Human Interface Guidelines â€” systemBlue (#007AFF) + SF Pro.
  * Source: https://developer.apple.com/design/human-interface-guidelines/color
  *         https://developer.apple.com/documentation/uikit/uicolor/systembue
  * Soft system grays, generous-but-not-huge corner radii, native SF stack.
@@ -344,7 +344,7 @@
   --shadow-md: 0 4px 10px -2px oklch(0 0 0 / 0.06);
   --shadow-lg: 0 12px 28px -6px oklch(0 0 0 / 0.1);
 
-  /* Apple scrollbar — soft cool-gray tube, generous radius, slimmer
+  /* Apple scrollbar â€” soft cool-gray tube, generous radius, slimmer
    * gutter to match the airy HIG density. */
   --scrollbar-size: 11px;
   --scrollbar-thumb: oklch(0.8 0.005 240);
@@ -375,14 +375,14 @@
 /* @eikon:variant(design=apple) end */
 
 /* @eikon:variant(design=linear) begin */
-/* Linear.app brand — Lavender-Blue #5E6AD2 on Mercury White #F4F5F8 /
+/* Linear.app brand â€” Lavender-Blue #5E6AD2 on Mercury White #F4F5F8 /
  * Nordic Gray #222326, Inter typography, compact radii.
  * Source: https://linear.app/brand   https://developers.linear.app/brand
  * Dark mode primary uses #828FFF "Lavender Hover" so the accent stays
  * visible on the dark surface.
  *
  * Typography & density:
- *   - 15px base body, 13px secondary, tight spacing step → high info
+ *   - 15px base body, 13px secondary, tight spacing step â†’ high info
  *     density typical of productivity tools.
  *   - Linear's signature "hairline" shadow uses a single solid 1px offset
  *     instead of a blur, giving a sharper, more architectural feel. */
@@ -432,7 +432,7 @@
   --shadow-md: 0 2px 4px -1px oklch(0.4 0.01 264 / 0.08);
   --shadow-lg: 0 8px 20px -4px oklch(0.4 0.01 264 / 0.12);
 
-  /* Linear scrollbar — narrow architectural thumb. Tight 0.25rem radius
+  /* Linear scrollbar â€” narrow architectural thumb. Tight 0.25rem radius
    * matches `--radius-sm`; reduced border (2px) keeps the thumb visible
    * inside the 9px gutter. */
   --scrollbar-size: 9px;
@@ -464,21 +464,21 @@
 /* @eikon:variant(design=linear) end */
 
 /* @eikon:variant(design=anthropic) begin */
-/* Anthropic / Claude brand — Crail Orange #d97757 on warm cream #faf9f5,
+/* Anthropic / Claude brand â€” Crail Orange #d97757 on warm cream #faf9f5,
  * near-black #141413 text, Lora body / Poppins headings.
  * Source: https://github.com/anthropics/skills/blob/main/skills/brand-guidelines/SKILL.md
  *         https://www.designmd.co/d/anthropic
- * Earthy, humanist palette — communicates "trustworthy + approachable"
+ * Earthy, humanist palette â€” communicates "trustworthy + approachable"
  * rather than typical tech blue.
  *
  * Typography & density:
  *   - 17px serif body with editorial line-height (~1.65 effective) for
- *     long-form readability — much closer to a longform article than a
+ *     long-form readability â€” much closer to a longform article than a
  *     tech dashboard.
  *   - `font-sans` is mapped to Lora (a serif) so the existing components
  *     that opt for `font-sans` automatically pick up the editorial voice.
  *     `font-serif` and `font-mono` remain available for explicit choices.
- *   - Tracking is zero — serif text reads worse when artificially tight.
+ *   - Tracking is zero â€” serif text reads worse when artificially tight.
  *   - Shadows are warm-tinted to match the cream surface. */
 @theme {
   --color-background: oklch(0.98 0.006 90);
@@ -531,7 +531,7 @@
   --shadow-md: 0 4px 10px -2px oklch(0.2 0 90 / 0.08);
   --shadow-lg: 0 12px 28px -6px oklch(0.2 0 90 / 0.1);
 
-  /* Anthropic scrollbar — warm-tinted thumb on the cream surface,
+  /* Anthropic scrollbar â€” warm-tinted thumb on the cream surface,
    * editorial-generous gutter to echo the loose 1.7 line-height. */
   --scrollbar-size: 13px;
   --scrollbar-thumb: oklch(0.82 0.015 90);
@@ -562,15 +562,15 @@
 /* @eikon:variant(design=anthropic) end */
 
 /* @eikon:variant(design=vercel) begin */
-/* Vercel Geist — strict monochrome, ink-on-white (and inverse in dark).
+/* Vercel Geist â€” strict monochrome, ink-on-white (and inverse in dark).
  * Primary IS the ink: black surfaces / white text and vice-versa. The
- * iconic #0070F3 blue is reserved for focus rings and links only —
+ * iconic #0070F3 blue is reserved for focus rings and links only â€”
  * never as a button fill (per Geist's "accent is so sparing the system
  * could work without it" philosophy).
  * Source: https://vercel.com/geist/colors
  *
  * Typography & density:
- *   - 14px body, 13px secondary, tight spacing step — the dense, scannable
+ *   - 14px body, 13px secondary, tight spacing step â€” the dense, scannable
  *     rhythm of Vercel docs and dashboards.
  *   - Geist Mono is provided so `font-mono` utilities pick up the brand
  *     monospace (used in code blocks, kbd, command palette).
@@ -625,7 +625,7 @@
   --shadow-md: 0 0 0 1px oklch(0 0 0 / 0.08), 0 2px 8px -2px oklch(0 0 0 / 0.06);
   --shadow-lg: 0 0 0 1px oklch(0 0 0 / 0.08), 0 10px 24px -6px oklch(0 0 0 / 0.1);
 
-  /* Vercel scrollbar — pure monochrome, near-square corners to echo the
+  /* Vercel scrollbar â€” pure monochrome, near-square corners to echo the
    * 0.125rem `--radius-sm`. No tint: chroma stays at 0. */
   --scrollbar-size: 10px;
   --scrollbar-thumb: oklch(0.82 0 0);
@@ -656,16 +656,16 @@
 /* @eikon:variant(design=vercel) end */
 
 /* @eikon:variant(design=notion) begin */
-/* Notion-style — warm-tinted neutrals with a confident blue accent
+/* Notion-style â€” warm-tinted neutrals with a confident blue accent
  * (#2eaadc-ish), Inter typography, compact radii. Suits document-heavy /
  * dashboard surfaces.
  * Reference: https://www.notion.so + community palette write-ups.
  *
  * Typography & density:
- *   - 16px body with comfortable 1.6 line-height — Notion's editor
+ *   - 16px body with comfortable 1.6 line-height â€” Notion's editor
  *     baseline; readable for long blocks of running text without feeling
  *     stretched.
- *   - Standard 0.25rem spacing step (Tailwind default) — Notion is dense
+ *   - Standard 0.25rem spacing step (Tailwind default) â€” Notion is dense
  *     but not as tight as Vercel/Linear.
  *   - Shadows are soft and warm-tinted to match the cream-leaning whites. */
 @theme {
@@ -715,7 +715,7 @@
   --shadow-md: 0 4px 8px -2px oklch(0.4 0.005 60 / 0.06);
   --shadow-lg: 0 10px 24px -6px oklch(0.4 0.005 60 / 0.08);
 
-  /* Notion scrollbar — warm-gray thumb on cream surface, soft 5px
+  /* Notion scrollbar â€” warm-gray thumb on cream surface, soft 5px
    * radius to match the small-radius `--radius-md`. */
   --scrollbar-size: 11px;
   --scrollbar-thumb: oklch(0.84 0.008 60);
@@ -746,8 +746,8 @@
 /* @eikon:variant(design=notion) end */
 
 /* @eikon:variant(design=flat) begin */
-/* Flat Design — zero shadows, solid opaque fills, sharp geometry.
- * Windows Metro / Swiss Design inspired. No depth cues whatsoever —
+/* Flat Design â€” zero shadows, solid opaque fills, sharp geometry.
+ * Windows Metro / Swiss Design inspired. No depth cues whatsoever â€”
  * separation comes from strong color blocking and visible borders.
  * Hover = background-fill swap (no shadow), active = border darkens. */
 @theme {
@@ -815,10 +815,10 @@
 /* @eikon:variant(design=flat) end */
 
 /* @eikon:variant(design=material) begin */
-/* Material Design 3 — elevation-based depth via layered shadows, zero
+/* Material Design 3 â€” elevation-based depth via layered shadows, zero
  * visible borders. Depth comes exclusively from shadow (dp layers).
  * Generous 1rem radii per M3 "container" shape language. Roboto font.
- * Hover raises elevation (md→lg), active presses to sm. */
+ * Hover raises elevation (mdâ†’lg), active presses to sm. */
 @theme {
   --color-background: oklch(0.99 0.005 270);
   --color-foreground: oklch(0.18 0.015 270);
@@ -893,7 +893,7 @@
 /* @eikon:variant(design=material) end */
 
 /* @eikon:variant(design=skeuomorphism) begin */
-/* Skeuomorphism — realistic depth with inset highlight bevels, deep
+/* Skeuomorphism â€” realistic depth with inset highlight bevels, deep
  * layered shadows, warm gold-brown palette. Inspired by pre-iOS7 Apple.
  * Surfaces feel tactile with a white top-edge highlight. Hover deepens
  * the drop shadow; active presses into the surface (bevel inverts). */
@@ -980,7 +980,7 @@
 /* @eikon:variant(design=skeuomorphism) end */
 
 /* @eikon:variant(design=neumorphism) begin */
-/* Neumorphism — soft extruded plastic on matching-tone background.
+/* Neumorphism â€” soft extruded plastic on matching-tone background.
  * ZERO visible border; depth ONLY from opposing dual shadows (light
  * top-left, dark bottom-right). Card bg = page bg (critical). Input
  * fields use concave inset variant.
@@ -1069,85 +1069,8 @@
 }
 /* @eikon:variant(design=neumorphism) end */
 
-/* @eikon:variant(design=glassmorphism) begin */
-/* Glassmorphism — frosted glass panels with backdrop-blur(16px), semi-
- * transparent surfaces, luminous thin borders, subtle glow ring. The
- * card is see-through; content behind it blurs into soft focus. Deep
- * purple palette. Hover intensifies the glow; active dims to ground. */
-@theme {
-  --color-background: oklch(0.96 0.015 290);
-  --color-foreground: oklch(0.18 0.015 290);
-  --color-card: oklch(1 0 0 / 0.45);
-  --color-card-foreground: oklch(0.18 0.015 290);
-  --color-muted: oklch(0.94 0.012 290 / 0.6);
-  --color-muted-foreground: oklch(0.45 0.02 290);
-  --color-border: oklch(1 0 0 / 0.35);
-  --color-input: oklch(1 0 0 / 0.3);
-  --color-primary: oklch(0.52 0.22 290);
-  --color-primary-foreground: oklch(1 0 0);
-  --color-secondary: oklch(0.94 0.012 290 / 0.4);
-  --color-secondary-foreground: oklch(0.18 0.015 290);
-  --color-accent: oklch(0.92 0.04 340 / 0.55);
-  --color-accent-foreground: oklch(0.18 0.015 290);
-  --color-destructive: oklch(0.55 0.22 25);
-  --color-destructive-foreground: oklch(1 0 0);
-  --color-ring: oklch(0.52 0.22 290);
-  --radius-lg: 1rem;
-  --radius-md: 0.75rem;
-  --radius-sm: 0.5rem;
-
-  --surface-border-width: 1px;
-  --surface-backdrop: blur(16px);
-  --surface-inset-shadow: none;
-  --surface-ring-width: 1px;
-  --surface-ring-color: oklch(1 0 0 / 0.15);
-  --surface-hover-shadow: 0 8px 32px -4px oklch(0.4 0.08 290 / 0.25), 0 0 0 1px oklch(1 0 0 / 0.2);
-  --surface-active-shadow: 0 2px 8px -2px oklch(0.4 0.04 290 / 0.15);
-
-  --shadow-sm: 0 2px 8px -1px oklch(0.4 0.04 290 / 0.12);
-  --shadow-md: 0 6px 20px -4px oklch(0.4 0.04 290 / 0.18);
-  --shadow-lg: 0 12px 36px -8px oklch(0.4 0.04 290 / 0.22);
-
-  --scrollbar-size: 10px;
-  --scrollbar-thumb: oklch(0.7 0.02 290 / 0.5);
-  --scrollbar-thumb-hover: oklch(0.5 0.03 290 / 0.7);
-  --scrollbar-thumb-radius: 8px;
-  --scrollbar-thumb-border: 2px;
-}
-.dark {
-  --color-background: oklch(0.12 0.015 290);
-  --color-foreground: oklch(0.96 0.005 290);
-  --color-card: oklch(0.2 0.015 290 / 0.4);
-  --color-card-foreground: oklch(0.96 0.005 290);
-  --color-muted: oklch(0.22 0.012 290 / 0.5);
-  --color-muted-foreground: oklch(0.72 0.01 290);
-  --color-border: oklch(0.5 0.015 290 / 0.25);
-  --color-input: oklch(0.5 0.015 290 / 0.2);
-  --color-primary: oklch(0.72 0.2 290);
-  --color-primary-foreground: oklch(0.12 0.015 290);
-  --color-secondary: oklch(0.22 0.012 290 / 0.4);
-  --color-secondary-foreground: oklch(0.96 0.005 290);
-  --color-accent: oklch(0.27 0.045 340 / 0.55);
-  --color-accent-foreground: oklch(0.96 0.005 290);
-  --color-destructive: oklch(0.65 0.2 25);
-  --color-destructive-foreground: oklch(1 0 0);
-  --color-ring: oklch(0.72 0.2 290);
-
-  --surface-ring-color: oklch(0.6 0.1 290 / 0.15);
-  --surface-hover-shadow: 0 8px 32px -4px oklch(0 0 0 / 0.4), 0 0 0 1px oklch(0.6 0.1 290 / 0.2);
-  --surface-active-shadow: 0 2px 6px -2px oklch(0 0 0 / 0.3);
-
-  --shadow-sm: 0 2px 8px -1px oklch(0 0 0 / 0.25);
-  --shadow-md: 0 6px 20px -4px oklch(0 0 0 / 0.35);
-  --shadow-lg: 0 12px 36px -8px oklch(0 0 0 / 0.4);
-
-  --scrollbar-thumb: oklch(0.4 0.015 290 / 0.5);
-  --scrollbar-thumb-hover: oklch(0.6 0.02 290 / 0.7);
-}
-/* @eikon:variant(design=glassmorphism) end */
-
 /* @eikon:variant(design=liquid-glass) begin */
-/* Liquid Glass — Apple iOS 26 "water-droplet on photo" treatment, pushed
+/* Liquid Glass â€” Apple iOS 26 "water-droplet on photo" treatment, pushed
  * to its 2026 extreme. Heavy backdrop-blur(28px) + saturate(180%) lets
  * surfaces refract a vivid forest/photo backdrop like a thick optical
  * lens. Each surface is built from a 4-layer box-shadow:
@@ -1155,7 +1078,7 @@
  *   1. outer ambient drop shadow (depth)
  *   2. inset hairline rim (full-perimeter 0.5px specular ring)
  *   3. inset top-edge white glint (the streak running across the top
- *      of every iOS 26 capsule — sun catching the meniscus)
+ *      of every iOS 26 capsule â€” sun catching the meniscus)
  *   4. inset bottom-edge cool blue rim (chromatic refraction at the
  *      far edge, the "water lens" giveaway)
  *
@@ -1164,7 +1087,7 @@
  * Capsule radii (1.75rem) + ultra-soft 0.5px borders push the surface
  * into "pill" territory; hover flares a luminous halo, active settles. */
 @theme {
-  /* Deep forest base — leans cool-emerald (hue 155) so the saturate(180%)
+  /* Deep forest base â€” leans cool-emerald (hue 155) so the saturate(180%)
    * backdrop-filter doesn't over-yellow the foliage seen through the
    * panels. Page chrome itself is solid; ambience comes from the body
    * background-image gradient lower in this block. */
@@ -1176,7 +1099,7 @@
   --color-muted-foreground: oklch(0.82 0.015 155);
   --color-border: oklch(1 0 0 / 0.18);
   --color-input: oklch(0.28 0.02 155 / 0.45);
-  /* Primary leans iOS-blurple — it's the colored pill in the screenshot
+  /* Primary leans iOS-blurple â€” it's the colored pill in the screenshot
    * (selected toggle, play button, "Primary" CTA). Sits well against the
    * cool emerald panels because it shares the cool side of the wheel. */
   --color-primary: oklch(0.62 0.19 275);
@@ -1188,7 +1111,7 @@
   --color-destructive: oklch(0.62 0.22 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.62 0.19 275);
-  /* Capsule radii — large enough that small cards read as fully-rounded
+  /* Capsule radii â€” large enough that small cards read as fully-rounded
    * pills. radius-lg drives Card, radius-md drives Button. */
   --radius-lg: 1.75rem;
   --radius-md: 1rem;
@@ -1203,12 +1126,12 @@
   --font-weight-medium: 510;
   --font-weight-semibold: 600;
 
-  /* Surface stack — the meat of the droplet treatment. */
+  /* Surface stack â€” the meat of the droplet treatment. */
   --surface-border-width: 0.5px;
   --surface-backdrop: blur(28px) saturate(180%);
   --surface-inset-shadow: none;
   --surface-ring-width: 0.5px;
-  /* Ring sits inside the border for a doubled hairline — the second
+  /* Ring sits inside the border for a doubled hairline â€” the second
    * line that makes the capsule edge read as glass thickness rather
    * than a flat outline. */
   --surface-ring-color: oklch(1 0 0 / 0.22);
@@ -1223,7 +1146,7 @@
     inset 0 1px 0 oklch(1 0 0 / 0.35),
     inset 0 -1px 0 oklch(0.6 0.12 230 / 0.3);
 
-  /* Shadow utilities — every Card already ships with shadow-sm, so the
+  /* Shadow utilities â€” every Card already ships with shadow-sm, so the
    * 4-layer droplet stack lives here and is "free" for consumers. */
   --shadow-sm:
     0 10px 30px -8px oklch(0 0 0 / 0.4),
@@ -1251,9 +1174,9 @@
   --scrollbar-thumb-border: 2px;
 }
 .dark {
-  /* Forest "night" — push the base darker so the droplets' inset top
+  /* Forest "night" â€” push the base darker so the droplets' inset top
    * highlight pops harder. Keeps the same hue (155, cool emerald) so
-   * day↔night doesn't drift palette. */
+   * dayâ†”night doesn't drift palette. */
   --color-background: oklch(0.16 0.035 155);
   --color-foreground: oklch(0.97 0.005 155);
   --color-card: oklch(0.22 0.025 155 / 0.38);
@@ -1307,12 +1230,12 @@
   --scrollbar-thumb-hover: oklch(1 0 0 / 0.35);
 }
 
-/* Body ambience — a layered radial-gradient stack that fakes the
+/* Body ambience â€” a layered radial-gradient stack that fakes the
  * "photo behind the glass" depth seen in iOS 26 marketing material:
  *
- *   • two warm sun-spots high-left and mid-right    (golden glints)
- *   • two cool mid-tone radials                     (depth haze)
- *   • a deep emerald base                           (forest floor)
+ *   â€¢ two warm sun-spots high-left and mid-right    (golden glints)
+ *   â€¢ two cool mid-tone radials                     (depth haze)
+ *   â€¢ a deep emerald base                           (forest floor)
  *
  * backdrop-filter on the Card uses these gradients as its source, so
  * the panels appear to refract real foliage even though no <img> is
@@ -1341,7 +1264,7 @@ body {
 /* @eikon:variant(design=liquid-glass) end */
 
 /* @eikon:variant(design=claymorphism) begin */
-/* Claymorphism — puffy inflated-plastic surfaces. NO visible border.
+/* Claymorphism â€” puffy inflated-plastic surfaces. NO visible border.
  * Inner white highlight on top edge + hue-tinted soft drop shadow
  * create the signature "clay blob" look. Very generous radii (1.5rem).
  * Warm pink-coral palette. Hover inflates shadow further; active
@@ -1423,7 +1346,7 @@ body {
 /* @eikon:variant(design=claymorphism) end */
 
 /* @eikon:variant(design=aurora) begin */
-/* Aurora UI — northern lights glow. Dual-hue shadows (green-cyan +
+/* Aurora UI â€” northern lights glow. Dual-hue shadows (green-cyan +
  * magenta) create colored halos around surfaces. 1px colored ring glow.
  * Vivid turquoise primary with magenta accent flares. Hover flares the
  * aurora glow wider; active dampens to a subtle halo. */
@@ -1442,7 +1365,7 @@ body {
   --color-secondary-foreground: oklch(0.18 0.015 170);
   /* Accent is consumed by shadcn convention as the hover/highlighted-row
    * tint (TaskCard hover, Command selected row, MobileDrawer nav-item
-   * hover) — so it must be a soft *tint*, not a vivid fill. We keep the
+   * hover) â€” so it must be a soft *tint*, not a vivid fill. We keep the
    * magenta hue 310 so the cool turquoise surface picks up just a whisper
    * of the dual-hue aurora warmth on hover; the actual vivid magenta
    * "flare" lives in --surface-hover-shadow / --shadow-* below, which is
@@ -1507,7 +1430,7 @@ body {
 /* @eikon:variant(design=aurora) end */
 
 /* @eikon:variant(design=neo-brutalism) begin */
-/* NEO-Brutalism — THICK 3px black borders, hard-offset shadows (zero
+/* NEO-Brutalism â€” THICK 3px black borders, hard-offset shadows (zero
  * blur), zero radius. Saturated clashing fills: hot yellow primary,
  * electric green secondary, hot coral accent. Monospace font. Raw,
  * intentional, comic-zine aesthetic. Hover INCREASES offset (pops out);
@@ -1528,10 +1451,10 @@ body {
   /* Accent is the shadcn hover/highlighted-row tint (TaskCard, Command,
    * MobileDrawer). Brutalism's design comment names "hot coral accent" as
    * the third member of the clashing-fills trio, but in practice no button
-   * / badge / fill surface consumes accent — it's only ever the hover bg.
+   * / badge / fill surface consumes accent â€” it's only ever the hover bg.
    * A full-saturation coral floods the whole card on hover and reads as a
    * red panic-state, which clashes with the intent (hover = "I'm hovered",
-   * not "danger"). The brutalist drama still comes through via the 3px→7px
+   * not "danger"). The brutalist drama still comes through via the 3pxâ†’7px
    * hard black shadow pop on hover (--surface-hover-shadow); we just keep
    * the coral *hue* as a whisper-tint behind it. */
   --color-accent: oklch(0.92 0.045 25);
@@ -1610,7 +1533,7 @@ body {
 /* --- layout axis -----------------------------------------------------------
  * Each layout (stacked / sidebar / topbar-sidebar / centered) is its own
  * top-level component file under src/app/layouts/, so layout-specific
- * styling lives in Tailwind classes inside that component — no axis-keyed
+ * styling lives in Tailwind classes inside that component â€” no axis-keyed
  * CSS hooks are needed here. Keeping this comment as a sign-post for
  * anyone hunting for the layout axis. */
 
