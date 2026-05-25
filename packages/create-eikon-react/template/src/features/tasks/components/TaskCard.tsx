@@ -71,11 +71,11 @@ interface TaskCardProps {
 
 const STATUS_CLASS: Record<TaskStatus, string> = {
   pending:
-    'bg-slate-100 text-slate-700 ring-slate-300 dark:bg-slate-500/10 dark:text-slate-300 dark:ring-slate-500/30',
+    'bg-slate-100 text-slate-700 dark:bg-slate-500/15 dark:text-slate-300',
   in_progress:
-    'bg-sky-100 text-sky-700 ring-sky-300 dark:bg-sky-500/10 dark:text-sky-300 dark:ring-sky-500/30',
+    'bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300',
   completed:
-    'bg-emerald-100 text-emerald-700 ring-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-500/30',
+    'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
 };
 
 // =================================================================================================
@@ -145,14 +145,20 @@ function TaskCard({ task, onClick, onDelete, className }: TaskCardProps) {
       >
         <CardHeader className="gap-2 pb-2">
           <div className="flex items-center justify-between gap-3">
-            <CardTitle className="text-base">{task.title}</CardTitle>
-            <div className="flex items-center gap-2">
+            <CardTitle className="min-w-0 flex-1 truncate text-base">
+              {task.title}
+            </CardTitle>
+            <div className="flex shrink-0 items-center gap-2">
               <span
                 className={cn(
-                  'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
+                  'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[0.6875rem] font-medium tracking-tight',
                   STATUS_CLASS[task.status]
                 )}
               >
+                <span
+                  aria-hidden="true"
+                  className="h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-75"
+                />
                 {t(`status.${task.status}`)}
               </span>
               {onDelete && (

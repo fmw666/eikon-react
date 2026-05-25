@@ -136,7 +136,7 @@ function MobileDrawerRootLayout() {
           'pt-[env(safe-area-inset-top)]'
         )}
       >
-        <div className="flex h-14 items-center justify-between gap-2 px-3">
+        <div className="flex h-14 items-center gap-2 px-3">
           <Sheet open={open} onOpenChange={setOpen} side="left">
             <SheetTrigger
               aria-label={t('nav.menu', { defaultValue: 'Open navigation' })}
@@ -232,7 +232,7 @@ function MobileDrawerRootLayout() {
           <Link to="/" className="text-sm font-semibold tracking-tight">
             Eikon App
           </Link>
-          <div className="flex items-center gap-1">
+          <div className="ml-auto flex items-center gap-1">
             {/* @eikon:feature(i18n) begin */}
             <LanguageSwitcher />
             {/* @eikon:feature(i18n) end */}
