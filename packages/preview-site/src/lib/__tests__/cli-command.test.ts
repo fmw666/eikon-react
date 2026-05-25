@@ -38,10 +38,10 @@ describe('buildCliCommand', () => {
     );
   });
 
-  it('emits `--toast <value>` for non-default toast preset', () => {
-    const state = { ...defaultState(), toast: 'minimal' };
+  it('emits `--toast-position <value>` for non-default toast position', () => {
+    const state = { ...defaultState(), toastPosition: 'bottom-center' };
     const cmd = buildCliCommand(state);
-    expect(cmd).toBe('npx create-eikon-react <proj_name> --toast minimal');
+    expect(cmd).toBe('npx create-eikon-react <proj_name> --toast-position bottom-center');
   });
 
   it('combines boolean and enum overrides in schema order', () => {
@@ -52,11 +52,11 @@ describe('buildCliCommand', () => {
       design: 'anthropic',
       layout: 'sidebar',
       ui: 'radix',
-      toast: 'glass',
+      toastPosition: 'bottom-right',
     };
     const cmd = buildCliCommand(state);
     expect(cmd).toBe(
-      'npx create-eikon-react <proj_name> --supabase --pm npm --design anthropic --layout sidebar --ui radix --toast glass'
+      'npx create-eikon-react <proj_name> --supabase --pm npm --design anthropic --layout sidebar --ui radix --toast-position bottom-right'
     );
   });
 });

@@ -43,7 +43,7 @@ describe('<ExamplesIndexPage />', () => {
 
   it('links the TOC to the standalone showcase routes', () => {
     renderWithRouter(<ExamplesIndexPage />);
-    expect(screen.getAllByRole('link', { name: /toaster/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('link', { name: /toast/i }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('link', { name: /dialog/i }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('link', { name: /performance/i }).length).toBeGreaterThan(0);
   });

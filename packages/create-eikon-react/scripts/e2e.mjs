@@ -219,28 +219,20 @@ const SCENARIOS = [
       'sidebar',
       '--ui',
       'radix',
-      '--toast',
-      'minimal',
+      '--toast-position',
+      'bottom-center',
     ],
     expect: {
       filesPresent: [
         'src/features/counter/index.ts',
-        // The chosen toast preset's sibling file must survive whole-file
-        // stripping (it carries an `@eikon:variant(toast=minimal) file` marker).
-        'src/shared/ui/toaster/minimal-toaster.tsx',
+        'src/shared/ui/toaster.tsx',
       ],
       filesAbsent: [
         'src/shared/supabase',
         // examples is always stripped — see comment on the lean scenario.
         'src/features/examples',
-        // Every non-chosen toast preset's sibling file is removed by its
-        // own first-line `@eikon:variant(toast=X) file` marker.
-        'src/shared/ui/toaster/default-toaster.tsx',
-        'src/shared/ui/toaster/apple-toaster.tsx',
-        'src/shared/ui/toaster/glass-toaster.tsx',
-        'src/shared/ui/toaster/terminal-toaster.tsx',
-        'src/shared/ui/toaster/floating-bar-toaster.tsx',
-        'src/shared/ui/toaster/stacked-cards-toaster.tsx',
+        // The toaster/ directory no longer exists — toast is a single file.
+        'src/shared/ui/toaster',
         // layout=sidebar means the mobile-drawer Sheet primitive is dead.
         'src/shared/ui/sheet.tsx',
         // platform defaults to web here, so the workspace yaml is dropped.
@@ -270,28 +262,21 @@ const SCENARIOS = [
         '@eikon:variant(layout=topbar-sidebar)',
         '@eikon:variant(layout=centered)',
       ],
-      // The dispatcher at toaster.tsx must keep ONLY the chosen preset's
-      // import + array entry, and the unchosen marker blocks must be gone
-      // entirely (so typecheck doesn't trip over missing sibling files).
+      // The toaster.tsx must keep ONLY the chosen position's variant block
+      // and strip the others.
       toasterContains: [
-        '@eikon:variant(toast=minimal)',
-        './toaster/minimal-toaster',
+        '@eikon:variant(toastPosition=bottom-center)',
+        "'bottom-center'",
       ],
       toasterAbsent: [
-        '@eikon:variant(toast=default)',
-        '@eikon:variant(toast=apple)',
-        '@eikon:variant(toast=glass)',
-        '@eikon:variant(toast=terminal)',
-        '@eikon:variant(toast=floating-bar)',
-        '@eikon:variant(toast=stacked-cards)',
-        './toaster/default-toaster',
-        './toaster/apple-toaster',
-        './toaster/glass-toaster',
+        '@eikon:variant(toastPosition=top-right)',
+        '@eikon:variant(toastPosition=top-center)',
+        '@eikon:variant(toastPosition=bottom-right)',
       ],
       // The CSS file should keep the chosen design + ui blocks and drop
       // the non-chosen ones (the default / apple / anthropic / vercel /
       // notion design palettes etc.). The CSS file has no `layout=` or
-      // `toast=` markers — those axes live in JSX / TSX files instead.
+      // `toastPosition=` markers — those axes live in JSX / TSX files.
       stylesContains: ['design=linear', 'ui=radix'],
       stylesAbsent: [
         'design=default',

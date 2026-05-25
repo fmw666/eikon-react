@@ -1,6 +1,6 @@
 # Legacy (v1) 文档归档
 
-> **这是 AI-DevKit v1 时代的中文知识文档归档**，保留下来是因为其中的架构设计、性能优化思路、Providers 使用模式、Toast 集成方案等内容仍有参考价值。
+> **这是 AI-DevKit v1 时代的中文知识文档归档**，保留下来是因为其中的架构设计、性能优化思路、Providers 使用模式等内容仍有参考价值。
 >
 > 这些文档**不描述当前 v2（feature-first + create-eikon-react CLI + .agent/ 协议）的实现**。要了解 v2 的当前架构，请阅读：
 >

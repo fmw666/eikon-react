@@ -57,7 +57,7 @@ export const DEFAULT_INPUTS: BuildInputs = {
   design: 'default',
   layout: 'stacked',
   ui: 'animate-ui',
-  toast: 'default',
+  toastPosition: 'top-right',
 };
 
 // The skip list is the single CLI-authored source of truth. By reusing it
@@ -300,7 +300,7 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
     design: inputs.design,
     layout: inputs.layout,
     ui: inputs.ui,
-    toast: inputs.toast,
+    toastPosition: inputs.toastPosition,
   };
   // The playground simulates template-react's own local-dev experience.
   // Three knobs hold that contract together:
@@ -309,12 +309,8 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
   //     dev-only showcase) in the rendered tree. The CLI default still
   //     strips it for end users.
   //   - `keepAllVariantFiles: true` keeps every variant sibling on disk
-  //     (all 4 `*RootLayout.tsx`, all 7 `*-toaster.tsx`, …). Block-level
-  //     variant markers still narrow each dispatcher down to the user's
-  //     chosen value, so picking `toast=apple` in the params panel
-  //     still changes the GLOBAL Toaster — but the orphan sibling files
-  //     stay around so the examples showcase (which statically imports
-  //     all 7 toasters) can still compile.
+  //     (all 4 `*RootLayout.tsx`). Block-level variant markers still
+  //     narrow each dispatcher down to the user's chosen value.
   //   - The viteBuild below runs in `mode: 'development'`, which flips
   //     `import.meta.env.DEV` to `true` inside the generated bundle.
   //     Without that, every showcase route would tree-shake away even

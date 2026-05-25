@@ -2,21 +2,19 @@
  * @file ToasterShowcasePage.tsx
  * @description Route-level component for `/examples/toaster`.
  *
- * Lets the developer preview all seven Sonner-based toast presets that
- * ship with the template without rerunning the CLI. The page side-steps
- * the dispatcher at `shared/ui/toaster.tsx` and imports each sibling
- * directly so they can be toggled at runtime.
+ * Lets the developer preview the design-driven toast at each of the 4
+ * supported positions without rerunning the CLI. The styling is always
+ * controlled by the active design preset — this page only toggles
+ * placement.
  *
  * IMPORTANT: only one Sonner `<Toaster>` should be mounted at any given
- * moment — multiple mounts produce duplicate toasts. We rotate the chosen
- * preset and mount only that one, which mirrors the post-strip production
- * shape.
+ * moment — multiple mounts produce duplicate toasts. We mount a single
+ * `<SonnerToaster>` with the chosen position; the global Toaster in
+ * providers.tsx is the production one.
  *
  * Note: this page only renders in dev — the routes import in
  * `app/router.tsx` is gated by `import.meta.env.DEV`, and the CLI strips
- * the entire showcase directory from scaffolded projects. The global
- * production Toaster (the one mounted in providers.tsx) is unaffected
- * either way.
+ * the entire showcase directory from scaffolded projects.
  */
 
 // =================================================================================================
@@ -32,18 +30,11 @@ import { useTranslation } from 'react-i18next';
 // @eikon:feature(i18n) end
 
 // --- Third-party Libraries ---
-import { toast } from 'sonner';
+import { toast, Toaster as SonnerToaster } from 'sonner';
 
 // --- Absolute Imports ---
 import { Button } from '@/shared/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/shared/ui/tabs';
-import { AppleToaster } from '@/shared/ui/toaster/apple-toaster';
-import { DefaultToaster } from '@/shared/ui/toaster/default-toaster';
-import { FloatingBarToaster } from '@/shared/ui/toaster/floating-bar-toaster';
-import { GlassToaster } from '@/shared/ui/toaster/glass-toaster';
-import { MinimalToaster } from '@/shared/ui/toaster/minimal-toaster';
-import { StackedCardsToaster } from '@/shared/ui/toaster/stacked-cards-toaster';
-import { TerminalToaster } from '@/shared/ui/toaster/terminal-toaster';
 
 // --- Relative Imports ---
 import { ShowcasePageHeader } from '../components/ShowcasePageHeader';
@@ -52,21 +43,17 @@ import { ShowcasePageHeader } from '../components/ShowcasePageHeader';
 // Constants
 // =================================================================================================
 
-interface PresetSpec {
-  id: string;
-  label: string;
-  /** The matching Sonner toaster component. */
-  Component: React.ComponentType;
-}
+type Position =
+  | 'top-right'
+  | 'top-center'
+  | 'bottom-center'
+  | 'bottom-right';
 
-const PRESETS: PresetSpec[] = [
-  { id: 'default', label: 'default', Component: DefaultToaster },
-  { id: 'minimal', label: 'minimal', Component: MinimalToaster },
-  { id: 'apple', label: 'apple', Component: AppleToaster },
-  { id: 'glass', label: 'glass', Component: GlassToaster },
-  { id: 'terminal', label: 'terminal', Component: TerminalToaster },
-  { id: 'floating-bar', label: 'floating-bar', Component: FloatingBarToaster },
-  { id: 'stacked-cards', label: 'stacked-cards', Component: StackedCardsToaster },
+const POSITIONS: Position[] = [
+  'top-right',
+  'top-center',
+  'bottom-center',
+  'bottom-right',
 ];
 
 // =================================================================================================
@@ -83,11 +70,7 @@ function ToasterShowcasePage() {
   //   opts?.defaultValue ?? _k;
   // @eikon:feature(i18n:fallback) end
 
-  // Default to the same preset Sonner ships at scaffold time so the
-  // first render matches the production look.
-  const [activeId, setActiveId] = React.useState<string>('default');
-  const ActiveToaster =
-    PRESETS.find((p) => p.id === activeId)?.Component ?? DefaultToaster;
+  const [position, setPosition] = React.useState<Position>('top-right');
 
   const fireSuccess = React.useCallback(() => {
     toast.success(t('pages.toaster.successMessage'));
@@ -128,15 +111,15 @@ function ToasterShowcasePage() {
           <span className="text-xs uppercase tracking-wide text-[var(--color-muted-foreground)]">
             {t('pages.toaster.currentLabel')}
           </span>
-          <Tabs value={activeId} onValueChange={setActiveId}>
+          <Tabs value={position} onValueChange={(v) => setPosition(v as Position)}>
             <TabsList className="flex h-auto flex-wrap gap-1">
-              {PRESETS.map((p) => (
+              {POSITIONS.map((p) => (
                 <TabsTrigger
-                  key={p.id}
-                  value={p.id}
+                  key={p}
+                  value={p}
                   layoutId="examples-toaster-indicator"
                 >
-                  {p.label}
+                  {p}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -157,13 +140,19 @@ function ToasterShowcasePage() {
         </div>
       </section>
 
-      {/*
-        Mount the selected preset. We DON'T remount on every tab change
-        via `key` — Sonner manages its own state and remounting would
-        wipe in-flight toasts. Swapping the component is enough; Sonner's
-        portal reconciles position + classNames on the next render.
-      */}
-      <ActiveToaster />
+      <SonnerToaster
+        position={position}
+        richColors
+        closeButton
+        toastOptions={{
+          classNames: {
+            toast:
+              'rounded-[var(--radius-md)] border-[length:var(--surface-border-width)] border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-card-foreground)] shadow-lg',
+            title: 'text-sm font-medium',
+            description: 'text-xs text-[var(--color-muted-foreground)]',
+          },
+        }}
+      />
     </div>
   );
 }

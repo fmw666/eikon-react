@@ -17,7 +17,7 @@ describe('serializeToQuery', () => {
     expect(sp.get('design')).toBe('default');
     expect(sp.get('layout')).toBe('stacked');
     expect(sp.get('ui')).toBe('animate-ui');
-    expect(sp.get('toast')).toBe('default');
+    expect(sp.get('toastPosition')).toBe('top-right');
   });
 
   it('round-trips through parseFromQuery losslessly', () => {
@@ -26,7 +26,7 @@ describe('serializeToQuery', () => {
       supabase: true,
       pm: 'bun',
       design: 'linear',
-      toast: 'minimal',
+      toastPosition: 'bottom-center',
     };
     const round = mergeWithDefaults(parseFromQuery(serializeToQuery(state)));
     expect(round).toEqual(state);
@@ -41,7 +41,7 @@ describe('parseFromQuery', () => {
 
   it('drops invalid enum values rather than crashing', () => {
     const out = parseFromQuery(
-      'design=hot-pink&layout=stacked&toast=not-a-preset'
+      'design=hot-pink&layout=stacked&toastPosition=not-a-preset'
     );
     expect(out).toEqual({ layout: 'stacked' });
   });

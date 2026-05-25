@@ -36,7 +36,7 @@ export function ParamsPanel() {
   const layoutDef = getEnum('layout');
   const designDef = getEnum('design');
   const uiDef = getEnum('ui');
-  const toastDef = getEnum('toast');
+  const toastPosDef = getEnum('toastPosition');
   const pmDef = getEnum('pm');
   const supabaseVisible = visible.some((d) => d.id === 'supabase');
 
@@ -88,12 +88,12 @@ export function ParamsPanel() {
         {t('params.sentence.toastPrefix') && (
           <span>{t('params.sentence.toastPrefix')}</span>
         )}
-        {toastDef && (
+        {toastPosDef && (
           <InlineSlot
-            def={toastDef}
+            def={toastPosDef}
             platform={platform}
-            value={state.toast as string}
-            onChange={(v) => setParam('toast', v)}
+            value={state.toastPosition as string}
+            onChange={(v) => setParam('toastPosition', v)}
             shortLabels
           />
         )}

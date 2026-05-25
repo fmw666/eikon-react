@@ -24,7 +24,7 @@ export interface BuildInputs {
   design: string;
   layout: string;
   ui: string;
-  toast: string;
+  toastPosition: string;
 }
 
 /**
@@ -65,7 +65,7 @@ export function hashBuildInputs(
     design: String(inputs.design),
     layout: String(inputs.layout),
     ui: String(inputs.ui),
-    toast: String(inputs.toast),
+    toastPosition: String(inputs.toastPosition),
   };
   return createHash('sha256')
     .update(JSON.stringify(ordered))

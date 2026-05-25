@@ -18,7 +18,7 @@ export const DEFAULT_VARIANTS: VariantSelections = {
   design: 'default',
   layout: 'stacked',
   ui: 'animate-ui',
-  toast: 'default',
+  toastPosition: 'top-right',
 };
 
 /**
@@ -107,14 +107,10 @@ const PACKAGE_DEPS_BY_FEATURE: Record<string, string[]> = {
  *
  *   - `keepAllVariantFiles`: skip the `@eikon:variant(<axis>=<value>) file`
  *     first-line strip so every variant sibling stays on disk (all 4
- *     `*RootLayout.tsx`, all 7 `*-toaster.tsx`, …). Block-level variant
- *     markers still apply, so dispatchers like `app/layouts/RootLayout.tsx`
- *     and `shared/ui/toaster.tsx` continue to narrow to the user's
- *     chosen value — variant selection in the playground still drives
- *     the rendered global UI. The reason we keep the orphan files: the
- *     examples showcase (e.g. `ToasterShowcasePage`) imports every
- *     sibling directly to demo all presets, which would fail to build
- *     once 6 of 7 files have been deleted.
+ *     `*RootLayout.tsx`, …). Block-level variant markers still apply,
+ *     so dispatchers like `app/layouts/RootLayout.tsx` continue to
+ *     narrow to the user's chosen value — variant selection in the
+ *     playground still drives the rendered global UI.
  *
  *   - `keepShells`: keep the `apps/desktop/` (Tauri) and `apps/mobile/`
  *     (Capacitor) directories regardless of the chosen platform, and
@@ -350,10 +346,8 @@ async function stripFile(
   }
 
   // Variant file-level strip: removes orphan variant siblings (e.g. the
-  // 6 unchosen toasters / 3 unchosen layouts) so the scaffolded project
-  // only carries the user's selection. The playground opts out via
-  // `keepAllVariantFiles` so its examples showcase can still statically
-  // import every preset.
+  // 3 unchosen layouts) so the scaffolded project only carries the user's
+  // selection. The playground opts out via `keepAllVariantFiles`.
   if (!options.keepAllVariantFiles) {
     const variantFileMatch = raw.match(VARIANT_FILE_MARKER_RE);
     if (variantFileMatch) {

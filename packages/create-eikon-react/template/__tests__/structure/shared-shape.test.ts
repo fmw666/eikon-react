@@ -9,10 +9,7 @@
  * Allowed top-level subdirectories (whitelist):
  *
  *   - ui/         shadcn-style presentational primitives (kebab-case .tsx).
- *                 The single allowed nested directory is `ui/toaster/` —
- *                 it hosts the `*-toaster.tsx` sibling files for the
- *                 `--toast` variant axis; see the dispatcher at
- *                 `ui/toaster.tsx`.
+ *                 Flat directory — no nesting allowed.
  *   - lib/        pure utility functions (camelCase .ts)
  *   - hooks/      cross-cutting React hooks (camelCase .ts, must start with `use`)
  *   - stores/     genuinely cross-feature Zustand stores (camelCase .ts)
@@ -68,11 +65,10 @@ const BARREL_REQUIRED_DIRS = new Set(['theme', 'i18n', 'services', 'supabase']);
 
 /**
  * Subdirectories allowed inside `shared/ui/`. `shared/ui/` is otherwise
- * flat (shadcn lineage — one component per file); the only sanctioned
- * nesting is `ui/toaster/` for the variant-axis sibling files. Anything
- * else here should stay at the `ui/` top level.
+ * flat (shadcn lineage — one component per file). Anything else here
+ * should stay at the `ui/` top level.
  */
-const ALLOWED_UI_SUBDIRS = new Set(['toaster']);
+const ALLOWED_UI_SUBDIRS = new Set<string>([]);
 
 const KEBAB_CASE = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 const CAMEL_CASE = /^[a-z][A-Za-z0-9]*$/;
@@ -143,55 +139,6 @@ describe('structure: src/shared/', () => {
       }
     });
   });
-
-  // -----------------------------------------------------------------------------------------------
-  // shared/ui/toaster — `--toast` variant siblings
-  // -----------------------------------------------------------------------------------------------
-
-  describe.skipIf(!isDir(path.join(SHARED_ROOT, 'ui', 'toaster')))(
-    'shared/ui/toaster/',
-    () => {
-      const dir = path.join(SHARED_ROOT, 'ui', 'toaster');
-
-      it('only contains flat kebab-case `*-toaster.tsx` sibling files (one per --toast preset)', () => {
-        const entries = readDir(dir);
-        expect(
-          entries.length,
-          'shared/ui/toaster/ must contain at least one preset sibling — after CLI strip the chosen preset survives here'
-        ).toBeGreaterThan(0);
-
-        for (const name of entries) {
-          const full = path.join(dir, name);
-          expect(
-            isFile(full),
-            `shared/ui/toaster/${name} should be a flat sibling file, not a nested directory`
-          ).toBe(true);
-          expect(
-            name.endsWith('-toaster.tsx'),
-            `shared/ui/toaster/${name} must end with '-toaster.tsx' so the dispatcher's named import stays predictable`
-          ).toBe(true);
-          const base = name.replace(/\.tsx$/, '');
-          expect(
-            KEBAB_CASE.test(base),
-            `shared/ui/toaster/${name} must be kebab-case (shadcn lineage; matches eslint.config.js rule for src/shared/ui/**/*.tsx)`
-          ).toBe(true);
-        }
-      });
-
-      it('every sibling carries the first-line `@eikon:variant(toast=<value>) file` marker', () => {
-        const expected = /^\/\/ @eikon:variant\(toast=[a-z0-9-]+\) file/;
-        for (const name of readDir(dir)) {
-          const full = path.join(dir, name);
-          if (!isFile(full)) continue;
-          const firstLine = readText(full).split('\n')[0]!.trim();
-          expect(
-            expected.test(firstLine),
-            `shared/ui/toaster/${name} must start with '// @eikon:variant(toast=<value>) file' so the CLI can whole-file strip unchosen presets (found: ${JSON.stringify(firstLine)})`
-          ).toBe(true);
-        }
-      });
-    }
-  );
 
   // -----------------------------------------------------------------------------------------------
   // shared/lib — utility functions

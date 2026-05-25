@@ -76,9 +76,9 @@
   },
   "pages": {
     "toaster": {
-      "title": "Toaster",
-      "description": "Seven Sonner-based toaster presets ship with the template. In a scaffolded project the CLI strips down to the one you chose; here you can preview every variant side by side.",
-      "currentLabel": "Active preset",
+      "title": "Toast",
+      "description": "Design-driven Sonner toaster with configurable position. The toast styling follows the active design preset automatically; switch positions to preview placement.",
+      "currentLabel": "Position",
       "fireSuccess": "Fire success",
       "fireError": "Fire error",
       "fireInfo": "Fire info",

@@ -42,7 +42,7 @@ export type EnumParam = {
   readonly default: string;
   readonly cliFlag: string;
   readonly label: string;
-  readonly axis: 'tooling' | 'design' | 'layout' | 'ui' | 'toast' | 'platform';
+  readonly axis: 'tooling' | 'design' | 'layout' | 'ui' | 'platform';
   /**
    * Optional friendlier labels keyed by `value`. The CLI / URL / build hash
    * always use the raw `value` (kept stable across UI redesigns); the UI
@@ -217,29 +217,18 @@ export const PARAMS = [
     axis: 'ui',
   },
   {
-    id: 'toast',
+    id: 'toastPosition',
     kind: 'enum',
-    values: [
-      'default',
-      'minimal',
-      'apple',
-      'glass',
-      'terminal',
-      'floating-bar',
-      'stacked-cards',
-    ],
-    default: 'default',
-    cliFlag: 'toast',
-    label: 'Toast',
-    axis: 'toast',
+    values: ['top-right', 'top-center', 'bottom-center', 'bottom-right'],
+    default: 'top-right',
+    cliFlag: 'toast-position',
+    label: 'Toast position',
+    axis: 'ui',
     valueLabels: {
-      default: 'Default (top-right, richColors)',
-      minimal: 'Minimal (bottom-center, no chrome)',
-      apple: 'Apple banner (top-center, frosted)',
-      glass: 'Glassmorphism (top-right, blur)',
-      terminal: 'Terminal (bottom-left, mono)',
-      'floating-bar': 'Floating bar (bottom-center)',
-      'stacked-cards': 'Stacked cards (bottom-right, expand)',
+      'top-right': 'Top right',
+      'top-center': 'Top center',
+      'bottom-center': 'Bottom center',
+      'bottom-right': 'Bottom right',
     },
   },
 ] as const satisfies readonly ParamDef[];

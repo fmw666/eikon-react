@@ -44,7 +44,7 @@ const DEFAULT_VARIANTS = {
   design: 'default',
   layout: 'stacked',
   ui: 'animate-ui',
-  toast: 'default',
+  toastPosition: 'top-right',
 } as const;
 
 /**

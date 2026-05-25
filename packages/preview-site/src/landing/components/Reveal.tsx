@@ -58,7 +58,6 @@ import {
   useRef,
   type CSSProperties,
   type ReactNode,
-  type Ref,
 } from 'react';
 
 import { getLastNavTimestamp } from '../nav/route';
@@ -217,7 +216,7 @@ export function Reveal({
 
   return (
     <Tag
-      ref={ref as Ref<HTMLElement>}
+      ref={ref as React.RefObject<never>}
       className={mergedClass}
       style={mergedStyle}
     >

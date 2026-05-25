@@ -30,7 +30,7 @@ interface BuildRequestBody {
   design?: string;
   layout?: string;
   ui?: string;
-  toast?: string;
+  toastPosition?: string;
 }
 
 function normalizeInputs(body: BuildRequestBody): BuildInputs {
@@ -41,7 +41,7 @@ function normalizeInputs(body: BuildRequestBody): BuildInputs {
     design: String(body.design ?? DEFAULT_INPUTS.design),
     layout: String(body.layout ?? DEFAULT_INPUTS.layout),
     ui: String(body.ui ?? DEFAULT_INPUTS.ui),
-    toast: String(body.toast ?? DEFAULT_INPUTS.toast),
+    toastPosition: String(body.toastPosition ?? DEFAULT_INPUTS.toastPosition),
   };
 }
 

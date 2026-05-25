@@ -26,7 +26,7 @@ interface BuildInputs {
   design: string;
   layout: string;
   ui: string;
-  toast: string;
+  toastPosition: string;
 }
 
 const KNOWN_PLATFORMS: ReadonlySet<DevicePlatform> = new Set([
@@ -315,7 +315,7 @@ function selectBuildInputs(s: ParamsStore): BuildInputs {
     design: String(s.state.design),
     layout: String(s.state.layout),
     ui: String(s.state.ui),
-    toast: String(s.state.toast),
+    toastPosition: String(s.state.toastPosition),
   };
 }
 

@@ -12,7 +12,7 @@ This template adopts the **animate-ui** philosophy: shadcn-style primitives that
 
 ## Where primitives live
 
-- All ui primitives live in `src/shared/ui/`. Each primitive is one file named in lowercase (`button.tsx`, `dialog.tsx`, `tabs.tsx`, `card.tsx`, `toaster.tsx`). The one exception is `toaster.tsx`: it is a dispatcher that re-exports one of seven sibling `*-toaster.tsx` files under `src/shared/ui/toaster/`, picked by the `--toast` variant axis (see "Toast notifications" below).
+- All ui primitives live in `src/shared/ui/`. Each primitive is one file named in lowercase (`button.tsx`, `dialog.tsx`, `tabs.tsx`, `card.tsx`, `toaster.tsx`).
 - Primitives are **never** feature-specific. Anything visual that exists only inside one feature lives in `features/<feature>/components/`.
 
 ## Adding a new primitive
@@ -39,13 +39,12 @@ For a globally-openable Modal driven by a store (auth, role switcher, app-wide c
 
 These three primitives + the feature-level Modal pattern are showcased end-to-end in `features/examples`: `DialogShowcasePage` (basics / sizes / nested / fullscreen), `SheetShowcasePage` (4 sides + scrollable body), `CommandShowcasePage` (⌘K + inline) and `SignInModalShowcasePage` (mount + 2 triggers). Use those pages as runnable references when extending behaviour.
 
-## Toast notifications (`toast` variant axis)
+## Toast notifications
 
-- Toasts are mounted exactly once in [src/app/providers.tsx](../../src/app/providers.tsx) via `<Toaster />` from `@/shared/ui/toaster`. Business code fires events imperatively via `import { toast } from '@/shared/ui/toaster'` (`toast.success`, `toast.error`, `toast.promise`, …). The imperative API surface comes from [`sonner`](https://sonner.emilkowal.ski/) and is **identical across every preset** — switching presets never touches feature code.
-- The template ships seven scaffold-time toast presets, each a thin Sonner wrapper varying position / chrome / classNames: `default` (top-right, richColors), `minimal` (bottom-center, no chrome), `apple` (top-center frosted banner), `glass` (top-right glassmorphism), `terminal` (bottom-left mono on dark), `floating-bar` (bottom-center wide pill), and `stacked-cards` (bottom-right `expand=true`). Each lives in its own `src/shared/ui/toaster/<name>-toaster.tsx` with a first-line `@eikon:variant(toast=<value>) file` marker, and the dispatcher at `src/shared/ui/toaster.tsx` picks exactly one to re-export as `Toaster` via `.at(0)!`. The CLI's `--toast <value>` flag keeps only the chosen sibling and strips the rest. This is the same dispatcher pattern used by `app/layouts/RootLayout.tsx` for the `layout` axis.
-- Preset card styling MUST consume design tokens (`bg-[var(--color-card)]`, `border-[var(--color-border)]`, `text-[var(--color-card-foreground)]`, `shadow-lg`) so the active design preset and dark mode flow through automatically. The deliberate exception is `terminal-toaster.tsx`, which fixes its own dark neutral background as part of the preset's identity.
-- Adding a new toast preset, switching the default, or tweaking an existing preset are all covered step-by-step in [skills/customize-toast/SKILL.md](../skills/customize-toast/SKILL.md) — read it before editing `toaster.tsx` or its sibling directory.
-- The known-value list lives in three places that MUST stay in lock-step: the marker comments + sibling files, `VARIANT_CHOICES.toast` in [`packages/create-eikon-react/src/index.ts`](../../../create-eikon-react/src/index.ts), and `toast.values` in [`packages/preview-site/src/lib/params-schema.ts`](../../../preview-site/src/lib/params-schema.ts).
+- Toasts are mounted exactly once in [src/app/providers.tsx](../../src/app/providers.tsx) via `<Toaster />` from `@/shared/ui/toaster`. Business code fires events imperatively via `import { toast } from '@/shared/ui/toaster'` (`toast.success`, `toast.error`, `toast.promise`, …). The imperative API surface comes from [`sonner`](https://sonner.emilkowal.ski/).
+- Toast **styling** is design-driven — it reads CSS tokens (`--color-card`, `--color-border`, `--radius-md`, `--surface-border-width`) that the active design preset already controls. No separate style files exist; the design preset determines the look automatically.
+- Toast **position** is the only user-facing config (`--toast-position`): `top-right` (default), `top-center`, `bottom-center`, `bottom-right`. Position is wired via `@eikon:variant(toastPosition=...)` markers inside `toaster.tsx`.
+- Tweaking toast styling or position is covered in [skills/customize-toast/SKILL.md](../skills/customize-toast/SKILL.md).
 
 ## When to use `motion/react`
 

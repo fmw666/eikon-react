@@ -70,15 +70,7 @@ const VARIANT_CHOICES = {
     'bottom-tabs-fab',
   ] as const,
   ui: ['radix', 'shadcn-style', 'animate-ui'] as const,
-  toast: [
-    'default',
-    'minimal',
-    'apple',
-    'glass',
-    'terminal',
-    'floating-bar',
-    'stacked-cards',
-  ] as const,
+  toastPosition: ['top-right', 'top-center', 'bottom-center', 'bottom-right'] as const,
 } satisfies Record<string, readonly string[]>;
 
 type VariantAxis = keyof typeof VARIANT_CHOICES;
@@ -125,7 +117,7 @@ const PLATFORM_OVERRIDES: Record<
   },
   design: {},
   ui: {},
-  toast: {},
+  toastPosition: {},
 };
 
 function getEffectiveValues(

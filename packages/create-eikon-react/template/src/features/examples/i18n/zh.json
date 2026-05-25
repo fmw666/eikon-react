@@ -76,9 +76,9 @@
   },
   "pages": {
     "toaster": {
-      "title": "Toaster",
-      "description": "模板自带 7 种基于 Sonner 的 Toaster 预设。在 scaffold 出的项目里 CLI 会只保留你选中的那一种；此处可以并排预览所有 variant。",
-      "currentLabel": "当前预设",
+      "title": "Toast",
+      "description": "设计驱动的 Sonner 提示框，支持可配置的位置。Toast 样式自动跟随当前设计预设；切换位置以预览不同的弹出方位。",
+      "currentLabel": "位置",
       "fireSuccess": "触发 success",
       "fireError": "触发 error",
       "fireInfo": "触发 info",

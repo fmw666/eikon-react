@@ -2,7 +2,7 @@
 
 This document explains **why** the Eikon React template uses a feature-first layout and **how** the architectural boundaries are enforced. It is reproduced (in shorter form, as a non-negotiable rule) in [packages/template-react/.agent/rules/00-architecture.md](../packages/template-react/.agent/rules/00-architecture.md); read that file too if you are an AI agent acting on the codebase.
 
-> Looking for v1 (pre-monorepo) design notes — Providers tuning, performance work, Toast integration, service-layer architecture? They live under [./legacy/](./legacy/) as archived reference material. They do **not** describe the current v2 implementation.
+> Looking for v1 (pre-monorepo) design notes — Providers tuning, performance work, service-layer architecture? They live under [./legacy/](./legacy/) as archived reference material. They do **not** describe the current v2 implementation.
 
 ## Motivation
 

@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { coercePlatform } from '@/lib/params-schema';
 import { useShellStore } from '@/shell/store';
 
-import { useI18n } from '../../theme/i18n';
+import { type I18nKey, useI18n } from '../../theme/i18n';
 import { type PlatformOption } from './constants';
 import { WebIcon, DesktopIcon, MobileIcon } from './icons';
 import { StackedStage } from './StackedStage';
@@ -93,7 +93,7 @@ function CompactPlatformNav({
   options: ReadonlyArray<PlatformOption>;
   current: string;
   onSelect: (p: string) => void;
-  t: (key: string) => string;
+  t: (key: I18nKey) => string;
 }) {
   const activeIdx = options.findIndex((o) => o.value === current);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
