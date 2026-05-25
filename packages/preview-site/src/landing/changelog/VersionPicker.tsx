@@ -190,7 +190,7 @@ function Dropdown({
         <ChevronDown />
       </summary>
 
-      <div className="absolute left-0 top-9 z-30 max-h-72 w-[min(16rem,calc(100vw-2rem))] overflow-auto rounded-md border border-[var(--border-1)] bg-[var(--surface-2)] py-1 shadow-lg">
+      <div className="eikon-scroll-dropdown absolute left-0 top-9 z-30 max-h-72 w-[min(16rem,calc(100vw-2rem))] overflow-auto rounded-md border border-[var(--border-1)] bg-[var(--surface-2)] py-1 shadow-lg">
         {releases.length === 0 ? (
           <div className="px-3 py-2 text-xs text-[var(--fg-3)]">
             No releases

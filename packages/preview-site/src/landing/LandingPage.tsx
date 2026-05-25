@@ -284,7 +284,7 @@ function HomeRoute() {
   //      shows the divider line "ahead of" the section it's
   //      dividing — keeps the rhythm consistent on slow scrolls.
   return (
-    <main>
+    <main className="eikon-landing">
       <Hero onPrimaryCta={() => scrollToId(PLATFORM_PICKER_ANCHOR_ID)} />
       <Reveal variant="rise-scale">
         <PlatformPicker />

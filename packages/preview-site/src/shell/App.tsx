@@ -109,7 +109,7 @@ export function PlaygroundShell() {
   const isError = buildStatus === 'error';
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--border-1)] bg-[var(--surface-1)]">
+    <div className="eikon-playground flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--border-1)] bg-[var(--surface-1)]">
       <UrlSync />
 
       <Toolbar

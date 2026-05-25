@@ -84,7 +84,7 @@ export function PanelContent({ controller, sections, floating }: PanelContentPro
         />
       </div>
 
-      <div className="flex h-[calc(100%-49px)] min-h-0 flex-col gap-5 p-4 sm:p-5">
+      <div className="eikon-scroll-panel flex h-[calc(100%-49px)] min-h-0 flex-col gap-5 p-4 sm:p-5">
         {sections.map((section) => (
           <SidebarSection key={section.id} section={section} />
         ))}

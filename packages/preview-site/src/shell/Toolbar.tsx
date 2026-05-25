@@ -469,6 +469,7 @@ function CompactToolbar({
           <div
             role="menu"
             aria-label="Toolbar overflow"
+            className="eikon-scroll-dropdown"
             style={{
               position: 'absolute',
               top: 'calc(100% + 6px)',

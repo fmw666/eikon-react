@@ -138,7 +138,7 @@ export function SidebarSection({ section }: { section: SidebarSectionSpec }) {
           <span>{section.title}</span>
         </h3>
       )}
-      <div className={'min-h-0 ' + (section.fill ? 'flex flex-1 flex-col overflow-y-auto' : '')}>
+      <div className={'min-h-0 ' + (section.fill ? 'eikon-scroll-panel flex flex-1 flex-col overflow-y-auto' : '')}>
         {section.children}
       </div>
     </section>

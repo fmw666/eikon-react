@@ -84,8 +84,16 @@ export const ScaledDeviceShell = memo(function ScaledDeviceShell({
   const overlayStyle =
     platform === 'mobile' ? OVERLAY_STYLE_MOBILE : OVERLAY_STYLE_OTHER;
 
+  const deviceClass =
+    platform === 'mobile'
+      ? 'eikon-device-mobile'
+      : platform === 'desktop'
+        ? 'eikon-device-desktop'
+        : 'eikon-device-web';
+
   const renderScreen = (screenStyle: CSSProperties) => (
     <div
+      className={deviceClass}
       style={{
         ...screenStyle,
         position: 'relative',

@@ -35,6 +35,74 @@ const KNOWN_PLATFORMS: ReadonlySet<DevicePlatform> = new Set([
   'mobile',
 ]);
 
+const SCROLLBAR_STYLE_ID = 'eikon-device-scrollbar';
+
+function getDeviceScrollbarCSS(platform: DevicePlatform): string {
+  if (platform === 'mobile') {
+    return `
+      html, body, * {
+        scrollbar-width: none !important;
+      }
+      ::-webkit-scrollbar {
+        display: none !important;
+      }
+    `;
+  }
+  if (platform === 'desktop') {
+    return `
+      * { scrollbar-width: thin; scrollbar-color: rgba(120,120,128,0.3) transparent; }
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(120,120,128,0.25);
+        border-radius: 999px;
+        border: 1.5px solid transparent;
+        background-clip: padding-box;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(120,120,128,0.5);
+        border: 1.5px solid transparent;
+        background-clip: padding-box;
+      }
+      ::-webkit-scrollbar-corner { background: transparent; }
+    `;
+  }
+  // web — Chrome style
+  return `
+    * { scrollbar-width: thin; scrollbar-color: rgba(100,100,110,0.35) rgba(240,240,240,0.4); }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(240,240,242,0.5); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100,100,110,0.3);
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100,100,110,0.55);
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+    ::-webkit-scrollbar-corner { background: transparent; }
+  `;
+}
+
+function injectScrollbarStyle(iframe: HTMLIFrameElement, platform: DevicePlatform): void {
+  try {
+    const doc = iframe.contentDocument;
+    if (!doc) return;
+    let style = doc.getElementById(SCROLLBAR_STYLE_ID) as HTMLStyleElement | null;
+    if (!style) {
+      style = doc.createElement('style');
+      style.id = SCROLLBAR_STYLE_ID;
+      doc.head.appendChild(style);
+    }
+    style.textContent = getDeviceScrollbarCSS(platform);
+  } catch {
+    // Cross-origin or iframe not ready — silently skip
+  }
+}
+
 /**
  * Coerce the param-store's free-form `platform` string into the union
  * `DeviceShell` expects. Anything unknown falls back to `web` so the
@@ -539,6 +607,7 @@ export function PreviewFrame() {
               // doesn't accidentally mark B as ready off A's onLoad.
               onLoad={() => {
                 if (lastReadyHash) setIframeReadyHash(lastReadyHash);
+                if (iframeRef.current) injectScrollbarStyle(iframeRef.current, platform);
               }}
             />
           )}

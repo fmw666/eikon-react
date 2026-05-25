@@ -93,7 +93,7 @@ export function WebShell({
       aria-label="Chrome browser preview"
     >
       <ChromeTopChrome domain={domain} title={title} />
-      <div style={{ flex: 1, position: 'relative' }}>
+      <div className="eikon-device-web" style={{ flex: 1, position: 'relative' }}>
         {children({
           width: '100%',
           height: '100%',

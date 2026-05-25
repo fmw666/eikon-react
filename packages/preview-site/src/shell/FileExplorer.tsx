@@ -4,6 +4,7 @@ import { Tree, type NodeApi, type NodeRendererProps } from 'react-arborist';
 
 import { getFileIcon, getFolderIcon } from './fileIcons';
 import { useUiStore } from './store';
+import { useScrollFade } from './useScrollFade';
 
 interface FileNode {
   id: string;
@@ -300,6 +301,7 @@ export function FileExplorer() {
   const [tree, setTree] = useState<FileNode[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
+  useScrollFade(wrapRef);
   const [size, setSize] = useState<{ w: number; h: number }>({
     w: 240,
     h: 400,
@@ -424,6 +426,7 @@ export function FileExplorer() {
       </div>
       <div
         ref={wrapRef}
+        className="eikon-scroll-panel"
         style={{
           flex: 1,
           overflow: 'hidden',

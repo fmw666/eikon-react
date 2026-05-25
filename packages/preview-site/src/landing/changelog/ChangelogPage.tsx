@@ -63,7 +63,7 @@ export default function ChangelogPage() {
   // box on big monitors.
   return (
     <main
-      className="mx-auto flex w-full max-w-[1400px] flex-col gap-6 px-4 pb-12 sm:gap-8 sm:px-6 sm:pb-16 lg:px-8"
+      className="eikon-landing mx-auto flex w-full max-w-[1400px] flex-col gap-6 px-4 pb-12 sm:gap-8 sm:px-6 sm:pb-16 lg:px-8"
       // `100dvh` honours iOS Safari's collapsing toolbar so the page
       // never overshoots the visible viewport on first paint. The
       // 5rem subtraction matches the floating Nav region height.

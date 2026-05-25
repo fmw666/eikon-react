@@ -1,8 +1,9 @@
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import CodeMirror, { type Extension } from '@uiw/react-codemirror';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useUiStore } from './store';
+import { useScrollFade } from './useScrollFade';
 
 interface FileResponse {
   hash: string;
@@ -91,6 +92,8 @@ export function CodeView() {
   const hash = useUiStore((s) => s.currentHash);
   const selectedFile = useUiStore((s) => s.selectedFile);
   const closeFile = useUiStore((s) => s.closeFile);
+  const codeWrapRef = useRef<HTMLDivElement | null>(null);
+  useScrollFade(codeWrapRef);
 
   const [file, setFile] = useState<FileResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -248,7 +251,7 @@ export function CodeView() {
           )}
         </span>
       </div>
-      <div style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
+      <div ref={codeWrapRef} className="eikon-scroll-code" style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
         {!selectedFile && (
           <div
             style={{

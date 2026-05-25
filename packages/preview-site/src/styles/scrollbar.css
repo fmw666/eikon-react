@@ -1,0 +1,337 @@
+/* ===========================================================================
+ * Scrollbar system — device-aware + panel-aware
+ *
+ * Architecture:
+ *
+ *   A) DEVICE CONTEXTS — applied to device-shell screen areas and
+ *      PlatformPicker ScreenContent. Each emulates the real device's
+ *      native scrollbar behavior:
+ *
+ *        .eikon-device-mobile   → iOS: scrollbars completely hidden
+ *        .eikon-device-desktop  → macOS: thin overlay, fades on idle
+ *        .eikon-device-web      → Chrome: standard visible, rounded
+ *
+ *   B) PANEL CONTEXTS — for the playground's tool panels (file tree,
+ *      code editor, sidebar, dropdowns). Dark-surface-optimized:
+ *
+ *        .eikon-scroll-panel    → 6px, expands to 8px on hover
+ *        .eikon-scroll-code     → 6px both axes (CodeMirror)
+ *        .eikon-scroll-dropdown → 4px ultra-thin (floating menus)
+ *
+ *   C) INTERACTION STATE — `.is-scrolling` is toggled by a JS hook
+ *      during active scroll; when absent, thumb fades to low opacity.
+ *
+ * The playground iframe has its own document and is NOT affected by
+ * these rules — the template owns its own scrollbar styling.
+ * =========================================================================== */
+
+/* ===========================================================================
+ * A) DEVICE CONTEXTS
+ * =========================================================================== */
+
+/* ---- Mobile: iOS — no visible scrollbar ---- */
+
+.eikon-device-mobile,
+.eikon-device-mobile * {
+  scrollbar-width: none;
+}
+
+.eikon-device-mobile::-webkit-scrollbar,
+.eikon-device-mobile *::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---- Desktop: macOS overlay — thin, fades on idle ---- */
+
+.eikon-device-desktop,
+.eikon-device-desktop * {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--fg-4) 40%, transparent) transparent;
+}
+
+.eikon-device-desktop::-webkit-scrollbar,
+.eikon-device-desktop *::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.eikon-device-desktop::-webkit-scrollbar-track,
+.eikon-device-desktop *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.eikon-device-desktop::-webkit-scrollbar-thumb,
+.eikon-device-desktop *::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--fg-4) 30%, transparent);
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 300ms ease, opacity 300ms ease;
+}
+
+.eikon-device-desktop::-webkit-scrollbar-thumb:hover,
+.eikon-device-desktop *::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--fg-4) 70%, transparent);
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+}
+
+.eikon-device-desktop::-webkit-scrollbar-corner,
+.eikon-device-desktop *::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Idle state: thumb nearly invisible (macOS overlay behaviour) */
+.eikon-device-desktop:not(.is-scrolling)::-webkit-scrollbar-thumb,
+.eikon-device-desktop:not(.is-scrolling) *::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--fg-4) 8%, transparent);
+  background-clip: padding-box;
+}
+
+/* Active scroll: thumb visible */
+.eikon-device-desktop.is-scrolling::-webkit-scrollbar-thumb,
+.eikon-device-desktop.is-scrolling *::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--fg-4) 50%, transparent);
+  background-clip: padding-box;
+}
+
+/* ---- Web: Chrome-style — always visible, standard width ---- */
+
+.eikon-device-web,
+.eikon-device-web * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-2) color-mix(in srgb, var(--surface-2) 50%, transparent);
+}
+
+.eikon-device-web::-webkit-scrollbar,
+.eikon-device-web *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.eikon-device-web::-webkit-scrollbar-track,
+.eikon-device-web *::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--surface-2) 40%, transparent);
+  border-radius: 999px;
+}
+
+.eikon-device-web::-webkit-scrollbar-thumb,
+.eikon-device-web *::-webkit-scrollbar-thumb {
+  background: var(--border-2);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 200ms ease;
+}
+
+.eikon-device-web::-webkit-scrollbar-thumb:hover,
+.eikon-device-web *::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-4);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.eikon-device-web::-webkit-scrollbar-corner,
+.eikon-device-web *::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ===========================================================================
+ * B) PANEL CONTEXTS — tool surfaces in the playground
+ * =========================================================================== */
+
+/* ---- Panel: file tree, sidebar, changelog diff ---- */
+
+.eikon-scroll-panel {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--fg-4) 40%, transparent) transparent;
+}
+
+.eikon-scroll-panel::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  transition: width 200ms ease;
+}
+
+.eikon-scroll-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.eikon-scroll-panel::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--fg-4) 35%, transparent);
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 200ms ease;
+}
+
+.eikon-scroll-panel::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-4);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+.eikon-scroll-panel::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Idle: shrink + fade */
+.eikon-scroll-panel:not(.is-scrolling):not(:hover)::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.eikon-scroll-panel:not(.is-scrolling):not(:hover)::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--fg-4) 15%, transparent);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+/* ---- Code: CodeMirror scroller — both axes ---- */
+
+.eikon-scroll-code,
+.eikon-scroll-code .cm-scroller {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--fg-4) 35%, transparent) transparent;
+}
+
+.eikon-scroll-code::-webkit-scrollbar,
+.eikon-scroll-code .cm-scroller::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.eikon-scroll-code::-webkit-scrollbar-track,
+.eikon-scroll-code .cm-scroller::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.eikon-scroll-code::-webkit-scrollbar-thumb,
+.eikon-scroll-code .cm-scroller::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--fg-4) 30%, transparent);
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 200ms ease;
+}
+
+.eikon-scroll-code::-webkit-scrollbar-thumb:hover,
+.eikon-scroll-code .cm-scroller::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--fg-4) 65%, transparent);
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+}
+
+.eikon-scroll-code::-webkit-scrollbar-corner,
+.eikon-scroll-code .cm-scroller::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Idle: dim */
+.eikon-scroll-code:not(.is-scrolling):not(:hover)::-webkit-scrollbar-thumb,
+.eikon-scroll-code:not(.is-scrolling):not(:hover) .cm-scroller::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--fg-4) 12%, transparent);
+  background-clip: padding-box;
+}
+
+/* ---- Dropdown: floating menus, ultra-thin ---- */
+
+.eikon-scroll-dropdown {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--fg-4) 30%, transparent) transparent;
+}
+
+.eikon-scroll-dropdown::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.eikon-scroll-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.eikon-scroll-dropdown::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--fg-4) 35%, transparent);
+  border-radius: 999px;
+  transition: background-color 150ms ease;
+}
+
+.eikon-scroll-dropdown::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--fg-4) 60%, transparent);
+}
+
+.eikon-scroll-dropdown::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ===========================================================================
+ * C) GLOBAL FALLBACK — playground + landing descendants that don't have
+ *    an explicit scroll class still get thin, themed scrollbars.
+ *    Lower specificity than the above, so explicit classes always win.
+ * =========================================================================== */
+
+.eikon-playground *,
+.eikon-landing * {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--fg-4) 30%, transparent) transparent;
+}
+
+.eikon-playground *::-webkit-scrollbar,
+.eikon-landing *::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.eikon-playground *::-webkit-scrollbar-track,
+.eikon-landing *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.eikon-playground *::-webkit-scrollbar-thumb,
+.eikon-landing *::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--fg-4) 28%, transparent);
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 200ms ease;
+}
+
+.eikon-playground *::-webkit-scrollbar-thumb:hover,
+.eikon-landing *::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-4);
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+}
+
+.eikon-playground *::-webkit-scrollbar-corner,
+.eikon-landing *::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ===========================================================================
+ * D) KNOWN COMPONENT OVERRIDES — specific elements that need the
+ *    dropdown treatment but are styled via their own CSS class
+ *    (not via a React className prop on the element).
+ * =========================================================================== */
+
+.eikon-slot-dropdown::-webkit-scrollbar {
+  width: 4px;
+}
+
+.eikon-slot-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.eikon-slot-dropdown::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--fg-4) 35%, transparent);
+  border-radius: 999px;
+}
+
+.eikon-slot-dropdown::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--fg-4) 60%, transparent);
+}
+
+.eikon-slot-dropdown {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--fg-4) 35%, transparent) transparent;
+}

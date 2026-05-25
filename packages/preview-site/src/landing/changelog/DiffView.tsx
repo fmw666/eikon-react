@@ -196,6 +196,7 @@ export function DiffView({
 
       {/* Body */}
       <div
+        className="eikon-scroll-panel"
         style={{
           // Cap super-long diffs at ~70vh so a 5000-line patch
           // doesn't stretch the page taller than the viewport; once

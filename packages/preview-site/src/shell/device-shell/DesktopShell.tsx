@@ -45,7 +45,7 @@ export function DesktopShell({
       aria-label="macOS window preview"
     >
       <TitleBar title={title} />
-      <div style={{ flex: 1, position: 'relative' }}>
+      <div className="eikon-device-desktop" style={{ flex: 1, position: 'relative' }}>
         {children({
           width: '100%',
           height: '100%',

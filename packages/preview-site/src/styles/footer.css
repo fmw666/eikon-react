@@ -1,30 +1,4 @@
-/* ---------------------------------------------------------------------------
- * Custom scrollbar styling (dark surfaces). Kept minimal — the playground
- * iframe still uses the host browser’s defaults, this only applies to the
- * landing chrome / file tree / params panel.
- * --------------------------------------------------------------------------- */
-
-.dark *::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-.dark *::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.dark *::-webkit-scrollbar-thumb {
-  background: var(--border-2);
-  border-radius: 999px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-.dark *::-webkit-scrollbar-thumb:hover {
-  background: var(--fg-4);
-  background-clip: padding-box;
-  border: 2px solid transparent;
-}
+/* Scrollbar styling moved to scrollbar.css */
 
 /* ------------------------------------------------------------------
  * eikon-footer-shine — slow horizontal sweep along the footer hairline
