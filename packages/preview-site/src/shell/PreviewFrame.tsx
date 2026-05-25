@@ -5,8 +5,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { type ParamsStore } from '@/lib/params-store';
 
 import { DeviceShell, type DevicePlatform } from './device-shell';
-import { MOBILE_SCREEN, DESKTOP_SCREEN } from './device-shell/types';
-import { PHONE_GEOMETRY } from './device-shell/MobileShell';
+import { MOBILE_SCREEN, DESKTOP_SCREEN, PHONE_GEOMETRY } from './device-shell/types';
 import { TITLE_BAR_HEIGHT } from './device-shell/DesktopShell';
 import { CHROME_TAB_BAR_HEIGHT, CHROME_TOOLBAR_HEIGHT } from './device-shell/WebShell';
 import { useShellStore, useUiStore } from './store';

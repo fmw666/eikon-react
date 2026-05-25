@@ -339,6 +339,7 @@ function InteractiveFlower({ onBurst }: { onBurst: () => void }) {
 
     setTimeout(() => setBlooming(false), 600);
     setTimeout(() => setParticles([]), 1200);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

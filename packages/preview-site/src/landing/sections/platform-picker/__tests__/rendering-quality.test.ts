@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { INNER_BASE_STYLE } from '../ScaledDeviceShell';
+import { INNER_BASE_STYLE } from '../constants';
 
 describe('ScaledDeviceShell rendering quality', () => {
   it('INNER_BASE_STYLE includes blur(0px) filter for anti-aliasing on GPU layers', () => {

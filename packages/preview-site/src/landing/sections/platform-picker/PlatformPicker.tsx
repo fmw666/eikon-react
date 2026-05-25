@@ -108,6 +108,7 @@ function CompactPlatformNav({
     setIndicator({ left: el.offsetLeft, width: el.offsetWidth });
   };
 
+  /* eslint-disable react-hooks/exhaustive-deps */
   useLayoutEffect(() => {
     recalc();
     if (!enableTransition) {
@@ -118,6 +119,7 @@ function CompactPlatformNav({
   useEffect(() => {
     document.fonts.ready.then(() => recalc());
   }, [activeIdx]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   useEffect(() => {
     if (isInitial.current) {

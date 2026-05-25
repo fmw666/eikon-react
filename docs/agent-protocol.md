@@ -23,15 +23,22 @@ This document specifies the `.agent/` directory shape that every project scaffol
     │   ├── 40-state-management.md
     │   ├── 50-animate-ui.md
     │   ├── 60-i18n.md
-    │   └── 70-commit-style.md
+    │   ├── 70-commit-style.md
+    │   ├── 80-quality-system.md
+    │   └── 90-platform-targets.md
     └── skills/              # task playbooks, looked up by relevance
-        ├── add-feature/SKILL.md
-        ├── add-page/SKILL.md
         ├── add-animate-ui-component/SKILL.md
-        ├── add-zustand-store/SKILL.md
+        ├── add-data-feature/SKILL.md
+        ├── add-feature/SKILL.md
         ├── add-i18n-keys/SKILL.md
-        ├── write-component-test/SKILL.md
-        └── enable-supabase/SKILL.md
+        ├── add-locale/SKILL.md
+        ├── add-modal/SKILL.md
+        ├── add-page/SKILL.md
+        ├── add-zustand-store/SKILL.md
+        ├── customize-design/SKILL.md
+        ├── customize-toast/SKILL.md
+        ├── enable-supabase/SKILL.md
+        └── write-component-test/SKILL.md
 ```
 
 ## How agents are expected to use it

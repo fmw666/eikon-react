@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 import type { Platform } from '@/lib/params-schema';
 import type { DevicePlatform } from '@/shell/device-shell';
@@ -24,6 +24,20 @@ export const STACK_SLOT_SCALE: Record<StackSlot, number> = {
   center: 1,
   left: 0.82,
   right: 0.82,
+};
+
+export const INNER_BASE_STYLE: CSSProperties = {
+  transformOrigin: 'center center',
+  transition: 'transform 420ms cubic-bezier(0.22, 1, 0.36, 1)',
+  willChange: 'transform',
+  backfaceVisibility: 'hidden',
+  WebkitBackfaceVisibility: 'hidden',
+  // DO NOT REMOVE — forces Chromium to use high-quality AA on this GPU layer;
+  // without it, backface-visibility:hidden degrades border-radius rendering
+  // on scaled/rotated side cards (visible as wavy/jagged device borders).
+  filter: 'blur(0px)',
+  pointerEvents: 'auto',
+  cursor: 'pointer',
 };
 
 export function getSlot(idx: number, activeIdx: number, count: number): StackSlot {

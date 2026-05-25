@@ -23,6 +23,7 @@ out
 # Caches
 .cache
 .parcel-cache
+.preview-cache
 .turbo
 .vite
 .eslintcache

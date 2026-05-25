@@ -13,6 +13,7 @@ import { DeviceShell, type DevicePlatform } from '@/shell/device-shell';
 import { ActiveAmbience } from './ActiveAmbience';
 import {
   type StackSlot,
+  INNER_BASE_STYLE,
   SCREEN_DIM_SCRIM,
   SCREEN_DIM_SCRIM_INACTIVE,
   STACK_SLOT_SCALE,
@@ -21,20 +22,6 @@ import { IMacHardwareShell, LaptopHardwareShell } from './HardwareShells';
 
 const OVERLAY_STYLE_MOBILE: CSSProperties = { inset: 10, borderRadius: 32 };
 const OVERLAY_STYLE_OTHER: CSSProperties = { inset: 0, borderRadius: 12 };
-
-export const INNER_BASE_STYLE: CSSProperties = {
-  transformOrigin: 'center center',
-  transition: 'transform 420ms cubic-bezier(0.22, 1, 0.36, 1)',
-  willChange: 'transform',
-  backfaceVisibility: 'hidden',
-  WebkitBackfaceVisibility: 'hidden',
-  // DO NOT REMOVE — forces Chromium to use high-quality AA on this GPU layer;
-  // without it, backface-visibility:hidden degrades border-radius rendering
-  // on scaled/rotated side cards (visible as wavy/jagged device borders).
-  filter: 'blur(0px)',
-  pointerEvents: 'auto',
-  cursor: 'pointer',
-};
 
 export const ScaledDeviceShell = memo(function ScaledDeviceShell({
   slot,

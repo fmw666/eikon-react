@@ -271,13 +271,15 @@ export function Footer() {
     };
 
     // iOS 13+ requires permission from a user gesture
-    const needsPermission =
-      typeof (DeviceOrientationEvent as any).requestPermission === 'function';
+    const DOE = DeviceOrientationEvent as unknown as {
+      requestPermission?: () => Promise<string>;
+    };
+    const needsPermission = typeof DOE.requestPermission === 'function';
 
     if (needsPermission) {
       const handleTap = () => {
-        (DeviceOrientationEvent as any)
-          .requestPermission()
+        DOE
+          .requestPermission!()
           .then((state: string) => {
             if (state === 'granted') startListening();
           })

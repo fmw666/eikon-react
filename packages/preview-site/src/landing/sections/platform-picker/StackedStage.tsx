@@ -205,6 +205,7 @@ const TabNav = memo(function TabNav({
     });
   };
 
+  /* eslint-disable react-hooks/exhaustive-deps */
   useLayoutEffect(() => {
     recalcIndicator();
     if (!enableTransition) {
@@ -215,6 +216,7 @@ const TabNav = memo(function TabNav({
   useEffect(() => {
     document.fonts.ready.then(() => recalcIndicator());
   }, [activeIdx]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   useEffect(() => {
     if (isInitial.current) {
