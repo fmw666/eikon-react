@@ -1147,88 +1147,196 @@
 /* @eikon:variant(design=glassmorphism) end */
 
 /* @eikon:variant(design=liquid-glass) begin */
-/* Liquid Glass — Apple iOS 26 style, heavy backdrop-blur(24px), ultra-
- * translucent panels, specular 0.5px edge glow, generous 1.5rem radii.
- * Surfaces refract content behind them like thick optical glass. Hover
- * lifts with a soft luminous halo; active settles flat. */
+/* Liquid Glass — Apple iOS 26 "water-droplet on photo" treatment, pushed
+ * to its 2026 extreme. Heavy backdrop-blur(28px) + saturate(180%) lets
+ * surfaces refract a vivid forest/photo backdrop like a thick optical
+ * lens. Each surface is built from a 4-layer box-shadow:
+ *
+ *   1. outer ambient drop shadow (depth)
+ *   2. inset hairline rim (full-perimeter 0.5px specular ring)
+ *   3. inset top-edge white glint (the streak running across the top
+ *      of every iOS 26 capsule — sun catching the meniscus)
+ *   4. inset bottom-edge cool blue rim (chromatic refraction at the
+ *      far edge, the "water lens" giveaway)
+ *
+ * Because Card/Button consume var(--shadow-sm) and var(--surface-*-shadow)
+ * the whole droplet stack is achievable without touching component files.
+ * Capsule radii (1.75rem) + ultra-soft 0.5px borders push the surface
+ * into "pill" territory; hover flares a luminous halo, active settles. */
 @theme {
-  --color-background: oklch(0.97 0.005 240);
-  --color-foreground: oklch(0.18 0.01 240);
-  --color-card: oklch(0.99 0 0 / 0.5);
-  --color-card-foreground: oklch(0.18 0.01 240);
-  --color-muted: oklch(0.95 0.005 240 / 0.6);
-  --color-muted-foreground: oklch(0.48 0.012 240);
-  --color-border: oklch(1 0 0 / 0.2);
-  --color-input: oklch(1 0 0 / 0.2);
-  --color-primary: oklch(0.55 0.2 240);
+  /* Deep forest base — leans cool-emerald (hue 155) so the saturate(180%)
+   * backdrop-filter doesn't over-yellow the foliage seen through the
+   * panels. Page chrome itself is solid; ambience comes from the body
+   * background-image gradient lower in this block. */
+  --color-background: oklch(0.24 0.04 155);
+  --color-foreground: oklch(0.97 0.005 155);
+  --color-card: oklch(0.32 0.025 155 / 0.32);
+  --color-card-foreground: oklch(0.98 0.005 155);
+  --color-muted: oklch(0.28 0.02 155 / 0.4);
+  --color-muted-foreground: oklch(0.82 0.015 155);
+  --color-border: oklch(1 0 0 / 0.18);
+  --color-input: oklch(0.28 0.02 155 / 0.45);
+  /* Primary leans iOS-blurple — it's the colored pill in the screenshot
+   * (selected toggle, play button, "Primary" CTA). Sits well against the
+   * cool emerald panels because it shares the cool side of the wheel. */
+  --color-primary: oklch(0.62 0.19 275);
   --color-primary-foreground: oklch(1 0 0);
-  --color-secondary: oklch(0.95 0.005 240 / 0.45);
-  --color-secondary-foreground: oklch(0.18 0.01 240);
-  --color-accent: oklch(0.92 0.035 200 / 0.55);
-  --color-accent-foreground: oklch(0.18 0.01 240);
-  --color-destructive: oklch(0.55 0.22 25);
+  --color-secondary: oklch(0.32 0.02 155 / 0.4);
+  --color-secondary-foreground: oklch(0.97 0.005 155);
+  --color-accent: oklch(0.42 0.06 200 / 0.45);
+  --color-accent-foreground: oklch(0.97 0.005 155);
+  --color-destructive: oklch(0.62 0.22 25);
   --color-destructive-foreground: oklch(1 0 0);
-  --color-ring: oklch(0.55 0.2 240);
-  --radius-lg: 1.5rem;
+  --color-ring: oklch(0.62 0.19 275);
+  /* Capsule radii — large enough that small cards read as fully-rounded
+   * pills. radius-lg drives Card, radius-md drives Button. */
+  --radius-lg: 1.75rem;
   --radius-md: 1rem;
-  --radius-sm: 0.625rem;
+  --radius-sm: 0.75rem;
   --font-sans:
     -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
     'Helvetica Neue', system-ui, sans-serif;
 
-  --spacing: 0.27rem;
+  --spacing: 0.28rem;
   --text-base: 1.0625rem;
   --text-base--line-height: 1.6rem;
   --font-weight-medium: 510;
   --font-weight-semibold: 600;
 
+  /* Surface stack — the meat of the droplet treatment. */
   --surface-border-width: 0.5px;
-  --surface-backdrop: blur(24px);
+  --surface-backdrop: blur(28px) saturate(180%);
   --surface-inset-shadow: none;
   --surface-ring-width: 0.5px;
-  --surface-ring-color: oklch(1 0 0 / 0.3);
-  --surface-hover-shadow: 0 10px 28px -6px oklch(0.4 0.01 240 / 0.14), 0 0 0 0.5px oklch(1 0 0 / 0.35);
-  --surface-active-shadow: 0 2px 4px oklch(0.4 0.01 240 / 0.06);
+  /* Ring sits inside the border for a doubled hairline — the second
+   * line that makes the capsule edge read as glass thickness rather
+   * than a flat outline. */
+  --surface-ring-color: oklch(1 0 0 / 0.22);
+  --surface-hover-shadow:
+    0 18px 44px -10px oklch(0 0 0 / 0.45),
+    0 0 0 0.5px oklch(1 0 0 / 0.4),
+    inset 0 1px 0 oklch(1 0 0 / 0.5),
+    inset 0 -1px 0 oklch(0.7 0.14 230 / 0.4),
+    inset 0 0 18px -4px oklch(1 0 0 / 0.18);
+  --surface-active-shadow:
+    0 4px 10px -2px oklch(0 0 0 / 0.3),
+    inset 0 1px 0 oklch(1 0 0 / 0.35),
+    inset 0 -1px 0 oklch(0.6 0.12 230 / 0.3);
 
-  --shadow-sm: 0 2px 6px oklch(0.4 0.01 240 / 0.06);
-  --shadow-md: 0 8px 20px -4px oklch(0.4 0.01 240 / 0.1);
-  --shadow-lg: 0 16px 40px -8px oklch(0.4 0.01 240 / 0.14);
+  /* Shadow utilities — every Card already ships with shadow-sm, so the
+   * 4-layer droplet stack lives here and is "free" for consumers. */
+  --shadow-sm:
+    0 10px 30px -8px oklch(0 0 0 / 0.4),
+    0 2px 6px -2px oklch(0 0 0 / 0.22),
+    inset 0 1px 0 oklch(1 0 0 / 0.42),
+    inset 0 -1px 0 oklch(0.7 0.14 230 / 0.32),
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.16);
+  --shadow-md:
+    0 14px 36px -10px oklch(0 0 0 / 0.42),
+    0 4px 10px -3px oklch(0 0 0 / 0.25),
+    inset 0 1px 0 oklch(1 0 0 / 0.45),
+    inset 0 -1px 0 oklch(0.7 0.14 230 / 0.35),
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.2);
+  --shadow-lg:
+    0 22px 56px -14px oklch(0 0 0 / 0.5),
+    0 8px 18px -6px oklch(0 0 0 / 0.28),
+    inset 0 1px 0 oklch(1 0 0 / 0.5),
+    inset 0 -1px 0 oklch(0.65 0.15 230 / 0.4),
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.24);
 
   --scrollbar-size: 10px;
-  --scrollbar-thumb: oklch(0.78 0.008 240 / 0.45);
-  --scrollbar-thumb-hover: oklch(0.5 0.012 240 / 0.65);
+  --scrollbar-thumb: oklch(1 0 0 / 0.22);
+  --scrollbar-thumb-hover: oklch(1 0 0 / 0.4);
   --scrollbar-thumb-radius: 10px;
   --scrollbar-thumb-border: 2px;
 }
 .dark {
-  --color-background: oklch(0.1 0.008 240);
-  --color-foreground: oklch(0.96 0.005 240);
-  --color-card: oklch(0.16 0.008 240 / 0.45);
-  --color-card-foreground: oklch(0.96 0.005 240);
-  --color-muted: oklch(0.2 0.008 240 / 0.5);
-  --color-muted-foreground: oklch(0.72 0.008 240);
-  --color-border: oklch(0.4 0.008 240 / 0.2);
-  --color-input: oklch(0.4 0.008 240 / 0.2);
-  --color-primary: oklch(0.72 0.18 240);
-  --color-primary-foreground: oklch(0.1 0.008 240);
-  --color-secondary: oklch(0.2 0.008 240 / 0.4);
-  --color-secondary-foreground: oklch(0.96 0.005 240);
-  --color-accent: oklch(0.27 0.04 200 / 0.55);
-  --color-accent-foreground: oklch(0.96 0.005 240);
-  --color-destructive: oklch(0.65 0.2 25);
+  /* Forest "night" — push the base darker so the droplets' inset top
+   * highlight pops harder. Keeps the same hue (155, cool emerald) so
+   * day↔night doesn't drift palette. */
+  --color-background: oklch(0.16 0.035 155);
+  --color-foreground: oklch(0.97 0.005 155);
+  --color-card: oklch(0.22 0.025 155 / 0.38);
+  --color-card-foreground: oklch(0.97 0.005 155);
+  --color-muted: oklch(0.2 0.02 155 / 0.45);
+  --color-muted-foreground: oklch(0.78 0.012 155);
+  --color-border: oklch(1 0 0 / 0.14);
+  --color-input: oklch(0.2 0.02 155 / 0.5);
+  --color-primary: oklch(0.7 0.18 275);
+  --color-primary-foreground: oklch(0.16 0.035 155);
+  --color-secondary: oklch(0.22 0.02 155 / 0.45);
+  --color-secondary-foreground: oklch(0.97 0.005 155);
+  --color-accent: oklch(0.32 0.06 200 / 0.5);
+  --color-accent-foreground: oklch(0.97 0.005 155);
+  --color-destructive: oklch(0.68 0.22 25);
   --color-destructive-foreground: oklch(1 0 0);
-  --color-ring: oklch(0.72 0.18 240);
+  --color-ring: oklch(0.7 0.18 275);
 
-  --surface-ring-color: oklch(0.6 0.08 240 / 0.2);
-  --surface-hover-shadow: 0 10px 28px -6px oklch(0 0 0 / 0.35), 0 0 0 0.5px oklch(0.6 0.08 240 / 0.25);
-  --surface-active-shadow: 0 2px 4px oklch(0 0 0 / 0.25);
+  --surface-ring-color: oklch(1 0 0 / 0.18);
+  --surface-hover-shadow:
+    0 18px 48px -10px oklch(0 0 0 / 0.6),
+    0 0 0 0.5px oklch(1 0 0 / 0.35),
+    inset 0 1px 0 oklch(1 0 0 / 0.42),
+    inset 0 -1px 0 oklch(0.6 0.14 230 / 0.45),
+    inset 0 0 22px -4px oklch(1 0 0 / 0.2);
+  --surface-active-shadow:
+    0 4px 12px -2px oklch(0 0 0 / 0.45),
+    inset 0 1px 0 oklch(1 0 0 / 0.28),
+    inset 0 -1px 0 oklch(0.55 0.12 230 / 0.35);
 
-  --shadow-sm: 0 2px 6px oklch(0 0 0 / 0.2);
-  --shadow-md: 0 8px 20px -4px oklch(0 0 0 / 0.3);
-  --shadow-lg: 0 16px 40px -8px oklch(0 0 0 / 0.4);
+  --shadow-sm:
+    0 12px 34px -10px oklch(0 0 0 / 0.55),
+    0 2px 6px -2px oklch(0 0 0 / 0.35),
+    inset 0 1px 0 oklch(1 0 0 / 0.34),
+    inset 0 -1px 0 oklch(0.6 0.14 230 / 0.38),
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.12);
+  --shadow-md:
+    0 16px 40px -12px oklch(0 0 0 / 0.58),
+    0 4px 10px -3px oklch(0 0 0 / 0.4),
+    inset 0 1px 0 oklch(1 0 0 / 0.38),
+    inset 0 -1px 0 oklch(0.55 0.14 230 / 0.42),
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.16);
+  --shadow-lg:
+    0 26px 64px -16px oklch(0 0 0 / 0.65),
+    0 8px 20px -6px oklch(0 0 0 / 0.45),
+    inset 0 1px 0 oklch(1 0 0 / 0.42),
+    inset 0 -1px 0 oklch(0.55 0.16 230 / 0.5),
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.2);
 
-  --scrollbar-thumb: oklch(0.35 0.008 240 / 0.5);
-  --scrollbar-thumb-hover: oklch(0.55 0.01 240 / 0.7);
+  --scrollbar-thumb: oklch(1 0 0 / 0.16);
+  --scrollbar-thumb-hover: oklch(1 0 0 / 0.35);
+}
+
+/* Body ambience — a layered radial-gradient stack that fakes the
+ * "photo behind the glass" depth seen in iOS 26 marketing material:
+ *
+ *   • two warm sun-spots high-left and mid-right    (golden glints)
+ *   • two cool mid-tone radials                     (depth haze)
+ *   • a deep emerald base                           (forest floor)
+ *
+ * backdrop-filter on the Card uses these gradients as its source, so
+ * the panels appear to refract real foliage even though no <img> is
+ * involved. Strip-features keeps this rule alongside its design tokens. */
+body {
+  background-color: var(--color-background);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 18% 12%, oklch(0.78 0.16 90 / 0.32), transparent 60%),
+    radial-gradient(ellipse 70% 55% at 82% 38%, oklch(0.62 0.12 130 / 0.28), transparent 65%),
+    radial-gradient(ellipse 90% 70% at 50% 95%, oklch(0.18 0.06 155 / 0.55), transparent 70%),
+    radial-gradient(circle at 30% 70%, oklch(0.45 0.1 160 / 0.35), transparent 55%),
+    radial-gradient(circle at 75% 80%, oklch(0.4 0.09 145 / 0.35), transparent 50%),
+    linear-gradient(180deg, oklch(0.3 0.05 160) 0%, oklch(0.2 0.05 155) 60%, oklch(0.14 0.04 155) 100%);
+  background-attachment: fixed;
+  background-size: cover;
+}
+.dark body {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 18% 12%, oklch(0.55 0.14 90 / 0.28), transparent 60%),
+    radial-gradient(ellipse 70% 55% at 82% 38%, oklch(0.42 0.1 130 / 0.3), transparent 65%),
+    radial-gradient(ellipse 90% 70% at 50% 95%, oklch(0.1 0.05 155 / 0.6), transparent 70%),
+    radial-gradient(circle at 30% 70%, oklch(0.28 0.08 160 / 0.4), transparent 55%),
+    radial-gradient(circle at 75% 80%, oklch(0.25 0.08 145 / 0.4), transparent 50%),
+    linear-gradient(180deg, oklch(0.18 0.04 160) 0%, oklch(0.12 0.04 155) 60%, oklch(0.08 0.03 155) 100%);
 }
 /* @eikon:variant(design=liquid-glass) end */
 
