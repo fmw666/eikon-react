@@ -110,7 +110,7 @@ function BottomTabsRootLayout() {
     <div className="flex min-h-[100dvh] flex-col">
       <header
         className={cn(
-          'sticky top-0 z-30 border-b border-[var(--color-border)]',
+          'sticky top-0 z-30 border-b-[length:var(--surface-border-width)] border-[var(--color-border)]',
           'bg-[var(--color-card)]/85 backdrop-blur',
           'pt-[env(safe-area-inset-top)]'
         )}
@@ -152,7 +152,7 @@ function BottomTabsRootLayout() {
       <nav
         aria-label={t('nav.primary', { defaultValue: 'Primary navigation' })}
         className={cn(
-          'fixed inset-x-0 bottom-0 z-30 border-t border-[var(--color-border)]',
+          'fixed inset-x-0 bottom-0 z-30 border-t-[length:var(--surface-border-width)] border-[var(--color-border)]',
           'bg-[var(--color-card)]/95 backdrop-blur',
           'pb-[env(safe-area-inset-bottom)]'
         )}

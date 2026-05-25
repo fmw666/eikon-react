@@ -17,7 +17,7 @@
  *   - Always-visible nav links in the header (stacked exposes Home,
  *     Counter, Tasks inline; mobile-drawer hides them behind a
  *     hamburger; bottom-tabs renders them in a footer dock).
- *   - Active-link styling — the `bg-[var(--color-accent)]` class is
+ *   - Active-link styling — the `bg-[var(--color-primary)]` class is
  *     part of the stacked active treatment specifically.
  *   - Footer chrome ("Built with Eikon …") — only the four
  *     web/desktop layouts ship a footer; mobile layouts substitute
@@ -103,9 +103,9 @@ describe('<StackedRootLayout />', () => {
     expect(screen.getByText('counter page')).toBeInTheDocument();
   });
 
-  it('marks the active nav link with the accent background', () => {
+  it('marks the active nav link with the primary background', () => {
     renderShell('/tasks');
     const tasksLink = screen.getByRole('link', { name: /tasks/i });
-    expect(tasksLink.className).toMatch(/bg-\[var\(--color-accent\)\]/);
+    expect(tasksLink.className).toMatch(/bg-\[var\(--color-primary\)\]/);
   });
 });

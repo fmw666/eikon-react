@@ -84,10 +84,10 @@ function SidebarRootLayout() {
       <aside
         className={cn(
           'sticky top-0 flex h-[100dvh] w-60 shrink-0 flex-col',
-          'border-r border-[var(--color-border)] bg-[var(--color-card)]/70 backdrop-blur'
+          'border-r-[length:var(--surface-border-width)] border-[var(--color-border)] bg-[var(--color-card)]/70 backdrop-blur'
         )}
       >
-        <div className="flex h-14 items-center border-b border-[var(--color-border)] px-4">
+        <div className="flex h-14 items-center border-b-[length:var(--surface-border-width)] border-[var(--color-border)] px-4">
           <Link to="/" className="text-sm font-semibold tracking-tight">
             Eikon App
           </Link>
@@ -101,9 +101,9 @@ function SidebarRootLayout() {
               className={({ isActive }) =>
                 cn(
                   'rounded-md px-3 py-2 text-sm transition-colors',
-                  'text-[var(--color-muted-foreground)] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)]',
+                  'text-[var(--color-muted-foreground)] hover:bg-[var(--color-primary)]/8 hover:text-[var(--color-foreground)]',
                   isActive &&
-                    'bg-[var(--color-accent)] text-[var(--color-accent-foreground)]'
+                    'bg-[var(--color-primary)]/12 text-[var(--color-primary)]'
                 )
               }
             >
@@ -111,7 +111,7 @@ function SidebarRootLayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="flex flex-wrap items-center gap-1 border-t border-[var(--color-border)] p-2">
+        <div className="flex flex-wrap items-center gap-1 border-t-[length:var(--surface-border-width)] border-[var(--color-border)] p-2">
           {/* @eikon:feature(i18n) begin */}
           <LanguageSwitcher />
           {/* @eikon:feature(i18n) end */}

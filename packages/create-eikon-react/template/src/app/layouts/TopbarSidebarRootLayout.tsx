@@ -78,7 +78,7 @@ function TopbarSidebarRootLayout() {
     <div className="flex min-h-[100dvh] flex-col">
       <header
         className={cn(
-          'sticky top-0 z-10 border-b border-[var(--color-border)]',
+          'sticky top-0 z-10 border-b-[length:var(--surface-border-width)] border-[var(--color-border)]',
           'bg-[var(--color-card)]/70 backdrop-blur'
         )}
       >
@@ -110,7 +110,7 @@ function TopbarSidebarRootLayout() {
         <aside
           className={cn(
             'sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-56 shrink-0 md:flex',
-            'flex-col border-r border-[var(--color-border)]',
+            'flex-col border-r-[length:var(--surface-border-width)] border-[var(--color-border)]',
             'bg-[var(--color-card)]/50'
           )}
         >
@@ -123,9 +123,9 @@ function TopbarSidebarRootLayout() {
                 className={({ isActive }) =>
                   cn(
                     'rounded-md px-3 py-2 text-sm transition-colors',
-                    'text-[var(--color-muted-foreground)] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)]',
+                    'text-[var(--color-muted-foreground)] hover:bg-[var(--color-primary)]/8 hover:text-[var(--color-foreground)]',
                     isActive &&
-                      'bg-[var(--color-accent)] text-[var(--color-accent-foreground)]'
+                      'bg-[var(--color-primary)]/12 text-[var(--color-primary)]'
                   )
                 }
               >

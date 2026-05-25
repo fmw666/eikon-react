@@ -33,7 +33,7 @@ function StackedCardsToaster() {
       toastOptions={{
         classNames: {
           toast:
-            'rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-card-foreground)] shadow-2xl',
+            'rounded-lg border-[length:var(--surface-border-width)] border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-card-foreground)] shadow-2xl',
           title: 'text-sm font-medium',
           description: 'text-xs text-[var(--color-muted-foreground)]',
         },

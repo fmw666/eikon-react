@@ -36,7 +36,7 @@ function CounterDisplay({ value, className }: CounterDisplayProps) {
   return (
     <div
       className={cn(
-        'relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-muted)]',
+        'relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl border-[length:var(--surface-border-width)] border-[var(--color-border)] bg-[var(--color-muted)]',
         className
       )}
       aria-live="polite"

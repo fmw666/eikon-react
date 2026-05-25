@@ -131,7 +131,7 @@ function CenteredRootLayout() {
       <div className="flex w-full max-w-md flex-col items-center gap-4">
         <main
           className={cn(
-            'w-full rounded-lg border border-[var(--color-border)]',
+            'w-full rounded-lg border-[length:var(--surface-border-width)] border-[var(--color-border)]',
             'bg-[var(--color-card)] p-6 shadow-sm'
           )}
         >

@@ -81,7 +81,7 @@ function StackedRootLayout() {
 
   return (
     <div className="flex min-h-[100dvh] flex-col">
-      <header className="border-b border-[var(--color-border)] bg-[var(--color-card)]/70 backdrop-blur">
+      <header className="border-b-[length:var(--surface-border-width)] border-[var(--color-border)] bg-[var(--color-card)]/70 backdrop-blur">
         {/*
           3-column grid pattern: brand (left, 1fr) | nav (auto, centered) |
           actions (right, 1fr). The matching 1fr columns on either side force
@@ -103,9 +103,9 @@ function StackedRootLayout() {
                 className={({ isActive }) =>
                   cn(
                     'rounded-md px-3 py-1.5 text-sm transition-colors',
-                    'text-[var(--color-muted-foreground)] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)]',
+                    'text-[var(--color-muted-foreground)] hover:bg-[var(--color-primary)]/8 hover:text-[var(--color-foreground)]',
                     isActive &&
-                      'bg-[var(--color-accent)] text-[var(--color-accent-foreground)]'
+                      'bg-[var(--color-primary)]/12 text-[var(--color-primary)]'
                   )
                 }
               >
@@ -133,7 +133,7 @@ function StackedRootLayout() {
           <Outlet />
         </Suspense>
       </main>
-      <footer className="border-t border-[var(--color-border)] py-4 text-center text-xs text-[var(--color-muted-foreground)]">
+      <footer className="border-t-[length:var(--surface-border-width)] border-[var(--color-border)] py-4 text-center text-xs text-[var(--color-muted-foreground)]">
         Built with Eikon
       </footer>
     </div>

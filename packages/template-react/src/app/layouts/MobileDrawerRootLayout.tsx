@@ -115,7 +115,7 @@ function MobileDrawerRootLayout() {
       */}
       <header
         className={cn(
-          'sticky top-0 z-30 border-b border-[var(--color-border)]',
+          'sticky top-0 z-30 border-b-[length:var(--surface-border-width)] border-[var(--color-border)]',
           'bg-[var(--color-card)]/85 backdrop-blur',
           'pt-[env(safe-area-inset-top)]'
         )}
@@ -128,7 +128,7 @@ function MobileDrawerRootLayout() {
                 'inline-flex items-center justify-center rounded-md',
                 'min-h-[var(--touch-target-min,44px)] min-w-[var(--touch-target-min,44px)]',
                 'text-[var(--color-foreground)] transition-colors',
-                'hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)]'
+                'hover:bg-[var(--color-primary)]/8 hover:text-[var(--color-foreground)]'
               )}
             >
               <Menu className="h-5 w-5" />
@@ -154,7 +154,7 @@ function MobileDrawerRootLayout() {
                             'min-h-[var(--touch-target-min,44px)]',
                             'text-[var(--color-muted-foreground)] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)]',
                             isActive &&
-                              'bg-[var(--color-accent)] text-[var(--color-accent-foreground)]'
+                              'bg-[var(--color-primary)]/12 text-[var(--color-primary)]'
                           )
                         }
                       >

@@ -30,7 +30,7 @@ function MinimalToaster() {
       toastOptions={{
         classNames: {
           toast:
-            'rounded-md border border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-foreground)] shadow-sm px-3 py-2',
+            'rounded-md border-[length:var(--surface-border-width)] border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-foreground)] shadow-sm px-3 py-2',
           title: 'text-xs font-medium tracking-tight',
           description: 'text-xs text-[var(--color-muted-foreground)]',
         },

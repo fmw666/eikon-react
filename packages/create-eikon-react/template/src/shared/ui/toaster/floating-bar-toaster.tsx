@@ -29,7 +29,7 @@ function FloatingBarToaster() {
       toastOptions={{
         classNames: {
           toast:
-            'min-w-80 max-w-2xl rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-card-foreground)] shadow-lg px-4 py-2.5',
+            'min-w-80 max-w-2xl rounded-lg border-[length:var(--surface-border-width)] border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-card-foreground)] shadow-lg px-4 py-2.5',
           title: 'text-sm font-medium',
           description: 'text-xs text-[var(--color-muted-foreground)]',
         },

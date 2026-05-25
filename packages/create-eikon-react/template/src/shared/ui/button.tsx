@@ -43,11 +43,11 @@ const buttonVariants = cva(
         default:
           'bg-[var(--color-primary)] text-[var(--color-primary-foreground)] shadow-sm hover:opacity-90',
         secondary:
-          'bg-[var(--color-secondary)] text-[var(--color-secondary-foreground)] hover:bg-[var(--color-accent)]',
+          'bg-[var(--color-secondary)] text-[var(--color-secondary-foreground)] hover:bg-[var(--color-primary)]/8',
         outline:
-          'border border-[var(--color-border)] bg-transparent text-[var(--color-foreground)] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)]',
+          'border-[length:var(--surface-border-width)] border-[var(--color-border)] bg-transparent text-[var(--color-foreground)] hover:bg-[var(--color-primary)]/8',
         ghost:
-          'bg-transparent text-[var(--color-foreground)] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)]',
+          'bg-transparent text-[var(--color-foreground)] hover:bg-[var(--color-primary)]/8',
         destructive:
           'bg-[var(--color-destructive)] text-[var(--color-destructive-foreground)] hover:opacity-90',
         link: 'bg-transparent text-[var(--color-primary)] underline-offset-4 hover:underline',
