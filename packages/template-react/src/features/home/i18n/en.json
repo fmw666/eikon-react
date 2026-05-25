@@ -1,6 +1,6 @@
 {
   "title": "Welcome to Eikon App",
-  "subtitle": "An AI-Agent-friendly React starter with Tailwind v4 and animate-ui.",
+  "subtitle": "An AI-Agent-friendly React starter built on TypeScript, Vite, and Tailwind v4.",
   "cta": "Get Started",
   "ctaExamples": "Browse component showcase"
 }

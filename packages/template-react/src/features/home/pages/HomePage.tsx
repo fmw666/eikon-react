@@ -44,7 +44,7 @@ function HomePage() {
   //   ({
   //     title: 'Welcome to Eikon App',
   //     subtitle:
-  //       'An AI-Agent-friendly React starter with Tailwind v4 and animate-ui.',
+  //       'An AI-Agent-friendly React starter built on TypeScript, Vite, and Tailwind v4.',
   //     cta: 'Get Started',
   //   })[k] ?? k;
   // @eikon:feature(i18n:fallback) end
