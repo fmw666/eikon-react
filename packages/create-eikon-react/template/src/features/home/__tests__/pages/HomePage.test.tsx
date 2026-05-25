@@ -36,7 +36,7 @@ describe('<HomePage />', () => {
 
   it('links the primary CTA to /counter', () => {
     renderWithRouter(<HomePage />);
-    const cta = screen.getByRole('link', { name: /counter demo/i });
+    const cta = screen.getByRole('link', { name: /get started/i });
     expect(cta).toHaveAttribute('href', '/counter');
   });
 
