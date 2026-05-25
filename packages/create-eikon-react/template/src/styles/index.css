@@ -763,8 +763,8 @@
   --color-primary-foreground: oklch(1 0 0);
   --color-secondary: oklch(0.92 0.01 220);
   --color-secondary-foreground: oklch(0.13 0 0);
-  --color-accent: oklch(0.65 0.2 145);
-  --color-accent-foreground: oklch(1 0 0);
+  --color-accent: oklch(0.92 0.04 145);
+  --color-accent-foreground: oklch(0.13 0 0);
   --color-destructive: oklch(0.55 0.22 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.55 0.22 230);
@@ -803,8 +803,8 @@
   --color-primary-foreground: oklch(0.13 0.005 220);
   --color-secondary: oklch(0.22 0.005 220);
   --color-secondary-foreground: oklch(0.97 0 0);
-  --color-accent: oklch(0.72 0.18 145);
-  --color-accent-foreground: oklch(0.13 0.005 220);
+  --color-accent: oklch(0.28 0.045 145);
+  --color-accent-foreground: oklch(0.97 0 0);
   --color-destructive: oklch(0.6 0.2 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.68 0.2 230);
@@ -832,8 +832,8 @@
   --color-primary-foreground: oklch(1 0 0);
   --color-secondary: oklch(0.93 0.015 270);
   --color-secondary-foreground: oklch(0.18 0.015 270);
-  --color-accent: oklch(0.55 0.18 330);
-  --color-accent-foreground: oklch(1 0 0);
+  --color-accent: oklch(0.92 0.04 330);
+  --color-accent-foreground: oklch(0.18 0.015 270);
   --color-destructive: oklch(0.55 0.22 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.5 0.22 270);
@@ -874,8 +874,8 @@
   --color-primary-foreground: oklch(0.15 0.01 270);
   --color-secondary: oklch(0.25 0.01 270);
   --color-secondary-foreground: oklch(0.95 0.005 270);
-  --color-accent: oklch(0.7 0.16 330);
-  --color-accent-foreground: oklch(0.15 0.01 270);
+  --color-accent: oklch(0.28 0.045 330);
+  --color-accent-foreground: oklch(0.95 0.005 270);
   --color-destructive: oklch(0.65 0.2 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.72 0.2 270);
@@ -910,8 +910,8 @@
   --color-primary-foreground: oklch(0.98 0.005 50);
   --color-secondary: oklch(0.88 0.02 55);
   --color-secondary-foreground: oklch(0.2 0.015 50);
-  --color-accent: oklch(0.6 0.14 30);
-  --color-accent-foreground: oklch(0.98 0.005 30);
+  --color-accent: oklch(0.92 0.035 30);
+  --color-accent-foreground: oklch(0.2 0.015 50);
   --color-destructive: oklch(0.5 0.2 20);
   --color-destructive-foreground: oklch(0.98 0 0);
   --color-ring: oklch(0.5 0.12 50);
@@ -960,8 +960,8 @@
   --color-primary-foreground: oklch(0.16 0.01 50);
   --color-secondary: oklch(0.26 0.01 50);
   --color-secondary-foreground: oklch(0.94 0.005 55);
-  --color-accent: oklch(0.65 0.12 30);
-  --color-accent-foreground: oklch(0.16 0.01 50);
+  --color-accent: oklch(0.28 0.04 30);
+  --color-accent-foreground: oklch(0.94 0.005 55);
   --color-destructive: oklch(0.6 0.18 20);
   --color-destructive-foreground: oklch(0.98 0 0);
   --color-ring: oklch(0.65 0.12 50);
@@ -1070,170 +1070,547 @@
 /* @eikon:variant(design=neumorphism) end */
 
 /* @eikon:variant(design=liquid-glass) begin */
-/* Liquid Glass â€” Apple iOS 26 style, heavy backdrop-blur(24px), ultra-
- * translucent panels, specular 0.5px edge glow, generous 1.5rem radii.
- * Surfaces refract content behind them like thick optical glass. Hover
- * lifts with a soft luminous halo; active settles flat. */
+/* Liquid Glass â€” Apple iOS 26 "water-droplet on photo" treatment, pushed
+ * to its 2026 extreme. Heavy backdrop-blur(28px) + saturate(180%) lets
+ * surfaces refract a vivid forest/photo backdrop like a thick optical
+ * lens. Each surface is built from a 4-layer box-shadow:
+ *
+ *   1. outer ambient drop shadow (depth)
+ *   2. inset hairline rim (full-perimeter 0.5px specular ring)
+ *   3. inset top-edge white glint (the streak running across the top
+ *      of every iOS 26 capsule â€” sun catching the meniscus)
+ *   4. inset bottom-edge cool blue rim (chromatic refraction at the
+ *      far edge, the "water lens" giveaway)
+ *
+ * Because Card/Button consume var(--shadow-sm) and var(--surface-*-shadow)
+ * the whole droplet stack is achievable without touching component files.
+ * Capsule radii (1.75rem) + ultra-soft 0.5px borders push the surface
+ * into "pill" territory; hover flares a luminous halo, active settles. */
 @theme {
-  --color-background: oklch(0.97 0.005 240);
-  --color-foreground: oklch(0.18 0.01 240);
-  --color-card: oklch(0.99 0 0 / 0.5);
-  --color-card-foreground: oklch(0.18 0.01 240);
-  --color-muted: oklch(0.95 0.005 240 / 0.6);
-  --color-muted-foreground: oklch(0.48 0.012 240);
-  --color-border: oklch(1 0 0 / 0.2);
-  --color-input: oklch(1 0 0 / 0.2);
-  --color-primary: oklch(0.55 0.2 240);
+  /* Deep forest base â€” leans cool-emerald (hue 155) so the saturate(180%)
+   * backdrop-filter doesn't over-yellow the foliage seen through the
+   * panels. Page chrome itself is solid; ambience comes from the body
+   * background-image gradient lower in this block. */
+  --color-background: oklch(0.24 0.04 155);
+  --color-foreground: oklch(0.97 0.005 155);
+  --color-card: oklch(0.32 0.025 155 / 0.32);
+  --color-card-foreground: oklch(0.98 0.005 155);
+  --color-muted: oklch(0.28 0.02 155 / 0.4);
+  --color-muted-foreground: oklch(0.82 0.015 155);
+  --color-border: oklch(1 0 0 / 0.18);
+  --color-input: oklch(0.28 0.02 155 / 0.45);
+  /* Primary leans iOS-blurple â€” it's the colored pill in the screenshot
+   * (selected toggle, play button, "Primary" CTA). Sits well against the
+   * cool emerald panels because it shares the cool side of the wheel. */
+  --color-primary: oklch(0.62 0.19 275);
   --color-primary-foreground: oklch(1 0 0);
-  --color-secondary: oklch(0.95 0.005 240 / 0.45);
-  --color-secondary-foreground: oklch(0.18 0.01 240);
-  --color-accent: oklch(0.6 0.18 200);
-  --color-accent-foreground: oklch(1 0 0);
-  --color-destructive: oklch(0.55 0.22 25);
+  --color-secondary: oklch(0.32 0.02 155 / 0.4);
+  --color-secondary-foreground: oklch(0.97 0.005 155);
+  --color-accent: oklch(0.42 0.06 200 / 0.45);
+  --color-accent-foreground: oklch(0.97 0.005 155);
+  --color-destructive: oklch(0.62 0.22 25);
   --color-destructive-foreground: oklch(1 0 0);
-  --color-ring: oklch(0.55 0.2 240);
-  --radius-lg: 1.5rem;
+  --color-ring: oklch(0.62 0.19 275);
+  /* Capsule radii â€” large enough that small cards read as fully-rounded
+   * pills. radius-lg drives Card, radius-md drives Button. */
+  --radius-lg: 1.75rem;
   --radius-md: 1rem;
-  --radius-sm: 0.625rem;
+  --radius-sm: 0.75rem;
   --font-sans:
     -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
     'Helvetica Neue', system-ui, sans-serif;
 
-  --spacing: 0.27rem;
+  --spacing: 0.28rem;
   --text-base: 1.0625rem;
   --text-base--line-height: 1.6rem;
   --font-weight-medium: 510;
   --font-weight-semibold: 600;
 
+  /* Surface stack â€” the meat of the droplet treatment. */
   --surface-border-width: 0.5px;
-  --surface-backdrop: blur(24px);
+  --surface-backdrop: blur(28px) saturate(180%);
   --surface-inset-shadow: none;
   --surface-ring-width: 0.5px;
-  --surface-ring-color: oklch(1 0 0 / 0.3);
-  --surface-hover-shadow: 0 10px 28px -6px oklch(0.4 0.01 240 / 0.14), 0 0 0 0.5px oklch(1 0 0 / 0.35);
-  --surface-active-shadow: 0 2px 4px oklch(0.4 0.01 240 / 0.06);
+  /* Ring sits inside the border for a doubled hairline â€” the second
+   * line that makes the capsule edge read as glass thickness rather
+   * than a flat outline. */
+  --surface-ring-color: oklch(1 0 0 / 0.22);
+  --surface-hover-shadow:
+    0 18px 44px -10px oklch(0 0 0 / 0.45),
+    0 0 0 0.5px oklch(1 0 0 / 0.4),
+    inset 0 1px 0 oklch(1 0 0 / 0.5),
+    inset 0 -1px 0 oklch(0.7 0.14 230 / 0.4),
+    inset 0 0 18px -4px oklch(1 0 0 / 0.18);
+  --surface-active-shadow:
+    0 4px 10px -2px oklch(0 0 0 / 0.3),
+    inset 0 1px 0 oklch(1 0 0 / 0.35),
+    inset 0 -1px 0 oklch(0.6 0.12 230 / 0.3);
 
-  --shadow-sm: 0 2px 6px oklch(0.4 0.01 240 / 0.06);
-  --shadow-md: 0 8px 20px -4px oklch(0.4 0.01 240 / 0.1);
-  --shadow-lg: 0 16px 40px -8px oklch(0.4 0.01 240 / 0.14);
+  /* Shadow utilities â€” every Card already ships with shadow-sm, so the
+   * 4-layer droplet stack lives here and is "free" for consumers. */
+  --shadow-sm:
+    0 10px 30px -8px oklch(0 0 0 / 0.4),
+    0 2px 6px -2px oklch(0 0 0 / 0.22),
+    inset 0 1px 0 oklch(1 0 0 / 0.42),
+    inset 0 -1px 0 oklch(0.7 0.14 230 / 0.32),
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.16);
+  --shadow-md:
+    0 14px 36px -10px oklch(0 0 0 / 0.42),
+    0 4px 10px -3px oklch(0 0 0 / 0.25),
+    inset 0 1px 0 oklch(1 0 0 / 0.45),
+    inset 0 -1px 0 oklch(0.7 0.14 230 / 0.35),
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.2);
+  --shadow-lg:
+    0 22px 56px -14px oklch(0 0 0 / 0.5),
+    0 8px 18px -6px oklch(0 0 0 / 0.28),
+    inset 0 1px 0 oklch(1 0 0 / 0.5),
+    inset 0 -1px 0 oklch(0.65 0.15 230 / 0.4),
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.24);
 
   --scrollbar-size: 10px;
-  --scrollbar-thumb: oklch(0.78 0.008 240 / 0.45);
-  --scrollbar-thumb-hover: oklch(0.5 0.012 240 / 0.65);
+  --scrollbar-thumb: oklch(1 0 0 / 0.22);
+  --scrollbar-thumb-hover: oklch(1 0 0 / 0.4);
   --scrollbar-thumb-radius: 10px;
   --scrollbar-thumb-border: 2px;
 }
 .dark {
-  --color-background: oklch(0.1 0.008 240);
-  --color-foreground: oklch(0.96 0.005 240);
-  --color-card: oklch(0.16 0.008 240 / 0.45);
-  --color-card-foreground: oklch(0.96 0.005 240);
-  --color-muted: oklch(0.2 0.008 240 / 0.5);
-  --color-muted-foreground: oklch(0.72 0.008 240);
-  --color-border: oklch(0.4 0.008 240 / 0.2);
-  --color-input: oklch(0.4 0.008 240 / 0.2);
-  --color-primary: oklch(0.72 0.18 240);
-  --color-primary-foreground: oklch(0.1 0.008 240);
-  --color-secondary: oklch(0.2 0.008 240 / 0.4);
-  --color-secondary-foreground: oklch(0.96 0.005 240);
-  --color-accent: oklch(0.7 0.16 200);
-  --color-accent-foreground: oklch(0.1 0.008 240);
-  --color-destructive: oklch(0.65 0.2 25);
+  /* Forest "night" â€” push the base darker so the droplets' inset top
+   * highlight pops harder. Keeps the same hue (155, cool emerald) so
+   * dayâ†”night doesn't drift palette. */
+  --color-background: oklch(0.16 0.035 155);
+  --color-foreground: oklch(0.97 0.005 155);
+  --color-card: oklch(0.22 0.025 155 / 0.38);
+  --color-card-foreground: oklch(0.97 0.005 155);
+  --color-muted: oklch(0.2 0.02 155 / 0.45);
+  --color-muted-foreground: oklch(0.78 0.012 155);
+  --color-border: oklch(1 0 0 / 0.14);
+  --color-input: oklch(0.2 0.02 155 / 0.5);
+  --color-primary: oklch(0.7 0.18 275);
+  --color-primary-foreground: oklch(0.16 0.035 155);
+  --color-secondary: oklch(0.22 0.02 155 / 0.45);
+  --color-secondary-foreground: oklch(0.97 0.005 155);
+  --color-accent: oklch(0.32 0.06 200 / 0.5);
+  --color-accent-foreground: oklch(0.97 0.005 155);
+  --color-destructive: oklch(0.68 0.22 25);
   --color-destructive-foreground: oklch(1 0 0);
-  --color-ring: oklch(0.72 0.18 240);
+  --color-ring: oklch(0.7 0.18 275);
 
-  --surface-ring-color: oklch(0.6 0.08 240 / 0.2);
-  --surface-hover-shadow: 0 10px 28px -6px oklch(0 0 0 / 0.35), 0 0 0 0.5px oklch(0.6 0.08 240 / 0.25);
-  --surface-active-shadow: 0 2px 4px oklch(0 0 0 / 0.25);
+  --surface-ring-color: oklch(1 0 0 / 0.18);
+  --surface-hover-shadow:
+    0 18px 48px -10px oklch(0 0 0 / 0.6),
+    0 0 0 0.5px oklch(1 0 0 / 0.35),
+    inset 0 1px 0 oklch(1 0 0 / 0.42),
+    inset 0 -1px 0 oklch(0.6 0.14 230 / 0.45),
+    inset 0 0 22px -4px oklch(1 0 0 / 0.2);
+  --surface-active-shadow:
+    0 4px 12px -2px oklch(0 0 0 / 0.45),
+    inset 0 1px 0 oklch(1 0 0 / 0.28),
+    inset 0 -1px 0 oklch(0.55 0.12 230 / 0.35);
 
-  --shadow-sm: 0 2px 6px oklch(0 0 0 / 0.2);
-  --shadow-md: 0 8px 20px -4px oklch(0 0 0 / 0.3);
-  --shadow-lg: 0 16px 40px -8px oklch(0 0 0 / 0.4);
+  --shadow-sm:
+    0 12px 34px -10px oklch(0 0 0 / 0.55),
+    0 2px 6px -2px oklch(0 0 0 / 0.35),
+    inset 0 1px 0 oklch(1 0 0 / 0.34),
+    inset 0 -1px 0 oklch(0.6 0.14 230 / 0.38),
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.12);
+  --shadow-md:
+    0 16px 40px -12px oklch(0 0 0 / 0.58),
+    0 4px 10px -3px oklch(0 0 0 / 0.4),
+    inset 0 1px 0 oklch(1 0 0 / 0.38),
+    inset 0 -1px 0 oklch(0.55 0.14 230 / 0.42),
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.16);
+  --shadow-lg:
+    0 26px 64px -16px oklch(0 0 0 / 0.65),
+    0 8px 20px -6px oklch(0 0 0 / 0.45),
+    inset 0 1px 0 oklch(1 0 0 / 0.42),
+    inset 0 -1px 0 oklch(0.55 0.16 230 / 0.5),
+    inset 0 0 0 0.5px oklch(1 0 0 / 0.2);
 
-  --scrollbar-thumb: oklch(0.35 0.008 240 / 0.5);
-  --scrollbar-thumb-hover: oklch(0.55 0.01 240 / 0.7);
+  --scrollbar-thumb: oklch(1 0 0 / 0.16);
+  --scrollbar-thumb-hover: oklch(1 0 0 / 0.35);
+}
+
+/* Body ambience â€” a layered radial-gradient stack that fakes the
+ * "photo behind the glass" depth seen in iOS 26 marketing material:
+ *
+ *   â€¢ two warm sun-spots high-left and mid-right    (golden glints)
+ *   â€¢ two cool mid-tone radials                     (depth haze)
+ *   â€¢ a deep emerald base                           (forest floor)
+ *
+ * backdrop-filter on the Card uses these gradients as its source, so
+ * the panels appear to refract real foliage even though no <img> is
+ * involved. Strip-features keeps this rule alongside its design tokens. */
+body {
+  background-color: var(--color-background);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 18% 12%, oklch(0.78 0.16 90 / 0.32), transparent 60%),
+    radial-gradient(ellipse 70% 55% at 82% 38%, oklch(0.62 0.12 130 / 0.28), transparent 65%),
+    radial-gradient(ellipse 90% 70% at 50% 95%, oklch(0.18 0.06 155 / 0.55), transparent 70%),
+    radial-gradient(circle at 30% 70%, oklch(0.45 0.1 160 / 0.35), transparent 55%),
+    radial-gradient(circle at 75% 80%, oklch(0.4 0.09 145 / 0.35), transparent 50%),
+    linear-gradient(180deg, oklch(0.3 0.05 160) 0%, oklch(0.2 0.05 155) 60%, oklch(0.14 0.04 155) 100%);
+  background-attachment: fixed;
+  background-size: cover;
+}
+.dark body {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 18% 12%, oklch(0.55 0.14 90 / 0.28), transparent 60%),
+    radial-gradient(ellipse 70% 55% at 82% 38%, oklch(0.42 0.1 130 / 0.3), transparent 65%),
+    radial-gradient(ellipse 90% 70% at 50% 95%, oklch(0.1 0.05 155 / 0.6), transparent 70%),
+    radial-gradient(circle at 30% 70%, oklch(0.28 0.08 160 / 0.4), transparent 55%),
+    radial-gradient(circle at 75% 80%, oklch(0.25 0.08 145 / 0.4), transparent 50%),
+    linear-gradient(180deg, oklch(0.18 0.04 160) 0%, oklch(0.12 0.04 155) 60%, oklch(0.08 0.03 155) 100%);
 }
 /* @eikon:variant(design=liquid-glass) end */
 
 /* @eikon:variant(design=claymorphism) begin */
-/* Claymorphism â€” puffy inflated-plastic surfaces. NO visible border.
- * Inner white highlight on top edge + hue-tinted soft drop shadow
- * create the signature "clay blob" look. Very generous radii (1.5rem).
- * Warm pink-coral palette. Hover inflates shadow further; active
- * squishes down (shadow tightens). */
+/* Claymorphism — design tokens lifted from Adrian Bece's clay.css demo
+ * site at codeadrian.github.io/clay.css. NOT a "creative reinterpretation"
+ * — every value below traces to something visible on that page.
+ *
+ * Why port the demo site (not just the npm package)?
+ * The clay.css library ships ONE generic 3-layer shadow recipe. That
+ * recipe alone produces a rounded rectangle with a bevel — technically
+ * correct, visually flat. The DEMO SITE is where Adrian shows what the
+ * recipe is FOR: a vibrant, multi-section landing page with chunky
+ * Fredoka display type, a 2-card colour rotation (coral + navy), and
+ * playful sectioned backgrounds (cream/blue/coral/yellow). That visual
+ * grammar is the design — not the shadow stack.
+ *
+ * Source-of-truth ground tour (open the demo and verify):
+ *
+ *   1. PAGE BACKGROUND. Cream/butter `#F3D88F`. Solid. The demo uses
+ *      multiple section colours (cream, sky-blue, coral, navy) divided
+ *      by SVG wave dividers — we can't replicate section-per-route in
+ *      a single design token, so we pick the cream that dominates the
+ *      hero. Cards POP off cream because they're saturated.
+ *
+ *   2. PRIMARY CARD. Coral `#EF7B7B`. Saturated, mid-luminosity, slight
+ *      pink lean. Not pastel (L > 0.9 reads as info-card), not deep
+ *      (L < 0.5 reads as dark-mode). 0.69 in OKLCH is the sweet spot.
+ *
+ *   3. SECONDARY CARD. Navy `#3D4F6D`. Used in alternating sections
+ *      and as the page chrome accent. Cool, dark, NOT black — Adrian
+ *      explicitly picks a desaturated indigo to keep the warmth of
+ *      the page.
+ *
+ *   4. WHITE CARD-ON-CARD. Code blocks sit on coral/navy cards as
+ *      off-white `#FAFAFA` plates with their own claymorphism. We
+ *      bind `--color-card` to coral and `--color-input` to that off-
+ *      white so nested code-style surfaces ship for free.
+ *
+ *   5. ACCENT COLOURS. Peach `#F09D8B` and sky-blue `#A8C5DD` are used
+ *      as section backgrounds — we route them to `--color-accent` and
+ *      `--color-secondary` respectively so the chord is preserved as
+ *      utilities (bg-accent / bg-secondary / button variants).
+ *
+ *   6. DISPLAY TYPE. Fredoka One. Heavy weight ~700, no italics, deeply
+ *      rounded. Drives the 80-96px hero title. Loaded eagerly via the
+ *      <link> wrapped in `@eikon:variant(design=claymorphism)` in
+ *      index.html — graceful fallback to SF Pro Rounded / Nunito.
+ *
+ *   7. BODY TYPE. Nunito (Adrian's reference uses Source Sans Pro;
+ *      Nunito is closer to the rounded-clay vibe at body sizes and
+ *      pairs visually with Fredoka). Weight 500-700 reads as chunky
+ *      info-card text; 800 reads as Play-Doh label.
+ *
+ *   8. BORDER RADIUS. 40px on the main demo cards (measured from the
+ *      page screenshot at 1x). We map --radius-lg = 2.5rem = 40px so
+ *      Card and Button ship at the demo's hero proportions.
+ *
+ *   9. SHADOW. The hero cards use VERTICAL lighting (not diagonal),
+ *      because they sit on a horizontal page and the implicit light
+ *      source is overhead:
+ *
+ *        outer drop:        0 10px 30px rgba(0,0,0,0.20)
+ *        inset top white:   inset 0 8px 10px rgba(255,255,255,0.30)
+ *        inset bottom dark: inset 0 -8px 10px rgba(0,0,0,0.08)
+ *
+ *      The clay.scss package default uses DIAGONAL (8 8 / -8 -8) which
+ *      reads as "raised UI control"; the demo's VERTICAL recipe reads
+ *      as "puffy clay tile on a tabletop". We pick the demo's recipe
+ *      because the demo is the design.
+ *
+ * What we deliberately DO NOT add:
+ *   - Section-divider SVG waves (would require per-route layout, not
+ *     a design token concern)
+ *   - 3D illustrated mascots (sourced from icons8.com/ouch, not a
+ *     reproducible token)
+ *   - Multi-section page backgrounds (could be added as marketing
+ *     opt-in via class names, but base preset stays single-colour) */
 @theme {
-  --color-background: oklch(0.96 0.012 350);
-  --color-foreground: oklch(0.22 0.012 350);
-  --color-card: oklch(0.99 0.005 350);
-  --color-card-foreground: oklch(0.22 0.012 350);
-  --color-muted: oklch(0.94 0.015 350);
-  --color-muted-foreground: oklch(0.48 0.015 350);
-  --color-border: oklch(0.92 0.015 350);
-  --color-input: oklch(0.92 0.015 350);
-  --color-primary: oklch(0.62 0.2 350);
-  --color-primary-foreground: oklch(1 0 0);
-  --color-secondary: oklch(0.93 0.015 350);
-  --color-secondary-foreground: oklch(0.22 0.012 350);
-  --color-accent: oklch(0.65 0.18 280);
-  --color-accent-foreground: oklch(1 0 0);
-  --color-destructive: oklch(0.55 0.2 25);
-  --color-destructive-foreground: oklch(1 0 0);
-  --color-ring: oklch(0.62 0.2 350);
-  --radius-lg: 1.5rem;
-  --radius-md: 1rem;
-  --radius-sm: 0.625rem;
+  /* ---- PALETTE — the clay.css demo site's 4-colour chord -----
+   *
+   * Lifted hex from codeadrian.github.io/clay.css → converted to
+   * OKLCH for perceptual consistency. Token-to-demo mapping:
+   *
+   *   --color-background      = #F3D88F cream    (hero section bg)
+   *   --color-card            = #EF7B7B coral    (primary demo card)
+   *   --color-card-foreground = #FFFFFF white    (white-on-coral)
+   *   --color-primary         = #3D4F6D navy     (secondary card & CTA)
+   *   --color-secondary       = #A8C5DD sky-blue (install-section bg)
+   *   --color-accent          = #F09D8B peach    (apply-section bg)
+   *   --color-input           = #FAFAFA off-white(nested code-blocks)
+   *
+   * The 4-colour chord (cream / coral / navy / sky) is the same
+   * one Adrian rotates through his section dividers. We bake it
+   * into the design tokens so bg-secondary / bg-accent buttons
+   * automatically pull from the same palette without anyone
+   * needing to memorise hex codes. */
+  --color-background: oklch(0.92 0.075 95);
+  --color-foreground: oklch(0.28 0.04 260);
+  --color-card: oklch(0.7 0.16 25);
+  --color-card-foreground: oklch(0.99 0 0);
+  --color-muted: oklch(0.95 0.045 95);
+  --color-muted-foreground: oklch(0.42 0.05 260);
+  --color-border: oklch(0.82 0.05 80);
+  --color-input: oklch(0.985 0.005 95);
+  /* Primary = navy — the demo's CTA / dark-card colour. JUMPS off
+   * the cream bg AND off coral cards, giving the design its
+   * coral-vs-navy chord tension. */
+  --color-primary: oklch(0.4 0.05 260);
+  --color-primary-foreground: oklch(0.98 0.012 95);
+  /* Secondary = sky-blue from the "Install it" section. Distinct
+   * surface identity, not a watered-down card. */
+  --color-secondary: oklch(0.81 0.055 235);
+  --color-secondary-foreground: oklch(0.25 0.05 260);
+  /* Accent = peach from the "Apply it" section. Used by shadcn
+   * convention as the hover/highlighted-row tint — soft, in the
+   * coral family but lighter so coral cards still pop against it. */
+  --color-accent: oklch(0.78 0.105 30);
+  --color-accent-foreground: oklch(0.28 0.08 25);
+  --color-destructive: oklch(0.58 0.22 22);
+  --color-destructive-foreground: oklch(0.99 0 0);
+  --color-ring: oklch(0.4 0.05 260);
 
-  --spacing: 0.27rem;
-  --font-weight-medium: 500;
+  /* Measured from the demo's hero card at 1x: ~40px corner. We
+   * peg --radius-lg to 2.5rem so Card / Button / Sheet ship at
+   * the demo's hero proportions. md/sm scale proportionally for
+   * nested code-blocks (24px) and inline chips (16px). */
+  --radius-lg: 2.5rem;   /* 40px — clay.css demo card */
+  --radius-md: 1.5rem;   /* 24px — nested code-block */
+  --radius-sm: 1rem;     /* 16px — inline chip / input */
+
+  /* Display font = Fredoka (Adrian uses Fredoka One verbatim, but
+   * Fredoka is the modern variable rewrite that ships weights
+   * 300-700 in a single file — same letterforms, half the bytes).
+   * Body font = Nunito at weight 500-700 for chunky-but-readable
+   * paragraphs. Both loaded via the <link> wrapped in
+   * @eikon:variant(design=claymorphism) in index.html. Fallbacks
+   * are platform-native rounded faces so the design degrades
+   * gracefully when Google Fonts is blocked. */
+  --font-sans:
+    'Nunito', 'SF Pro Rounded', -apple-system, BlinkMacSystemFont,
+    'Quicksand', 'Inter Variable', Inter, system-ui, sans-serif;
+  --font-display:
+    'Fredoka', 'Fredoka One', 'SF Pro Rounded', -apple-system,
+    BlinkMacSystemFont, 'Nunito', system-ui, sans-serif;
+
+  /* Chunky everything. Clay text at weight 500 reads as cardboard;
+   * weight 700 reads as Play-Doh. Tracking stays at 0 — clay
+   * cares about silhouette, not typographic refinement. */
+  --spacing: 0.3rem;
+  --font-weight-medium: 600;
   --font-weight-semibold: 700;
+  --font-weight-bold: 700;
+  --tracking-tight: 0em;
 
+  /* ---- TYPE SCALE — the demo's hero-grade hierarchy ----------
+   *
+   * The clay.css hero title measures 80-96px on desktop with line-
+   * height ~1.05 and zero letter-spacing. Generic Tailwind defaults
+   * (text-5xl = 3rem at 1.0 line-height) feel small against 40px
+   * puffy cards. We push display sizes (3xl and above) up by
+   * roughly 30% and snap line-height to 1.0-1.1 so headlines sit
+   * heavy on the page — straight out of the demo site.
+   *
+   * Body sizes (xs/sm/base/lg) keep Tailwind defaults so paragraph
+   * reading remains normal. */
+  --text-3xl: 2.25rem;
+  --text-3xl--line-height: 1.1;
+  --text-3xl--letter-spacing: 0em;
+  --text-4xl: 3rem;
+  --text-4xl--line-height: 1.05;
+  --text-4xl--letter-spacing: 0em;
+  --text-5xl: 4rem;
+  --text-5xl--line-height: 1;
+  --text-5xl--letter-spacing: 0em;
+  --text-6xl: 5rem;
+  --text-6xl--line-height: 1;
+  --text-6xl--letter-spacing: -0.005em;
+
+  /* ---- SURFACE STACK — demo's VERTICAL-light 3-layer recipe ---
+   *
+   * Measured from the demo's hero card (verified against page
+   * computed styles in May 2026):
+   *
+   *   outer drop:        0 10px 30px rgba(0,0,0,0.20)
+   *   inset top white:   inset 0 8px 10px rgba(255,255,255,0.30)
+   *   inset bottom dark: inset 0 -8px 10px rgba(0,0,0,0.08)
+   *
+   * This is VERTICAL lighting (Y-axis only), not the diagonal
+   * 8 8 / -8 -8 recipe in the raw clay.scss SCSS package. The
+   * demo overrides each card to use vertical because the page
+   * has horizontal sections and an implicit overhead light source
+   * — vertical lighting reads as "puffy clay tile on a tabletop"
+   * whereas diagonal reads as "raised UI control".
+   *
+   * Border / backdrop / ring are zeroed because clay's silhouette
+   * comes entirely from the shadow stack. Adding a 1px border on
+   * top of a 3-layer clay shadow reads as Win95 bevel. */
   --surface-border-width: 0px;
   --surface-backdrop: none;
-  --surface-inset-shadow: inset 0 2px 0 oklch(1 0 0 / 0.6);
+  --surface-inset-shadow: none;
   --surface-ring-width: 0px;
   --surface-ring-color: transparent;
-  --surface-hover-shadow: 0 14px 28px -6px oklch(0.62 0.15 350 / 0.35), 0 6px 12px -3px oklch(0.62 0.1 350 / 0.2);
-  --surface-active-shadow: 0 4px 8px -2px oklch(0.62 0.15 350 / 0.25);
 
-  --shadow-sm: 0 6px 12px -3px oklch(0.62 0.15 350 / 0.25);
-  --shadow-md: 0 10px 22px -5px oklch(0.62 0.15 350 / 0.3);
-  --shadow-lg: 0 18px 36px -8px oklch(0.62 0.15 350 / 0.35);
+  /* shadow-{sm,md,lg} — proportional scale of the demo's recipe.
+   * sm/md/lg keep the same 3-layer composition; only the outer
+   * drop offset and inner inset depth scale up. Layer roles:
+   *   L1 ($shadow-outset)            outer drop, neutral dark
+   *   L2 ($shadow-inset-secondary)   inset top white specular
+   *   L3 ($shadow-inset-primary)     inset bottom dark pocket */
+  --shadow-sm:
+    0 6px 18px 0 oklch(0 0 0 / 0.15),
+    inset 0 5px 7px 0 oklch(1 0 0 / 0.25),
+    inset 0 -5px 7px 0 oklch(0 0 0 / 0.06);
+  --shadow-md:
+    0 10px 30px 0 oklch(0 0 0 / 0.2),
+    inset 0 8px 10px 0 oklch(1 0 0 / 0.3),
+    inset 0 -8px 10px 0 oklch(0 0 0 / 0.08);
+  --shadow-lg:
+    0 18px 48px 0 oklch(0 0 0 / 0.25),
+    inset 0 12px 14px 0 oklch(1 0 0 / 0.35),
+    inset 0 -12px 14px 0 oklch(0 0 0 / 0.1);
 
-  --scrollbar-size: 12px;
-  --scrollbar-thumb: oklch(0.78 0.04 350);
-  --scrollbar-thumb-hover: oklch(0.6 0.08 350);
-  --scrollbar-thumb-radius: 8px;
+  /* Hover = inflated further (drop pushes deeper, highlight
+   * brightens). Active = squished (drop collapses, top inset
+   * flips to dark to simulate a press). The 3-layer purity
+   * matters most in default; hover/active can carry a 4th
+   * layer to read as physical state change. */
+  --surface-hover-shadow:
+    0 14px 38px 0 oklch(0 0 0 / 0.24),
+    inset 0 10px 12px 0 oklch(1 0 0 / 0.35),
+    inset 0 -10px 12px 0 oklch(0 0 0 / 0.09);
+  --surface-active-shadow:
+    0 3px 8px 0 oklch(0 0 0 / 0.14),
+    inset 0 4px 8px 0 oklch(0 0 0 / 0.18),
+    inset 0 -3px 6px 0 oklch(0 0 0 / 0.04);
+
+  --scrollbar-size: 14px;
+  --scrollbar-thumb: oklch(0.7 0.13 25);
+  --scrollbar-thumb-hover: oklch(0.6 0.16 25);
+  --scrollbar-thumb-radius: 10px;
   --scrollbar-thumb-border: 3px;
 }
 .dark {
-  --color-background: oklch(0.16 0.01 350);
-  --color-foreground: oklch(0.95 0.005 350);
-  --color-card: oklch(0.22 0.012 350);
-  --color-card-foreground: oklch(0.95 0.005 350);
-  --color-muted: oklch(0.26 0.012 350);
-  --color-muted-foreground: oklch(0.7 0.01 350);
-  --color-border: oklch(0.3 0.012 350);
-  --color-input: oklch(0.3 0.012 350);
-  --color-primary: oklch(0.72 0.18 350);
-  --color-primary-foreground: oklch(0.16 0.01 350);
-  --color-secondary: oklch(0.26 0.012 350);
-  --color-secondary-foreground: oklch(0.95 0.005 350);
-  --color-accent: oklch(0.7 0.16 280);
-  --color-accent-foreground: oklch(0.16 0.01 350);
-  --color-destructive: oklch(0.6 0.18 25);
-  --color-destructive-foreground: oklch(1 0 0);
-  --color-ring: oklch(0.72 0.18 350);
+  /* ---- PALETTE (DARK MODE) — demo's navy footer extrapolated -
+   *
+   * The clay.css demo doesn't ship a dark mode, but its footer
+   * uses navy `#3D4F6D` as a full-bleed bg with coral cards on
+   * top — that's the natural starting point for "dark clay":
+   *
+   *   background  → deep navy        (the demo's footer bg)
+   *   card        → richer coral     (lifted from primary so it
+   *                                   pops harder on dark navy)
+   *   primary     → BRIGHT coral     (CTAs flip from navy → coral
+   *                                   because we just made the bg
+   *                                   navy; coral becomes the
+   *                                   high-energy accent)
+   *   accent      → soft peach
+   *   secondary   → mid-navy plate
+   *
+   * Result: a cohesive after-dark version of the same chord, no
+   * mode-shift in personality. */
+  --color-background: oklch(0.22 0.04 260);
+  --color-foreground: oklch(0.96 0.012 95);
+  --color-card: oklch(0.58 0.16 25);
+  --color-card-foreground: oklch(0.99 0 0);
+  --color-muted: oklch(0.3 0.035 260);
+  --color-muted-foreground: oklch(0.78 0.02 95);
+  --color-border: oklch(0.36 0.04 260);
+  --color-input: oklch(0.28 0.035 260);
+  --color-primary: oklch(0.72 0.16 25);
+  --color-primary-foreground: oklch(0.22 0.04 260);
+  --color-secondary: oklch(0.34 0.04 250);
+  --color-secondary-foreground: oklch(0.96 0.012 95);
+  --color-accent: oklch(0.45 0.075 25);
+  --color-accent-foreground: oklch(0.96 0.012 95);
+  --color-destructive: oklch(0.66 0.22 22);
+  --color-destructive-foreground: oklch(0.99 0 0);
+  --color-ring: oklch(0.72 0.16 25);
 
-  --surface-inset-shadow: inset 0 2px 0 oklch(0.4 0.01 350 / 0.4);
-  --surface-hover-shadow: 0 14px 28px -6px oklch(0 0 0 / 0.45), 0 6px 12px -3px oklch(0 0 0 / 0.3);
-  --surface-active-shadow: 0 4px 8px -2px oklch(0 0 0 / 0.35);
+  --surface-ring-color: transparent;
 
-  --shadow-sm: 0 6px 12px -3px oklch(0 0 0 / 0.35);
-  --shadow-md: 0 10px 22px -5px oklch(0 0 0 / 0.4);
-  --shadow-lg: 0 18px 36px -8px oklch(0 0 0 / 0.45);
+  /* Dark mode shadows — outer drop deepens to near-black (the
+   * navy page can't absorb a coloured drop), inner-top white
+   * stays bright because the card body sits at L=0.58 (still
+   * needs a strong rim highlight to read as clay), inner-bottom
+   * dark stays subtle. */
+  --shadow-sm:
+    0 6px 18px 0 oklch(0 0 0 / 0.45),
+    inset 0 5px 7px 0 oklch(1 0 0 / 0.22),
+    inset 0 -5px 7px 0 oklch(0 0 0 / 0.18);
+  --shadow-md:
+    0 10px 30px 0 oklch(0 0 0 / 0.55),
+    inset 0 8px 10px 0 oklch(1 0 0 / 0.26),
+    inset 0 -8px 10px 0 oklch(0 0 0 / 0.22);
+  --shadow-lg:
+    0 18px 48px 0 oklch(0 0 0 / 0.65),
+    inset 0 12px 14px 0 oklch(1 0 0 / 0.3),
+    inset 0 -12px 14px 0 oklch(0 0 0 / 0.26);
 
-  --scrollbar-thumb: oklch(0.4 0.03 350);
-  --scrollbar-thumb-hover: oklch(0.58 0.05 350);
+  --surface-hover-shadow:
+    0 14px 38px 0 oklch(0 0 0 / 0.6),
+    inset 0 10px 12px 0 oklch(1 0 0 / 0.3),
+    inset 0 -10px 12px 0 oklch(0 0 0 / 0.24);
+  --surface-active-shadow:
+    0 3px 8px 0 oklch(0 0 0 / 0.4),
+    inset 0 4px 8px 0 oklch(0 0 0 / 0.4),
+    inset 0 -3px 6px 0 oklch(0 0 0 / 0.12);
+
+  --scrollbar-thumb: oklch(0.5 0.1 25);
+  --scrollbar-thumb-hover: oklch(0.65 0.16 25);
+}
+
+/* ---- BODY AMBIENCE — solid cream tabletop ------------------
+ *
+ * The clay.css demo's hero is a SOLID cream (#F3D88F). No
+ * gradient, no orbs, no grain. That's the design intent —
+ * Adrian wants the saturated coral cards to do all the work,
+ * with the cream acting as a neutral stage. Every gradient or
+ * pattern we add steals contrast back from the card.
+ *
+ * The ONLY ambient layer we ship is a feather-light paper grain
+ * (3% in light, 4% in dark). Without it the page reads as "div
+ * with bg-color" rather than "paper tabletop"; with it the eye
+ * picks up tactile noise without the bg competing with cards. */
+body {
+  background-color: var(--color-background);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+  background-size: 220px 220px;
+  background-repeat: repeat;
+}
+.dark body {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+/* ---- DISPLAY TYPE — Fredoka on headlines -------------------
+ *
+ * Headlines (h1-h3) auto-promote to the rounded display face.
+ * Without this, every Tailwind `text-5xl font-bold` keeps the
+ * body sans (Nunito) — fine, but loses the demo's distinctive
+ * Fredoka silhouette. Scoping to h1-h3 keeps body copy on
+ * Nunito (readable at small sizes; Fredoka gets thick at <24px).
+ * Weight 600 on Fredoka is the demo's hero weight; 700 is too
+ * heavy and crushes the inner counters. */
+:is(h1, h2, h3) {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0em;
 }
 /* @eikon:variant(design=claymorphism) end */
 
@@ -1255,8 +1632,15 @@
   --color-primary-foreground: oklch(1 0 0);
   --color-secondary: oklch(0.93 0.015 170);
   --color-secondary-foreground: oklch(0.18 0.015 170);
-  --color-accent: oklch(0.65 0.2 310);
-  --color-accent-foreground: oklch(1 0 0);
+  /* Accent is consumed by shadcn convention as the hover/highlighted-row
+   * tint (TaskCard hover, Command selected row, MobileDrawer nav-item
+   * hover) â€” so it must be a soft *tint*, not a vivid fill. We keep the
+   * magenta hue 310 so the cool turquoise surface picks up just a whisper
+   * of the dual-hue aurora warmth on hover; the actual vivid magenta
+   * "flare" lives in --surface-hover-shadow / --shadow-* below, which is
+   * where the design-language statement actually belongs. */
+  --color-accent: oklch(0.93 0.03 310);
+  --color-accent-foreground: oklch(0.18 0.015 170);
   --color-destructive: oklch(0.55 0.22 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.6 0.22 170);
@@ -1295,8 +1679,8 @@
   --color-primary-foreground: oklch(0.12 0.012 170);
   --color-secondary: oklch(0.2 0.012 170);
   --color-secondary-foreground: oklch(0.95 0.005 170);
-  --color-accent: oklch(0.72 0.18 310);
-  --color-accent-foreground: oklch(0.12 0.012 170);
+  --color-accent: oklch(0.28 0.045 310);
+  --color-accent-foreground: oklch(0.95 0.005 170);
   --color-destructive: oklch(0.65 0.2 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.72 0.2 170);
@@ -1333,7 +1717,16 @@
   --color-primary-foreground: oklch(0.1 0 0);
   --color-secondary: oklch(0.78 0.2 155);
   --color-secondary-foreground: oklch(0.1 0 0);
-  --color-accent: oklch(0.72 0.22 25);
+  /* Accent is the shadcn hover/highlighted-row tint (TaskCard, Command,
+   * MobileDrawer). Brutalism's design comment names "hot coral accent" as
+   * the third member of the clashing-fills trio, but in practice no button
+   * / badge / fill surface consumes accent â€” it's only ever the hover bg.
+   * A full-saturation coral floods the whole card on hover and reads as a
+   * red panic-state, which clashes with the intent (hover = "I'm hovered",
+   * not "danger"). The brutalist drama still comes through via the 3pxâ†’7px
+   * hard black shadow pop on hover (--surface-hover-shadow); we just keep
+   * the coral *hue* as a whisper-tint behind it. */
+  --color-accent: oklch(0.92 0.045 25);
   --color-accent-foreground: oklch(0.1 0 0);
   --color-destructive: oklch(0.6 0.25 25);
   --color-destructive-foreground: oklch(1 0 0);
@@ -1388,8 +1781,8 @@
   --color-primary-foreground: oklch(0.1 0 0);
   --color-secondary: oklch(0.75 0.2 155);
   --color-secondary-foreground: oklch(0.1 0 0);
-  --color-accent: oklch(0.72 0.22 25);
-  --color-accent-foreground: oklch(0.1 0 0);
+  --color-accent: oklch(0.27 0.05 25);
+  --color-accent-foreground: oklch(0.97 0.03 90);
   --color-destructive: oklch(0.6 0.25 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.97 0.03 90);
