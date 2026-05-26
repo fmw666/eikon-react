@@ -15,6 +15,27 @@ import {
 import { getTemplateRev } from './fingerprint';
 import { hashBuildInputs, type BuildInputs } from './hash';
 
+// Force the template's viteBuild() to compute import.meta.env.DEV === true.
+//
+// Vite resolves isProduction = `NODE_ENV === 'production' || mode === 'production'`
+// and then sets `import.meta.env.DEV = !isProduction`. Passing `mode: 'development'`
+// to viteBuild (see runBuild below) is necessary but NOT sufficient when the
+// host process has NODE_ENV='production' — Fly's runtime config sets that, and
+// it would silently flip DEV to false in the produced bundle.
+//
+// That breaks the `examples` showcase: the template's router double-gates
+// example routes on `import.meta.env.DEV` (see template-react/src/app/router.tsx
+// line 55) so they disappear from production builds. The preview-site exists
+// specifically to demonstrate the FULL template (examples included), so we
+// need DEV=true regardless of how the host is deployed.
+//
+// Setting NODE_ENV='development' once at module load (before Vite's first
+// resolveConfig) is the canonical fix and matches what `vite build` itself
+// does in its CLI entrypoint. The preview-site's React shell is already
+// minified at Docker-build time, and nothing in the runtime Node server
+// branches on NODE_ENV, so flipping it process-wide is safe here.
+process.env.NODE_ENV = 'development';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -343,7 +364,10 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
     // `mode` flips `import.meta.env.DEV` to `true` in the produced
     // bundle, which is the second half of "the playground is the
     // template's dev environment". The first half (source files
-    // present) is handled by `keepExamples: true` above.
+    // present) is handled by `keepExamples: true` above. NOTE: mode
+    // alone is NOT sufficient when the host has NODE_ENV='production'
+    // (Vite OR-s the two flags) — see the module-level NODE_ENV
+    // override at the top of this file for the load-bearing other half.
     mode: 'development',
     build: {
       outDir: 'dist',
