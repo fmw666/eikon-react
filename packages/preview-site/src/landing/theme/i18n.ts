@@ -15,15 +15,16 @@
 
 import { useCallback } from 'react';
 
+import { DEFAULT_LANG, type Lang, SUPPORTED_LANGS, isLang } from './lang';
 import { useThemeStore } from './theme-store';
 
-export const SUPPORTED_LANGS = ['zh', 'en'] as const;
-export type Lang = (typeof SUPPORTED_LANGS)[number];
-export const DEFAULT_LANG: Lang = 'en';
-
-export function isLang(v: unknown): v is Lang {
-  return typeof v === 'string' && (SUPPORTED_LANGS as readonly string[]).includes(v);
-}
+// Re-exported for backward compatibility — most consumers import
+// these directly from `theme/i18n`. The actual definitions live in
+// `./lang` (a leaf module with no React/zustand imports) so the
+// `theme-store` ↔ `i18n` import cycle never sees them mid-init.
+// See `theme/lang.ts` for the full rationale.
+export { DEFAULT_LANG, SUPPORTED_LANGS, isLang };
+export type { Lang };
 
 /**
  * Native (self-)labels for the language dropdown. Each language is

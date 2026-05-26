@@ -20,7 +20,7 @@
 import { useEffect, useRef } from 'react';
 import { create } from 'zustand';
 
-import { DEFAULT_LANG, type Lang, isLang } from './i18n';
+import { DEFAULT_LANG, type Lang, isLang } from './lang';
 
 export type Theme = 'light' | 'dark';
 
