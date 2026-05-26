@@ -50,7 +50,7 @@ const DICT = {
     'nav.language': '语言',
     'nav.github': 'GitHub',
 
-    'hero.badge': 'v0.1.0 · React 19 · Vite 6',
+    'hero.badge': 'v1.0.0 · React 19 · Vite 6',
     'hero.title.line1': '每一个伟大的产品，',
     'hero.title.line2Prefix': '都从',
     'hero.title.highlight': '同一段 Prompt',
@@ -58,7 +58,6 @@ const DICT = {
     'hero.subtitle':
       '一套预制好的项目骨架 + 技术栈 + AI 配置 + 质量标准 + 通用模块，让 AI 从「配环境」直接进入「写需求」。',
     'hero.cta.primary': '去找找',
-    'hero.cta.secondary': '查看 GitHub',
     'hero.findIt': 'GitHub',
 
     'platform.eyebrow': '交付形态',
@@ -254,7 +253,7 @@ const DICT = {
     'nav.language': 'Language',
     'nav.github': 'GitHub',
 
-    'hero.badge': 'v0.1.0 · React 19 · Vite 6',
+    'hero.badge': 'v1.0.0 · React 19 · Vite 6',
     'hero.title.line1': 'Every great product',
     'hero.title.line2Prefix': 'starts with ',
     'hero.title.highlight': 'the same prompt',
@@ -262,7 +261,6 @@ const DICT = {
     'hero.subtitle':
       'A pre-baked project skeleton + stack + AI rules + quality system + shared modules, so your AI agent jumps from "setup" straight to "ship".',
     'hero.cta.primary': 'go find it',
-    'hero.cta.secondary': 'View on GitHub',
     'hero.findIt': 'GitHub',
 
     'platform.eyebrow': 'Shipping shapes',

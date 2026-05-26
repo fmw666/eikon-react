@@ -27,7 +27,7 @@ const githubRepo = 'eikon-react';
 
 export const SITE = {
   /** Display version. Bumped manually alongside marketing copy. */
-  version: 'v0.1.0',
+  version: 'v1.0.0',
 
   /** Canonical name as shown in nav + meta tags. */
   brandName: 'Eikon-React',

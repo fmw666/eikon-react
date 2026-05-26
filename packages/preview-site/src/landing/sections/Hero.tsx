@@ -12,7 +12,7 @@
  *   │         subtitle                                              │
  *   │                                                               │
  *   │                                         ●●● $ npx create-…  ▎ │
- *   │ [primary CTA] [github CTA]                         ⌥ find it │
+ *   │ [primary CTA]                                      ⌥ find it │
  *   └──────────────────────────────────────────────────────────────┘
  *
  * The terminal teaser is absolutely positioned so it never competes
@@ -37,7 +37,7 @@
 import type { CSSProperties } from 'react';
 
 import { CtaButton, WordReveal } from '../components/CtaButton';
-import { isGithubConfigured, SITE } from '../site-config';
+import { SITE } from '../site-config';
 import { useI18n } from '../theme/i18n';
 
 /** Anchor id used by Nav's "Home" link to scroll back to the top. */
@@ -118,31 +118,14 @@ export function Hero({
             {t('hero.subtitle')}
           </p>
 
-          {/* CTAs — codex.io-flavoured pair: lime primary with
-              sparkle + halo, dark secondary with subtle outline.
-              Both inherit the word-reveal hover from <CtaButton/>.
-              The extra `mt-12` (vs the original `mt-10`) buys the
-              primary's outer halo a bit of breathing room so it
-              doesn't crowd the subtitle. */}
+          {/* CTA — single primary button. The Nav already carries a
+              GitHub link and the bottom-right "find it" pill below
+              also deep-links to the repo, so a secondary GitHub CTA
+              here is redundant. */}
           <div className="mt-12 flex flex-wrap items-center justify-start gap-x-5 gap-y-4">
             <CtaButton variant="primary" onClick={onPrimaryCta}>
               {t('hero.cta.primary')}
             </CtaButton>
-            {/* Drop the secondary GitHub CTA when site-config has no
-                real repo configured — the destination would be a 404
-                or the github.com home page, neither of which serves
-                the visitor. */}
-            {isGithubConfigured() && (
-              <CtaButton
-                variant="secondary"
-                href={SITE.github.url}
-                target="_blank"
-                rel="noreferrer"
-                leadingIcon={<GithubIcon className="h-3.5 w-3.5" />}
-              >
-                {t('hero.cta.secondary')}
-              </CtaButton>
-            )}
           </div>
         </div>
 
