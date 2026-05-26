@@ -1,0 +1,35 @@
+# Build context exclusion list for the preview-site Fly image.
+#
+# Anything matched here is skipped before the Docker daemon snapshots
+# the build context, which keeps `docker build` snappy and avoids
+# accidentally shipping local-only artefacts (caches, IDE config,
+# uncommitted git data) into the image.
+
+# pnpm + node tooling outputs
+**/node_modules
+**/.pnpm-store
+**/.turbo
+
+# Vite / tsup outputs (rebuilt inside the container)
+**/dist
+**/dist-server
+**/.vite
+**/.preview-cache
+
+# Test / coverage / lint outputs
+**/coverage
+**/*.tsbuildinfo
+
+# Editor / OS noise
+.idea
+.vscode
+.DS_Store
+Thumbs.db
+
+# Git internals — Docker doesn't need them and they bloat the context.
+.git
+.gitignore
+
+# Claude session scratch
+.claude
+.claude-tasks

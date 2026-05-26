@@ -1,0 +1,74 @@
+# Fly.io app config for the @eikon/preview playground.
+#
+# This file defines the Fly machine (build source, port mapping, region,
+# scaling). Pair it with `Dockerfile` in the repo root: the build runs the
+# Dockerfile, the runtime carries `packages/preview-site/dist-server/prod.js`
+# plus the full pnpm workspace because `viteBuild()` is invoked at runtime
+# (see Dockerfile header for the why).
+#
+# First-time deploy (manual one-time, you run these — flyctl is interactive):
+#
+#   fly auth login
+#   # the next command edits this file in-place to set `app = "<your-name>"`,
+#   # creates the Fly app, and triggers an initial deploy. Run from REPO ROOT.
+#   fly launch --copy-config --name <your-name> --region hkg --no-deploy
+#   fly deploy
+#
+# Custom domain (whenever you have one ready):
+#
+#   fly certs add app.example.com           # provisions LE cert
+#   # then point an A/AAAA record at the IPs printed by:
+#   fly ips list
+#   # OR use a CNAME → <your-name>.fly.dev (handles IPv6 too).
+#
+# Scaling notes:
+#
+#   - `min_machines_running = 0` keeps the bill near $0 when idle, but the
+#     first request after an idle period pays a 5-15s cold-start penalty
+#     (Node boot + template-react node_modules graph + first viteBuild()
+#     warm-up). Bump to 1 if you want every visit hot — costs ~$2-3/mo on
+#     the smallest VM.
+#   - 1GB RAM is the floor: viteBuild() against template-react regularly
+#     peaks ~600-700MB. 256MB shared OOMs reliably.
+
+app = "REPLACE_ME"
+primary_region = "hkg"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+  HOST = "0.0.0.0"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  # 0 keeps cost near zero when idle. Change to 1 for always-warm.
+  min_machines_running = 0
+  # Single region by default; the playground is interactive but not
+  # latency-sensitive enough to justify multi-region until traffic
+  # demands it.
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    # viteBuild() is CPU-heavy. Hard cap a single VM at one concurrent
+    # build by leaning on per-hash inflight de-dup in the builder, plus
+    # a generous request budget for the static + API mix.
+    soft_limit = 50
+    hard_limit = 100
+
+[[http_service.checks]]
+  grace_period = "30s"
+  interval = "15s"
+  timeout = "5s"
+  method = "GET"
+  path = "/healthz"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"
