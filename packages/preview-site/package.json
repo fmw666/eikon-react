@@ -10,6 +10,7 @@
     "build:server": "tsup",
     "build:all": "pnpm build && pnpm build:server",
     "build:check": "tsc -b --noEmit && vite build",
+    "prebuild-variants": "node ./dist-server/prebuild-variants.js",
     "start": "node ./dist-server/prod.js",
     "preview": "vite preview",
     "lint": "eslint . --max-warnings 0",

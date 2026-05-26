@@ -261,6 +261,11 @@ const REV_POLL_INTERVAL_MS = 2000;
 const BUILD_POLL_INITIAL_MS = 200;
 const BUILD_POLL_MIN_MS = 500;
 const BUILD_POLL_MAX_MS = 4000;
+// Fallback window for the iframe-ready postMessage. The template
+// normally posts within ~50ms of root.render; 6s is generous enough
+// to cover slow CI machines and still bound the user-visible "stuck
+// overlay" experience if the template crashes during boot.
+const READY_FALLBACK_MS = 6000;
 
 function isDocumentVisible(): boolean {
   return (
@@ -336,6 +341,13 @@ export function PreviewFrame() {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const prevPlatformRef = useRef(buildInputs.platform);
   const platformChangedRef = useRef(false);
+  // Mirror lastReadyHash into a ref so the postMessage listener can
+  // read the freshest hash without re-subscribing on every change —
+  // the listener is registered once at mount.
+  const lastReadyHashRef = useRef<string | null>(null);
+  useEffect(() => {
+    lastReadyHashRef.current = lastReadyHash;
+  }, [lastReadyHash]);
 
   // Reset sub-route when platform changes — the new build may not
   // have the same routes, and the iframe remounts anyway (shell swap).
@@ -346,6 +358,48 @@ export function PreviewFrame() {
       platformChangedRef.current = true;
     }
   }, [buildInputs.platform]);
+
+  // ---- iframe-ready signal -----------------------------------------------
+  //
+  // The template's `main.tsx` posts `{type:'eikon:preview-ready'}` to its
+  // parent AFTER React mounts. We treat that as the "real" ready signal
+  // for the shell-level overlay — `iframe.onLoad` is too early, since it
+  // fires when the HTML is parsed but the dark `<body>` hasn't been
+  // overwritten by any React-rendered content yet, producing a 1-3s
+  // black flash on every variant switch.
+  //
+  // Belt-and-suspenders timeout: if the template fails to mount (build
+  // crash, runtime error in App), the postMessage never arrives and the
+  // overlay would be stuck. Fall back to clearing on `lastReadyHash`
+  // change after `READY_FALLBACK_MS` so the user at least sees whatever
+  // the iframe DID paint (the build error overlay, the partial page).
+  useEffect(() => {
+    function onMessage(event: MessageEvent): void {
+      if (event.source !== iframeRef.current?.contentWindow) return;
+      const data = event.data as { type?: unknown } | null;
+      if (!data || data.type !== 'eikon:preview-ready') return;
+      const h = lastReadyHashRef.current;
+      if (h) setIframeReadyHash(h);
+    }
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+    // setIframeReadyHash is stable; deliberately empty deps so the
+    // listener mounts once and survives every iframe remount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Fallback: if the postMessage never arrives within READY_FALLBACK_MS
+  // of `lastReadyHash` becoming a new value, mark the iframe ready
+  // anyway so the overlay clears and any error UI inside the iframe
+  // becomes visible.
+  useEffect(() => {
+    if (!lastReadyHash) return;
+    const timer = setTimeout(() => {
+      setIframeReadyHash(lastReadyHash);
+    }, READY_FALLBACK_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastReadyHash]);
 
   // ---- /api/template-rev polling (HMR-like) ------------------------------
   useEffect(() => {
@@ -599,13 +653,13 @@ export function PreviewFrame() {
               src={iframeSrc}
               title="Eikon template preview"
               style={screenStyle}
-              // Pixel-level "ready" signal for the App-level overlay.
-              // We report the hash that this iframe was mounted for, NOT
-              // whatever happens to be `currentHash` at fire time, so a
-              // rapid param flip (build A → build B before A even loads)
-              // doesn't accidentally mark B as ready off A's onLoad.
+              // Pixel-level "ready" for the App-level overlay is now
+              // signalled by a `postMessage` from the template's
+              // `main.tsx` — see the dedicated effect above. We keep
+              // `onLoad` for the scrollbar-CSS injection only, which
+              // genuinely is a DOM-parse-time concern (the styles need
+              // to land in the iframe's <head> before its first paint).
               onLoad={() => {
-                if (lastReadyHash) setIframeReadyHash(lastReadyHash);
                 if (iframeRef.current) injectScrollbarStyle(iframeRef.current, platform);
               }}
             />

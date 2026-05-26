@@ -1,3 +1,4 @@
+// @eikon:variant(layout=mobile-drawer) file
 /**
  * @file SheetShowcasePage.tsx
  * @description Route-level component for `/examples/sheet`.

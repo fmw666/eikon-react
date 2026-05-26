@@ -66,6 +66,7 @@ const DialogShowcasePage = lazy(async () => {
   return { default: mod.DialogShowcasePage };
 });
 
+// @eikon:variant(layout=mobile-drawer) begin
 const SheetShowcasePage = lazy(async () => {
   const [mod] = await Promise.all([
     import('./pages/SheetShowcasePage'),
@@ -75,6 +76,7 @@ const SheetShowcasePage = lazy(async () => {
   ]);
   return { default: mod.SheetShowcasePage };
 });
+// @eikon:variant(layout=mobile-drawer) end
 
 const CommandShowcasePage = lazy(async () => {
   const [mod] = await Promise.all([
@@ -125,7 +127,9 @@ export const examplesRoutes = (
     <Route path="/examples" element={<ExamplesIndexPage />} />
     <Route path="/examples/toaster" element={<ToasterShowcasePage />} />
     <Route path="/examples/dialog" element={<DialogShowcasePage />} />
+    {/* @eikon:variant(layout=mobile-drawer) begin */}
     <Route path="/examples/sheet" element={<SheetShowcasePage />} />
+    {/* @eikon:variant(layout=mobile-drawer) end */}
     <Route path="/examples/command" element={<CommandShowcasePage />} />
     <Route
       path="/examples/sign-in-modal"

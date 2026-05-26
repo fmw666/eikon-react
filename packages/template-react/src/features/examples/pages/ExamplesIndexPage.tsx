@@ -78,7 +78,9 @@ function ExamplesIndexPage() {
       items: [
         { type: 'route', to: '/examples/toaster', label: t('pages.toaster.title') },
         { type: 'route', to: '/examples/dialog', label: t('pages.dialog.title') },
+        // @eikon:variant(layout=mobile-drawer) begin
         { type: 'route', to: '/examples/sheet', label: t('pages.sheet.title') },
+        // @eikon:variant(layout=mobile-drawer) end
         { type: 'route', to: '/examples/command', label: t('pages.command.title') },
         {
           type: 'route',

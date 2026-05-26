@@ -60,6 +60,16 @@ COPY . .
 # sequence so a future bumping of either side stays in lock-step.
 RUN pnpm --filter @eikon/preview build:all
 
+# Pre-bake the single-axis variant subset (~25 combos covering "user
+# changed exactly one parameter from the default"). This trades ~4
+# minutes of build time for instant first-paint on the most common
+# first-visit URLs. The pre-baked dirs land in
+# packages/template-react/.preview-cache/<hash>/ and survive the
+# `COPY --from=builder /app /app` in the runner stage. See
+# `packages/preview-site/scripts/prebuild-variants.ts` for the subset
+# enumeration and rationale.
+RUN pnpm --filter @eikon/preview prebuild-variants
+
 # ---------------------------------------------------------------------------
 # Stage 2 — minimal runtime
 # ---------------------------------------------------------------------------

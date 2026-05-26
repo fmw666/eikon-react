@@ -21,7 +21,21 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['server/prod.ts'],
+  // The prod server AND the Docker-time variant pre-baker share this
+  // bundle config so the latter sees an identical resolution graph
+  // (incl. the inlined `create-eikon-react/src/strip-features.ts`).
+  // Both produce single-file ESM bundles in dist-server/.
+  //
+  // Entry names are explicit so tsup writes flat files
+  // (`dist-server/prod.js`, `dist-server/prebuild-variants.js`) rather
+  // than mirroring the source-tree layout (`dist-server/server/prod.js`,
+  // `dist-server/scripts/prebuild-variants.js`) — the prod CMD and the
+  // package.json `prebuild-variants` script both reference the flat
+  // paths.
+  entry: {
+    prod: 'server/prod.ts',
+    'prebuild-variants': 'scripts/prebuild-variants.ts',
+  },
   outDir: 'dist-server',
   format: ['esm'],
   target: 'node20',

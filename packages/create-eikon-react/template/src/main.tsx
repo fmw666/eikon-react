@@ -60,4 +60,21 @@ void Promise.all(preconditions).then(() => {
       <App />
     </StrictMode>
   );
+  // Preview-site bridge: when this template runs inside the playground's
+  // iframe, the shell needs to know that React has actually mounted —
+  // not just that the HTML parsed (which is what `iframe.onLoad` reports
+  // and what the shell-side overlay used to clear on, briefly exposing
+  // the dark `<body>` before the first paint of <App />).
+  //
+  // We post AFTER `root.render` so by the time the shell receives the
+  // message, the synchronous render pass has scheduled commits; pixels
+  // are at most one rAF away. Gated by:
+  //   - `import.meta.env.DEV` so a production scaffold (built by the end
+  //     user) ships zero bytes of preview-bridge code — Rollup can
+  //     statically eliminate this whole `if` once DEV evaluates `false`.
+  //   - `window.parent !== window` to skip the broadcast when the
+  //     template is running standalone (regular `pnpm dev`).
+  if (import.meta.env.DEV && window.parent !== window) {
+    window.parent.postMessage({ type: 'eikon:preview-ready' }, '*');
+  }
 });

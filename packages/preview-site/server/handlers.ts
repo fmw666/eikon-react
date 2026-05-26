@@ -35,6 +35,7 @@ import {
   isReady,
   getError,
   TEMPLATE_REACT_DIR,
+  touchHashServed,
 } from './builder';
 import { getTemplateRev } from './fingerprint';
 import { type BuildInputs } from './hash';
@@ -409,6 +410,14 @@ export async function handlePreviewServe(
   const rawRest = match[2] ?? '/';
   const rest = rawRest === '/' ? '/index.html' : rawRest;
   const dist = getDistDir(hash);
+
+  // Mark this hash as actively in use so the LRU eviction in builder.ts
+  // doesn't delete the cache dir while the iframe is still pulling
+  // chunks / navigating SPA routes inside it. We touch BEFORE serving
+  // so even a 404 (e.g. preview hash got evicted between page nav and
+  // chunk fetch) refreshes the timestamp and lets the next eviction
+  // pass keep the dir if a parallel rebuild is repopulating it.
+  touchHashServed(hash);
 
   // Reject anything that tries to escape the dist directory.
   const requested = path.normalize(path.join(dist, rest));

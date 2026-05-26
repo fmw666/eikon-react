@@ -99,6 +99,16 @@ export interface BuildState {
 
 const inflight = new Map<string, Promise<void>>();
 const errors = new Map<string, string>();
+/**
+ * `lastServed[hash]` = wall-clock timestamp of the most recent
+ * `/preview/<hash>/...` HTTP hit. Updated by `touchHashServed` from the
+ * static-file handler so the LRU eviction can avoid deleting hashes
+ * that the iframe is actively displaying.
+ *
+ * Entries are pruned opportunistically when they age past SERVED_TTL_MS
+ * (during eviction), so the map size stays bounded.
+ */
+const lastServed = new Map<string, number>();
 
 /**
  * Caps on retained build state. The cache lives on disk (every entry is a
@@ -108,9 +118,28 @@ const errors = new Map<string, string>();
  *
  * The numbers below are conservative; bump if you hit cache misses while
  * cycling through variants on the same template revision.
+ *
+ * 32 was picked to comfortably hold the Docker pre-bake (~25 single-axis
+ * combos) plus headroom for whatever variant the user is currently
+ * cycling through. At ~3 MB / dist that's ~96 MB on disk — well within
+ * Fly's shared-cpu-1x scratch space and the dev box's tolerance.
  */
-const MAX_CACHED_HASHES = 8;
+const MAX_CACHED_HASHES = 32;
 const MAX_RETAINED_ERRORS = 32;
+/**
+ * Hashes whose `/preview/<hash>/...` URL was hit within `SERVED_TTL_MS`
+ * are protected from LRU eviction even if their cache-dir mtime aged out.
+ * Without this, after the user cycles through MAX_CACHED_HASHES variants
+ * the iframe's *currently displayed* hash gets deleted under it (the dir
+ * mtime doesn't refresh on read), the iframe later 404s on a chunk fetch
+ * or a navigation, and the user sees a black screen.
+ *
+ * 10 minutes is comfortably longer than any realistic pause between
+ * variant switches; the timestamps map is bounded by MAX_CACHED_HASHES *
+ * a constant factor since hashes outside the cache get pruned by
+ * `pruneServedRecord` below.
+ */
+const SERVED_TTL_MS = 10 * 60_000;
 
 let evictionInflight: Promise<void> | null = null;
 
@@ -173,6 +202,17 @@ export function clearError(hash: string): void {
 }
 
 /**
+ * Record a hit on `/preview/<hash>/...`. Called by the static-file
+ * handler in `handlers.ts`. The recorded timestamp protects this hash
+ * from `evictCacheLru()` for `SERVED_TTL_MS` so the iframe's currently-
+ * displayed cache dir is never yanked out from under it during a
+ * variant cycling spree.
+ */
+export function touchHashServed(hash: string): void {
+  lastServed.set(hash, Date.now());
+}
+
+/**
  * Drop all known build errors. Called from the dev-server file watcher when
  * the template changes, so that fixing a bug in source automatically
  * "unblocks" any variant that previously errored — without the user having
@@ -187,6 +227,7 @@ export async function clearAllCache(): Promise<void> {
   await rm(CACHE_ROOT, RM_OPTS);
   errors.clear();
   inflight.clear();
+  lastServed.clear();
 }
 
 function capErrors(): void {
@@ -237,7 +278,9 @@ export function selectHashesToEvict(
 /**
  * Keep at most `MAX_CACHED_HASHES` per-variant cache directories on disk,
  * dropping the oldest by mtime. We never delete a directory whose hash is
- * still being built (inflight) to avoid yanking files out from under Vite.
+ * still being built (inflight) to avoid yanking files out from under Vite,
+ * NOR a directory that was hit via `/preview/<hash>/...` within
+ * `SERVED_TTL_MS` (so the iframe's currently-displayed variant survives).
  */
 async function evictCacheLru(): Promise<void> {
   let entries: string[];
@@ -257,17 +300,21 @@ async function evictCacheLru(): Promise<void> {
     })
   );
   const dirs = stats.filter((d): d is DirStat => d !== null);
-  const toRemove = selectHashesToEvict(
-    dirs,
-    MAX_CACHED_HASHES,
-    new Set(inflight.keys())
-  );
+  // Prune lastServed entries past their TTL so the map doesn't grow
+  // unboundedly (and so a long-idle hash isn't artificially protected).
+  const now = Date.now();
+  for (const [h, ts] of lastServed) {
+    if (now - ts > SERVED_TTL_MS) lastServed.delete(h);
+  }
+  const keep = new Set<string>([...inflight.keys(), ...lastServed.keys()]);
+  const toRemove = selectHashesToEvict(dirs, MAX_CACHED_HASHES, keep);
 
   await Promise.all(
     toRemove.map(async (name) => {
       try {
         await rm(path.join(CACHE_ROOT, name), RM_OPTS);
         errors.delete(name);
+        lastServed.delete(name);
       } catch {
         // Best-effort: even with RM_OPTS retries, a directory might still be
         // held open by Vite/AV on Windows past our retry budget. We'll pick
