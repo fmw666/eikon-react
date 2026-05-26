@@ -29,8 +29,17 @@
  *
  *   TTLs differ by endpoint because their immutability differs:
  *
- *     - releases list:  5 minutes — releases CAN be added / re-tagged,
- *                       so we keep this fresh-ish.
+ *     - releases list:  60 minutes — releases CAN be added / re-tagged,
+ *                       but the marketing changelog never needs sub-
+ *                       hour freshness. The previous 5-minute TTL was
+ *                       too aggressive against GitHub's anonymous
+ *                       60-req/hr/IP quota: a dozen simultaneous
+ *                       visitors with a 5-minute window guaranteed
+ *                       rate-limit lockouts inside the same hour.
+ *                       60 minutes lets cached visitors share work
+ *                       and keeps fresh-data latency acceptable for
+ *                       a changelog (a release goes stale in hours,
+ *                       not seconds).
  *     - compare(A,B):   7 days   — both endpoints of a tag→tag compare
  *                       are immutable refs; the diff between them is
  *                       cacheable for as long as we like. We cap at a
@@ -42,8 +51,18 @@
  *
  *   We do NOT use ETags / If-None-Match — the simpler TTL model is
  *   plenty for a public marketing-side changelog and avoids a class
- *   of "stale despite 304" bugs. If GitHub rate-limits us, we surface
- *   the message verbatim so visitors understand why the data is empty.
+ *   of "stale despite 304" bugs.
+ *
+ * STALE-WHILE-ERROR FALLBACK
+ *
+ *   When a network call fails (rate-limit, offline, GitHub outage),
+ *   we don't blow away the page — we serve the LAST cached value
+ *   even if its TTL has expired (`cacheGetStale`). The visitor sees
+ *   slightly-old data instead of an empty error panel, which is the
+ *   right trade for a read-only marketing surface where data
+ *   freshness is far less valuable than "the page still works".
+ *   Only when there's NO cache at all (cold cache + rate-limited)
+ *   does the original error propagate to the UI.
  *
  * NETWORK
  *
@@ -139,7 +158,7 @@ const STORAGE_KEY = 'eikon.changelog.cache.v1';
 
 /** Per-endpoint TTL in milliseconds. See file header for rationale. */
 const TTL = {
-  releases: 5 * 60 * 1000, // 5 min
+  releases: 60 * 60 * 1000, // 60 min — anonymous quota is 60 req/hr/IP
   compare: 7 * 24 * 60 * 60 * 1000, // 7 days
 } as const;
 
@@ -179,6 +198,25 @@ function cacheGet<T>(key: string, ttl: number): T | null {
   const stored = blob.entries[key];
   if (!stored || now - stored.ts >= ttl) return null;
   // Promote to memory so subsequent reads in the same session are hot.
+  MEMO.set(key, stored);
+  return stored.data as T;
+}
+
+/**
+ * Read cache IGNORING the TTL — used by the stale-while-error fallback.
+ * Returns whatever's there even if it's expired. Callers should only
+ * reach for this AFTER a network attempt has failed (e.g. rate limit,
+ * offline) — surfacing arbitrarily-old data is a deliberate degradation,
+ * not a happy-path read.
+ */
+function cacheGetStale<T>(key: string): T | null {
+  const fromMemo = MEMO.get(key);
+  if (fromMemo) return fromMemo.data as T;
+
+  const blob = readBlob();
+  const stored = blob.entries[key];
+  if (!stored) return null;
+  // Promote so subsequent reads in this session don't re-parse the blob.
   MEMO.set(key, stored);
   return stored.data as T;
 }
@@ -334,20 +372,41 @@ export async function listReleases(
   if (cached) return cached;
 
   const url = `https://api.github.com/repos/${SITE.github.owner}/${SITE.github.repo}/releases?per_page=100`;
-  const raw = await ghFetch<RawRelease[]>(url, signal);
-  const data: GitHubRelease[] = raw
-    .filter((r) => !r.draft)
-    .map((r) => ({
-      tagName: r.tag_name,
-      name: r.name?.trim() || r.tag_name,
-      publishedAt: r.published_at ?? '',
-      body: r.body ?? '',
-      htmlUrl: r.html_url,
-      prerelease: r.prerelease,
-      draft: r.draft,
-    }));
-  cacheSet(key, data);
-  return data;
+  try {
+    const raw = await ghFetch<RawRelease[]>(url, signal);
+    const data: GitHubRelease[] = raw
+      .filter((r) => !r.draft)
+      .map((r) => ({
+        tagName: r.tag_name,
+        name: r.name?.trim() || r.tag_name,
+        publishedAt: r.published_at ?? '',
+        body: r.body ?? '',
+        htmlUrl: r.html_url,
+        prerelease: r.prerelease,
+        draft: r.draft,
+      }));
+    cacheSet(key, data);
+    return data;
+  } catch (err) {
+    // Network failed (rate-limit, offline, GitHub outage). Serve the
+    // last known release list even if its TTL is long blown — visitors
+    // get an obviously-old changelog instead of an error panel, which
+    // is the right trade for a read-only marketing page. Only when
+    // the cache is genuinely empty (first visit + GitHub down) do we
+    // let the error bubble up.
+    if (signal?.aborted) throw err;
+    const stale = cacheGetStale<GitHubRelease[]>(key);
+    if (stale) {
+      if (typeof console !== 'undefined') {
+        console.warn(
+          '[github] releases fetch failed, serving stale cache:',
+          err
+        );
+      }
+      return stale;
+    }
+    throw err;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -392,30 +451,53 @@ export async function compareRefs(
   if (cached) return cached;
 
   const url = `https://api.github.com/repos/${SITE.github.owner}/${SITE.github.repo}/compare/${encodeURIComponent(base)}...${encodeURIComponent(head)}`;
-  const raw = await ghFetch<RawCompare>(url, signal);
+  try {
+    const raw = await ghFetch<RawCompare>(url, signal);
 
-  const files: CompareFile[] = (raw.files ?? [])
-    .map((f) => ({
-      filename: f.filename,
-      previousFilename: f.previous_filename,
-      status: f.status,
-      additions: f.additions,
-      deletions: f.deletions,
-      changes: f.changes,
-      patch: f.patch,
-    }))
-    .sort((a, b) => a.filename.localeCompare(b.filename));
+    const files: CompareFile[] = (raw.files ?? [])
+      .map((f) => ({
+        filename: f.filename,
+        previousFilename: f.previous_filename,
+        status: f.status,
+        additions: f.additions,
+        deletions: f.deletions,
+        changes: f.changes,
+        patch: f.patch,
+      }))
+      .sort((a, b) => a.filename.localeCompare(b.filename));
 
-  const result: CompareResult = {
-    base,
-    head,
-    status: raw.status,
-    aheadBy: raw.ahead_by,
-    behindBy: raw.behind_by,
-    totalCommits: raw.total_commits,
-    files,
-    htmlUrl: raw.html_url,
-  };
-  cacheSet(key, result);
-  return result;
+    const result: CompareResult = {
+      base,
+      head,
+      status: raw.status,
+      aheadBy: raw.ahead_by,
+      behindBy: raw.behind_by,
+      totalCommits: raw.total_commits,
+      files,
+      htmlUrl: raw.html_url,
+    };
+    cacheSet(key, result);
+    return result;
+  } catch (err) {
+    // Same stale-while-error policy as listReleases. compare(A,B) for a
+    // tag pair is immutable, so a stale value is actually CORRECT — not
+    // a degradation — as long as both tags still exist. We don't bother
+    // distinguishing rate-limit from a genuine 404 here: NotFoundError
+    // means the upstream ref is gone, which is a real error the visitor
+    // needs to see (so they can pick a different pair). Stale cache only
+    // catches the other failure modes.
+    if (signal?.aborted) throw err;
+    if (err instanceof NotFoundError) throw err;
+    const stale = cacheGetStale<CompareResult>(key);
+    if (stale) {
+      if (typeof console !== 'undefined') {
+        console.warn(
+          '[github] compare fetch failed, serving stale cache:',
+          err
+        );
+      }
+      return stale;
+    }
+    throw err;
+  }
 }
