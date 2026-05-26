@@ -75,7 +75,7 @@ function HomePage() {
         )}
         {/* @eikon:feature(examples) end */}
         <Button asChild size="lg" variant="outline">
-          <a href="https://github.com/" target="_blank" rel="noreferrer noopener">
+          <a href="https://github.com/fmw666/eikon-react" target="_blank" rel="noreferrer noopener">
             GitHub
           </a>
         </Button>

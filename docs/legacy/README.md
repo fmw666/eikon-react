@@ -132,8 +132,8 @@ docs/
 
 如果您发现文档中的问题或有改进建议，欢迎：
 
-1. 创建 [Issue](https://github.com/your-repo/issues) 反馈问题
-2. 提交 [Pull Request](https://github.com/your-repo/pulls) 改进文档
+1. 创建 [Issue](https://github.com/fmw666/eikon-react/issues) 反馈问题
+2. 提交 [Pull Request](https://github.com/fmw666/eikon-react/pulls) 改进文档
 3. 参与项目讨论和贡献
 
 ---

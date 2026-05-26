@@ -22,8 +22,8 @@
  *   automatically. `url` is derived; you don't need to edit it.
  */
 
-const githubOwner = '';
-const githubRepo = '';
+const githubOwner = 'fmw666';
+const githubRepo = 'eikon-react';
 
 export const SITE = {
   /** Display version. Bumped manually alongside marketing copy. */
