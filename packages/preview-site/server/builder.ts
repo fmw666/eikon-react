@@ -323,39 +323,28 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
     ui: inputs.ui,
     toastPosition: inputs.toastPosition,
   };
-  // The playground simulates template-react's own local-dev experience.
-  // Three knobs hold that contract together:
+  // The playground simulates exactly what `npx create-eikon-react`
+  // outputs — its left-side files panel must equal the scaffolded tree
+  // 1:1. That means we now run the strip with no overrides:
   //
-  //   - `keepExamples: true` keeps `src/features/examples/` (the
-  //     dev-only showcase) in the rendered tree. The CLI default still
-  //     strips it for end users.
-  //   - `keepAllVariantFiles: true` keeps every variant sibling on disk
-  //     (all 4 `*RootLayout.tsx`). Block-level variant markers still
-  //     narrow each dispatcher down to the user's chosen value.
-  //   - The viteBuild below runs in `mode: 'development'`, which flips
-  //     `import.meta.env.DEV` to `true` inside the generated bundle.
-  //     Without that, every showcase route would tree-shake away even
-  //     though its source survived the strip — because the router and
-  //     layouts gate them on `import.meta.env.DEV`.
-  await stripFeatures(cacheDir, flags, variants, {
-    keepExamples: true,
-    keepAllVariantFiles: true,
-    // Platform-shell stripping IS applied — the playground used to opt
-    // out via `keepShells: true` to share one on-disk tree across every
-    // platform, but that hid a real CLI behaviour from users: picking
-    // `--platform web` in `create-eikon-react` actually deletes both
-    // `apps/desktop/` and `apps/mobile/`, prunes `tauri:*` / `cap:*`
-    // scripts from `package.json`, and removes `pnpm-workspace.yaml`.
-    // Mirroring those passes here makes the file tree shown in the
-    // preview match what the user gets after scaffolding 1:1.
-    //
-    // Cost: each platform now gets its own physical cache directory
-    // (already its own cache hash, so no new entries — just slightly
-    // different on-disk contents per entry). The playground still
-    // produces a Vite web bundle regardless of platform; nothing in
-    // `src/` imports from `apps/`, so the dropped shells are inert
-    // for the build itself.
-  });
+  //   - examples ships unconditionally (CLI default), so the showcase
+  //     dir + its deps are present in both playground and scaffold.
+  //   - variant siblings: only the chosen `*RootLayout.tsx` survives,
+  //     matching the CLI's per-axis file-level strip. Block-level
+  //     variant markers still narrow each dispatcher.
+  //   - platform shells (`apps/desktop/`, `apps/mobile/`) and
+  //     `pnpm-workspace.yaml` are stripped per the chosen platform —
+  //     the playground gets one physical cache entry per platform
+  //     (already its own cache hash, so no new entries) and the file
+  //     tree shown matches what `--platform <x>` would produce.
+  //
+  // The runtime DEV gate in `app/router.tsx` is the second half of the
+  // showcase story: with `mode: 'development'` set on the viteBuild
+  // below, `import.meta.env.DEV` evaluates to `true` inside the
+  // playground's bundle, so the gated examples routes mount. End users
+  // running `npm run build` get a production bundle where the same
+  // gate evaluates to `false` and tree-shakes the routes away.
+  await stripFeatures(cacheDir, flags, variants);
 
   await viteBuild({
     root: cacheDir,
@@ -364,10 +353,12 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
     // `mode` flips `import.meta.env.DEV` to `true` in the produced
     // bundle, which is the second half of "the playground is the
     // template's dev environment". The first half (source files
-    // present) is handled by `keepExamples: true` above. NOTE: mode
-    // alone is NOT sufficient when the host has NODE_ENV='production'
-    // (Vite OR-s the two flags) — see the module-level NODE_ENV
-    // override at the top of this file for the load-bearing other half.
+    // present) is now handled by the unconditional `examples` ship in
+    // the CLI's strip-features.ts — the showcase directory is part of
+    // every scaffold. NOTE: mode alone is NOT sufficient when the host
+    // has NODE_ENV='production' (Vite OR-s the two flags) — see the
+    // module-level NODE_ENV override at the top of this file for the
+    // load-bearing other half.
     mode: 'development',
     build: {
       outDir: 'dist',

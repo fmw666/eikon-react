@@ -45,16 +45,20 @@ const SCENARIOS = [
     projectName: 'eikon-e2e-default',
     flags: ['--no-supabase'],
     expect: {
-      filesPresent: ['src/features/counter/index.ts', '.agent/README.md'],
-      // The `examples` feature is a DEV-only template showcase that the
-      // CLI strips from EVERY scaffold regardless of flags — there is
-      // intentionally no `--examples` opt-in. Its two runtime deps
-      // (web-vitals, @tanstack/react-virtual) are pruned in lock-step.
-      // platform=web (default) also drops the mobile-drawer Sheet
-      // primitive and the `apps/*` workspace declaration.
+      filesPresent: [
+        'src/features/counter/index.ts',
+        '.agent/README.md',
+        // The `examples` feature is a DEV-only template showcase that
+        // ships with EVERY scaffold. Production bundles stay clean via
+        // the runtime `import.meta.env.DEV` gate in `app/router.tsx`,
+        // not via scaffold-time stripping. Its two showcase deps
+        // (web-vitals, @tanstack/react-virtual) ride along.
+        'src/features/examples',
+      ],
+      // platform=web (default) drops the mobile-drawer Sheet primitive
+      // and the `apps/*` workspace declaration.
       filesAbsent: [
         'src/shared/supabase',
-        'src/features/examples',
         'src/shared/ui/sheet.tsx',
         'pnpm-workspace.yaml',
       ],
@@ -63,12 +67,11 @@ const SCENARIOS = [
         'tailwindcss',
         'motion',
         '@tanstack/react-query',
-      ],
-      depsAbsent: [
-        '@supabase/supabase-js',
+        // showcase deps — kept in lock-step with src/features/examples
         '@tanstack/react-virtual',
         'web-vitals',
       ],
+      depsAbsent: ['@supabase/supabase-js'],
       providersContains: [
         'BrowserRouter',
         '<Toaster',
@@ -97,10 +100,16 @@ const SCENARIOS = [
       filesPresent: [
         'src/features/counter/index.ts',
         'src/shared/supabase/client.ts',
+        'src/features/examples',
       ],
-      filesAbsent: ['src/features/examples'],
-      depsPresent: ['@supabase/supabase-js', '@tanstack/react-query'],
-      depsAbsent: ['@tanstack/react-virtual', 'web-vitals'],
+      filesAbsent: [],
+      depsPresent: [
+        '@supabase/supabase-js',
+        '@tanstack/react-query',
+        '@tanstack/react-virtual',
+        'web-vitals',
+      ],
+      depsAbsent: [],
       providersContains: ['QueryClientProvider'],
       providersAbsent: [],
     },
@@ -127,7 +136,6 @@ const SCENARIOS = [
       // / capacitor content is also dropped.
       filesAbsent: [
         'apps/mobile',
-        'src/features/examples',
         'src/shared/supabase',
         'src/shared/ui/sheet.tsx',
       ],
@@ -173,7 +181,7 @@ const SCENARIOS = [
         // Mobile uses pnpm --filter "./apps/mobile" for cap:* scripts.
         'pnpm-workspace.yaml',
       ],
-      filesAbsent: ['apps/desktop', 'src/features/examples', 'src/shared/supabase'],
+      filesAbsent: ['apps/desktop', 'src/shared/supabase'],
       depsPresent: ['react'],
       depsAbsent: ['@supabase/supabase-js'],
       providersContains: [],
@@ -229,8 +237,6 @@ const SCENARIOS = [
       ],
       filesAbsent: [
         'src/shared/supabase',
-        // examples is always stripped — see comment on the lean scenario.
-        'src/features/examples',
         // The toaster/ directory no longer exists — toast is a single file.
         'src/shared/ui/toaster',
         // layout=sidebar means the mobile-drawer Sheet primitive is dead.
@@ -239,11 +245,7 @@ const SCENARIOS = [
         'pnpm-workspace.yaml',
       ],
       depsPresent: ['@tanstack/react-query'],
-      depsAbsent: [
-        '@supabase/supabase-js',
-        '@tanstack/react-virtual',
-        'web-vitals',
-      ],
+      depsAbsent: ['@supabase/supabase-js'],
       providersContains: ['QueryClientProvider'],
       providersAbsent: [],
       // Strip-features must keep ONLY the chosen variant block in

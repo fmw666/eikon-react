@@ -83,16 +83,12 @@ const PACKAGE_DEPS_BY_FEATURE: Record<string, string[]> = {
   // future template strips one of them, its deps would go here. TanStack
   // Query (`@tanstack/react-query`) is treated as baseline infrastructure
   // alongside React / React Router — every scaffold ships with it.
-
-  // The `examples` showcase is a DEV-ONLY template-internal feature. Its
-  // entire directory (`src/features/examples/`) is removed by the directory
-  // sweep below; its runtime-only dependencies are pruned here so a
-  // scaffolded project's `pnpm install` doesn't pull them in. `cmdk` joins
-  // the list because the `<Command>` primitive at
-  // `src/shared/ui/command.tsx` is gated by `@eikon:feature(examples)
-  // file` — only the examples showcase mounts it in the unstripped
-  // template, so the package is dead-weight once examples is stripped.
-  examples: ['web-vitals', '@tanstack/react-virtual', 'cmdk'],
+  //
+  // `examples` used to live here (pruning `web-vitals` /
+  // `@tanstack/react-virtual` / `cmdk`), but the showcase is now shipped
+  // unconditionally — the runtime `import.meta.env.DEV` gate in
+  // `app/router.tsx` keeps the routes out of production bundles, so end
+  // users carry the source but pay nothing in their built app.
 };
 
 /**
@@ -101,9 +97,6 @@ const PACKAGE_DEPS_BY_FEATURE: Record<string, string[]> = {
  * All of these knobs exist for the in-repo preview playground; every other
  * caller (the CLI, the e2e suite) leaves them at their defaults so
  * end-user projects get the fully-stripped tree.
- *
- *   - `keepExamples`: keep the dev-only `src/features/examples/`
- *     showcase + its `package.json` deps.
  *
  *   - `keepAllVariantFiles`: skip the `@eikon:variant(<axis>=<value>) file`
  *     first-line strip so every variant sibling stays on disk (all 4
@@ -123,7 +116,6 @@ const PACKAGE_DEPS_BY_FEATURE: Record<string, string[]> = {
  *     what the shells look like.
  */
 export interface StripOptions {
-  keepExamples?: boolean;
   keepAllVariantFiles?: boolean;
   keepShells?: boolean;
 }
@@ -145,14 +137,18 @@ export async function stripFeatures(
   const disabled = new Set<string>();
   if (!flags.supabase) disabled.add('supabase');
   if (!flags.i18n) disabled.add('i18n'); // currently never disabled by the CLI
-  // The `examples` feature is a template-internal component showcase. End
-  // users of `create-eikon-react` never want it in their scaffolded project
-  // so it's stripped by default — there's no `--examples` CLI flag.
-  // The preview playground opts out via `keepExamples` because the showcase
-  // IS its primary value-add.
-  if (!options.keepExamples) {
-    disabled.add('examples');
-  }
+  // The `examples` feature used to be stripped by default — end users
+  // were considered to never want a template-internal showcase in their
+  // scaffolded project. That decision was reversed: examples now ships
+  // unconditionally so the playground's file panel matches the scaffold
+  // output 1:1, and so end users can browse the showcase locally with
+  // `npm run dev`. Production bundles stay clean via the runtime
+  // `import.meta.env.DEV` gate in `app/router.tsx` — `pnpm build` /
+  // `vite build` evaluates that gate to `false`, tree-shaking the
+  // routes out. The `@eikon:feature(examples)` markers across the
+  // template tree are now inert (no consumer adds 'examples' to
+  // `disabled`), but they're left in place as documentation and as a
+  // ready hook should the strip ever need to come back.
 
   await walkAndStrip(root, disabled, variants, options);
   await pruneDependencies(root, disabled);
@@ -220,10 +216,6 @@ async function walkAndStrip(
     if (entry.isDirectory()) {
       // If a directory's purpose is exclusively tied to a feature, drop it whole.
       if (disabled.has('supabase') && isInsideSupabaseDir(full)) {
-        await rm(full, { recursive: true, force: true });
-        continue;
-      }
-      if (disabled.has('examples') && isInsideExamplesDir(full)) {
         await rm(full, { recursive: true, force: true });
         continue;
       }
@@ -301,18 +293,13 @@ function isInsideSupabaseDir(p: string): boolean {
   return norm.endsWith('/src/shared/supabase');
 }
 
-function isInsideExamplesDir(p: string): boolean {
-  const norm = p.replace(/\\/g, '/');
-  return norm.endsWith('/src/features/examples');
-}
-
 /**
  * The Tauri 2 desktop shell lives in `apps/desktop/`. The directory is
  * unconditionally removed unless the chosen platform is `desktop` (or
  * the playground's `keepShells` opt-out is set). This is the platform
- * analog of `isInsideSupabaseDir` / `isInsideExamplesDir` — JSON / TOML
- * files inside don't accept `@eikon:variant(...) file` markers, so
- * directory-level removal is the right hammer.
+ * analog of `isInsideSupabaseDir` — JSON / TOML files inside don't
+ * accept `@eikon:variant(...) file` markers, so directory-level
+ * removal is the right hammer.
  */
 function isInsideDesktopShellDir(p: string): boolean {
   const norm = p.replace(/\\/g, '/');

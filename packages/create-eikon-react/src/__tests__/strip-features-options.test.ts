@@ -1,12 +1,14 @@
 /**
  * @file strip-features-options.test.ts
- * @description Regression coverage for the `StripOptions` knobs that the
- *  in-repo preview playground depends on:
+ * @description Regression coverage around two contracts strip-features owes
+ *  its callers:
  *
- *   - `keepExamples: true` must keep the `src/features/examples/` tree
- *     and its `package.json` deps (`web-vitals`, `@tanstack/react-virtual`).
- *     Default behaviour (or `keepExamples: false`) must continue to strip
- *     them so end users of `create-eikon-react` never carry showcase code.
+ *   - The `examples` feature is shipped unconditionally. The CLI never
+ *     adds 'examples' to the disabled set, so `src/features/examples/`
+ *     stays on disk and `web-vitals` / `@tanstack/react-virtual` /
+ *     `cmdk` survive the dependency prune. Production bundles stay
+ *     clean via the runtime `import.meta.env.DEV` gate in
+ *     `app/router.tsx`, not via scaffold-time stripping.
  *
  *   - `keepAllVariantFiles: true` must preserve every variant sibling on
  *     disk even when the variant value doesn't match the chosen one.
@@ -56,8 +58,9 @@ const DEFAULT_VARIANTS = {
 function setupFixture(): string {
   const dir = mkdtempSync(path.join(tmpdir(), 'strip-options-'));
 
-  // package.json — populated with the deps the examples feature claims to
-  // own (`web-vitals`, `@tanstack/react-virtual`) so we can assert pruning.
+  // package.json — populated with the deps the examples feature used
+  // to claim. They no longer get pruned (examples ships unconditionally),
+  // so the assertions below check they SURVIVE the strip.
   writeFileSync(
     path.join(dir, 'package.json'),
     JSON.stringify({
@@ -70,8 +73,9 @@ function setupFixture(): string {
     })
   );
 
-  // src/features/examples — a tiny tree the strip should sweep as a
-  // directory-level remove (`isInsideExamplesDir`).
+  // src/features/examples — a tiny tree that the strip used to sweep
+  // as a directory-level remove. Kept here so we can assert it
+  // SURVIVES under the new default.
   const examplesDir = path.join(dir, 'src', 'features', 'examples');
   mkdirSync(examplesDir, { recursive: true });
   writeFileSync(
@@ -116,10 +120,10 @@ function setupFixture(): string {
 }
 
 // =================================================================================================
-// Tests — keepExamples
+// Tests — examples (always kept)
 // =================================================================================================
 
-describe('stripFeatures — keepExamples', () => {
+describe('stripFeatures — examples ships unconditionally', () => {
   let dir: string;
   beforeEach(() => {
     dir = setupFixture();
@@ -128,43 +132,25 @@ describe('stripFeatures — keepExamples', () => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  it('default (no option): removes src/features/examples/ + its deps', async () => {
+  it('default: keeps src/features/examples/ on disk', async () => {
     await stripFeatures(dir, FLAGS, DEFAULT_VARIANTS);
-
-    const examplesDir = path.join(dir, 'src', 'features', 'examples');
-    expect(existsSync(examplesDir)).toBe(false);
-
-    const pkg = JSON.parse(
-      readFileSync(path.join(dir, 'package.json'), 'utf8')
-    ) as { dependencies?: Record<string, string> };
-    expect(pkg.dependencies).toBeDefined();
-    expect(pkg.dependencies!['web-vitals']).toBeUndefined();
-    expect(pkg.dependencies!['@tanstack/react-virtual']).toBeUndefined();
-    // Unrelated deps survive — pruning is feature-scoped.
-    expect(pkg.dependencies!['react']).toBeDefined();
-  });
-
-  it('keepExamples=false (explicit): same as default — removes examples', async () => {
-    await stripFeatures(dir, FLAGS, DEFAULT_VARIANTS, { keepExamples: false });
-
-    expect(existsSync(path.join(dir, 'src', 'features', 'examples'))).toBe(
-      false
-    );
-  });
-
-  it('keepExamples=true: keeps src/features/examples/ and its deps', async () => {
-    await stripFeatures(dir, FLAGS, DEFAULT_VARIANTS, { keepExamples: true });
 
     const examplesDir = path.join(dir, 'src', 'features', 'examples');
     expect(existsSync(examplesDir)).toBe(true);
     expect(existsSync(path.join(examplesDir, 'index.ts'))).toBe(true);
     expect(existsSync(path.join(examplesDir, 'routes.tsx'))).toBe(true);
+  });
+
+  it('default: keeps showcase deps in package.json (no prune)', async () => {
+    await stripFeatures(dir, FLAGS, DEFAULT_VARIANTS);
 
     const pkg = JSON.parse(
       readFileSync(path.join(dir, 'package.json'), 'utf8')
     ) as { dependencies?: Record<string, string> };
+    expect(pkg.dependencies).toBeDefined();
     expect(pkg.dependencies!['web-vitals']).toBeDefined();
     expect(pkg.dependencies!['@tanstack/react-virtual']).toBeDefined();
+    expect(pkg.dependencies!['react']).toBeDefined();
   });
 });
 
@@ -220,25 +206,5 @@ describe('stripFeatures — keepAllVariantFiles', () => {
     );
     expect(dispatcher).toContain('StackedRootLayout'); // chosen block kept
     expect(dispatcher).not.toContain('SidebarRootLayout'); // unchosen block dropped
-  });
-
-  it('keepAllVariantFiles + keepExamples compose without interfering', async () => {
-    // The two playground options stack — every showcase file present
-    // AND every variant sibling present, which is exactly what the
-    // preview-site builder asks for.
-    await stripFeatures(dir, FLAGS, DEFAULT_VARIANTS, {
-      keepExamples: true,
-      keepAllVariantFiles: true,
-    });
-
-    expect(existsSync(path.join(dir, 'src', 'features', 'examples'))).toBe(
-      true
-    );
-    expect(
-      existsSync(path.join(dir, 'src', 'app', 'layouts', 'StackedRootLayout.tsx'))
-    ).toBe(true);
-    expect(
-      existsSync(path.join(dir, 'src', 'app', 'layouts', 'SidebarRootLayout.tsx'))
-    ).toBe(true);
   });
 });
