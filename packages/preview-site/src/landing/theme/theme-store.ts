@@ -58,18 +58,20 @@ export function resolveInitialTheme(): Theme {
 /**
  * Resolve the initial display language. Precedence:
  *
- *   1. Stored user choice.
- *   2. Browser locale (`navigator.language`), narrowed to our supported set.
- *   3. Default (`DEFAULT_LANG`).
+ *   1. Stored user choice (persisted by [[ThemeAndLangSync]] on every
+ *      `setLang`, so a returning visitor sees their last picked language
+ *      regardless of where their browser thinks they are).
+ *   2. Default (`DEFAULT_LANG`).
+ *
+ * We deliberately do NOT consult `navigator.language` — the landing
+ * targets an international audience and we want a stable English
+ * default for every first-time visitor, including those on a
+ * Chinese-locale browser. The dropdown is one click away if they
+ * prefer Chinese, and that choice then sticks across sessions.
  */
 export function resolveInitialLang(): Lang {
   const stored = readStoredLang();
   if (stored) return stored;
-  if (typeof navigator !== 'undefined') {
-    const browser = navigator.language?.toLowerCase() ?? '';
-    if (browser.startsWith('zh')) return 'zh';
-    if (browser.startsWith('en')) return 'en';
-  }
   return DEFAULT_LANG;
 }
 

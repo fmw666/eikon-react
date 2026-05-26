@@ -19,7 +19,7 @@ import { useThemeStore } from './theme-store';
 
 export const SUPPORTED_LANGS = ['zh', 'en'] as const;
 export type Lang = (typeof SUPPORTED_LANGS)[number];
-export const DEFAULT_LANG: Lang = 'zh';
+export const DEFAULT_LANG: Lang = 'en';
 
 export function isLang(v: unknown): v is Lang {
   return typeof v === 'string' && (SUPPORTED_LANGS as readonly string[]).includes(v);
