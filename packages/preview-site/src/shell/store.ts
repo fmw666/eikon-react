@@ -249,10 +249,12 @@ export interface UiStore {
   buildError: string | null;
   /**
    * Hash for which the FileExplorer has finished loading the file tree.
-   * Diverges from `currentHash` during the brief window between a build
-   * completing and the explorer's `/api/files?hash=…` fetch finishing —
-   * which is the exact gap the unified overlay is meant to cover (the
-   * file tree used to silently swap in stale-then-fresh content there).
+   * Phase F decoupled the explorer from the build cache — it now hits
+   * `/api/files-tree?<6 params>` and asserts this hash on response so the
+   * App-level overlay can clear once the tree matches the current build
+   * state. Before the decoupling there was a real race here; now it's
+   * primarily a sentinel that keeps the overlay coordinator stable
+   * across the build/explorer ordering.
    */
   treeReadyHash: string | null;
   /**

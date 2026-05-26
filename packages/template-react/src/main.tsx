@@ -21,6 +21,7 @@ import { createRoot } from 'react-dom/client';
 
 // --- Absolute Imports ---
 import App from '@/App';
+import { LayoutVariantProvider } from '@/app/LayoutVariantContext';
 // @eikon:feature(i18n) begin
 import { initI18n } from '@/shared/i18n';
 // @eikon:feature(i18n) end
@@ -32,6 +33,51 @@ import '@/styles/index.css';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Root element #root not found in index.html');
+
+// Apply the initial class-based variant axes. Source of truth is the
+// `data-{design,ui}` attribute set the CLI stamps on <html> at scaffold
+// time (see `create-eikon-react/src/index.ts`). When absent — e.g.
+// running the workspace template directly with no CLI step — we leave
+// <html> untouched and Tailwind's base @theme tokens render the
+// "default" / "animate-ui" combination. The 14 design overrides live as
+// `:root.design-<name>` rules and the 2 non-default ui overrides as
+// `:root.ui-<name>` rules in `styles/index.css`; switching is a class
+// swap, no rebuild.
+function applyClassAxis(prefix: string, value: string | undefined): void {
+  if (!value) return;
+  const root = document.documentElement;
+  for (const cls of Array.from(root.classList)) {
+    if (cls.startsWith(`${prefix}-`)) root.classList.remove(cls);
+  }
+  // 'default' (design) / 'animate-ui' (ui) means "no class" — base @theme
+  // is the active variant. Anything else gets a `<prefix>-<value>` class.
+  if (value !== 'default' && !(prefix === 'ui' && value === 'animate-ui')) {
+    root.classList.add(`${prefix}-${value}`);
+  }
+}
+
+const htmlEl = rootElement.ownerDocument.documentElement;
+applyClassAxis('design', htmlEl.dataset.design);
+applyClassAxis('ui', htmlEl.dataset.ui);
+
+// Preview-shell variant bridge. Only mounted when (a) the bundle is a
+// dev build — production scaffolds drop this whole branch via Rollup's
+// dead-code elimination once `import.meta.env.DEV` evaluates `false` —
+// and (b) we're embedded in another window, i.e. the playground iframe.
+// Standalone `pnpm dev` skips it entirely.
+//
+// Class-axis swaps (`design`, `ui`) are handled here. `layout` and
+// `toastPosition` are consumed by LayoutVariantContext and Toaster.
+if (import.meta.env.DEV && window.parent !== window) {
+  window.addEventListener('message', (e: MessageEvent) => {
+    const data = e.data as
+      | { type?: string; design?: string; ui?: string }
+      | null;
+    if (!data || data.type !== 'eikon:set-variant') return;
+    if (typeof data.design === 'string') applyClassAxis('design', data.design);
+    if (typeof data.ui === 'string') applyClassAxis('ui', data.ui);
+  });
+}
 
 const root = createRoot(rootElement);
 
@@ -57,7 +103,9 @@ preconditions.push(
 void Promise.all(preconditions).then(() => {
   root.render(
     <StrictMode>
-      <App />
+      <LayoutVariantProvider>
+        <App />
+      </LayoutVariantProvider>
     </StrictMode>
   );
   // Preview-site bridge: when this template runs inside the playground's

@@ -34,8 +34,8 @@ import {
   handleBuild,
   handleBuildStatus,
   handleClearCache,
-  handleFile,
-  handleFiles,
+  handleFileContent,
+  handleFilesTree,
   handlePreviewServe,
   handleTemplateRev,
   isPreviewPath,
@@ -171,8 +171,8 @@ async function dispatch(
   if (pathname === '/api/template-rev') return handleTemplateRev(req, res);
   if (pathname === '/api/build') return handleBuild(req, res);
   if (pathname === '/api/build-status') return handleBuildStatus(req, res);
-  if (pathname === '/api/files') return handleFiles(req, res);
-  if (pathname === '/api/file') return handleFile(req, res);
+  if (pathname === '/api/files-tree') return handleFilesTree(req, res);
+  if (pathname === '/api/file-content') return handleFileContent(req, res);
   if (pathname === '/api/clear-cache') return handleClearCache(req, res);
 
   // -- /preview/<hash>/* iframe content --------------------------------

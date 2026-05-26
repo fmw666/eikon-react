@@ -5,12 +5,12 @@ import { type Plugin } from 'vite';
 import { clearAllErrors, TEMPLATE_REACT_DIR } from './builder';
 import { scheduleInvalidateTemplateRev } from './fingerprint';
 import {
-  clearTreeCache,
+  clearSimTreeCache,
   handleBuild,
   handleBuildStatus,
   handleClearCache,
-  handleFile,
-  handleFiles,
+  handleFileContent,
+  handleFilesTree,
   handlePreviewServe,
   handleTemplateRev,
   prewarmDefault,
@@ -29,13 +29,13 @@ import {
  *   - A boot-time pre-warm of the default combo (the prod server also
  *     pre-warms; we just call the same exported helper).
  *
- *   GET  /api/template-rev                    -> { rev }
- *   POST /api/build           { ...params }  -> { hash, status }
- *   GET  /api/build-status?hash=...           -> { hash, status }
- *   GET  /api/files?hash=...                  -> { hash, tree }
- *   GET  /api/file?hash=...&path=...          -> { hash, path, size, text }
- *   POST /api/clear-cache                     -> { ok: true }
- *   GET  /preview/<hash>/<file?>              -> static file or SPA fallback
+ *   GET  /api/template-rev                              -> { rev }
+ *   POST /api/build           { ...params }            -> { hash, status }
+ *   GET  /api/build-status?hash=...                     -> { hash, status }
+ *   GET  /api/files-tree?<6 params>                     -> { tree }
+ *   GET  /api/file-content?<6 params>&path=...          -> { path, size, text }
+ *   POST /api/clear-cache                               -> { ok: true }
+ *   GET  /preview/<hash>/<file?>                        -> static file or SPA fallback
  */
 
 /**
@@ -80,7 +80,7 @@ export function previewBuildPlugin(): Plugin {
           // map clear. The flush callback runs after the debounce window,
           // so we don't pay the cost N times for a single editor action.
           scheduleInvalidateTemplateRev(() => {
-            clearTreeCache();
+            clearSimTreeCache();
             // Clearing errors here lets a previously-broken variant
             // self-heal as soon as the source is fixed — the next build
             // request hits a clean slate instead of the cached error.
@@ -102,8 +102,12 @@ export function previewBuildPlugin(): Plugin {
       server.middlewares.use('/api/template-rev', handleTemplateRev);
       server.middlewares.use('/api/build', handleBuild);
       server.middlewares.use('/api/build-status', handleBuildStatus);
-      server.middlewares.use('/api/files', handleFiles);
-      server.middlewares.use('/api/file', handleFile);
+      // Phase F: input-driven, cache-decoupled file panel endpoints. The
+      // shell took the migration off the hash-keyed routes in Phase H and
+      // the legacy ones were deleted in Phase J — these are the canonical
+      // file endpoints now.
+      server.middlewares.use('/api/files-tree', handleFilesTree);
+      server.middlewares.use('/api/file-content', handleFileContent);
       server.middlewares.use('/api/clear-cache', handleClearCache);
 
       server.middlewares.use(async (req, res, next) => {

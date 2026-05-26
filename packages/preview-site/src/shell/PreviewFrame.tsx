@@ -22,9 +22,20 @@ interface BuildState {
 interface BuildInputs {
   platform: string;
   supabase: boolean;
+}
+
+/**
+ * Phase G: design / ui / layout / toastPosition no longer affect the
+ * built bundle (they're switched at runtime via CSS class on `<html>`,
+ * a React Context, and component state). They live in their own
+ * snapshot here so the build effect doesn't re-fire when the user only
+ * changed a runtime axis — a runtime-axis flip is a single
+ * postMessage, not an HTTP round-trip.
+ */
+interface RuntimeVariantInputs {
   design: string;
-  layout: string;
   ui: string;
+  layout: string;
   toastPosition: string;
 }
 
@@ -311,23 +322,40 @@ function waitForVisible(): Promise<void> {
  * to the build hash. Lifted out of the component so the function identity
  * is stable across renders (a fresh closure would defeat the point of
  * `useShallow` — it compares the *returned* shape).
+ *
+ * Phase G shrunk this to `(platform, supabase)` only. The four
+ * runtime-switchable axes have their own selector below.
  */
 function selectBuildInputs(s: ParamsStore): BuildInputs {
   return {
     platform: String(s.state.platform),
     supabase: !!s.state.supabase,
+  };
+}
+
+/**
+ * Project a `ParamsStore` snapshot down to the four runtime-switchable
+ * axes. Identity-stable for the same reason as `selectBuildInputs`:
+ * `useShallow` compares the returned shape, so a fresh closure here
+ * would re-render on every store change.
+ */
+function selectRuntimeVariants(s: ParamsStore): RuntimeVariantInputs {
+  return {
     design: String(s.state.design),
-    layout: String(s.state.layout),
     ui: String(s.state.ui),
+    layout: String(s.state.layout),
     toastPosition: String(s.state.toastPosition),
   };
 }
 
 export function PreviewFrame() {
-  // Subscribe to ONLY the 6 fields that actually go into the build hash.
+  // Subscribe to ONLY the 2 fields that actually go into the build hash.
   // Toggling `pm` mutates the CLI snippet but must NOT re-trigger a build
   // effect — the package manager only matters at scaffold time.
+  // Phase G: design / ui / layout / toastPosition are runtime-only and
+  // tracked via `runtimeVariants` below.
   const buildInputs = useShellStore(useShallow(selectBuildInputs));
+  const runtimeVariants = useShellStore(useShallow(selectRuntimeVariants));
   const setCurrentHash = useUiStore((s) => s.setCurrentHash);
   const setBuildStatus = useUiStore((s) => s.setBuildStatus);
   const setIframeReadyHash = useUiStore((s) => s.setIframeReadyHash);
@@ -348,6 +376,13 @@ export function PreviewFrame() {
   useEffect(() => {
     lastReadyHashRef.current = lastReadyHash;
   }, [lastReadyHash]);
+  // Mirror the runtime variant snapshot so the `eikon:preview-ready`
+  // handler can push the current values into a freshly-mounted iframe
+  // without re-subscribing the listener on every variant change.
+  const runtimeVariantsRef = useRef(runtimeVariants);
+  useEffect(() => {
+    runtimeVariantsRef.current = runtimeVariants;
+  }, [runtimeVariants]);
 
   // Reset sub-route when platform changes — the new build may not
   // have the same routes, and the iframe remounts anyway (shell swap).
@@ -380,6 +415,26 @@ export function PreviewFrame() {
       if (!data || data.type !== 'eikon:preview-ready') return;
       const h = lastReadyHashRef.current;
       if (h) setIframeReadyHash(h);
+      // Push the playground's current runtime-axis snapshot into the
+      // newly-mounted iframe. The template's `index.html` already carries
+      // the *initial* values via class / data attributes, but the user
+      // may have changed any of the four runtime axes between when the
+      // build started and when the iframe finished booting. Sending this
+      // immediately on `eikon:preview-ready` keeps the freshly-painted
+      // iframe in sync with the param store without an extra round-trip.
+      const win = iframeRef.current?.contentWindow;
+      if (!win) return;
+      const v = runtimeVariantsRef.current;
+      win.postMessage(
+        {
+          type: 'eikon:set-variant',
+          design: v.design,
+          ui: v.ui,
+          layout: v.layout,
+          toastPosition: v.toastPosition,
+        },
+        '*'
+      );
     }
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
@@ -400,6 +455,36 @@ export function PreviewFrame() {
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastReadyHash]);
+
+  // ---- Runtime variant push ---------------------------------------------
+  //
+  // Phase G: design / ui / layout / toastPosition are switched at runtime
+  // inside the iframe. Whenever the user flips any of these in the
+  // playground, we postMessage the new values into the live iframe so it
+  // updates in place — no rebuild, no remount, no flash. The template's
+  // `main.tsx` listens for `eikon:set-variant` (gated to dev + same-origin
+  // iframes) and applies the change via CSS class / Context dispatch.
+  //
+  // We don't gate on `lastReadyHash` here: when the iframe hasn't booted
+  // yet, `contentWindow` simply isn't there to receive the message and
+  // the postMessage no-ops. The `eikon:preview-ready` handler above
+  // re-pushes the current snapshot once boot completes, so the iframe
+  // catches up regardless of the relative ordering of "user flipped a
+  // toggle" vs "iframe finished mounting".
+  useEffect(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win) return;
+    win.postMessage(
+      {
+        type: 'eikon:set-variant',
+        design: runtimeVariants.design,
+        ui: runtimeVariants.ui,
+        layout: runtimeVariants.layout,
+        toastPosition: runtimeVariants.toastPosition,
+      },
+      '*'
+    );
+  }, [runtimeVariants]);
 
   // ---- /api/template-rev polling (HMR-like) ------------------------------
   useEffect(() => {

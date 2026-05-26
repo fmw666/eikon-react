@@ -1,17 +1,18 @@
 /**
  * @file prebuild-variants.ts
- * @description Docker-build-time pre-baker for the single-axis variant subset.
+ * @description Docker-build-time pre-baker for the platform×supabase matrix.
  *
  * Without this script, every visitor to a fresh URL on the deployed
  * preview triggers a runtime `viteBuild()` (10–11s cold). That's the
  * dominant source of "open page → wait → still loading" complaints.
  *
- * Pre-generating the full 4032-combo space is infeasible (75 min – 10 h
- * Docker build + ~20 GB image). Pre-generating just `default + each
- * non-default value on each axis` (~25 combos) covers exactly the case
- * "user changed ONE param from the defaults" — which is what the vast
- * majority of first-time visitors do. Roughly 4 minutes of build time,
- * ~75 MB on disk inside the image.
+ * Phase G collapsed the build matrix from 4032 combos to 6 — the
+ * runtime-switchable axes (design / ui / layout / toastPosition) no
+ * longer affect the bundle (see `server/hash.ts`), so a single build
+ * per `(platform, supabase)` pair covers every variant of the four CSS
+ * / Context-driven axes. Pre-baking those 6 in the Docker stage means
+ * the first user to land on any URL hits a hot cache — total prebuild
+ * cost is ~1 minute and a handful of MB on disk.
  *
  * Wiring:
  *   - This script is bundled by `tsup.config.ts` alongside `prod.ts` to
@@ -46,44 +47,26 @@ const DEFAULT: BuildInputs = {
   toastPosition: 'top-right',
 };
 
-// Single-axis variations. Each entry overrides exactly one field on the
-// default and produces one cache entry. For `platform`, we also flip the
-// dependent `layout` to its per-platform default — otherwise the chosen
-// pair `(platform=mobile, layout=stacked)` is invalid under the schema's
-// `valuesWhen`. The build will still run (the strip is unaware of cross-
-// axis rules), but the rendered iframe would mount no layout — not what
-// a real first visit looks like.
+// Phase G: the build matrix is now exactly `platform × supabase` — the
+// other four axes are runtime-switchable (CSS class on `<html>` for
+// design/ui, React Context for layout, component state for
+// toastPosition) and do not influence the bundle. We pre-bake all 6
+// combinations: 1 default + 5 non-default permutations below.
+//
+// Note: although `layout` is a runtime axis now, the playground UI
+// still snaps it on platform change (web→stacked, desktop→sidebar,
+// mobile→mobile-drawer) for ergonomics. Since layout is no longer in
+// the build hash, we don't bother flipping it here — the prebuilt
+// bundle for `(desktop, false)` is the same dist whether layout is
+// `sidebar` or `stacked`.
 const VARIATIONS: ReadonlyArray<Partial<BuildInputs>> = [
-  // platform axis (with layout follow-through to the platform's default)
-  { platform: 'desktop', layout: 'sidebar' },
-  { platform: 'mobile', layout: 'mobile-drawer' },
-  // supabase axis (single non-default value)
+  // platform axis × supabase=false
+  { platform: 'desktop' },
+  { platform: 'mobile' },
+  // supabase=true × all 3 platforms
   { supabase: true },
-  // design axis (13 non-default values)
-  { design: 'apple' },
-  { design: 'linear' },
-  { design: 'anthropic' },
-  { design: 'vercel' },
-  { design: 'notion' },
-  { design: 'flat' },
-  { design: 'material' },
-  { design: 'skeuomorphism' },
-  { design: 'neumorphism' },
-  { design: 'liquid-glass' },
-  { design: 'claymorphism' },
-  { design: 'aurora' },
-  { design: 'neo-brutalism' },
-  // layout axis (3 non-default values for the default platform 'web')
-  { layout: 'sidebar' },
-  { layout: 'topbar-sidebar' },
-  { layout: 'centered' },
-  // ui axis (2 non-default values)
-  { ui: 'radix' },
-  { ui: 'shadcn-style' },
-  // toastPosition axis (3 non-default values)
-  { toastPosition: 'top-center' },
-  { toastPosition: 'bottom-center' },
-  { toastPosition: 'bottom-right' },
+  { platform: 'desktop', supabase: true },
+  { platform: 'mobile', supabase: true },
 ];
 
 function describe(inputs: BuildInputs): string {

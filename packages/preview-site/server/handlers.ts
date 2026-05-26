@@ -19,18 +19,14 @@
  * is fine — the dev plugin and prod server each instantiate one process.
  */
 
-import { existsSync } from 'node:fs';
-import { readdir, readFile, stat } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { type IncomingMessage, type ServerResponse } from 'node:http';
 import path from 'node:path';
-
-import { TEMPLATE_COPY_SKIP } from '../../create-eikon-react/src/skip-list';
 
 import {
   clearAllCache,
   DEFAULT_INPUTS,
   ensureBuild,
-  getCacheDir,
   getDistDir,
   isReady,
   getError,
@@ -39,6 +35,10 @@ import {
 } from './builder';
 import { getTemplateRev } from './fingerprint';
 import { type BuildInputs } from './hash';
+import {
+  simulateStripFileContent,
+  simulateStripTree,
+} from './simulate-strip';
 
 // ---------------------------------------------------------------------------
 // Shared helpers
@@ -87,96 +87,12 @@ function sendJson(res: ServerResponse, body: unknown): void {
   res.end(JSON.stringify(body));
 }
 
-// /api/files reads the cacheDir, which already excludes everything in
-// TEMPLATE_COPY_SKIP at copy time. Vite's `viteBuild()` then deposits a
-// fresh `dist/` (and occasionally `.vite/`) inside cacheDir — those names
-// ALSO live in TEMPLATE_COPY_SKIP, which is exactly why reusing the same
-// set here scrubs them in one move and keeps "what the user sees in the
-// preview tree" identical to "what the user has on disk after the CLI".
-const FILES_SKIP = TEMPLATE_COPY_SKIP;
-
-/** Cap individual file responses so we don't OOM the browser on something
- *  weird like a bundled binary that slipped past the extension filter. */
-const FILE_MAX_BYTES = 2 * 1024 * 1024;
-
 interface FileNode {
-  /** Path-from-cacheRoot used as a stable id; e.g. 'src/app/providers.tsx'. */
+  /** Path-from-template-root used as a stable id; e.g. 'src/app/providers.tsx'. */
   id: string;
   name: string;
   type: 'dir' | 'file';
   children?: FileNode[];
-}
-
-/**
- * /api/files response cache. Trees are deterministic per cache directory,
- * and a cache directory only changes when its hash changes (new build) or
- * gets evicted — both already drive an `invalidate` (template change) or
- * are externally observable. We keep the cache tiny since each entry is
- * just a JS object graph.
- */
-const treeCache = new Map<string, FileNode[]>();
-const TREE_CACHE_MAX = 16;
-
-function rememberTree(hash: string, tree: FileNode[]): void {
-  treeCache.set(hash, tree);
-  if (treeCache.size > TREE_CACHE_MAX) {
-    const oldest = treeCache.keys().next().value as string | undefined;
-    if (oldest) treeCache.delete(oldest);
-  }
-}
-
-/**
- * Drop every cached file tree. The dev plugin calls this from its file
- * watcher when template-react changes; in prod the template is baked into
- * the image and never changes, so this is unused there but kept exported
- * for symmetry.
- */
-export function clearTreeCache(): void {
-  treeCache.clear();
-}
-
-async function readTree(rootDir: string, dir: string): Promise<FileNode[]> {
-  let entries;
-  try {
-    entries = await readdir(dir, { withFileTypes: true });
-  } catch {
-    return [];
-  }
-  const dirs: FileNode[] = [];
-  const files: FileNode[] = [];
-  for (const entry of entries) {
-    if (FILES_SKIP.has(entry.name)) continue;
-    const full = path.join(dir, entry.name);
-    const id = path.relative(rootDir, full).replace(/\\/g, '/');
-    if (entry.isDirectory()) {
-      dirs.push({
-        id,
-        name: entry.name,
-        type: 'dir',
-        children: await readTree(rootDir, full),
-      });
-    } else if (entry.isFile()) {
-      files.push({ id, name: entry.name, type: 'file' });
-    }
-  }
-  const cmp = (a: FileNode, b: FileNode) =>
-    a.name.localeCompare(b.name, 'en', { sensitivity: 'base' });
-  return [...dirs.sort(cmp), ...files.sort(cmp)];
-}
-
-/**
- * Resolve a /api/file?path=... request to an absolute path inside the cache
- * directory, returning null if the path tries to escape (e.g. via '..').
- */
-function safeResolveInside(rootDir: string, relPath: string): string | null {
-  const normalized = path.normalize(path.join(rootDir, relPath));
-  if (
-    normalized !== rootDir &&
-    !normalized.startsWith(rootDir + path.sep)
-  ) {
-    return null;
-  }
-  return normalized;
 }
 
 function mimeFor(p: string): string {
@@ -221,16 +137,20 @@ function mimeFor(p: string): string {
 // shell sees the same wire format whether it's loaded from `pnpm dev` or
 // from the deployed Fly machine):
 //
-//   GET  /api/template-rev                    -> { rev }
-//   POST /api/build           { ...params }  -> { hash, status }
-//   GET  /api/build-status?hash=...           -> { hash, status }
-//   GET  /api/files?hash=...                  -> { hash, tree }       (nested)
-//   GET  /api/file?hash=...&path=...          -> { hash, path, size, text }
-//   POST /api/clear-cache                     -> { ok: true }
-//   GET  /preview/<hash>/<file?>              -> static file or SPA fallback
+//   GET  /api/template-rev                              -> { rev }
+//   POST /api/build           { ...params }            -> { hash, status }
+//   GET  /api/build-status?hash=...                     -> { hash, status }
+//   GET  /api/files-tree?<6 params>                     -> { tree }
+//   GET  /api/file-content?<6 params>&path=...          -> { path, size, text }
+//   POST /api/clear-cache                               -> { ok: true }
+//   GET  /preview/<hash>/<file?>                        -> static file or SPA fallback
 //
 // Status is one of 'ready' | 'building' | 'error'. The shell polls
 // /api/build-status until 'ready' then sets iframe.src to /preview/<hash>/.
+// The `files-tree` / `file-content` pair are cache-decoupled (Phase F):
+// they take the raw 6-tuple of params and run `simulateStrip*` to produce
+// what `npx create-eikon-react --<args>` would emit, without ever touching
+// the per-hash dist directory.
 
 export async function handleTemplateRev(
   _req: IncomingMessage,
@@ -288,79 +208,177 @@ export function handleBuildStatus(
   sendJson(res, { hash, status: 'building' });
 }
 
-export async function handleFiles(
+// ---------------------------------------------------------------------------
+// /api/files-tree + /api/file-content — input-driven, cache-decoupled
+// ---------------------------------------------------------------------------
+//
+// Phase F: the files panel no longer follows the build cache. Instead the
+// shell calls these two endpoints with the raw 6-tuple of params; the
+// server uses `simulateStripTree` / `simulateStripFileContent` to produce
+// what `npx create-eikon-react --<args>` would have made — without ever
+// touching the per-hash cacheDir. Switching design / ui / layout /
+// toastPosition hits these handlers in milliseconds since the underlying
+// work is all in-memory regex + a small fs walk of `template-react/`.
+
+interface SimInputs {
+  platform: string;
+  supabase: boolean;
+  design: string;
+  layout: string;
+  ui: string;
+  toastPosition: string;
+}
+
+function readSimInputs(url: URL): SimInputs {
+  const q = url.searchParams;
+  return {
+    platform: q.get('platform') ?? DEFAULT_INPUTS.platform,
+    supabase: q.get('supabase') === 'true',
+    design: q.get('design') ?? DEFAULT_INPUTS.design,
+    layout: q.get('layout') ?? DEFAULT_INPUTS.layout,
+    ui: q.get('ui') ?? DEFAULT_INPUTS.ui,
+    toastPosition: q.get('toastPosition') ?? DEFAULT_INPUTS.toastPosition,
+  };
+}
+
+function simKey(inputs: SimInputs): string {
+  // Stable order — JSON.stringify on an object literal preserves
+  // insertion order, and TS `interface` fields land in declaration order.
+  return JSON.stringify(inputs);
+}
+
+/** LRU-ish cache on the simulated tree response. Entries are tiny
+ *  (POSIX paths in an array → on the order of 100KB even for the full
+ *  template) and the only invalidation lever is template-rev change,
+ *  which the watcher / fingerprint flow already drives. We simply drop
+ *  every entry whenever the watcher sees a template change. */
+const simTreeCache = new Map<string, string[]>();
+const SIM_TREE_CACHE_MAX = 32;
+
+function rememberSimTree(key: string, tree: string[]): void {
+  simTreeCache.set(key, tree);
+  if (simTreeCache.size > SIM_TREE_CACHE_MAX) {
+    const oldest = simTreeCache.keys().next().value as string | undefined;
+    if (oldest) simTreeCache.delete(oldest);
+  }
+}
+
+/**
+ * Invalidate the simulator's tree cache. Called by the dev plugin's
+ * file watcher when template-react changes; production never hits this
+ * because the template is baked into the image.
+ */
+export function clearSimTreeCache(): void {
+  simTreeCache.clear();
+}
+
+/**
+ * Convert a flat list of POSIX-relative paths into the nested
+ * `FileNode[]` shape the existing shell-side tree renderer expects.
+ * Sorted dirs-before-files, case-insensitive — matches `readTree`.
+ */
+function pathsToTree(paths: ReadonlyArray<string>): FileNode[] {
+  interface DirAcc {
+    children: Map<string, DirAcc | true>;
+  }
+  const root: DirAcc = { children: new Map() };
+  for (const p of paths) {
+    const parts = p.split('/');
+    let cur: DirAcc = root;
+    for (let i = 0; i < parts.length; i++) {
+      const name = parts[i]!;
+      const isLeaf = i === parts.length - 1;
+      const existing = cur.children.get(name);
+      if (isLeaf) {
+        if (existing === undefined) cur.children.set(name, true);
+        // If a dir exists with the same name, that's a paths bug —
+        // skip silently; the structure tests would catch it.
+      } else {
+        if (existing === true) {
+          // Same name appeared once as file, now as dir — ignore the
+          // file leaf. Shouldn't happen for real templates.
+          const dir: DirAcc = { children: new Map() };
+          cur.children.set(name, dir);
+          cur = dir;
+        } else if (existing === undefined) {
+          const dir: DirAcc = { children: new Map() };
+          cur.children.set(name, dir);
+          cur = dir;
+        } else {
+          cur = existing;
+        }
+      }
+    }
+  }
+  function emit(acc: DirAcc, prefix: string): FileNode[] {
+    const dirs: FileNode[] = [];
+    const files: FileNode[] = [];
+    for (const [name, val] of acc.children) {
+      const id = prefix ? `${prefix}/${name}` : name;
+      if (val === true) {
+        files.push({ id, name, type: 'file' });
+      } else {
+        dirs.push({ id, name, type: 'dir', children: emit(val, id) });
+      }
+    }
+    const cmp = (a: FileNode, b: FileNode) =>
+      a.name.localeCompare(b.name, 'en', { sensitivity: 'base' });
+    return [...dirs.sort(cmp), ...files.sort(cmp)];
+  }
+  return emit(root, '');
+}
+
+export async function handleFilesTree(
   req: IncomingMessage,
   res: ServerResponse
 ): Promise<void> {
   const url = new URL(req.url ?? '/', 'http://localhost');
-  const hash = url.searchParams.get('hash') ?? '';
-  if (!hash) {
-    res.statusCode = 400;
-    res.end('hash query param required');
-    return;
-  }
-  const cached = treeCache.get(hash);
-  if (cached) {
-    sendJson(res, { hash, tree: cached });
-    return;
-  }
-  const cacheDir = getCacheDir(hash);
-  if (!existsSync(cacheDir)) {
-    res.statusCode = 404;
-    res.end('Build not found for hash');
-    return;
-  }
+  const inputs = readSimInputs(url);
+  const key = simKey(inputs);
   try {
-    const tree = await readTree(cacheDir, cacheDir);
-    rememberTree(hash, tree);
-    sendJson(res, { hash, tree });
+    let paths = simTreeCache.get(key);
+    if (!paths) {
+      paths = await simulateStripTree(inputs);
+      rememberSimTree(key, paths);
+    }
+    sendJson(res, { tree: pathsToTree(paths) });
   } catch (e) {
     res.statusCode = 500;
     res.end(e instanceof Error ? e.message : String(e));
   }
 }
 
-export async function handleFile(
+export async function handleFileContent(
   req: IncomingMessage,
   res: ServerResponse
 ): Promise<void> {
   const url = new URL(req.url ?? '/', 'http://localhost');
-  const hash = url.searchParams.get('hash') ?? '';
+  const inputs = readSimInputs(url);
   const rel = url.searchParams.get('path') ?? '';
-  if (!hash || !rel) {
+  if (!rel) {
     res.statusCode = 400;
-    res.end('hash and path query params required');
+    res.end('path query param required');
     return;
   }
-  const cacheDir = getCacheDir(hash);
-  const abs = safeResolveInside(cacheDir, rel);
-  if (!abs) {
-    res.statusCode = 403;
-    res.end('Forbidden');
+  // Reject path traversal — the simulator only reads from
+  // TEMPLATE_REACT_DIR, but we reject empty / parent-escaping inputs at
+  // the edge so a malformed query never reaches the fs.
+  if (rel.includes('..') || rel.startsWith('/') || rel.includes('\\')) {
+    res.statusCode = 400;
+    res.end('Invalid path');
     return;
   }
   try {
-    const st = await stat(abs);
-    if (!st.isFile()) {
+    const text = await simulateStripFileContent(rel, inputs);
+    if (text === null) {
       res.statusCode = 404;
-      res.end('Not a file');
+      res.end('Not found (stripped under current inputs)');
       return;
     }
-    if (st.size > FILE_MAX_BYTES) {
-      res.statusCode = 413;
-      res.end('File too large to preview');
-      return;
-    }
-    const buf = await readFile(abs);
-    sendJson(res, {
-      hash,
-      path: rel,
-      size: st.size,
-      text: buf.toString('utf8'),
-    });
-  } catch {
-    res.statusCode = 404;
-    res.end('Not found');
+    sendJson(res, { path: rel, size: Buffer.byteLength(text, 'utf8'), text });
+  } catch (e) {
+    res.statusCode = 500;
+    res.end(e instanceof Error ? e.message : String(e));
   }
 }
 
@@ -374,7 +392,7 @@ export async function handleClearCache(
     return;
   }
   await clearAllCache();
-  clearTreeCache();
+  clearSimTreeCache();
   sendJson(res, { ok: true });
 }
 

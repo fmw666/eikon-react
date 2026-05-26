@@ -1,15 +1,56 @@
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
 import CodeMirror, { type Extension } from '@uiw/react-codemirror';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
-import { useUiStore } from './store';
+import { type ParamsStore } from '@/lib/params-store';
+
+import { useShellStore, useUiStore } from './store';
 import { useScrollFade } from './useScrollFade';
 
 interface FileResponse {
-  hash: string;
   path: string;
   size: number;
   text: string;
+}
+
+/**
+ * 6-tuple of params accepted by `/api/file-content` (Phase F's
+ * cache-decoupled endpoint). The simulator strips the file in memory
+ * for the given inputs and returns the post-strip text — no viteBuild
+ * involved, so flipping a runtime axis (design / ui / layout /
+ * toastPosition) refreshes the editor pane in milliseconds.
+ */
+interface SimInputs {
+  platform: string;
+  supabase: boolean;
+  design: string;
+  ui: string;
+  layout: string;
+  toastPosition: string;
+}
+
+function selectSimInputs(s: ParamsStore): SimInputs {
+  return {
+    platform: String(s.state.platform),
+    supabase: !!s.state.supabase,
+    design: String(s.state.design),
+    ui: String(s.state.ui),
+    layout: String(s.state.layout),
+    toastPosition: String(s.state.toastPosition),
+  };
+}
+
+function buildSimQuery(inputs: SimInputs, path: string): string {
+  const params = new URLSearchParams();
+  params.set('platform', inputs.platform);
+  params.set('supabase', String(inputs.supabase));
+  params.set('design', inputs.design);
+  params.set('ui', inputs.ui);
+  params.set('layout', inputs.layout);
+  params.set('toastPosition', inputs.toastPosition);
+  params.set('path', path);
+  return params.toString();
 }
 
 /**
@@ -89,7 +130,7 @@ async function copyToClipboard(text: string): Promise<void> {
 }
 
 export function CodeView() {
-  const hash = useUiStore((s) => s.currentHash);
+  const inputs = useShellStore(useShallow(selectSimInputs));
   const selectedFile = useUiStore((s) => s.selectedFile);
   const closeFile = useUiStore((s) => s.closeFile);
   const codeWrapRef = useRef<HTMLDivElement | null>(null);
@@ -102,7 +143,7 @@ export function CodeView() {
   const [languageExt, setLanguageExt] = useState<Extension | null>(null);
 
   useEffect(() => {
-    if (!hash || !selectedFile) {
+    if (!selectedFile) {
       setFile(null);
       setError(null);
       return;
@@ -110,9 +151,7 @@ export function CodeView() {
     setLoading(true);
     const ctrl = new AbortController();
     fetch(
-      `/api/file?hash=${encodeURIComponent(hash)}&path=${encodeURIComponent(
-        selectedFile
-      )}`,
+      `/api/file-content?${buildSimQuery(inputs, selectedFile)}`,
       { signal: ctrl.signal }
     )
       .then(async (r) => {
@@ -147,7 +186,7 @@ export function CodeView() {
       })
       .finally(() => setLoading(false));
     return () => ctrl.abort();
-  }, [hash, selectedFile, closeFile]);
+  }, [inputs, selectedFile, closeFile]);
 
   // Language packs load on-demand; opening the editor pays for at most
   // one pack at a time instead of all five up-front.

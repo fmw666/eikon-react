@@ -1,9 +1,12 @@
 import { Icon, iconLoaded, loadIcons } from '@iconify/react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Tree, type NodeApi, type NodeRendererProps } from 'react-arborist';
+import { useShallow } from 'zustand/react/shallow';
+
+import { type ParamsStore } from '@/lib/params-store';
 
 import { getFileIcon, getFolderIcon } from './fileIcons';
-import { useUiStore } from './store';
+import { useShellStore, useUiStore } from './store';
 import { useScrollFade } from './useScrollFade';
 
 interface FileNode {
@@ -13,16 +16,55 @@ interface FileNode {
   children?: FileNode[];
 }
 
-interface FilesResponse {
-  hash: string;
+interface FilesTreeResponse {
   tree: FileNode[];
 }
 
-function fetchTree(hash: string, signal: AbortSignal): Promise<FilesResponse> {
-  return fetch(`/api/files?hash=${encodeURIComponent(hash)}`, { signal }).then(
+/**
+ * The 6-tuple of params the new `/api/files-tree` + `/api/file-content`
+ * endpoints accept. Phase F decoupled the file panel from the build
+ * cache: a runtime-only axis flip (e.g. design) re-renders the tree from
+ * a pure simulator pass instead of waiting for a viteBuild.
+ */
+interface SimInputs {
+  platform: string;
+  supabase: boolean;
+  design: string;
+  ui: string;
+  layout: string;
+  toastPosition: string;
+}
+
+function selectSimInputs(s: ParamsStore): SimInputs {
+  return {
+    platform: String(s.state.platform),
+    supabase: !!s.state.supabase,
+    design: String(s.state.design),
+    ui: String(s.state.ui),
+    layout: String(s.state.layout),
+    toastPosition: String(s.state.toastPosition),
+  };
+}
+
+function buildSimQuery(inputs: SimInputs): string {
+  const params = new URLSearchParams();
+  params.set('platform', inputs.platform);
+  params.set('supabase', String(inputs.supabase));
+  params.set('design', inputs.design);
+  params.set('ui', inputs.ui);
+  params.set('layout', inputs.layout);
+  params.set('toastPosition', inputs.toastPosition);
+  return params.toString();
+}
+
+function fetchTree(
+  inputs: SimInputs,
+  signal: AbortSignal
+): Promise<FilesTreeResponse> {
+  return fetch(`/api/files-tree?${buildSimQuery(inputs)}`, { signal }).then(
     (r) => {
-      if (!r.ok) throw new Error(`/api/files failed: ${r.status}`);
-      return r.json() as Promise<FilesResponse>;
+      if (!r.ok) throw new Error(`/api/files-tree failed: ${r.status}`);
+      return r.json() as Promise<FilesTreeResponse>;
     }
   );
 }
@@ -293,7 +335,8 @@ const Row = memo(function Row({
 });
 
 export function FileExplorer() {
-  const hash = useUiStore((s) => s.currentHash);
+  const inputs = useShellStore(useShallow(selectSimInputs));
+  const currentHash = useUiStore((s) => s.currentHash);
   const selectedFile = useUiStore((s) => s.selectedFile);
   const openFile = useUiStore((s) => s.openFile);
   const setTreeReadyHash = useUiStore((s) => s.setTreeReadyHash);
@@ -307,24 +350,39 @@ export function FileExplorer() {
     h: 400,
   });
 
+  // Mirror the freshest currentHash into a ref so the fetch's
+  // `setTreeReadyHash` call doesn't capture a stale value when the
+  // build completes mid-flight. The overlay coordinator reads
+  // `treeReadyHash === currentHash` to decide if the tree is in sync.
+  const currentHashRef = useRef(currentHash);
   useEffect(() => {
-    if (!hash) {
-      setTree(null);
-      setError(null);
-      return;
-    }
+    currentHashRef.current = currentHash;
+  }, [currentHash]);
+
+  // Fetch on every input change. The new endpoint is decoupled from
+  // the build cache: it walks `template-react/` through the simulator
+  // and returns whatever `npx create-eikon-react --<args>` would
+  // produce — fast enough that there's no cold/warm distinction worth
+  // gating on. Runtime-axis flips (design / ui / layout /
+  // toastPosition) update the panel in milliseconds without touching
+  // viteBuild, so the user sees the file tree change in lock-step
+  // with the iframe.
+  useEffect(() => {
     const ctrl = new AbortController();
-    fetchTree(hash, ctrl.signal)
+    fetchTree(inputs, ctrl.signal)
       .then((r) => {
         setTree(r.tree);
         setError(null);
-        // Tell the App-level loading overlay that THIS panel has caught
-        // up to `currentHash`. Reporting `r.hash` (what the server
-        // actually answered for) instead of the local `hash` closure
-        // shields us from the rare case where `currentHash` flipped
-        // again while the fetch was in flight — we only mark the
-        // freshly-arrived hash as ready.
-        setTreeReadyHash(r.hash);
+        // The tree is now in sync with the current input snapshot. The
+        // overlay coordinator gates on `treeReadyHash === currentHash`
+        // — when no build is in flight `currentHash` already names the
+        // last-ready hash, so this assertion clears the overlay
+        // immediately. During a build, `currentHash` updates only
+        // after the build dist exists; the next fetch (triggered by
+        // the platform/supabase change that drove the build) will
+        // refresh `treeReadyHash` to match.
+        const h = currentHashRef.current;
+        if (h) setTreeReadyHash(h);
       })
       .catch((e: unknown) => {
         if ((e as { name?: string }).name === 'AbortError') return;
@@ -334,7 +392,7 @@ export function FileExplorer() {
     // `setTreeReadyHash` is a stable zustand setter; omitting it from
     // deps keeps this effect from re-running on store init.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hash]);
+  }, [inputs]);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -434,7 +492,7 @@ export function FileExplorer() {
           paddingTop: 4,
         }}
       >
-        {!hash && (
+        {!tree && !error && (
           <div
             style={{
               padding: 12,
@@ -442,7 +500,7 @@ export function FileExplorer() {
               color: COLOR_TEXT_MUTED,
             }}
           >
-            Waiting for first build…
+            Loading file tree…
           </div>
         )}
         {error && (

@@ -41,8 +41,13 @@ export interface BuildInputs {
  *       now strip `apps/<other-shell>/`, prune `tauri:*` / `cap:*`
  *       scripts, and drop `pnpm-workspace.yaml` on web. Old cache
  *       entries built with the keepShells opt-out must not be reused.
+ *   3 — Phase G: design / ui / layout / toastPosition no longer affect
+ *       the built bundle (they're runtime-switched via CSS class /
+ *       Context / state). The hash now only mixes platform + supabase,
+ *       so the build matrix collapses from 4032 to 6. Old cache
+ *       entries keyed on the wider 6-tuple must not be reused.
  */
-const CACHE_SCHEMA_VERSION = 2;
+const CACHE_SCHEMA_VERSION = 3;
 
 /**
  * Deterministic short hash of the build-relevant inputs + a "template
@@ -52,6 +57,12 @@ const CACHE_SCHEMA_VERSION = 2;
  * naturally invalidates the cache. `CACHE_SCHEMA_VERSION` provides a
  * second invalidation lever for changes that don't show up in the
  * template tree (e.g. server-side strip-option flips).
+ *
+ * Phase G intentionally drops `design / ui / layout / toastPosition`
+ * from the mix even though they live on the BuildInputs type — they're
+ * runtime-only now (see comments on the omitted fields in the
+ * call-site), and including them here would needlessly multiply cache
+ * entries that are byte-identical on disk.
  */
 export function hashBuildInputs(
   inputs: BuildInputs,
@@ -62,10 +73,6 @@ export function hashBuildInputs(
     templateRev,
     platform: String(inputs.platform),
     supabase: !!inputs.supabase,
-    design: String(inputs.design),
-    layout: String(inputs.layout),
-    ui: String(inputs.ui),
-    toastPosition: String(inputs.toastPosition),
   };
   return createHash('sha256')
     .update(JSON.stringify(ordered))

@@ -116,15 +116,13 @@ const lastServed = new Map<string, number>();
  * dev process after a few hours of editing (each template edit produces a
  * new templateRev → new hash → new dir, and the old dirs were orphaned).
  *
- * The numbers below are conservative; bump if you hit cache misses while
- * cycling through variants on the same template revision.
- *
- * 32 was picked to comfortably hold the Docker pre-bake (~25 single-axis
- * combos) plus headroom for whatever variant the user is currently
- * cycling through. At ~3 MB / dist that's ~96 MB on disk — well within
- * Fly's shared-cpu-1x scratch space and the dev box's tolerance.
+ * Phase G: the build matrix is exactly `platform × supabase` = 6 combos
+ * (see `server/hash.ts` for the schema-version 3 hash). 8 gives us the
+ * full pre-bake plus 2 slots of headroom for an in-flight templateRev
+ * rotation during dev edits. At ~3 MB / dist that's ~24 MB on disk —
+ * comfortably under any reasonable budget.
  */
-const MAX_CACHED_HASHES = 32;
+const MAX_CACHED_HASHES = 8;
 const MAX_RETAINED_ERRORS = 32;
 /**
  * Hashes whose `/preview/<hash>/...` URL was hit within `SERVED_TTL_MS`
@@ -134,12 +132,13 @@ const MAX_RETAINED_ERRORS = 32;
  * mtime doesn't refresh on read), the iframe later 404s on a chunk fetch
  * or a navigation, and the user sees a black screen.
  *
- * 10 minutes is comfortably longer than any realistic pause between
- * variant switches; the timestamps map is bounded by MAX_CACHED_HASHES *
- * a constant factor since hashes outside the cache get pruned by
- * `pruneServedRecord` below.
+ * Phase G: with only 6 build combos total, eviction pressure is low and
+ * the iframe will rarely flip outside the prebaked set, so we don't need
+ * to keep a long protective tail. 2 minutes still comfortably covers a
+ * user mid-cycle (the iframe doesn't pause that long between switches),
+ * but lets stale templateRev dirs age out faster after edits.
  */
-const SERVED_TTL_MS = 10 * 60_000;
+const SERVED_TTL_MS = 2 * 60_000;
 
 let evictionInflight: Promise<void> | null = null;
 
@@ -370,20 +369,24 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
     ui: inputs.ui,
     toastPosition: inputs.toastPosition,
   };
-  // The playground simulates exactly what `npx create-eikon-react`
-  // outputs — its left-side files panel must equal the scaffolded tree
-  // 1:1. That means we now run the strip with no overrides:
+  // The playground used to strip exactly like the CLI so the files
+  // panel matched 1:1. That coupling is gone now: the files panel is
+  // served by `simulate-strip.ts` (Phase F), and the *built bundle*
+  // running in the iframe is a runtime-switchable shell — every value
+  // of design / ui / layout / toastPosition coexists in the build, and
+  // the template's own dispatchers (CSS class on <html>, React Context,
+  // component state) pick one based on a postMessage from the shell.
   //
-  //   - examples ships unconditionally (CLI default), so the showcase
-  //     dir + its deps are present in both playground and scaffold.
-  //   - variant siblings: only the chosen `*RootLayout.tsx` survives,
-  //     matching the CLI's per-axis file-level strip. Block-level
-  //     variant markers still narrow each dispatcher.
-  //   - platform shells (`apps/desktop/`, `apps/mobile/`) and
-  //     `pnpm-workspace.yaml` are stripped per the chosen platform —
-  //     the playground gets one physical cache entry per platform
-  //     (already its own cache hash, so no new entries) and the file
-  //     tree shown matches what `--platform <x>` would produce.
+  //   - `keepAllVariants` lists the four runtime-switchable axes so
+  //     their `@eikon:variant` blocks AND file-level markers stay put.
+  //     Block-level platform/supabase markers still strip — those gate
+  //     things (apple-mobile-web-app-capable meta, --touch-target-min
+  //     token, supabase imports) that aren't safe to coexist.
+  //
+  //   - `keepAllVariantFiles` and `keepShells` stay on for backward
+  //     compat with the file-tree expectations the playground had
+  //     pre-Phase-F; they're cheap and Phase F's simulate-strip is
+  //     authoritative for the panel anyway.
   //
   // The runtime DEV gate in `app/router.tsx` is the second half of the
   // showcase story: with `mode: 'development'` set on the viteBuild
@@ -391,7 +394,11 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
   // playground's bundle, so the gated examples routes mount. End users
   // running `npm run build` get a production bundle where the same
   // gate evaluates to `false` and tree-shakes the routes away.
-  await stripFeatures(cacheDir, flags, variants);
+  await stripFeatures(cacheDir, flags, variants, {
+    keepAllVariantFiles: true,
+    keepShells: true,
+    keepAllVariants: ['design', 'ui', 'layout', 'toastPosition'],
+  });
 
   await viteBuild({
     root: cacheDir,

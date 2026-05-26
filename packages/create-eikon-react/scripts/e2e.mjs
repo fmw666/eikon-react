@@ -291,6 +291,63 @@ const SCENARIOS = [
       ],
     },
   },
+  {
+    // `--pm npm` rewrite: assert that the scaffolded package.json no longer
+    // depends on pnpm anywhere — engines pin npm, packageManager declares
+    // npm, and the aggregate scripts shell out via `npm run`. Workspace-
+    // filter scripts are pnpm-only but they're already pruned on web
+    // (this is a web scaffold), so there's nothing left to corrupt.
+    id: 'pm-npm',
+    projectName: 'eikon-e2e-pm-npm',
+    pm: 'npm',
+    flags: ['--no-supabase'],
+    expect: {
+      filesPresent: ['src/features/counter/index.ts'],
+      filesAbsent: ['pnpm-workspace.yaml'],
+      depsPresent: ['react', '@tanstack/react-query'],
+      depsAbsent: ['@supabase/supabase-js'],
+      providersContains: ['QueryClientProvider'],
+      providersAbsent: [],
+      enginesEquals: { node: '>=20.10.0', npm: '>=10.0.0' },
+      packageManagerEquals: 'npm@10.9.0',
+      // Aggregate scripts must use `npm run`, not `pnpm run`. Non-aggregate
+      // scripts (`dev`, `build`, `typecheck`) stay byte-identical because
+      // the rewriter only touches `\bpnpm run\b`.
+      scriptsContaining: {
+        check: 'npm run typecheck',
+        ci: 'npm run build',
+      },
+      scriptsNotContaining: {
+        check: 'pnpm run',
+        ci: 'pnpm run',
+      },
+    },
+  },
+  {
+    // `--pm bun` rewrite: same shape as pm-npm but with bun's spec.
+    id: 'pm-bun',
+    projectName: 'eikon-e2e-pm-bun',
+    pm: 'bun',
+    flags: ['--no-supabase'],
+    expect: {
+      filesPresent: ['src/features/counter/index.ts'],
+      filesAbsent: ['pnpm-workspace.yaml'],
+      depsPresent: ['react', '@tanstack/react-query'],
+      depsAbsent: ['@supabase/supabase-js'],
+      providersContains: ['QueryClientProvider'],
+      providersAbsent: [],
+      enginesEquals: { node: '>=20.10.0', bun: '>=1.1.0' },
+      packageManagerEquals: 'bun@1.1.30',
+      scriptsContaining: {
+        check: 'bun run typecheck',
+        ci: 'bun run build',
+      },
+      scriptsNotContaining: {
+        check: 'pnpm run',
+        ci: 'pnpm run',
+      },
+    },
+  },
 ];
 
 const selected = args.only
@@ -374,6 +431,9 @@ async function runScenario(scenario, tmpRoot, tarballPath) {
   }
 
   step('  invoke CLI');
+  // Default to pnpm so the existing scenarios stay green; pm-* scenarios
+  // override via `scenario.pm` to exercise the npm / bun rewrite paths.
+  const pm = scenario.pm ?? 'pnpm';
   await run(
     cliBin,
     [
@@ -381,7 +441,7 @@ async function runScenario(scenario, tmpRoot, tarballPath) {
       '--yes',
       ...scenario.flags,
       '--pm',
-      'pnpm',
+      pm,
       '--no-install',
       '--no-git',
     ],
@@ -589,6 +649,69 @@ async function verifyScenario(projectDir, expect) {
     for (const name of expect.scriptsAbsent ?? []) {
       if (name in scripts) {
         throw new Error(`expected package.json script absent: ${name}`);
+      }
+    }
+  }
+
+  // PM-rewrite assertions. The CLI's rewrite-package-manager.js is what
+  // wires `--pm npm|bun` through to `engines` / `packageManager` /
+  // `scripts`; without these checks we'd silently regress to a project
+  // that demands pnpm even when the user picked something else.
+  if (expect.enginesEquals) {
+    const actual = pkg.engines ?? {};
+    const expected = expect.enginesEquals;
+    const keysMatch =
+      Object.keys(actual).length === Object.keys(expected).length &&
+      Object.keys(expected).every((k) => actual[k] === expected[k]);
+    if (!keysMatch) {
+      throw new Error(
+        `expected package.json engines to equal ${JSON.stringify(
+          expected
+        )} but got ${JSON.stringify(actual)}`
+      );
+    }
+  }
+
+  if (expect.packageManagerEquals !== undefined) {
+    if (pkg.packageManager !== expect.packageManagerEquals) {
+      throw new Error(
+        `expected package.json packageManager=${JSON.stringify(
+          expect.packageManagerEquals
+        )} but got ${JSON.stringify(pkg.packageManager)}`
+      );
+    }
+  }
+
+  if (expect.scriptsContaining) {
+    const scripts = pkg.scripts ?? {};
+    for (const [name, needle] of Object.entries(expect.scriptsContaining)) {
+      const cmd = scripts[name];
+      if (typeof cmd !== 'string') {
+        throw new Error(
+          `expected package.json script ${name} to exist for scriptsContaining check`
+        );
+      }
+      if (!cmd.includes(needle)) {
+        throw new Error(
+          `expected package.json scripts.${name} to contain ${JSON.stringify(
+            needle
+          )} but got ${JSON.stringify(cmd)}`
+        );
+      }
+    }
+  }
+
+  if (expect.scriptsNotContaining) {
+    const scripts = pkg.scripts ?? {};
+    for (const [name, needle] of Object.entries(expect.scriptsNotContaining)) {
+      const cmd = scripts[name];
+      if (typeof cmd !== 'string') continue;
+      if (cmd.includes(needle)) {
+        throw new Error(
+          `expected package.json scripts.${name} to NOT contain ${JSON.stringify(
+            needle
+          )} but got ${JSON.stringify(cmd)}`
+        );
       }
     }
   }

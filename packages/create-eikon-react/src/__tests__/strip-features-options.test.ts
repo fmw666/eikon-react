@@ -208,3 +208,73 @@ describe('stripFeatures — keepAllVariantFiles', () => {
     expect(dispatcher).not.toContain('SidebarRootLayout'); // unchosen block dropped
   });
 });
+
+// =================================================================================================
+// Tests — keepAllVariants (per-axis block + file strip opt-out)
+// =================================================================================================
+
+describe('stripFeatures — keepAllVariants', () => {
+  let dir: string;
+  beforeEach(() => {
+    dir = setupFixture();
+  });
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('keepAllVariants=["layout"]: keeps all layout sibling files AND keeps block-level layout markers', async () => {
+    // The playground's runtime-dispatch path: source for every variant
+    // value coexists in the build so the iframe can swap with no
+    // rebuild. Both the file-level strip and the block-level strip
+    // skip — the dispatcher in RootLayout.tsx ends up containing
+    // *both* import lines.
+    await stripFeatures(dir, FLAGS, DEFAULT_VARIANTS, {
+      keepAllVariants: ['layout'],
+    });
+
+    // File-level: every sibling stays.
+    expect(
+      existsSync(path.join(dir, 'src', 'app', 'layouts', 'StackedRootLayout.tsx'))
+    ).toBe(true);
+    expect(
+      existsSync(path.join(dir, 'src', 'app', 'layouts', 'SidebarRootLayout.tsx'))
+    ).toBe(true);
+
+    // Block-level: every block survives in the dispatcher.
+    const dispatcher = readFileSync(
+      path.join(dir, 'src', 'app', 'layouts', 'RootLayout.tsx'),
+      'utf8'
+    );
+    expect(dispatcher).toContain('StackedRootLayout');
+    expect(dispatcher).toContain('SidebarRootLayout');
+  });
+
+  it('keepAllVariants=[] (default): full strip — same as not passing the option', async () => {
+    await stripFeatures(dir, FLAGS, DEFAULT_VARIANTS, { keepAllVariants: [] });
+
+    expect(
+      existsSync(path.join(dir, 'src', 'app', 'layouts', 'SidebarRootLayout.tsx'))
+    ).toBe(false);
+    const dispatcher = readFileSync(
+      path.join(dir, 'src', 'app', 'layouts', 'RootLayout.tsx'),
+      'utf8'
+    );
+    expect(dispatcher).not.toContain('SidebarRootLayout');
+  });
+
+  it('keepAllVariants does NOT affect axes outside its list', async () => {
+    // Listing only `design` should leave `layout` strip behaviour intact.
+    await stripFeatures(dir, FLAGS, DEFAULT_VARIANTS, {
+      keepAllVariants: ['design'],
+    });
+
+    expect(
+      existsSync(path.join(dir, 'src', 'app', 'layouts', 'SidebarRootLayout.tsx'))
+    ).toBe(false);
+    const dispatcher = readFileSync(
+      path.join(dir, 'src', 'app', 'layouts', 'RootLayout.tsx'),
+      'utf8'
+    );
+    expect(dispatcher).not.toContain('SidebarRootLayout');
+  });
+});

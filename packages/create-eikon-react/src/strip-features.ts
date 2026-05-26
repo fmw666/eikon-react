@@ -114,10 +114,27 @@ const PACKAGE_DEPS_BY_FEATURE: Record<string, string[]> = {
  *     entry can serve every platform without rebuilding the directory
  *     tree, and so the playground's "View source" panel can show users
  *     what the shells look like.
+ *
+ *   - `keepAllVariants`: a list of axis names whose block-level AND
+ *     file-level variant markers should be skipped. Used by the preview
+ *     playground for axes the template handles at *runtime* —
+ *     `design` / `ui` (CSS class), `layout` (React Context),
+ *     `toastPosition` (component state). For those axes the playground
+ *     wants every value's source to coexist in the build so the iframe
+ *     can switch with no rebuild; the template's own runtime dispatch
+ *     picks one. CLI users pass nothing → every axis is stripped to
+ *     the chosen value, exactly as before.
+ *
+ *     `platform` is intentionally NOT runtime-switchable — its blocks
+ *     gate things like the `apple-mobile-web-app-capable` meta tag
+ *     and `--touch-target-min` token that aren't safe to coexist —
+ *     so callers pass `['design','ui','layout','toastPosition']`
+ *     rather than a blanket boolean.
  */
 export interface StripOptions {
   keepAllVariantFiles?: boolean;
   keepShells?: boolean;
+  keepAllVariants?: ReadonlyArray<string>;
 }
 
 /**
@@ -334,14 +351,17 @@ async function stripFile(
 
   // Variant file-level strip: removes orphan variant siblings (e.g. the
   // 3 unchosen layouts) so the scaffolded project only carries the user's
-  // selection. The playground opts out via `keepAllVariantFiles`.
+  // selection. The playground opts out via `keepAllVariantFiles` (drops
+  // the whole pass) or `keepAllVariants` (per-axis exclusion — used to
+  // keep all `layout=*` files while still letting `platform=*` strip).
   if (!options.keepAllVariantFiles) {
     const variantFileMatch = raw.match(VARIANT_FILE_MARKER_RE);
     if (variantFileMatch) {
       const axis = variantFileMatch[1]!;
       const value = variantFileMatch[2]!;
       const chosen = variants[axis];
-      if (chosen !== undefined && chosen !== value) {
+      const axisKept = options.keepAllVariants?.includes(axis) ?? false;
+      if (!axisKept && chosen !== undefined && chosen !== value) {
         await rm(file, { force: true });
         return;
       }
@@ -353,6 +373,10 @@ async function stripFile(
     out = stripBlocksForFeature(out, feature);
   }
   for (const [axis, chosen] of Object.entries(variants)) {
+    // Skip block-level strip for runtime-switchable axes the playground
+    // opted out of (design / ui / layout / toastPosition). Marker
+    // comments stay in source — they're inert.
+    if (options.keepAllVariants?.includes(axis)) continue;
     out = stripBlocksForVariant(out, axis, chosen);
   }
 
@@ -611,3 +635,55 @@ export async function prunePlatformOnlyRootFiles(
 export { stripBlocksForFeature, stripBlocksForVariant, runWithConcurrency };
 // Reference exported helpers so unused-export lints don't trigger.
 export const __BLOCK_RE_FOR_TESTS = BLOCK_RE;
+
+// ---------------------------------------------------------------------------
+// Pure helpers exposed for the preview server's `simulate-strip.ts`.
+//
+// `simulateStrip()` (in preview-site) needs to produce, *per request and
+// without writing to disk*, the file tree + per-file content the CLI
+// would generate for a given (flags, variants) tuple. Re-implementing the
+// rules over there would drift; instead the pure pieces of the rule set
+// live here and the simulator composes them.
+//
+// Importantly: these are also load-bearing for CLI users (the regexes
+// power `stripFile`), so any breaking edit here is caught by CLI strip
+// tests and the playground drift test (Phase J) in lock-step.
+// ---------------------------------------------------------------------------
+
+export const FEATURE_FILE_MARKER_RE = FILE_MARKER_RE;
+export const VARIANT_FILE_MARKER = VARIANT_FILE_MARKER_RE;
+
+/** Map: feature name → npm deps removed when the feature is disabled. */
+export const FEATURE_DEPS = PACKAGE_DEPS_BY_FEATURE;
+
+/** Map: platform name → `package.json` scripts gated to that platform. */
+export const PLATFORM_SCRIPT_TAGS = PLATFORM_SCRIPTS;
+
+/**
+ * Root-level files that exist only for certain platforms. Each entry
+ * carries the platforms whose scaffolds should KEEP the file; for any
+ * other platform the file is dropped from the tree.
+ */
+export const PLATFORM_ROOT_FILES = PLATFORM_ONLY_ROOT_FILES;
+
+/**
+ * Predicate flavours of the directory-level removal rules. The CLI's
+ * strip walker uses inline checks (it has the absolute path); the
+ * simulator works with relative POSIX paths so it gets a normalised
+ * version here.
+ *
+ * `relPath` is template-relative and POSIX-separated, e.g.
+ * `'apps/desktop/src-tauri/Cargo.toml'`.
+ */
+export function isInsideSupabaseTree(relPath: string): boolean {
+  return (
+    relPath === 'src/shared/supabase' ||
+    relPath.startsWith('src/shared/supabase/')
+  );
+}
+export function isInsideDesktopShellTree(relPath: string): boolean {
+  return relPath === 'apps/desktop' || relPath.startsWith('apps/desktop/');
+}
+export function isInsideMobileShellTree(relPath: string): boolean {
+  return relPath === 'apps/mobile' || relPath.startsWith('apps/mobile/');
+}

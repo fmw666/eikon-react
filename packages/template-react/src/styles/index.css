@@ -86,6 +86,20 @@
   --surface-hover-shadow: 0 4px 12px -2px oklch(0 0 0 / 0.1);
   --surface-active-shadow: 0 1px 2px oklch(0 0 0 / 0.08);
 
+  /* Shadow scale defaults — match Tailwind v4's built-in `shadow-{sm,md,lg}`
+   * so a base scaffold (no design class on <html>) renders identical
+   * shadows to vanilla Tailwind. Design presets override via the
+   * `:root.design-<name>` blocks below; the `[class*="design-"] .shadow-*`
+   * rules near `.dark .shadow-*` re-point Tailwind's inlined utility
+   * values at the live `var(--shadow-*)` cascade so per-design overrides
+   * actually take effect on `.shadow-{sm,md,lg}` consumers. */
+  --shadow-sm:
+    0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md:
+    0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
   /* Scrollbar (not a Tailwind namespace â€” see header comment). The
    * `border` trick on the thumb creates a faux padding inside the track:
    * the border is painted in the (usually transparent) track colour via
@@ -180,6 +194,17 @@
 .dark .shadow-sm { --tw-shadow: var(--shadow-sm); }
 .dark .shadow-md { --tw-shadow: var(--shadow-md); }
 .dark .shadow-lg { --tw-shadow: var(--shadow-lg); }
+
+/* Same problem in light mode once design classes can override --shadow-* at
+ * runtime: Tailwind only inlined the BASE @theme defaults into the utility,
+ * so a `:root.design-claymorphism { --shadow-sm: ... }` swap is invisible to
+ * `.shadow-sm`. Re-point inside any `design-*` root so the utility reads the
+ * live cascade. We don't want this on plain `:root` because that would
+ * regress non-playground scaffolds (CLI users) where the utility carrying
+ * the literal default is the cheaper path. */
+:root[class*="design-"] .shadow-sm { --tw-shadow: var(--shadow-sm); }
+:root[class*="design-"] .shadow-md { --tw-shadow: var(--shadow-md); }
+:root[class*="design-"] .shadow-lg { --tw-shadow: var(--shadow-lg); }
 
 .dark {
   --color-background: oklch(0.16 0.01 260);
@@ -294,7 +319,7 @@
  *   - 17px base body (iOS body), 15px secondary, generous spacing step.
  *   - SF text is hinted to read tightly; -0.022em tracking matches HIG.
  *   - Shadows are very low contrast (HIG prefers blur over darkness). */
-@theme {
+:root.design-apple {
   --color-background: oklch(0.99 0.002 240);
   --color-foreground: oklch(0.2 0.005 240);
   --color-card: oklch(1 0 0);
@@ -352,7 +377,7 @@
   --scrollbar-thumb-radius: 7px;
   --scrollbar-thumb-border: 3px;
 }
-.dark {
+.dark.design-apple {
   --color-background: oklch(0.16 0.005 240);
   --color-foreground: oklch(0.97 0 0);
   --color-card: oklch(0.2 0.005 240);
@@ -386,7 +411,7 @@
  *     density typical of productivity tools.
  *   - Linear's signature "hairline" shadow uses a single solid 1px offset
  *     instead of a blur, giving a sharper, more architectural feel. */
-@theme {
+:root.design-linear {
   --color-background: oklch(0.97 0.005 264);
   --color-foreground: oklch(0.25 0.005 264);
   --color-card: oklch(1 0 0);
@@ -441,7 +466,7 @@
   --scrollbar-thumb-radius: 0.25rem;
   --scrollbar-thumb-border: 2px;
 }
-.dark {
+.dark.design-linear {
   --color-background: oklch(0.18 0.005 264);
   --color-foreground: oklch(0.95 0.005 264);
   --color-card: oklch(0.21 0.005 264);
@@ -480,7 +505,7 @@
  *     `font-serif` and `font-mono` remain available for explicit choices.
  *   - Tracking is zero â€” serif text reads worse when artificially tight.
  *   - Shadows are warm-tinted to match the cream surface. */
-@theme {
+:root.design-anthropic {
   --color-background: oklch(0.98 0.006 90);
   --color-foreground: oklch(0.2 0 90);
   --color-card: oklch(1 0.002 90);
@@ -539,7 +564,7 @@
   --scrollbar-thumb-radius: 7px;
   --scrollbar-thumb-border: 3px;
 }
-.dark {
+.dark.design-anthropic {
   --color-background: oklch(0.2 0 90);
   --color-foreground: oklch(0.94 0.006 90);
   --color-card: oklch(0.23 0 90);
@@ -576,7 +601,7 @@
  *     monospace (used in code blocks, kbd, command palette).
  *   - Geist's signature shadow is a 0-blur 1px ring (visible "outline"
  *     rather than a soft drop). */
-@theme {
+:root.design-vercel {
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.09 0 0);
   --color-card: oklch(1 0 0);
@@ -633,7 +658,7 @@
   --scrollbar-thumb-radius: 2px;
   --scrollbar-thumb-border: 2px;
 }
-.dark {
+.dark.design-vercel {
   --color-background: oklch(0.09 0 0);
   --color-foreground: oklch(0.98 0 0);
   --color-card: oklch(0.12 0 0);
@@ -668,7 +693,7 @@
  *   - Standard 0.25rem spacing step (Tailwind default) â€” Notion is dense
  *     but not as tight as Vercel/Linear.
  *   - Shadows are soft and warm-tinted to match the cream-leaning whites. */
-@theme {
+:root.design-notion {
   --color-background: oklch(0.99 0.003 80);
   --color-foreground: oklch(0.27 0.005 60);
   --color-card: oklch(1 0 0);
@@ -723,7 +748,7 @@
   --scrollbar-thumb-radius: 5px;
   --scrollbar-thumb-border: 2px;
 }
-.dark {
+.dark.design-notion {
   --color-background: oklch(0.21 0.003 60);
   --color-foreground: oklch(0.96 0.003 60);
   --color-card: oklch(0.24 0.003 60);
@@ -750,7 +775,7 @@
  * Windows Metro / Swiss Design inspired. No depth cues whatsoever â€”
  * separation comes from strong color blocking and visible borders.
  * Hover = background-fill swap (no shadow), active = border darkens. */
-@theme {
+:root.design-flat {
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.13 0 0);
   --color-card: oklch(0.96 0.005 220);
@@ -790,7 +815,7 @@
   --scrollbar-thumb-radius: 0rem;
   --scrollbar-thumb-border: 2px;
 }
-.dark {
+.dark.design-flat {
   --color-background: oklch(0.13 0.005 220);
   --color-foreground: oklch(0.97 0 0);
   --color-card: oklch(0.18 0.005 220);
@@ -819,7 +844,7 @@
  * visible borders. Depth comes exclusively from shadow (dp layers).
  * Generous 1rem radii per M3 "container" shape language. Roboto font.
  * Hover raises elevation (mdâ†’lg), active presses to sm. */
-@theme {
+:root.design-material {
   --color-background: oklch(0.99 0.005 270);
   --color-foreground: oklch(0.18 0.015 270);
   --color-card: oklch(0.98 0.005 270);
@@ -861,7 +886,7 @@
   --scrollbar-thumb-radius: 8px;
   --scrollbar-thumb-border: 3px;
 }
-.dark {
+.dark.design-material {
   --color-background: oklch(0.15 0.01 270);
   --color-foreground: oklch(0.95 0.005 270);
   --color-card: oklch(0.2 0.01 270);
@@ -897,7 +922,7 @@
  * layered shadows, warm gold-brown palette. Inspired by pre-iOS7 Apple.
  * Surfaces feel tactile with a white top-edge highlight. Hover deepens
  * the drop shadow; active presses into the surface (bevel inverts). */
-@theme {
+:root.design-skeuomorphism {
   --color-background: oklch(0.94 0.012 55);
   --color-foreground: oklch(0.2 0.015 50);
   --color-card: oklch(0.98 0.005 55);
@@ -947,7 +972,7 @@
   --scrollbar-thumb-radius: 7px;
   --scrollbar-thumb-border: 3px;
 }
-.dark {
+.dark.design-skeuomorphism {
   --color-background: oklch(0.16 0.01 50);
   --color-foreground: oklch(0.94 0.005 55);
   --color-card: oklch(0.21 0.01 50);
@@ -987,7 +1012,7 @@
  * Hover: shadow spreads wider (raised), Active: shadow inverts to
  * concave inset (pressed into surface). Dark mode uses much stronger
  * shadow differential for convincing 3D on dark backgrounds. */
-@theme {
+:root.design-neumorphism {
   --color-background: oklch(0.92 0.008 250);
   --color-foreground: oklch(0.28 0.015 250);
   --color-card: oklch(0.92 0.008 250);
@@ -1027,7 +1052,7 @@
   --scrollbar-thumb-radius: 6px;
   --scrollbar-thumb-border: 3px;
 }
-.dark {
+.dark.design-neumorphism {
   --color-background: oklch(0.28 0.01 250);
   --color-foreground: oklch(0.92 0.005 250);
   --color-card: oklch(0.28 0.01 250);
@@ -1086,7 +1111,7 @@
  * the whole droplet stack is achievable without touching component files.
  * Capsule radii (1.75rem) + ultra-soft 0.5px borders push the surface
  * into "pill" territory; hover flares a luminous halo, active settles. */
-@theme {
+:root.design-liquid-glass {
   /* Deep forest base â€” leans cool-emerald (hue 155) so the saturate(180%)
    * backdrop-filter doesn't over-yellow the foliage seen through the
    * panels. Page chrome itself is solid; ambience comes from the body
@@ -1173,7 +1198,7 @@
   --scrollbar-thumb-radius: 10px;
   --scrollbar-thumb-border: 2px;
 }
-.dark {
+.dark.design-liquid-glass {
   /* Forest "night" â€” push the base darker so the droplets' inset top
    * highlight pops harder. Keeps the same hue (155, cool emerald) so
    * dayâ†”night doesn't drift palette. */
@@ -1338,7 +1363,7 @@ body {
  *     reproducible token)
  *   - Multi-section page backgrounds (could be added as marketing
  *     opt-in via class names, but base preset stays single-colour) */
-@theme {
+:root.design-claymorphism {
   /* ---- PALETTE — the clay.css demo site's 4-colour chord -----
    *
    * Lifted hex from codeadrian.github.io/clay.css → converted to
@@ -1503,7 +1528,7 @@ body {
   --scrollbar-thumb-radius: 10px;
   --scrollbar-thumb-border: 3px;
 }
-.dark {
+.dark.design-claymorphism {
   /* ---- PALETTE (DARK MODE) — demo's navy footer extrapolated -
    *
    * The clay.css demo doesn't ship a dark mode, but its footer
@@ -1619,7 +1644,7 @@ body {
  * magenta) create colored halos around surfaces. 1px colored ring glow.
  * Vivid turquoise primary with magenta accent flares. Hover flares the
  * aurora glow wider; active dampens to a subtle halo. */
-@theme {
+:root.design-aurora {
   --color-background: oklch(0.97 0.008 170);
   --color-foreground: oklch(0.18 0.015 170);
   --color-card: oklch(1 0 0);
@@ -1666,7 +1691,7 @@ body {
   --scrollbar-thumb-radius: 6px;
   --scrollbar-thumb-border: 2px;
 }
-.dark {
+.dark.design-aurora {
   --color-background: oklch(0.12 0.012 170);
   --color-foreground: oklch(0.95 0.005 170);
   --color-card: oklch(0.16 0.012 170);
@@ -1704,7 +1729,7 @@ body {
  * electric green secondary, hot coral accent. Monospace font. Raw,
  * intentional, comic-zine aesthetic. Hover INCREASES offset (pops out);
  * active REMOVES offset (slams flat against surface). */
-@theme {
+:root.design-neo-brutalism {
   --color-background: oklch(0.97 0.03 90);
   --color-foreground: oklch(0.1 0 0);
   --color-card: oklch(1 0 0);
@@ -1768,7 +1793,7 @@ body {
   --scrollbar-thumb-radius: 0rem;
   --scrollbar-thumb-border: 3px;
 }
-.dark {
+.dark.design-neo-brutalism {
   --color-background: oklch(0.13 0 0);
   --color-foreground: oklch(0.97 0.03 90);
   --color-card: oklch(0.18 0 0);
@@ -1813,14 +1838,14 @@ body {
 /* @eikon:variant(ui=animate-ui) end */
 
 /* @eikon:variant(ui=radix) begin */
-@theme {
+:root.ui-radix {
   --radius-lg: 0.25rem;
   --radius-md: 0.125rem;
 }
 /* @eikon:variant(ui=radix) end */
 
 /* @eikon:variant(ui=shadcn-style) begin */
-@theme {
+:root.ui-shadcn-style {
   --radius-lg: 0.5rem;
   --radius-md: 0.375rem;
 }

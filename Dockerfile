@@ -60,14 +60,15 @@ COPY . .
 # sequence so a future bumping of either side stays in lock-step.
 RUN pnpm --filter @eikon/preview build:all
 
-# Pre-bake the single-axis variant subset (~25 combos covering "user
-# changed exactly one parameter from the default"). This trades ~4
-# minutes of build time for instant first-paint on the most common
-# first-visit URLs. The pre-baked dirs land in
+# Pre-bake the platform×supabase build matrix (6 combos) so first-paint
+# on any deployed URL hits a hot cache. Phase G collapsed the matrix from
+# 4032 to 6 — the runtime-switchable axes (design / ui / layout /
+# toastPosition) no longer affect the bundle (see `server/hash.ts`), so a
+# single build per `(platform, supabase)` covers every CSS / Context-
+# driven variant. Pre-baked dirs land in
 # packages/template-react/.preview-cache/<hash>/ and survive the
 # `COPY --from=builder /app /app` in the runner stage. See
-# `packages/preview-site/scripts/prebuild-variants.ts` for the subset
-# enumeration and rationale.
+# `packages/preview-site/scripts/prebuild-variants.ts` for the enumeration.
 RUN pnpm --filter @eikon/preview prebuild-variants
 
 # ---------------------------------------------------------------------------

@@ -19,8 +19,10 @@ import kleur from 'kleur';
 
 import { copyTemplate } from './copy-template.js';
 import { initGit } from './init-git.js';
+import { injectHtmlVariants } from './inject-html-variants.js';
 import { installDeps } from './install-deps.js';
 import { resolveProjectTarget } from './resolve-target.js';
+import { rewritePackageManagerFields } from './rewrite-package-manager.js';
 import {
   DEFAULT_VARIANTS,
   stripFeatures,
@@ -75,6 +77,14 @@ const VARIANT_CHOICES = {
 
 type VariantAxis = keyof typeof VARIANT_CHOICES;
 type PlatformValue = (typeof VARIANT_CHOICES)['platform'][number];
+
+const VARIANT_FLAG_ALIASES: Record<VariantAxis, readonly string[]> = {
+  platform: ['platform'],
+  design: ['design'],
+  layout: ['layout'],
+  ui: ['ui'],
+  toastPosition: ['toastPosition', 'toast-position'],
+};
 
 /**
  * Per-platform narrowing of accepted values + default overrides. The
@@ -194,7 +204,7 @@ async function run(rawArgv: string[]): Promise<void> {
 
   const features = await resolveFeatures(argv);
   const variants = await resolveVariants(argv);
-  const packageManager = await resolvePackageManager(argv);
+  const packageManager = await resolvePackageManager(argv, variants);
   const wantInstall = await resolveBoolean(
     argv,
     'install',
@@ -352,9 +362,34 @@ async function resolveVariants(argv: ParsedArgs): Promise<VariantSelections> {
 }
 
 async function resolvePackageManager(
-  argv: ParsedArgs
+  argv: ParsedArgs,
+  variants: VariantSelections
 ): Promise<'pnpm' | 'npm' | 'bun'> {
-  if (argv.pm) return argv.pm;
+  // Desktop / mobile shells live in `apps/*` and are wired up via
+  // `pnpm-workspace.yaml` + `pnpm --filter` scripts in the root
+  // package.json. Neither npm nor bun has a drop-in equivalent for
+  // those filter calls, and rewriting the workspace topology to npm
+  // workspaces / bun workspaces is out of scope. Snap to pnpm with a
+  // visible warning so the user knows their `--pm` choice was overridden
+  // rather than silently ignored.
+  const platform = variants.platform;
+  const requiresPnpm = platform === 'desktop' || platform === 'mobile';
+
+  const snapIfNeeded = (chosen: 'pnpm' | 'npm' | 'bun'): 'pnpm' | 'npm' | 'bun' => {
+    if (requiresPnpm && chosen !== 'pnpm') {
+      log.warn(
+        `--pm=${kleur.yellow(chosen)} is not supported for platform=${kleur.yellow(
+          platform!
+        )} — apps/${platform}/ uses pnpm workspaces. Falling back to ${kleur.cyan(
+          'pnpm'
+        )}.`
+      );
+      return 'pnpm';
+    }
+    return chosen;
+  };
+
+  if (argv.pm) return snapIfNeeded(argv.pm);
   if (argv.yes) return 'pnpm';
   const pm = await select({
     message: 'Package manager:',
@@ -369,7 +404,7 @@ async function resolvePackageManager(
     cancel('Aborted.');
     process.exit(1);
   }
-  return pm;
+  return snapIfNeeded(pm);
 }
 
 async function resolveBoolean(
@@ -404,6 +439,23 @@ async function scaffold(opts: CliOptions): Promise<void> {
   s.start('Applying feature selection');
   await stripFeatures(opts.targetDir, opts.features, opts.variants);
   s.stop('Feature selection applied');
+
+  // Phase I: stamp the picked design / ui / layout onto `<html>` so the
+  // first paint renders without a flash and the runtime initialisers in
+  // `src/main.tsx` + `src/app/LayoutVariantContext.tsx` resolve to the
+  // same value. `default` design / `animate-ui` ui collapse to no
+  // class/data attrs, while `data-layout` is always stamped as the
+  // layout Context's initial value.
+  await injectHtmlVariants(opts.targetDir, opts.variants);
+
+  // Re-flavour `package.json` for the chosen package manager. No-op on
+  // pnpm (the template is already pnpm-flavoured); for npm/bun this
+  // rewrites `engines`, `packageManager`, and any `pnpm run` callsites
+  // in aggregate scripts (`check`, `ci`). Workspace-scoped scripts
+  // (`tauri:*`, `cap:*`) are pnpm-only — `resolvePackageManager` snaps
+  // `--pm` to pnpm on desktop/mobile so we never reach this with a
+  // non-pnpm PM on those platforms.
+  await rewritePackageManagerFields(opts.targetDir, opts.packageManager);
 
   if (opts.initGit) {
     s.start('Initializing git repository');
@@ -485,23 +537,25 @@ function tryParseVariant(
 ): boolean {
   const axes = Object.keys(VARIANT_CHOICES) as VariantAxis[];
   for (const axis of axes) {
-    const longFlag = `--${axis}`;
-    let value: string | undefined;
-    if (token === longFlag) {
-      value = argv[i + 1];
-    } else if (token.startsWith(`${longFlag}=`)) {
-      value = token.slice(longFlag.length + 1);
-    } else {
-      continue;
+    for (const alias of VARIANT_FLAG_ALIASES[axis]) {
+      const longFlag = `--${alias}`;
+      let value: string | undefined;
+      if (token === longFlag) {
+        value = argv[i + 1];
+      } else if (token.startsWith(`${longFlag}=`)) {
+        value = token.slice(longFlag.length + 1);
+      } else {
+        continue;
+      }
+      if (
+        value !== undefined &&
+        (VARIANT_CHOICES[axis] as readonly string[]).includes(value)
+      ) {
+        out.variants ??= {};
+        out.variants[axis] = value;
+      }
+      return true;
     }
-    if (
-      value !== undefined &&
-      (VARIANT_CHOICES[axis] as readonly string[]).includes(value)
-    ) {
-      out.variants ??= {};
-      out.variants[axis] = value;
-    }
-    return true;
   }
   return false;
 }
