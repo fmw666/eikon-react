@@ -72,8 +72,35 @@ function normalizeInputs(body: BuildRequestBody): BuildInputs {
 async function readJsonBody(req: IncomingMessage): Promise<unknown> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
-    req.on('data', (c: Buffer) => chunks.push(c));
+    let total = 0;
+    let aborted = false;
+    req.on('data', (c: Buffer) => {
+      if (aborted) return;
+      total += c.length;
+      // P4.9: reject runaway POST bodies before they accumulate in
+      // memory. The legitimate /api/build / /api/clear-cache payloads
+      // are tiny (≤200 bytes); 64KB is generous headroom that still
+      // closes the trivial DoS where a client uploads megabytes of
+      // junk to /api/build to inflate the server's resident memory.
+      if (total > MAX_BODY_BYTES) {
+        aborted = true;
+        const err = new Error(
+          `request body exceeded ${MAX_BODY_BYTES} bytes`
+        );
+        (err as { statusCode?: number }).statusCode = 413;
+        reject(err);
+        // Best-effort: stop accumulating and detach. We can't cleanly
+        // close the underlying socket from here without races, so the
+        // outer handler returns the 413 response and the connection
+        // tears down naturally.
+        req.removeAllListeners('data');
+        req.removeAllListeners('end');
+        return;
+      }
+      chunks.push(c);
+    });
     req.on('end', () => {
+      if (aborted) return;
       try {
         const s = Buffer.concat(chunks).toString('utf8') || '{}';
         resolve(JSON.parse(s));
@@ -83,6 +110,33 @@ async function readJsonBody(req: IncomingMessage): Promise<unknown> {
     });
     req.on('error', reject);
   });
+}
+
+const MAX_BODY_BYTES = 64 * 1024;
+
+/**
+ * P4.19: Send a 5xx response without leaking server internals. The raw
+ * error (with stack frames including absolute paths and line numbers)
+ * goes to the server log; the client sees a stable, opaque message.
+ * The optional statusCode on the error lets `readJsonBody` signal 413
+ * (body too large) without the caller needing to inspect the message.
+ */
+function sendServerError(
+  res: ServerResponse,
+  e: unknown,
+  fallback = 'Internal Server Error'
+): void {
+  const detail = e instanceof Error ? (e.stack ?? e.message) : String(e);
+  console.warn(`[handlers] ${detail}`);
+  const status =
+    e &&
+    typeof e === 'object' &&
+    typeof (e as { statusCode?: number }).statusCode === 'number'
+      ? (e as { statusCode: number }).statusCode
+      : 500;
+  res.statusCode = status;
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.end(status === 413 ? 'Payload too large' : fallback);
 }
 
 function sendJson(res: ServerResponse, body: unknown): void {
@@ -164,8 +218,7 @@ export async function handleTemplateRev(
     const rev = await getTemplateRev(TEMPLATE_REACT_DIR);
     sendJson(res, { rev });
   } catch (e) {
-    res.statusCode = 500;
-    res.end(e instanceof Error ? e.message : String(e));
+    sendServerError(res, e);
   }
 }
 
@@ -184,8 +237,7 @@ export async function handleBuild(
     const state = await ensureBuild(inputs);
     sendJson(res, state);
   } catch (e) {
-    res.statusCode = 500;
-    res.end(e instanceof Error ? e.message : String(e));
+    sendServerError(res, e);
   }
 }
 
@@ -253,15 +305,34 @@ function simKey(inputs: SimInputs): string {
   return JSON.stringify(inputs);
 }
 
-/** LRU-ish cache on the simulated tree response. Entries are tiny
+/** LRU cache on the simulated tree response. Entries are tiny
  *  (POSIX paths in an array → on the order of 100KB even for the full
  *  template) and the only invalidation lever is template-rev change,
  *  which the watcher / fingerprint flow already drives. We simply drop
- *  every entry whenever the watcher sees a template change. */
+ *  every entry whenever the watcher sees a template change.
+ *
+ *  P4.12: Implemented as Map-with-bump for true LRU semantics.
+ *  Map preserves insertion order; deleting and re-setting on hit
+ *  bumps the entry to the most-recent position so the eviction step
+ *  (drop the FIRST key) actually drops the LEAST-recently-used. */
 const simTreeCache = new Map<string, string[]>();
 const SIM_TREE_CACHE_MAX = 32;
 
+function readSimTree(key: string): string[] | undefined {
+  const v = simTreeCache.get(key);
+  if (v !== undefined) {
+    // Bump on hit: re-insert so this key is now newest.
+    simTreeCache.delete(key);
+    simTreeCache.set(key, v);
+  }
+  return v;
+}
+
 function rememberSimTree(key: string, tree: string[]): void {
+  // Same delete-then-set pattern even on first insert — keeps the bump
+  // path identical and means there's a single code path that maintains
+  // ordering.
+  simTreeCache.delete(key);
   simTreeCache.set(key, tree);
   if (simTreeCache.size > SIM_TREE_CACHE_MAX) {
     const oldest = simTreeCache.keys().next().value as string | undefined;
@@ -270,12 +341,49 @@ function rememberSimTree(key: string, tree: string[]): void {
 }
 
 /**
- * Invalidate the simulator's tree cache. Called by the dev plugin's
- * file watcher when template-react changes; production never hits this
- * because the template is baked into the image.
+ * P4.13: file-content cache. Same key strategy as simTreeCache plus
+ * the relative path. Users opening the same file across rapid param
+ * changes (common: clicking through 3-4 design presets to compare
+ * `index.css`) hit this cache instead of re-running the per-file
+ * regex strip + fs read. Entries are individual file contents (≤a
+ * few KB each), so MAX=128 keeps total cache size bounded ≪1MB.
+ *
+ * `null` is cached too (file legitimately stripped under these
+ * inputs) to prevent the same param/path from re-walking the strip
+ * decision repeatedly.
+ */
+const simContentCache = new Map<string, string | null>();
+const SIM_CONTENT_CACHE_MAX = 128;
+
+function simContentKey(inputs: SimInputs, relPath: string): string {
+  return `${simKey(inputs)} ${relPath}`;
+}
+
+function readSimContent(key: string): string | null | undefined {
+  if (!simContentCache.has(key)) return undefined;
+  const v = simContentCache.get(key) ?? null;
+  simContentCache.delete(key);
+  simContentCache.set(key, v);
+  return v;
+}
+
+function rememberSimContent(key: string, value: string | null): void {
+  simContentCache.delete(key);
+  simContentCache.set(key, value);
+  if (simContentCache.size > SIM_CONTENT_CACHE_MAX) {
+    const oldest = simContentCache.keys().next().value as string | undefined;
+    if (oldest) simContentCache.delete(oldest);
+  }
+}
+
+/**
+ * Invalidate the simulator's tree + content caches. Called by the dev
+ * plugin's file watcher when template-react changes; production never
+ * hits this because the template is baked into the image.
  */
 export function clearSimTreeCache(): void {
   simTreeCache.clear();
+  simContentCache.clear();
 }
 
 /**
@@ -342,15 +450,14 @@ export async function handleFilesTree(
   const inputs = readSimInputs(url);
   const key = simKey(inputs);
   try {
-    let paths = simTreeCache.get(key);
+    let paths = readSimTree(key);
     if (!paths) {
       paths = await simulateStripTree(inputs);
       rememberSimTree(key, paths);
     }
     sendJson(res, { tree: pathsToTree(paths) });
   } catch (e) {
-    res.statusCode = 500;
-    res.end(e instanceof Error ? e.message : String(e));
+    sendServerError(res, e);
   }
 }
 
@@ -375,7 +482,12 @@ export async function handleFileContent(
     return;
   }
   try {
-    const text = await simulateStripFileContent(rel, inputs);
+    const cacheKey = simContentKey(inputs, rel);
+    let text = readSimContent(cacheKey);
+    if (text === undefined) {
+      text = await simulateStripFileContent(rel, inputs);
+      rememberSimContent(cacheKey, text);
+    }
     if (text === null) {
       res.statusCode = 404;
       res.end('Not found (stripped under current inputs)');
@@ -383,8 +495,7 @@ export async function handleFileContent(
     }
     sendJson(res, { path: rel, size: Buffer.byteLength(text, 'utf8'), text });
   } catch (e) {
-    res.statusCode = 500;
-    res.end(e instanceof Error ? e.message : String(e));
+    sendServerError(res, e);
   }
 }
 

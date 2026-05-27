@@ -89,9 +89,11 @@ COPY --from=builder /app /app
 EXPOSE 8080
 
 # Healthz keeps Fly's autoscaler honest: the route is implemented
-# directly in `server/prod.ts` and just returns 200 OK.
+# directly in `server/prod.ts` and just returns 200 OK. `--no-warnings`
+# (P4.27) suppresses Node's experimental-API banner so a healthy probe
+# doesn't pollute the Fly machine logs every 30s.
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-    CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||8080)+'/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+    CMD node --no-warnings -e "fetch('http://127.0.0.1:'+(process.env.PORT||8080)+'/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 WORKDIR /app/packages/preview-site
 CMD ["node", "dist-server/prod.js"]

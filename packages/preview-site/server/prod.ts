@@ -41,6 +41,8 @@ import {
   isPreviewPath,
   prewarmDefault,
 } from './handlers';
+import { scrubHalfBuiltCacheDirs, TEMPLATE_REACT_DIR } from './builder';
+import { getTemplateRev } from './fingerprint';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -194,9 +196,14 @@ async function dispatch(
 }
 
 const server = createServer((req, res) => {
+  // P4.25: tag every unhandled-error log line with method+URL so a
+  // failure in production can be traced back to the exact route that
+  // triggered it. The `log()` function already prefixes a wallclock
+  // timestamp; combined with the URL this gives a usable structured
+  // line for `fly logs | grep`.
   dispatch(req, res).catch((e: unknown) => {
     const msg = e instanceof Error ? (e.stack ?? e.message) : String(e);
-    log(`unhandled error: ${msg}`);
+    log(`unhandled error [${req.method ?? '?'} ${req.url ?? '?'}]: ${msg}`);
     if (!res.headersSent) {
       res.statusCode = 500;
       res.setHeader('Content-Type', 'text/plain; charset=utf-8');
@@ -210,6 +217,30 @@ const server = createServer((req, res) => {
 server.listen(PORT, HOST, () => {
   log(`listening on http://${HOST}:${PORT}`);
   log(`static dist: ${STATIC_DIR}`);
+  // Boot-time integrity sweep: a previous boot may have crashed mid-build,
+  // leaving a `dist/index.html` without a `.build-ok` marker. Such a cache
+  // entry would falsely satisfy `isReady()` and serve a half-built bundle.
+  // Remove them before any request can find them.
+  scrubHalfBuiltCacheDirs()
+    .then((removed) => {
+      if (removed.length > 0) {
+        log(`scrubbed ${removed.length} half-built cache dir(s): ${removed.join(', ')}`);
+      }
+    })
+    .catch((e: unknown) => {
+      const msg = e instanceof Error ? e.message : String(e);
+      log(`scrub failed (non-fatal): ${msg}`);
+    });
+  // P4.10: pre-warm the template-rev so the first /api/build (often
+  // fired before prewarmDefault completes) doesn't pay the ~50–200ms
+  // tree walk in its critical path. Fire-and-forget — failures show
+  // up as the on-demand path catching up.
+  getTemplateRev(TEMPLATE_REACT_DIR)
+    .then((rev) => log(`template-rev: ${rev}`))
+    .catch((e: unknown) => {
+      const msg = e instanceof Error ? e.message : String(e);
+      log(`template-rev pre-warm failed: ${msg}`);
+    });
   // Best-effort warm of the default combo so the first /api/build lands
   // on a hot cache. Fire-and-forget; failures only show in logs.
   prewarmDefault(log);

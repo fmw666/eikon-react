@@ -250,7 +250,8 @@ function ScaledShellWrapper({ platform, size, children }: { platform: DevicePlat
   useLayoutEffect(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
-    const recalc = () => {
+    let raf = 0;
+    const recalc = (): void => {
       // Use offsetWidth/offsetHeight instead of getBoundingClientRect()
       // because the workbench card has a scroll-driven scale animation
       // and BCR reflects ancestor transforms, giving wrong values.
@@ -260,10 +261,26 @@ function ScaledShellWrapper({ platform, size, children }: { platform: DevicePlat
       const s = Math.min(1, w / natural.width, h / natural.height);
       setScale(s);
     };
+    // P4.16: rAF-throttle the ResizeObserver callback. A drag-resize
+    // can fire ResizeObserver dozens of times per frame; without
+    // coalescing, each one schedules its own setState → setScale →
+    // synchronous transform recalculation in React. Batching to a
+    // single rAF gives the browser one chance to paint between bursts
+    // and removes the visible scale-stutter on slow machines.
+    const onResize = (): void => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        recalc();
+      });
+    };
     recalc();
-    const ro = new ResizeObserver(recalc);
+    const ro = new ResizeObserver(onResize);
     ro.observe(wrapper);
-    return () => ro.disconnect();
+    return () => {
+      ro.disconnect();
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, [natural.width, natural.height]);
 
   // Enable transition after layout settles
@@ -295,14 +312,30 @@ function readIframeSubUrl(iframe: HTMLIFrameElement | null): string {
   if (!iframe?.contentWindow) return '';
   try {
     const loc = iframe.contentWindow.location;
-    const sub = loc.pathname.replace(/^\/preview\/[^/]+\/?/, '');
+    // P4.17: tighten the prefix match to the actual hash shape
+    // (lower-case hex, 6–64 chars — must match `PREVIEW_PATH_RE` in
+    // server/handlers.ts). The previous `[^/]+` matched ANY path
+    // segment, so a navigation that landed on a non-/preview/ URL
+    // (e.g. an OAuth redirect that escaped the iframe sandbox in
+    // some adversarial scenario) would still slip through and get
+    // appended to the next iframe's `src`. Strict regex returns ''
+    // for any non-preview path so the new src lands cleanly at root.
+    if (!/^\/preview\/[0-9a-f]{6,64}\/?/.test(loc.pathname)) return '';
+    const sub = loc.pathname.replace(/^\/preview\/[0-9a-f]{6,64}\/?/, '');
     return sub + loc.search + loc.hash;
   } catch {
     return '';
   }
 }
 
-const REV_POLL_INTERVAL_MS = 2000;
+/**
+ * P4.11: poll cadence is 2s in dev (so editing template-react/* feels
+ * HMR-like), 30s in prod (so the deployed Fly machine isn't slammed
+ * with 1800/h fetches per open tab). Production rev only changes on
+ * deploy — the bake is immutable for the life of the container — so
+ * the longer cadence loses nothing.
+ */
+const REV_POLL_INTERVAL_MS = import.meta.env.DEV ? 2000 : 30_000;
 const BUILD_POLL_INITIAL_MS = 200;
 const BUILD_POLL_MIN_MS = 500;
 const BUILD_POLL_MAX_MS = 4000;
@@ -322,9 +355,20 @@ function isDocumentVisible(): boolean {
  * Resolve when the tab becomes visible again. Used to gate background
  * polling so a backgrounded preview tab stops hammering the dev server
  * (we observed ~18k /api/template-rev fetches over a 10h dev session).
+ *
+ * P4.18: accepts an optional AbortSignal so a cancelled effect can
+ * tear down the visibilitychange listener without waiting for the
+ * tab to come back. Without this, an unmounted component left behind
+ * a permanent listener every time it called waitForVisible() while
+ * hidden — a slow leak that compounded across React strict-mode
+ * double-mounts and route changes.
  */
-function waitForVisible(): Promise<void> {
-  return new Promise((resolve) => {
+function waitForVisible(signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException('aborted', 'AbortError'));
+      return;
+    }
     if (isDocumentVisible()) {
       resolve();
       return;
@@ -332,10 +376,17 @@ function waitForVisible(): Promise<void> {
     const onChange = (): void => {
       if (isDocumentVisible()) {
         document.removeEventListener('visibilitychange', onChange);
+        signal?.removeEventListener('abort', onAbort);
         resolve();
       }
     };
+    const onAbort = (): void => {
+      document.removeEventListener('visibilitychange', onChange);
+      signal?.removeEventListener('abort', onAbort);
+      reject(new DOMException('aborted', 'AbortError'));
+    };
     document.addEventListener('visibilitychange', onChange);
+    signal?.addEventListener('abort', onAbort);
   });
 }
 
@@ -430,6 +481,14 @@ export function PreviewFrame() {
   // the iframe DID paint (the build error overlay, the partial page).
   useEffect(() => {
     function onMessage(event: MessageEvent): void {
+      // P4.15: belt-and-braces origin check. The iframe is same-origin
+      // (`/preview/<hash>/` is served by the same host), so any message
+      // from a different origin is by definition NOT from our iframe
+      // and should be ignored. The `event.source` check below catches
+      // postMessages from unrelated windows (extensions, opener), but
+      // origin verification is the standard guard cited in MDN and CSP
+      // guidance — pinning both is cheap insurance.
+      if (event.origin !== window.location.origin) return;
       if (event.source !== iframeRef.current?.contentWindow) return;
       const data = event.data as { type?: unknown } | null;
       if (!data || data.type !== 'eikon:preview-ready') return;
@@ -523,11 +582,19 @@ export function PreviewFrame() {
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
     let ctrl: AbortController | null = null;
+    // P4.18: an AbortController dedicated to waitForVisible so the
+    // visibilitychange listener tears down on unmount, even if the
+    // tab never comes back into the foreground.
+    const visAbort = new AbortController();
 
     async function poll(): Promise<void> {
       // Hidden tabs don't need to know about template changes — pause
       // until the user comes back.
-      await waitForVisible();
+      try {
+        await waitForVisible(visAbort.signal);
+      } catch {
+        return; // unmounted while hidden
+      }
       if (cancelled) return;
       ctrl = new AbortController();
       try {
@@ -551,6 +618,7 @@ export function PreviewFrame() {
       cancelled = true;
       if (timer) clearTimeout(timer);
       ctrl?.abort();
+      visAbort.abort();
     };
   }, []);
 
@@ -569,6 +637,9 @@ export function PreviewFrame() {
     let pollTimer: ReturnType<typeof setTimeout> | null = null;
     let pollDelay = BUILD_POLL_MIN_MS;
     const ctrl = new AbortController();
+    // P4.18: shared visibility-abort so pollUntilDone's waitForVisible
+    // tears down its listener if the effect cleans up while hidden.
+    const visAbort = new AbortController();
 
     function adopt(next: BuildState): void {
       // Mirror the build lifecycle into the shared store so the App-level
@@ -601,7 +672,11 @@ export function PreviewFrame() {
     }
 
     async function pollUntilDone(hash: string): Promise<void> {
-      await waitForVisible();
+      try {
+        await waitForVisible(visAbort.signal);
+      } catch {
+        return; // unmounted while hidden
+      }
       if (cancelled || seq !== requestSeq.current) return;
       const r = await fetch(
         `/api/build-status?hash=${encodeURIComponent(hash)}`,
@@ -648,6 +723,7 @@ export function PreviewFrame() {
       cancelled = true;
       if (pollTimer) clearTimeout(pollTimer);
       ctrl.abort();
+      visAbort.abort();
     };
     // The zustand setters (`setCurrentHash`, `setBuildStatus`,
     // `setIframeReadyHash`) are stable across renders; omitting them
@@ -720,6 +796,17 @@ export function PreviewFrame() {
   // query the template / react-router cares about; `URL.searchParams.set`
   // overwrites stale values that may have round-tripped through
   // `readIframeSubUrl` after a sub-route navigation.
+  //
+  // P4.29 — drift window documented: between this snapshot and the
+  // iframe's `eikon:preview-ready` postMessage, the user can flip a
+  // runtime axis. The resulting `<html data-…>` attributes will be
+  // STALE for that brief window. The `eikon:preview-ready` handler
+  // (see effect above) re-pushes the *live* `runtimeVariantsRef.current`
+  // snapshot the moment the iframe announces it's listening, which
+  // corrects the drift before any user-visible paint can land. If a
+  // future change introduces a paint between iframe-boot and the
+  // ready-message, this drift will become visible — re-evaluate the
+  // tradeoff between dep-correctness and reload-thrash at that point.
   const iframeSrc = useMemo(() => {
     if (!lastReadyHash) return null;
     const v = runtimeVariantsRef.current;
@@ -797,6 +884,17 @@ export function PreviewFrame() {
               src={iframeSrc}
               title="Eikon template preview"
               style={screenStyle}
+              // P4.14: explicit sandbox attribute. The iframe is served
+              // from the same origin (`/preview/<hash>/`), and we DO
+              // need `allow-same-origin` because `injectScrollbarStyle`
+              // reaches into `contentDocument` and `readIframeSubUrl`
+              // reads `contentWindow.location`. The other tokens cover
+              // capabilities the template legitimately uses (form
+              // submit in SignInModal, opening docs links in a new tab,
+              // window.confirm dialogs, history.pushState for routing).
+              // Notably absent: `allow-top-navigation` (iframe MUST NOT
+              // navigate the playground shell) and `allow-downloads`.
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-pointer-lock"
               // Pixel-level "ready" for the App-level overlay is now
               // signalled by a `postMessage` from the template's
               // `main.tsx` — see the dedicated effect above. We keep

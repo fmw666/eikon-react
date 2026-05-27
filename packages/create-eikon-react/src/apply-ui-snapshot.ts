@@ -607,5 +607,5 @@ async function writeUiSnapshotEslintOverride(
 // Exports
 // =================================================================================================
 
-export { REPLACEABLE_UI_FILES };
+export { REPLACEABLE_UI_FILES, buildUiSnapshotEslintConfig };
 export const UI_SNAPSHOT_ESLINT_FILE = 'eslint.config.ui-snapshot.js';

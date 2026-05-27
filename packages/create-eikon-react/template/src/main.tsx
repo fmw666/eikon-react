@@ -73,6 +73,11 @@ applyClassAxis('design', htmlEl.dataset.design);
 // `pm` and `supabase`.
 if (import.meta.env.DEV && window.parent !== window) {
   window.addEventListener('message', (e: MessageEvent) => {
+    // P4.15: only trust messages from the embedding shell. The playground
+    // serves the iframe and the parent from the same origin, so any
+    // message claiming to be `eikon:set-variant` from a different origin
+    // is by definition not from the playground shell.
+    if (e.origin !== window.location.origin) return;
     const data = e.data as
       | {
           type?: string;

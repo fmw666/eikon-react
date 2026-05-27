@@ -71,6 +71,8 @@ function Toaster() {
     // scaffold this whole block is dead-code-eliminated.
     if (!import.meta.env.DEV || window.parent === window) return;
     function onMessage(e: MessageEvent) {
+      // P4.15: same-origin guard — see main.tsx for the rationale.
+      if (e.origin !== window.location.origin) return;
       const data = e.data as
         | { type?: string; toastPosition?: string }
         | null;

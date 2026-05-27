@@ -367,7 +367,7 @@ export async function simulateStripFileContent(
     // vendored primitives. Build it inline so the panel shows the
     // exact text the user gets on disk.
     if (relPath === UI_SNAPSHOT_ESLINT_FILE && (ui === 'shadcn' || ui === 'animate-ui')) {
-      return buildUiSnapshotEslintConfig(ui);
+      return await buildUiSnapshotEslintConfig(ui, path.join(UI_SNAPSHOTS_ROOT, ui));
     }
     // Extra files the snapshot ships under `src/` (e.g. animate-ui
     // hooks). Try the snapshot first; fall through to the template

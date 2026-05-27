@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { copyFile, mkdir, readdir, rm, stat } from 'node:fs/promises';
+import { copyFile, mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -117,7 +117,16 @@ export interface BuildState {
 }
 
 const inflight = new Map<string, Promise<void>>();
-const errors = new Map<string, string>();
+/**
+ * Error map. Each entry carries a timestamp so we can age out stale errors
+ * (P4.7): a transient build failure should not block a retry forever.
+ * `prevErr` checks in `ensureBuild` ignore entries older than `ERROR_TTL_MS`.
+ */
+interface ErrorEntry {
+  readonly message: string;
+  readonly at: number;
+}
+const errors = new Map<string, ErrorEntry>();
 /**
  * `lastServed[hash]` = wall-clock timestamp of the most recent
  * `/preview/<hash>/...` HTTP hit. Updated by `touchHashServed` from the
@@ -135,12 +144,12 @@ const lastServed = new Map<string, number>();
  * dev process after a few hours of editing (each template edit produces a
  * new templateRev → new hash → new dir, and the old dirs were orphaned).
  *
- * Phase H: the build matrix is one param-agnostic max-capability shell
- * per template revision (see `server/hash.ts` schema-version 4). A cap
- * of 3 keeps the current rev plus a couple of in-flight / recently
- * edited revs without letting stale template revisions pile up.
+ * Phase 4 (P4.3): bumped 3 → 6 because `ui` is now in the hash and three
+ * `ui` values × at most one in-flight rebuild on a template edit was
+ * forcing eviction of an in-use hash. 6 = 3 ui × 2 buffer for in-flight
+ * rebuilds. Disk cost: ~6 × ~50 MB tree = ~300 MB on the Fly volume.
  */
-const MAX_CACHED_HASHES = 3;
+const MAX_CACHED_HASHES = 6;
 const MAX_RETAINED_ERRORS = 32;
 /**
  * Hashes whose `/preview/<hash>/...` URL was hit within `SERVED_TTL_MS`
@@ -154,8 +163,41 @@ const MAX_RETAINED_ERRORS = 32;
  * the currently displayed template revision during local edits.
  */
 const SERVED_TTL_MS = 2 * 60_000;
+/**
+ * P4.7: Errors older than this are ignored by `ensureBuild`'s prevErr
+ * check, allowing a transient failure (network blip, OOM during a spike)
+ * to retry on its own. 5 minutes is long enough that a genuinely broken
+ * template doesn't loop endlessly during a deploy, and short enough that
+ * a fixed-on-disk template doesn't require a manual /api/clear-cache.
+ */
+const ERROR_TTL_MS = 5 * 60_000;
+/**
+ * P4.5: Hard ceiling on a single viteBuild. The 1 GB Fly machine has been
+ * observed to wedge for >10 min when the bundler enters a pathological
+ * import graph; reject after this window so callers see an error instead
+ * of hanging forever. Note: Vite has no AbortSignal, so the orphaned
+ * build may continue consuming RAM in the background — the cache scrub
+ * + LRU eviction cleans up the half-built dir on the next pass.
+ */
+const BUILD_TIMEOUT_MS = 60_000;
+/**
+ * P4.6: At most this many distinct viteBuild calls run at once. Each
+ * peaks around 600 MB resident; two parallel = ~1.2 GB which already
+ * brushes the 1 GB Fly cap, so the third caller waits in the queue
+ * (still reported as `building` to the client). Same-hash callers
+ * always share one inflight build via the `inflight` map, so this cap
+ * only kicks in when a user cycles `ui` or templateRev pumps a new
+ * hash while another build is still running.
+ */
+const BUILD_CONCURRENCY = 2;
 
 let evictionInflight: Promise<void> | null = null;
+/**
+ * Counting-semaphore state for P4.6. `buildSlotsInUse` tracks active
+ * runBuild calls; `buildWaiters` is a FIFO of resolvers awaiting a slot.
+ */
+let buildSlotsInUse = 0;
+const buildWaiters: Array<() => void> = [];
 
 export function getCacheDir(hash: string): string {
   return path.join(CACHE_ROOT, hash);
@@ -165,12 +207,37 @@ export function getDistDir(hash: string): string {
   return path.join(getCacheDir(hash), 'dist');
 }
 
+/**
+ * Marker filename written at the END of a successful build. Its presence
+ * is the integrity check used by `isReady` and by the boot-time scrub —
+ * a cache dir without it is assumed corrupt (build was killed mid-write,
+ * Fly SIGTERM during deploy, OOM'd before the dist completed) and gets
+ * deleted on next eviction.
+ */
+const BUILD_OK_MARKER = '.build-ok';
+
+function getBuildOkPath(hash: string): string {
+  return path.join(getDistDir(hash), BUILD_OK_MARKER);
+}
+
+/**
+ * A hash is `ready` only when BOTH `index.html` and `.build-ok` exist.
+ * `index.html` alone is insufficient: Vite writes it relatively early in
+ * the bundle pass, so a SIGTERM mid-build can leave a tree with the
+ * entry HTML present but downstream JS chunks missing — the iframe then
+ * 404s on the first script load.
+ */
 export function isReady(hash: string): boolean {
-  return existsSync(path.join(getDistDir(hash), 'index.html'));
+  const dist = getDistDir(hash);
+  return (
+    existsSync(path.join(dist, 'index.html')) &&
+    existsSync(path.join(dist, BUILD_OK_MARKER))
+  );
 }
 
 export function getError(hash: string): string | undefined {
-  return errors.get(hash);
+  const entry = errors.get(hash);
+  return entry?.message;
 }
 
 /**
@@ -187,16 +254,22 @@ export async function ensureBuild(inputs: BuildInputs): Promise<BuildState> {
   if (isReady(hash)) return { hash, status: 'ready' };
 
   // A previous attempt errored; surface the failure instead of silently
-  // retrying. Callers can clear errors via clearError(hash) if they want a
-  // fresh attempt (e.g. after the user changed something on disk).
+  // retrying — UNLESS the error has aged past ERROR_TTL_MS, in which
+  // case we let a fresh attempt run (P4.7). Callers can also clear
+  // errors via clearError(hash) for an immediate retry.
   const prevErr = errors.get(hash);
-  if (prevErr) return { hash, status: 'error', error: prevErr };
+  if (prevErr) {
+    if (Date.now() - prevErr.at < ERROR_TTL_MS) {
+      return { hash, status: 'error', error: prevErr.message };
+    }
+    errors.delete(hash);
+  }
 
   if (!inflight.has(hash)) {
-    const promise = runBuild(hash, inputs)
+    const promise = runBuildGated(hash, inputs)
       .catch((e) => {
         const msg = e instanceof Error ? (e.stack ?? e.message) : String(e);
-        errors.set(hash, msg);
+        errors.set(hash, { message: msg, at: Date.now() });
         capErrors();
       })
       .finally(() => {
@@ -244,6 +317,59 @@ export async function clearAllCache(): Promise<void> {
   lastServed.clear();
 }
 
+/**
+ * Walk the on-disk cache root once at startup and delete any cache dir
+ * whose `dist/` is missing the `.build-ok` integrity marker. These
+ * "half-built" trees can show up after a SIGKILL / OOM / Fly SIGTERM
+ * mid-build — the directory survives the kill, but `index.html` may be
+ * present without its dependent chunks, which would 404 the iframe.
+ *
+ * Idempotent: subsequent calls find nothing to do. Safe to call from
+ * `prod.ts` boot before the listener starts. Returns the names of dirs
+ * it removed (for logging).
+ *
+ * Errors during enumeration / removal are swallowed and logged via
+ * console.warn — boot must NOT fail because a stale dir is locked. The
+ * next eviction pass picks up whatever this one missed.
+ */
+export async function scrubHalfBuiltCacheDirs(): Promise<string[]> {
+  let entries: string[];
+  try {
+    entries = await readdir(CACHE_ROOT);
+  } catch {
+    return []; // CACHE_ROOT doesn't exist yet — nothing to scrub.
+  }
+  const removed: string[] = [];
+  await Promise.all(
+    entries.map(async (name) => {
+      const dir = path.join(CACHE_ROOT, name);
+      try {
+        const st = await stat(dir);
+        if (!st.isDirectory()) return;
+        const hasMarker = existsSync(
+          path.join(dir, 'dist', BUILD_OK_MARKER)
+        );
+        const hasIndex = existsSync(path.join(dir, 'dist', 'index.html'));
+        // No marker AND no index → never built, but the dir is here for
+        // some reason (an aborted very-early build). Leave it; it'll
+        // either get re-used or aged out by LRU.
+        // No marker but HAS index → half-built, the dangerous case.
+        if (!hasMarker && hasIndex) {
+          await rm(dir, RM_OPTS);
+          removed.push(name);
+        }
+      } catch (err) {
+        console.warn(
+          `[builder] scrub: failed to inspect ${name}: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    })
+  );
+  return removed;
+}
+
 function capErrors(): void {
   if (errors.size <= MAX_RETAINED_ERRORS) return;
   // Map preserves insertion order, so the oldest entries appear first.
@@ -257,9 +383,20 @@ function capErrors(): void {
 
 function scheduleEviction(): void {
   if (evictionInflight) return;
-  evictionInflight = evictCacheLru().finally(() => {
-    evictionInflight = null;
-  });
+  evictionInflight = evictCacheLru()
+    .catch((e) => {
+      // P4.26: previously this catch was implicit via .finally swallowing
+      // the rejection. A failing eviction (rare, but possible if Windows
+      // antivirus permanently locks a tree) was completely silent — the
+      // disk would just keep growing. Surface it via console.warn so it
+      // shows up in Fly's logs and a maintainer can investigate. Eviction
+      // is best-effort; we never want a failure here to crash the server.
+      const msg = e instanceof Error ? (e.stack ?? e.message) : String(e);
+      console.warn(`[builder] eviction failed (best-effort): ${msg}`);
+    })
+    .finally(() => {
+      evictionInflight = null;
+    });
 }
 
 export interface DirStat {
@@ -325,6 +462,14 @@ async function evictCacheLru(): Promise<void> {
 
   await Promise.all(
     toRemove.map(async (name) => {
+      // P4.4: re-check inflight at the moment of removal. The selection
+      // above happens once per scheduleEviction tick; a new build can
+      // start AFTER `keep` was computed but BEFORE `rm` runs. Without
+      // this re-check, eviction would race the new build's `mkdir` and
+      // delete its half-written tree mid-build. (`evictionInflight`
+      // serialises eviction passes, but doesn't synchronise with build
+      // start — so the read-then-rm is the actual race window.)
+      if (inflight.has(name)) return;
       try {
         await rm(path.join(CACHE_ROOT, name), RM_OPTS);
         errors.delete(name);
@@ -348,7 +493,7 @@ async function evictCacheLru(): Promise<void> {
 export const __testHooks = {
   capErrors,
   setError(hash: string, msg: string): void {
-    errors.set(hash, msg);
+    errors.set(hash, { message: msg, at: Date.now() });
   },
   countErrors(): number {
     return errors.size;
@@ -358,7 +503,73 @@ export const __testHooks = {
   },
   MAX_RETAINED_ERRORS,
   MAX_CACHED_HASHES,
+  ERROR_TTL_MS,
+  BUILD_TIMEOUT_MS,
+  BUILD_CONCURRENCY,
 };
+
+/**
+ * P4.5 + P4.6: queue-and-cap wrapper around `runBuild`. Acquires one
+ * of `BUILD_CONCURRENCY` slots before starting the actual build, and
+ * imposes a `BUILD_TIMEOUT_MS` ceiling on the inner work.
+ *
+ * The slot is released in a `finally` so a thrown error (timeout, vite
+ * crash, fs failure) can't leak the slot. The semaphore is FIFO via the
+ * `buildWaiters` queue.
+ */
+async function runBuildGated(hash: string, inputs: BuildInputs): Promise<void> {
+  await acquireBuildSlot();
+  try {
+    await withTimeout(runBuild(hash, inputs), BUILD_TIMEOUT_MS, hash);
+  } finally {
+    releaseBuildSlot();
+  }
+}
+
+function acquireBuildSlot(): Promise<void> {
+  if (buildSlotsInUse < BUILD_CONCURRENCY) {
+    buildSlotsInUse += 1;
+    return Promise.resolve();
+  }
+  return new Promise<void>((resolve) => {
+    buildWaiters.push(() => {
+      buildSlotsInUse += 1;
+      resolve();
+    });
+  });
+}
+
+function releaseBuildSlot(): void {
+  buildSlotsInUse -= 1;
+  const next = buildWaiters.shift();
+  if (next) next();
+}
+
+async function withTimeout<T>(
+  promise: Promise<T>,
+  ms: number,
+  label: string
+): Promise<T> {
+  let timer: NodeJS.Timeout | undefined;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      reject(
+        new Error(
+          `build timed out after ${(ms / 1000).toFixed(0)}s (hash=${label}). ` +
+            `Vite has no AbortSignal so the orphaned build may continue ` +
+            `running in the background until it completes or the process exits.`
+        )
+      );
+    }, ms);
+    // Don't keep the event loop alive solely for the timeout.
+    timer.unref?.();
+  });
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
 
 async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
   const cacheDir = getCacheDir(hash);
@@ -460,6 +671,14 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
     logLevel: 'warn',
     clearScreen: false,
   });
+
+  // Write the integrity marker LAST, after viteBuild has fully
+  // resolved. A cache dir without this file is treated as half-built
+  // by `isReady` and gets purged on the next eviction pass. We
+  // intentionally don't try/catch — if writing this 1-line file fails,
+  // the build is genuinely broken and the caller's error path should
+  // surface that.
+  await writeFile(getBuildOkPath(hash), `${Date.now()}\n`, 'utf8');
 }
 
 /**

@@ -60,7 +60,18 @@ export function createParamsStore(initial?: Partial<ParamState>) {
           state: snapToPlatform(merged, coercePlatform(merged.platform)),
         };
       }),
-    reset: () => set({ state: defaultState() }),
+    reset: () =>
+      set(() => {
+        // P4.28: feed defaultState through snapToPlatform so reset is
+        // symmetric with replaceAll. If the schema's defaults are
+        // already self-consistent this is a no-op, but it removes a
+        // latent footgun: a future per-platform default that disagrees
+        // with the global default would otherwise leak into the store
+        // here and surface as a "the controls don't match the picked
+        // platform" bug only after a `reset()`.
+        const fresh = defaultState();
+        return { state: snapToPlatform(fresh, coercePlatform(fresh.platform)) };
+      }),
   }));
 }
 

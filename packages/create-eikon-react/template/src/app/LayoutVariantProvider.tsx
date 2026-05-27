@@ -68,6 +68,9 @@ export function LayoutVariantProvider({
   useEffect(() => {
     if (!import.meta.env.DEV || window.parent === window) return;
     function onMessage(e: MessageEvent) {
+      // P4.15: only accept layout messages from the embedding shell
+      // (same origin as the iframe in playground use).
+      if (e.origin !== window.location.origin) return;
       const data = e.data as { type?: string; layout?: string } | null;
       if (!data || data.type !== 'eikon:set-variant') return;
       if (typeof data.layout !== 'string') return;
