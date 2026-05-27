@@ -22,6 +22,12 @@
   border-radius: inherit;
   pointer-events: none;
   z-index: 2;
+  /* Safari only clips a transformed `::before` against the parent's
+     rounded corners when a stacking context exists on the
+     overflow-hidden box. Without `isolation`, the diagonal sweep
+     composites as a rectangle that bleeds past the pill on macOS
+     Safari. The cousin `eikon-shimmer-hover` already does this. */
+  isolation: isolate;
 }
 
 .eikon-tab-flash::before {

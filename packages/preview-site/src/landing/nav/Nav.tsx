@@ -365,7 +365,7 @@ function NavPill({
   const showIndicator = targetKey !== null && indicator.width > 0;
 
   const railClass =
-    'eikon-nav-glass relative inline-flex items-center gap-0 rounded-full border p-0.5 transition-[background-color,box-shadow,border-color] duration-300 ease-out sm:gap-0.5 sm:p-1 ' +
+    'eikon-nav-glass relative isolate inline-flex items-center gap-0 rounded-full border p-0.5 transition-[background-color,box-shadow,border-color] duration-300 ease-out sm:gap-0.5 sm:p-1 ' +
     (scrolled
       ? 'border-[var(--border-2)]/80 bg-[var(--surface-2)]/80 shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_8px_24px_rgb(0_0_0/0.28)]'
       : 'border-[var(--border-1)] bg-[var(--surface-2)] shadow-[inset_0_1px_0_rgb(255_255_255/0.04),0_2px_8px_rgb(0_0_0/0.08)]');
@@ -445,7 +445,7 @@ function LangOrb({
   // routes the touch-viewport `backdrop-filter: none` override
   // in styles/index.css.
   const orbClass =
-    'eikon-nav-glass relative inline-flex h-9 w-9 items-center justify-center rounded-full border p-0.5 transition-[background-color,box-shadow,border-color] duration-300 ease-out ' +
+    'eikon-nav-glass relative isolate inline-flex h-9 w-9 items-center justify-center rounded-full border p-0.5 transition-[background-color,box-shadow,border-color] duration-300 ease-out ' +
     (scrolled
       ? 'border-[var(--border-2)]/80 bg-[var(--surface-2)]/80 shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_8px_24px_rgb(0_0_0/0.28)]'
       : 'border-[var(--border-1)] bg-[var(--surface-2)] shadow-[inset_0_1px_0_rgb(255_255_255/0.04),0_2px_8px_rgb(0_0_0/0.08)]');
