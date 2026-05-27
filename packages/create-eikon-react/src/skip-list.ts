@@ -58,8 +58,10 @@ export const TEMPLATE_COPY_SKIP: ReadonlySet<string> = new Set([
   // the source `.git` would import the entire monorepo history.
   '.git',
   // Pre-baked upstream UI library snapshots used by `--ui shadcn` /
-  // `--ui animate-ui` at scaffold time. The CLI lays down the right
-  // snapshot via `applyUiSnapshot()`; the directory itself never reaches
-  // the user's project.
-  '.snapshots',
+  // `--ui animate-ui` at scaffold time. Defensive: the canonical
+  // `template-snapshots/` lives as a sibling of `template/` and so
+  // never reaches the copy walkers, but if a maintainer ever drops a
+  // subdirectory by this name into `template/`, every consumer of this
+  // list will skip it.
+  'template-snapshots',
 ]);

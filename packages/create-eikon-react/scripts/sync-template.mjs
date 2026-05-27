@@ -32,7 +32,7 @@ const EXCLUDE = new Set([
   '.tsbuildinfo',
   '.preview-cache',
   '.git',
-  '.snapshots',
+  'template-snapshots',
 ]);
 
 async function main() {

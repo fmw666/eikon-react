@@ -34,6 +34,8 @@ const PROJECT_NAME_TARGETS: readonly string[] = [
   'apps/mobile/README.md',
 ];
 
+export { PROJECT_NAME_TARGETS };
+
 /**
  * Copy the template tree to `dest`, then:
  *   - rewrite package.json's "name"

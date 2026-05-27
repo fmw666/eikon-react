@@ -21,7 +21,7 @@ mandatory** and both fail the CI pipeline shipped at
 
 `pnpm ci` is identical plus `build` and is what CI invokes.
 
-`pnpm test:structure` runs only the 11 structural tests (fast, for
+`pnpm test:structure` runs only the 12 structural tests (fast, for
 inner-loop iteration).
 
 Note on `.agent/`: the meta-protocol surface (rules, skills, this
@@ -37,7 +37,7 @@ the conventions in `.agent/README.md` as guidance, not as a gate.
 
 Lives under [`__tests__/structure/`](../../__tests__/structure/) with
 a shared helper [`_helpers.ts`](../../__tests__/structure/_helpers.ts).
-The 11 specs map 1:1 to the structural concerns in
+The 12 specs map 1:1 to the structural concerns in
 [`00-architecture.md`](./00-architecture.md):
 
 | Spec | Guards |
@@ -53,6 +53,7 @@ The 11 specs map 1:1 to the structural concerns in
 | `tests-root.test.ts` | `__tests__/` has setup/test-utils + the 4 fixed subfolders; no loose specs |
 | `repo-root-files.test.ts` | Every config file the workflow assumes exists; `package.json` has the full script set |
 | `boundary-imports.test.ts` | Rules 1–5 of the import boundary contract enforced via filesystem scan |
+| `marker-balance.test.ts` | Per-file balance of `@eikon:variant(axis=value) begin / end` pairs across `src/**/*.{ts,tsx,css}` + root `index.html` |
 
 When adding a new feature, the first three (`feature-shape`,
 `feature-public-api`, `feature-i18n-parity`) get coverage automatically

@@ -116,7 +116,7 @@ describe('skip-list parity', () => {
       '.tsbuildinfo',
       '.preview-cache',
       '.git',
-      '.snapshots',
+      'template-snapshots',
     ];
     for (const name of expected) {
       expect(TEMPLATE_COPY_SKIP.has(name)).toBe(true);
