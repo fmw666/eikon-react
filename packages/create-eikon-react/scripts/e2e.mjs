@@ -461,26 +461,67 @@ async function runScenario(scenario, tmpRoot, tarballPath) {
     return;
   }
 
-  step('  pnpm install (in generated project)');
+  // pnpm 9+ refuses to install when `package.json` declares a different
+  // `packageManager` field (the `manage-package-manager-versions` rule).
+  // Mirror the user's choice end-to-end so the generated project is
+  // exercised with its declared pm.
+  if (pm !== 'pnpm' && !(await commandExists(pm))) {
+    console.log(
+      `  (skipping install/build because '${pm}' is not on PATH; ` +
+        'scaffold + verify already passed)'
+    );
+    return;
+  }
+
+  step(`  ${pm} install (in generated project)`);
   // Honour the generated project's `pnpm-workspace.yaml` — desktop / mobile
   // scaffolds depend on `apps/*` being recognised as workspace packages so
   // that `tauri:dev` / `cap:sync` resolve via `pnpm --filter "./apps/<x>"`.
-  // `--prefer-offline` is kept; we deliberately do NOT pass
-  // `--ignore-workspace` (an earlier iteration did, which silently masked
-  // a missing workspace file in the template).
-  await run('pnpm', ['install', '--prefer-offline'], projectDir);
+  // See `PM_INSTALL_ARGS` for the per-pm flag rationale.
+  await run(pm, PM_INSTALL_ARGS[pm], projectDir);
 
-  step('  pnpm typecheck');
-  await run('pnpm', ['typecheck'], projectDir);
+  step(`  ${pm} typecheck`);
+  await run(pm, ['run', 'typecheck'], projectDir);
 
-  step('  pnpm test');
-  await run('pnpm', ['test'], projectDir);
+  step(`  ${pm} test`);
+  await run(pm, ['run', 'test'], projectDir);
 
-  step('  pnpm lint');
-  await run('pnpm', ['lint'], projectDir);
+  step(`  ${pm} lint`);
+  await run(pm, ['run', 'lint'], projectDir);
 
-  step('  pnpm build');
-  await run('pnpm', ['build'], projectDir);
+  step(`  ${pm} build`);
+  await run(pm, ['run', 'build'], projectDir);
+}
+
+// Per-pm install args. `--prefer-offline` is only safe for pnpm here:
+// pnpm's metadata cache is auto-refreshed by every workspace install in
+// this monorepo, so it's never stale. npm's cache lifetime is governed
+// by `cache-min` and routinely lags behind the registry — using
+// `--prefer-offline` there causes intermittent "no matching version"
+// errors against legitimately-published deps. bun has no equivalent
+// flag (it owns its global cache).
+const PM_INSTALL_ARGS = {
+  pnpm: ['install', '--prefer-offline'],
+  npm: ['install'],
+  bun: ['install'],
+};
+
+/**
+ * Probe whether a CLI is on PATH by running `<cmd> --version`. Used to
+ * gracefully skip the install/build phase for `pm-bun` on machines where
+ * bun isn't installed — the scaffold + tree verification still runs and
+ * is the part of the test that's actually pm-specific. pnpm and npm are
+ * both prerequisites of this monorepo so we don't bother probing them.
+ */
+function commandExists(cmd) {
+  return new Promise((resolve) => {
+    const child = spawn(cmd, ['--version'], {
+      stdio: 'ignore',
+      shell: process.platform === 'win32',
+    });
+    child.on('error', () => resolve(false));
+    child.on('close', (code) => resolve(code === 0));
+  });
 }
 
 async function verifyScenario(projectDir, expect) {
