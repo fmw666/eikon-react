@@ -39,6 +39,8 @@ import {
   simulateStripFileContent,
   simulateStripTree,
 } from './simulate-strip';
+import { rewriteHtmlOpenTag } from '../../create-eikon-react/src/inject-html-variants';
+import { type VariantSelections } from '../../create-eikon-react/src/strip-features';
 
 // ---------------------------------------------------------------------------
 // Shared helpers
@@ -47,6 +49,7 @@ import {
 interface BuildRequestBody {
   platform?: string;
   supabase?: boolean;
+  pm?: string;
   design?: string;
   layout?: string;
   ui?: string;
@@ -58,6 +61,7 @@ function normalizeInputs(body: BuildRequestBody): BuildInputs {
     platform: String(body.platform ?? DEFAULT_INPUTS.platform),
     supabase:
       body.supabase === undefined ? DEFAULT_INPUTS.supabase : !!body.supabase,
+    pm: String(body.pm ?? DEFAULT_INPUTS.pm),
     design: String(body.design ?? DEFAULT_INPUTS.design),
     layout: String(body.layout ?? DEFAULT_INPUTS.layout),
     ui: String(body.ui ?? DEFAULT_INPUTS.ui),
@@ -223,6 +227,7 @@ export function handleBuildStatus(
 interface SimInputs {
   platform: string;
   supabase: boolean;
+  pm: string;
   design: string;
   layout: string;
   ui: string;
@@ -234,6 +239,7 @@ function readSimInputs(url: URL): SimInputs {
   return {
     platform: q.get('platform') ?? DEFAULT_INPUTS.platform,
     supabase: q.get('supabase') === 'true',
+    pm: q.get('pm') ?? DEFAULT_INPUTS.pm,
     design: q.get('design') ?? DEFAULT_INPUTS.design,
     layout: q.get('layout') ?? DEFAULT_INPUTS.layout,
     ui: q.get('ui') ?? DEFAULT_INPUTS.ui,
@@ -399,6 +405,33 @@ export async function handleClearCache(
 const PREVIEW_PATH_RE = /^\/preview\/([0-9a-f]{6,64})(\/.*)?$/;
 
 /**
+ * Pull the runtime axes the playground appended to `iframe.src` as
+ * `__eikon*` query params. Used by `handlePreviewServe` to splice the
+ * same `<html class data-…>` attributes onto the served HTML that
+ * `inject-html-variants.ts` bakes onto a CLI scaffold — so the iframe's
+ * first paint already reflects the user's chosen design / ui / layout
+ * instead of relying on the postMessage round-trip that fires after
+ * React mounts.
+ *
+ * Missing keys collapse to no-ops inside `rewriteHtmlOpenTag`
+ * (it checks individual axes for truthy values), so a request that
+ * arrives without any `__eikon*` params produces unchanged HTML —
+ * matching the legacy behaviour for any caller that hasn't been taught
+ * to attach the snapshot.
+ */
+function readVariantsFromUrl(rawUrl: string): VariantSelections {
+  const u = new URL(rawUrl, 'http://localhost');
+  const out: VariantSelections = {};
+  const d = u.searchParams.get('__eikonDesign');
+  const i = u.searchParams.get('__eikonUi');
+  const l = u.searchParams.get('__eikonLayout');
+  if (d) out.design = d;
+  if (i) out.ui = i;
+  if (l) out.layout = l;
+  return out;
+}
+
+/**
  * Decide whether a request URL belongs to the `/preview/<hash>/...` route.
  * Lets the prod server's static-file fallback skip these without a regex
  * test of its own.
@@ -447,18 +480,33 @@ export async function handlePreviewServe(
 
   try {
     const data = await readFile(requested);
-    res.setHeader('Content-Type', mimeFor(requested));
-    res.setHeader('Cache-Control', 'no-store');
-    res.end(data);
+    const mime = mimeFor(requested);
+    if (mime.startsWith('text/html')) {
+      // Stamp `<html>` with the variant attrs the playground appended to
+      // iframe.src — same shape as a CLI scaffold's post-strip HTML, so
+      // the cascade applies before any JS runs and there's no first-frame
+      // flash on the user's chosen design / ui / layout.
+      const variants = readVariantsFromUrl(req.url ?? '/');
+      const stamped = rewriteHtmlOpenTag(data.toString('utf8'), variants);
+      res.setHeader('Content-Type', mime);
+      res.setHeader('Cache-Control', 'no-store');
+      res.end(stamped);
+    } else {
+      res.setHeader('Content-Type', mime);
+      res.setHeader('Cache-Control', 'no-store');
+      res.end(data);
+    }
   } catch {
     // SPA fallback: any extensionless path (e.g. /preview/<h>/counter)
     // should boot the same index.html and let react-router handle it.
     if (!path.extname(rest)) {
       try {
         const data = await readFile(path.join(dist, 'index.html'));
+        const variants = readVariantsFromUrl(req.url ?? '/');
+        const stamped = rewriteHtmlOpenTag(data.toString('utf8'), variants);
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Cache-Control', 'no-store');
-        res.end(data);
+        res.end(stamped);
         return true;
       } catch {
         // Fall through to 404 if even index.html is missing — i.e. the

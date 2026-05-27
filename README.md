@@ -11,14 +11,45 @@
 
 ## What this is
 
-This repository is **two things in one pnpm monorepo**:
+One source template plus two things that consume it — **three packages in a single pnpm workspace**:
 
-| Package                                                  | Role                                                                                 |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| [packages/create-eikon-react](packages/create-eikon-react) | The CLI published to npm as `create-eikon-react` (`npx create-eikon-react my-app`).    |
-| [packages/template-react](packages/template-react)       | The reference React 19 template that the CLI ships and scaffolds into your project. |
+| Package | Role |
+| --- | --- |
+| [`packages/template-react`](packages/template-react) | **Source of truth.** The canonical React 19 app, with `@eikon:variant(...)` / `@eikon:feature(...)` strip markers around every optional axis. Workspace-developable on its own (`pnpm dev`); all variants live simultaneously and tests pass with everything on. |
+| [`packages/create-eikon-react`](packages/create-eikon-react) | **Distribution.** The CLI published to npm as `create-eikon-react`. At build time `scripts/sync-template.mjs` mirrors `template-react/` into the package's own `./template/` payload and `tsup` bundles the binary. At end-user runtime the CLI strips that bundled payload according to the user's choices and writes the result to disk. |
+| [`packages/preview-site`](packages/preview-site) (`@eikon/preview`) | **Try-before-scaffold playground.** Reads `template-react/` *live* (a chokidar watcher invalidates the cache when source changes), applies the same strip engine on demand, and surfaces it as a side-by-side "what file tree would I get?" + "what would the running app look like?" UI. Does not ship anything to end users. |
 
 The template is **opinionated, AI-agent-aware, and feature-first** so that — humans or AI agents — anyone who edits a generated project starts from the same conventions instead of reinventing them.
+
+## Architecture
+
+```mermaid
+flowchart TB
+    src[packages/template-react<br/><i>source of truth — all variants alive</i>]
+    src -->|"reads LIVE<br/>(fs + chokidar)"| pv[packages/preview-site<br/><i>playground</i>]
+    src -.->|"sync at build<br/>(scripts/sync-template.mjs)"| ce[packages/create-eikon-react<br/><i>./template payload</i>]
+    pv --> ux[Playground UI<br/>file tree + iframe preview]
+    ce --> npm[(npm: create-eikon-react)]
+    npm -->|"npx create-eikon-react"| user[End-user project<br/>stripped, written to disk]
+```
+
+The strip engine — the line-level `@eikon:variant` / `@eikon:feature` block remover — is the one piece of logic shared across all three packages. `template-react` defines the markers, `create-eikon-react` runs them on the user's machine, `preview-site` runs them on demand to render the playground.
+
+### Why each package is necessary
+
+- **`template-react` exists** so the React app, its variants, and its test suite live in one place. The CLI's `./template/` payload is *generated* from this directory at build time, never edited by hand.
+- **`create-eikon-react` exists** so end users can scaffold offline, with a single npm install, without depending on the playground server. Stripping happens on the user's machine; the bundled payload is the authoritative thing they get.
+- **`preview-site` exists** so users can pick a parameter combo with confidence before running the CLI. It collapses the "scaffold → install → run" feedback loop into a single page. It's a UX layer on top of the same strip engine — not a second source of truth.
+
+### Why there's no per-permutation matrix CI
+
+The question naturally arises: with axes like `platform × supabase × pm × design × ui × layout × toastPosition`, shouldn't CI run all 4000+ combinations through `strip → vite build`? No, because three independent guard rails already cover that surface:
+
+1. **`template-react`'s own test suite runs with every variant alive** — a strictly stronger condition than any single stripped subset. If a variant's import or dispatch entry would break a stripped build, it breaks the workspace test suite first.
+2. **The strip engine itself is unit-tested** in both `create-eikon-react` (block pairing, marker syntax, file-level removal) and `preview-site` (`__tests__/strip-drift.test.ts` checks the simulator's output against the real CLI strip).
+3. **`pnpm e2e` runs the full chain on representative scenarios** — `npm pack` the CLI, install the tarball into a throwaway sandbox, scaffold a project, then `pnpm install && pnpm typecheck && pnpm test && pnpm lint && pnpm build` *inside* the generated project. That's the smoke test for the strip → distribute → run pipeline.
+
+A 4032-cell matrix on top of those three would catch nothing they don't, while burning CI minutes proportional to the cross-product of every axis.
 
 ## Quick start (consumers)
 
@@ -83,8 +114,9 @@ trade-offs and prerequisites.
 ```
 .
 ├── packages/
-│   ├── create-eikon-react/   # CLI source + e2e tests
-│   └── template-react/      # Canonical React 19 template
+│   ├── template-react/      # Source of truth — React 19 template with strip markers
+│   ├── create-eikon-react/  # CLI: bundles a snapshot of template-react, strips on user's machine
+│   └── preview-site/        # Playground: reads template-react live, runs strip + Vite per request
 ├── docs/
 │   ├── architecture.md      # Why feature-first, how boundaries work
 │   └── agent-protocol.md    # The .agent/ specification
@@ -98,12 +130,14 @@ Requires Node ≥ 20.10 and pnpm ≥ 9.
 
 ```bash
 pnpm install                                  # install all workspaces
-pnpm --filter @eikon/react dev      # run the template locally
-pnpm --filter @eikon/react test     # template tests
-pnpm --filter @eikon/react lint     # template lint
-pnpm --filter @eikon/react build    # template prod build
-pnpm --filter create-eikon-react build         # build the CLI bundle + sync template payload
-pnpm cli                                      # build then run CLI from source
+pnpm --filter @eikon/react dev                # run the template standalone
+pnpm --filter @eikon/react test               # template tests (all variants alive)
+pnpm --filter @eikon/react lint               # template lint
+pnpm --filter @eikon/react build              # template prod build
+pnpm --filter create-eikon-react build        # build CLI bundle + sync template payload
+pnpm --filter @eikon/preview dev              # run the playground (reads template-react live)
+pnpm --filter @eikon/preview test             # strip-drift + simulator tests
+pnpm cli                                      # build CLI then run from source
 ```
 
 ### End-to-end validation

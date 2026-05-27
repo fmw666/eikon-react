@@ -39,6 +39,11 @@
 // Imports
 // =================================================================================================
 
+import {
+  useLayoutVariant,
+  type LayoutVariant,
+} from '@/app/LayoutVariantContext';
+
 // @eikon:variant(layout=stacked) begin
 import { StackedRootLayout } from './StackedRootLayout';
 // @eikon:variant(layout=stacked) end
@@ -60,11 +65,6 @@ import { BottomTabsRootLayout } from './BottomTabsRootLayout';
 // @eikon:variant(layout=bottom-tabs-fab) begin
 import { BottomTabsFabRootLayout } from './BottomTabsFabRootLayout';
 // @eikon:variant(layout=bottom-tabs-fab) end
-
-import {
-  useLayoutVariant,
-  type LayoutVariant,
-} from '@/app/LayoutVariantContext';
 
 // =================================================================================================
 // Dispatch

@@ -75,6 +75,7 @@ const RM_OPTS = {
 export const DEFAULT_INPUTS: BuildInputs = {
   platform: 'web',
   supabase: false,
+  pm: 'pnpm',
   design: 'default',
   layout: 'stacked',
   ui: 'animate-ui',
@@ -116,13 +117,12 @@ const lastServed = new Map<string, number>();
  * dev process after a few hours of editing (each template edit produces a
  * new templateRev → new hash → new dir, and the old dirs were orphaned).
  *
- * Phase G: the build matrix is exactly `platform × supabase` = 6 combos
- * (see `server/hash.ts` for the schema-version 3 hash). 8 gives us the
- * full pre-bake plus 2 slots of headroom for an in-flight templateRev
- * rotation during dev edits. At ~3 MB / dist that's ~24 MB on disk —
- * comfortably under any reasonable budget.
+ * Phase H: the build matrix is one param-agnostic max-capability shell
+ * per template revision (see `server/hash.ts` schema-version 4). A cap
+ * of 3 keeps the current rev plus a couple of in-flight / recently
+ * edited revs without letting stale template revisions pile up.
  */
-const MAX_CACHED_HASHES = 8;
+const MAX_CACHED_HASHES = 3;
 const MAX_RETAINED_ERRORS = 32;
 /**
  * Hashes whose `/preview/<hash>/...` URL was hit within `SERVED_TTL_MS`
@@ -132,11 +132,8 @@ const MAX_RETAINED_ERRORS = 32;
  * mtime doesn't refresh on read), the iframe later 404s on a chunk fetch
  * or a navigation, and the user sees a black screen.
  *
- * Phase G: with only 6 build combos total, eviction pressure is low and
- * the iframe will rarely flip outside the prebaked set, so we don't need
- * to keep a long protective tail. 2 minutes still comfortably covers a
- * user mid-cycle (the iframe doesn't pause that long between switches),
- * but lets stale templateRev dirs age out faster after edits.
+ * Phase H: params no longer create new hashes, so this mostly protects
+ * the currently displayed template revision during local edits.
  */
 const SERVED_TTL_MS = 2 * 60_000;
 
@@ -359,10 +356,16 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
   await copyTree(TEMPLATE_REACT_DIR, cacheDir, COPY_SKIP);
 
   const flags: FeatureFlags = {
-    supabase: inputs.supabase,
+    // The iframe is a max-capability preview shell. Supabase source stays
+    // present so toggling the playground's Supabase flag never rebuilds;
+    // the file/code simulator remains the source of truth for whether a
+    // real CLI scaffold would include or strip those files.
+    supabase: true,
     i18n: true,
   };
   const variants: VariantSelections = {
+    // These values only seed marker-aware helpers. Every playground axis
+    // that can change at runtime is kept below via keepAllVariants.
     platform: inputs.platform,
     design: inputs.design,
     layout: inputs.layout,
@@ -372,21 +375,22 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
   // The playground used to strip exactly like the CLI so the files
   // panel matched 1:1. That coupling is gone now: the files panel is
   // served by `simulate-strip.ts` (Phase F), and the *built bundle*
-  // running in the iframe is a runtime-switchable shell — every value
-  // of design / ui / layout / toastPosition coexists in the build, and
+  // running in the iframe is a max-capability runtime shell. Every
+  // playground value coexists in the build where that is meaningful, and
   // the template's own dispatchers (CSS class on <html>, React Context,
   // component state) pick one based on a postMessage from the shell.
   //
-  //   - `keepAllVariants` lists the four runtime-switchable axes so
-  //     their `@eikon:variant` blocks AND file-level markers stay put.
-  //     Block-level platform/supabase markers still strip — those gate
-  //     things (apple-mobile-web-app-capable meta, --touch-target-min
-  //     token, supabase imports) that aren't safe to coexist.
+  //   - `keepAllVariants` includes platform too, so mobile PWA meta,
+  //     safe-area utilities, Vite base guards, and every layout sibling
+  //     survive in the single preview bundle.
   //
-  //   - `keepAllVariantFiles` and `keepShells` stay on for backward
-  //     compat with the file-tree expectations the playground had
-  //     pre-Phase-F; they're cheap and Phase F's simulate-strip is
-  //     authoritative for the panel anyway.
+  //   - `keepShells` preserves both desktop and mobile shell directories
+  //     on disk for the cached source tree. The iframe still runs the
+  //     Vite web bundle; shell presence is for source inspection only.
+  //
+  //   - Supabase source is always present in the iframe build. The
+  //     generated file tree for `--no-supabase` is shown by
+  //     simulate-strip, not by mutating this cache dir.
   //
   // The runtime DEV gate in `app/router.tsx` is the second half of the
   // showcase story: with `mode: 'development'` set on the viteBuild
@@ -397,7 +401,7 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
   await stripFeatures(cacheDir, flags, variants, {
     keepAllVariantFiles: true,
     keepShells: true,
-    keepAllVariants: ['design', 'ui', 'layout', 'toastPosition'],
+    keepAllVariants: ['platform', 'design', 'ui', 'layout', 'toastPosition'],
   });
 
   await viteBuild({

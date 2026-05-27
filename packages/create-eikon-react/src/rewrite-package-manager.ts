@@ -83,6 +83,22 @@ export async function rewritePackageManagerFields(
     return;
   }
 
+  const next = rewritePackageJsonForPackageManager(raw, pm);
+  if (next === raw) return;
+  await writeFile(pkgPath, next, 'utf8');
+}
+
+/**
+ * Pure string-in/string-out variant used by the preview simulator so the
+ * code panel can show the same `package.json` a real CLI scaffold would
+ * write for `--pm npm|bun`.
+ */
+export function rewritePackageJsonForPackageManager(
+  raw: string,
+  pm: PackageManager
+): string {
+  if (pm === 'pnpm') return raw;
+
   const pkg = JSON.parse(raw) as {
     engines?: Record<string, string>;
     packageManager?: string;
@@ -112,5 +128,5 @@ export async function rewritePackageManagerFields(
     }
   }
 
-  await writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
+  return JSON.stringify(pkg, null, 2) + '\n';
 }

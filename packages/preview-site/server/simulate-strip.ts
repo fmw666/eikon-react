@@ -61,6 +61,10 @@ import {
   type VariantSelections,
 } from '../../create-eikon-react/src/strip-features';
 import { rewriteHtmlOpenTag } from '../../create-eikon-react/src/inject-html-variants';
+import {
+  rewritePackageJsonForPackageManager,
+  type PackageManager,
+} from '../../create-eikon-react/src/rewrite-package-manager';
 import { TEMPLATE_COPY_SKIP } from '../../create-eikon-react/src/skip-list';
 
 import { TEMPLATE_REACT_DIR } from './builder';
@@ -88,6 +92,10 @@ function variantsFromInputs(inputs: BuildInputs): VariantSelections {
     ui: inputs.ui,
     toastPosition: inputs.toastPosition,
   };
+}
+
+function packageManagerFromInputs(inputs: BuildInputs): PackageManager {
+  return inputs.pm === 'npm' || inputs.pm === 'bun' ? inputs.pm : 'pnpm';
 }
 
 function disabledFeaturesFromFlags(flags: FeatureFlags): Set<string> {
@@ -267,7 +275,7 @@ export async function simulateStripFileContent(
   // Special-case `package.json` so the dependency / script prune the CLI
   // performs at the JSON level shows up in the panel content too.
   if (relPath === 'package.json') {
-    return prunePackageJson(raw, flags, variants);
+    return prunePackageJson(raw, flags, variants, packageManagerFromInputs(inputs));
   }
 
   // Special-case `index.html` so the panel reflects the same variant
@@ -302,7 +310,8 @@ export async function simulateStripFileContent(
 function prunePackageJson(
   raw: string,
   flags: FeatureFlags,
-  variants: VariantSelections
+  variants: VariantSelections,
+  pm: PackageManager
 ): string {
   let pkg: {
     dependencies?: Record<string, string>;
@@ -338,5 +347,6 @@ function prunePackageJson(
     for (const key of scriptsToDrop) delete pkg.scripts[key];
   }
 
-  return JSON.stringify(pkg, null, 2) + '\n';
+  const pruned = JSON.stringify(pkg, null, 2) + '\n';
+  return rewritePackageJsonForPackageManager(pruned, pm);
 }

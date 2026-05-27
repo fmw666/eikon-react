@@ -17,10 +17,13 @@
  *      same value, so they're consistent regardless of whether the
  *      cascade-driven first paint already applied the class.
  *
- * `toastPosition` is intentionally NOT mirrored as a `data-` attribute:
- * the toaster's `INITIAL_POSITION` is computed from a four-entry
- * `@eikon:variant(toastPosition=...)` array which CLI strip collapses
- * to the picked entry. Stamping `data-toast` would be inert noise.
+ * `platform` is intentionally NOT mirrored to a `<html>` class /
+ * `data-` attribute. Platform-specific behaviour is gated at scaffold
+ * time by `@eikon:variant(platform=…)` strip markers (see
+ * `90-platform-targets.md`); a runtime class would be a parallel
+ * mechanism with no consumer. `toastPosition` is similarly inert at
+ * scaffold time — its four-entry `INITIAL_POSITION` array is collapsed
+ * by strip to the picked value.
  *
  * The transformation is a single regex on `<html lang="en">` so it
  * tolerates extra whitespace / future attributes the template might
@@ -39,7 +42,7 @@ const HTML_OPEN_RE = /<html\b([^>]*)>/i;
  * selection. `default` design / `animate-ui` ui collapse to "no class"
  * (matching the runtime contract in `template-react/src/main.tsx`'s
  * `applyClassAxis` helper). `data-layout` is always emitted because
- * the layout Context reads it as its initial value.
+ * `LayoutVariantContext` reads it as the initial value.
  *
  * Exposed for unit tests; the CLI itself only needs `injectHtmlVariants`.
  */

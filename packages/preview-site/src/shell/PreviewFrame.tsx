@@ -22,15 +22,29 @@ interface BuildState {
 interface BuildInputs {
   platform: string;
   supabase: boolean;
+  pm: string;
+  design: string;
+  layout: string;
+  ui: string;
+  toastPosition: string;
 }
 
 /**
- * Phase G: design / ui / layout / toastPosition no longer affect the
- * built bundle (they're switched at runtime via CSS class on `<html>`,
- * a React Context, and component state). They live in their own
- * snapshot here so the build effect doesn't re-fire when the user only
- * changed a runtime axis — a runtime-axis flip is a single
- * postMessage, not an HTTP round-trip.
+ * Runtime playground snapshot. Holds the axes the running iframe actually
+ * consumes via postMessage — `design` / `ui` (CSS class on `<html>`),
+ * `layout` (LayoutVariantContext), `toastPosition` (Toaster).
+ *
+ * `platform` doesn't live here either: platform-specific behaviour is
+ * gated at scaffold time by `@eikon:variant(platform=…)` strip markers
+ * (see `90-platform-targets.md`). For the playground we keep all
+ * platform variants alive in a single max-capability shell via
+ * `keepAllVariants`, and the device chrome (web / desktop / mobile) is
+ * driven by a separate shell-side store selector — there's no class /
+ * data attribute to push into the iframe.
+ *
+ * `pm` and `supabase` similarly don't ride this channel — they only
+ * drive the file-tree / package.json simulator endpoints, which
+ * subscribe to the store directly from CodeView / FileExplorer.
  */
 interface RuntimeVariantInputs {
   design: string;
@@ -38,6 +52,16 @@ interface RuntimeVariantInputs {
   layout: string;
   toastPosition: string;
 }
+
+const PREVIEW_BUILD_INPUTS: BuildInputs = {
+  platform: 'web',
+  supabase: true,
+  pm: 'pnpm',
+  design: 'default',
+  layout: 'stacked',
+  ui: 'animate-ui',
+  toastPosition: 'top-right',
+};
 
 const KNOWN_PLATFORMS: ReadonlySet<DevicePlatform> = new Set([
   'web',
@@ -308,7 +332,10 @@ function waitForVisible(): Promise<void> {
 /**
  * Centre stage iframe with on-demand template builds.
  *
- *   - Params change → POST /api/build → poll → swap iframe.src.
+ *   - Initial mount / template source change → POST /api/build → poll →
+ *     swap iframe.src.
+ *   - Playground param changes → postMessage into the existing iframe and
+ *     refresh file/code simulator responses; no Vite rebuild.
  *   - Cold builds keep the previous variant mounted under a translucent
  *     "Building variant…" overlay so the user always has visual context.
  *   - Hash swaps preserve the iframe's current sub-route (e.g. /counter),
@@ -318,24 +345,8 @@ function waitForVisible(): Promise<void> {
  *     re-mounts the iframe with the same params + same sub-route.
  */
 /**
- * Project a `ParamsStore` snapshot down to ONLY the fields that contribute
- * to the build hash. Lifted out of the component so the function identity
- * is stable across renders (a fresh closure would defeat the point of
- * `useShallow` — it compares the *returned* shape).
- *
- * Phase G shrunk this to `(platform, supabase)` only. The four
- * runtime-switchable axes have their own selector below.
- */
-function selectBuildInputs(s: ParamsStore): BuildInputs {
-  return {
-    platform: String(s.state.platform),
-    supabase: !!s.state.supabase,
-  };
-}
-
-/**
- * Project a `ParamsStore` snapshot down to the four runtime-switchable
- * axes. Identity-stable for the same reason as `selectBuildInputs`:
+ * Project a `ParamsStore` snapshot down to the runtime-switchable axes.
+ * Identity-stable for the same reason as the old build-input selector:
  * `useShallow` compares the returned shape, so a fresh closure here
  * would re-render on every store change.
  */
@@ -349,13 +360,14 @@ function selectRuntimeVariants(s: ParamsStore): RuntimeVariantInputs {
 }
 
 export function PreviewFrame() {
-  // Subscribe to ONLY the 2 fields that actually go into the build hash.
-  // Toggling `pm` mutates the CLI snippet but must NOT re-trigger a build
-  // effect — the package manager only matters at scaffold time.
-  // Phase G: design / ui / layout / toastPosition are runtime-only and
-  // tracked via `runtimeVariants` below.
-  const buildInputs = useShellStore(useShallow(selectBuildInputs));
+  const buildInputs = PREVIEW_BUILD_INPUTS;
   const runtimeVariants = useShellStore(useShallow(selectRuntimeVariants));
+  // The device chrome (web / desktop / mobile) is shell-only — it doesn't
+  // ride the `eikon:set-variant` postMessage channel because the iframe
+  // already mounts a max-capability bundle (`keepAllVariants` keeps every
+  // platform variant alive). Subscribe to `platform` separately so that
+  // toggling the chrome doesn't push a no-op message into the iframe.
+  const shellPlatformRaw = useShellStore((s) => String(s.state.platform));
   const setCurrentHash = useUiStore((s) => s.setCurrentHash);
   const setBuildStatus = useUiStore((s) => s.setBuildStatus);
   const setIframeReadyHash = useUiStore((s) => s.setIframeReadyHash);
@@ -367,8 +379,6 @@ export function PreviewFrame() {
   const [templateRev, setTemplateRev] = useState<string | null>(null);
   const requestSeq = useRef(0);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  const prevPlatformRef = useRef(buildInputs.platform);
-  const platformChangedRef = useRef(false);
   // Mirror lastReadyHash into a ref so the postMessage listener can
   // read the freshest hash without re-subscribing on every change —
   // the listener is registered once at mount.
@@ -384,22 +394,15 @@ export function PreviewFrame() {
     runtimeVariantsRef.current = runtimeVariants;
   }, [runtimeVariants]);
 
-  // Reset sub-route when platform changes — the new build may not
-  // have the same routes, and the iframe remounts anyway (shell swap).
-  useEffect(() => {
-    if (prevPlatformRef.current !== buildInputs.platform) {
-      prevPlatformRef.current = buildInputs.platform;
-      setSubUrl('');
-      platformChangedRef.current = true;
-    }
-  }, [buildInputs.platform]);
-
   // ---- iframe-ready signal -----------------------------------------------
   //
-  // The template's `main.tsx` posts `{type:'eikon:preview-ready'}` to its
-  // parent AFTER React mounts. We treat that as the "real" ready signal
-  // for the shell-level overlay — `iframe.onLoad` is too early, since it
-  // fires when the HTML is parsed but the dark `<body>` hasn't been
+  // The template's `LayoutVariantProvider` posts
+  // `{type:'eikon:preview-ready'}` to its parent inside its mount-time
+  // `useEffect`, AFTER its `eikon:set-variant` listener has been
+  // installed (see that file's header for the listener-then-post race
+  // it avoids). We treat that as the "real" ready signal for the
+  // shell-level overlay — `iframe.onLoad` is too early, since it fires
+  // when the HTML is parsed but the dark `<body>` hasn't been
   // overwritten by any React-rendered content yet, producing a 1-3s
   // black flash on every variant switch.
   //
@@ -416,12 +419,15 @@ export function PreviewFrame() {
       const h = lastReadyHashRef.current;
       if (h) setIframeReadyHash(h);
       // Push the playground's current runtime-axis snapshot into the
-      // newly-mounted iframe. The template's `index.html` already carries
-      // the *initial* values via class / data attributes, but the user
-      // may have changed any of the four runtime axes between when the
-      // build started and when the iframe finished booting. Sending this
-      // immediately on `eikon:preview-ready` keeps the freshly-painted
-      // iframe in sync with the param store without an extra round-trip.
+      // newly-mounted iframe. Unlike a CLI-scaffolded project — whose
+      // `inject-html-variants.ts` stamps the chosen axes onto
+      // `<html data-…>` at scaffold time — the playground builder
+      // serves an unstamped `index.html` (a single max-capability
+      // bundle is shared by every parameter combo). So the iframe
+      // boots with schema defaults and relies entirely on this
+      // response to learn the user's current selection. The reply
+      // also accounts for any axis the user changed between build
+      // start and iframe boot.
       const win = iframeRef.current?.contentWindow;
       if (!win) return;
       const v = runtimeVariantsRef.current;
@@ -458,12 +464,21 @@ export function PreviewFrame() {
 
   // ---- Runtime variant push ---------------------------------------------
   //
-  // Phase G: design / ui / layout / toastPosition are switched at runtime
-  // inside the iframe. Whenever the user flips any of these in the
-  // playground, we postMessage the new values into the live iframe so it
-  // updates in place — no rebuild, no remount, no flash. The template's
-  // `main.tsx` listens for `eikon:set-variant` (gated to dev + same-origin
-  // iframes) and applies the change via CSS class / Context dispatch.
+  // The 4 visual axes (`design`, `ui`, `layout`, `toastPosition`) are
+  // switched at runtime inside the iframe. Whenever the user flips any
+  // control, we postMessage the new values into the live iframe so it
+  // updates in place — no rebuild, no remount, no flash. Three listeners
+  // inside the template share this single message type, each gated to
+  // dev + same-origin iframes:
+  //   - `main.tsx` applies `design` / `ui` as a class on `<html>`
+  //   - `LayoutVariantProvider` dispatches `layout` via React Context
+  //   - `Toaster` updates `toastPosition` in its own state
+  //
+  // `platform` doesn't ride this channel — see RuntimeVariantInputs:
+  // the iframe already mounts a max-capability bundle, and the device
+  // chrome that the user sees flip is purely shell-side. `pm` and
+  // `supabase` similarly don't ride here — they only affect the
+  // file-tree / package.json simulator outputs.
   //
   // We don't gate on `lastReadyHash` here: when the iframe hasn't booted
   // yet, `contentWindow` simply isn't there to receive the message and
@@ -524,10 +539,9 @@ export function PreviewFrame() {
 
   // ---- Build orchestration ----------------------------------------------
   //
-  // We re-run on `buildInputs` (hash-affecting params only) and `templateRev`
-  // (the watcher's "source changed, rebuild" signal). Tooling params like
-  // `pm` deliberately don't drive this effect — they only change the
-  // suggested CLI command, not the rendered project.
+  // We re-run only on `templateRev` (the watcher's "source changed,
+  // rebuild" signal). Playground params deliberately do not drive this
+  // effect; they update via postMessage and simulator endpoints.
   useEffect(() => {
     const seq = ++requestSeq.current;
     let cancelled = false;
@@ -552,15 +566,13 @@ export function PreviewFrame() {
         return;
       }
       // Capture wherever the user has navigated inside the previous
-      // variant so we can re-mount the new variant at the same place.
-      // Skip when the platform just changed — old routes likely don't
-      // exist in the new build.
-      const sub = platformChangedRef.current ? '' : readIframeSubUrl(iframeRef.current);
-      platformChangedRef.current = false;
+      // preview shell so template-source rebuilds preserve the route.
+      const sub = readIframeSubUrl(iframeRef.current);
       setSubUrl(sub);
       setLastReadyHash(next.hash);
-      // Broadcast the current ready hash so sibling panels (file explorer,
-      // code view) target the right cache dir for /api/files & /api/file.
+      // Broadcast the current ready hash so sibling panels can coordinate
+      // loading overlays. File/code content itself is input-driven via
+      // simulator endpoints.
       setCurrentHash(next.hash);
       // Build dist exists; pixel-level "ready" is signalled by the iframe
       // and tree onLoad reporters. The unified overlay reads those.
@@ -620,7 +632,7 @@ export function PreviewFrame() {
     // `setIframeReadyHash`) are stable across renders; omitting them
     // intentionally so the build effect doesn't re-run on store init.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [buildInputs, templateRev]);
+  }, [templateRev]);
 
   // ---- Quick-jump navigation requested from the Toolbar -----------------
   //
@@ -668,12 +680,38 @@ export function PreviewFrame() {
   }, [navRequest, lastReadyHash, clearNavRequest]);
 
 
-  // The iframe's src is set ONCE per (hash, subUrl) pair via React's `key`
-  // remount mechanism. We deliberately don't bind it as a controlled prop —
-  // any in-iframe navigation should not be clobbered by re-renders.
-  const iframeSrc = lastReadyHash
-    ? `/preview/${lastReadyHash}/${subUrl.replace(/^\//, '')}`
-    : null;
+  // The iframe's src is snapshotted once per `iframeKey` change via this
+  // useMemo. We append the current `runtimeVariants` as `__eikon*` query
+  // params so the server can splice them onto `<html>` before the
+  // bytes hit the iframe — exactly the same shape `inject-html-variants.ts`
+  // bakes onto a CLI scaffold's `index.html`. Without this stamping the
+  // iframe boots at schema defaults (design=default / ui=animate-ui /
+  // layout=stacked) and only catches up after `eikon:preview-ready`
+  // round-trips, producing a one-frame flash of the wrong layout.
+  //
+  // We read variants from `runtimeVariantsRef` instead of the live
+  // `runtimeVariants` value AND keep the deps tied to `iframeKey`'s
+  // sources. Why: the deps must NOT include `runtimeVariants`, otherwise
+  // every axis flip would change `iframe.src` and the browser would
+  // reload the iframe — defeating the runtime-postMessage design and
+  // re-introducing the flash this fix is removing. The eslint disable
+  // is intentional. The `__eikon` prefix avoids collision with any
+  // query the template / react-router cares about; `URL.searchParams.set`
+  // overwrites stale values that may have round-tripped through
+  // `readIframeSubUrl` after a sub-route navigation.
+  const iframeSrc = useMemo(() => {
+    if (!lastReadyHash) return null;
+    const v = runtimeVariantsRef.current;
+    const u = new URL(
+      `/preview/${lastReadyHash}/${subUrl.replace(/^\//, '')}`,
+      window.location.origin
+    );
+    u.searchParams.set('__eikonDesign', v.design);
+    u.searchParams.set('__eikonUi', v.ui);
+    u.searchParams.set('__eikonLayout', v.layout);
+    return u.pathname + u.search + u.hash;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastReadyHash, subUrl, reloadKey]);
 
   // Apple-styled device shell wrapping the iframe. The shell is purely
   // presentational — it adds the right macOS / Safari / iPhone chrome
@@ -684,8 +722,8 @@ export function PreviewFrame() {
   // build cache.
   const frameSize = useUiStore((s) => s.frameSize);
   const platform = useMemo(
-    () => coercePlatform(buildInputs.platform),
-    [buildInputs.platform]
+    () => coercePlatform(shellPlatformRaw),
+    [shellPlatformRaw]
   );
   const outerPadding = useShellOuterPadding(platform);
 

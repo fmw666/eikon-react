@@ -21,7 +21,7 @@ import { createRoot } from 'react-dom/client';
 
 // --- Absolute Imports ---
 import App from '@/App';
-import { LayoutVariantProvider } from '@/app/LayoutVariantContext';
+import { LayoutVariantProvider } from '@/app/LayoutVariantProvider';
 // @eikon:feature(i18n) begin
 import { initI18n } from '@/shared/i18n';
 // @eikon:feature(i18n) end
@@ -68,10 +68,19 @@ applyClassAxis('ui', htmlEl.dataset.ui);
 //
 // Class-axis swaps (`design`, `ui`) are handled here. `layout` and
 // `toastPosition` are consumed by LayoutVariantContext and Toaster.
+// `platform` / `pm` / `supabase` deliberately don't ride this channel:
+// platform-specific behaviour is gated at scaffold time by
+// `@eikon:variant(platform=…)` strip markers (see
+// `90-platform-targets.md`), and the playground simulator endpoints
+// own the file-tree / package.json preview for `pm` and `supabase`.
 if (import.meta.env.DEV && window.parent !== window) {
   window.addEventListener('message', (e: MessageEvent) => {
     const data = e.data as
-      | { type?: string; design?: string; ui?: string }
+      | {
+          type?: string;
+          design?: string;
+          ui?: string;
+        }
       | null;
     if (!data || data.type !== 'eikon:set-variant') return;
     if (typeof data.design === 'string') applyClassAxis('design', data.design);
@@ -108,21 +117,11 @@ void Promise.all(preconditions).then(() => {
       </LayoutVariantProvider>
     </StrictMode>
   );
-  // Preview-site bridge: when this template runs inside the playground's
-  // iframe, the shell needs to know that React has actually mounted —
-  // not just that the HTML parsed (which is what `iframe.onLoad` reports
-  // and what the shell-side overlay used to clear on, briefly exposing
-  // the dark `<body>` before the first paint of <App />).
-  //
-  // We post AFTER `root.render` so by the time the shell receives the
-  // message, the synchronous render pass has scheduled commits; pixels
-  // are at most one rAF away. Gated by:
-  //   - `import.meta.env.DEV` so a production scaffold (built by the end
-  //     user) ships zero bytes of preview-bridge code — Rollup can
-  //     statically eliminate this whole `if` once DEV evaluates `false`.
-  //   - `window.parent !== window` to skip the broadcast when the
-  //     template is running standalone (regular `pnpm dev`).
-  if (import.meta.env.DEV && window.parent !== window) {
-    window.parent.postMessage({ type: 'eikon:preview-ready' }, '*');
-  }
+  // Preview-site bridge: the `eikon:preview-ready` signal that the
+  // playground shell waits on used to be posted here, right after
+  // `root.render`. We moved it into `LayoutVariantProvider`'s
+  // `useEffect` so it fires AFTER the layout-axis message listener
+  // is installed — see that file's header for the race that broke.
+  // design / ui still get their listener synchronously at module
+  // load (above), so they're not in the same boat.
 });

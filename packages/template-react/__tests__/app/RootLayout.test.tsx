@@ -55,6 +55,7 @@ vi.mock('@/shared/supabase', () => ({
 }));
 
 // --- Absolute Imports ---
+import { LayoutVariantProvider } from '@/app/LayoutVariantProvider';
 import { RootLayout } from '@/app/layouts/RootLayout';
 
 // =================================================================================================
@@ -63,15 +64,17 @@ import { RootLayout } from '@/app/layouts/RootLayout';
 
 function renderShell(initialPath = '/') {
   return render(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <Routes>
-        <Route element={<RootLayout />}>
-          <Route path="/" element={<p>home page</p>} />
-          <Route path="/counter" element={<p>counter page</p>} />
-          <Route path="/tasks" element={<p>tasks page</p>} />
-        </Route>
-      </Routes>
-    </MemoryRouter>
+    <LayoutVariantProvider>
+      <MemoryRouter initialEntries={[initialPath]}>
+        <Routes>
+          <Route element={<RootLayout />}>
+            <Route path="/" element={<p>home page</p>} />
+            <Route path="/counter" element={<p>counter page</p>} />
+            <Route path="/tasks" element={<p>tasks page</p>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    </LayoutVariantProvider>
   );
 }
 

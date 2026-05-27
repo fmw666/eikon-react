@@ -24,6 +24,7 @@ interface FileResponse {
 interface SimInputs {
   platform: string;
   supabase: boolean;
+  pm: string;
   design: string;
   ui: string;
   layout: string;
@@ -34,6 +35,7 @@ function selectSimInputs(s: ParamsStore): SimInputs {
   return {
     platform: String(s.state.platform),
     supabase: !!s.state.supabase,
+    pm: String(s.state.pm),
     design: String(s.state.design),
     ui: String(s.state.ui),
     layout: String(s.state.layout),
@@ -45,6 +47,7 @@ function buildSimQuery(inputs: SimInputs, path: string): string {
   const params = new URLSearchParams();
   params.set('platform', inputs.platform);
   params.set('supabase', String(inputs.supabase));
+  params.set('pm', inputs.pm);
   params.set('design', inputs.design);
   params.set('ui', inputs.ui);
   params.set('layout', inputs.layout);

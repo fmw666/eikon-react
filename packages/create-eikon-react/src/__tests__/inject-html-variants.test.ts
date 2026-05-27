@@ -50,6 +50,22 @@ describe('buildHtmlVariantAttrs', () => {
       'data-layout': 'sidebar',
     });
   });
+
+  it('does not stamp any platform attribute or class', () => {
+    // Platform-specific behaviour is gated at scaffold time by
+    // `@eikon:variant(platform=…)` strip markers; a runtime <html> class
+    // would be a parallel mechanism with no consumer.
+    const out = buildHtmlVariantAttrs({
+      ...DEFAULT_VARIANTS,
+      platform: 'mobile',
+      design: 'default',
+      ui: 'animate-ui',
+      layout: 'mobile-drawer',
+      toastPosition: 'top-right',
+    });
+    expect(out.classes).toEqual([]);
+    expect(out.dataAttrs).toEqual({ 'data-layout': 'mobile-drawer' });
+  });
 });
 
 describe('rewriteHtmlOpenTag', () => {
@@ -86,16 +102,17 @@ describe('rewriteHtmlOpenTag', () => {
     expect(next).toBe(SAMPLE_HTML);
   });
 
-  it('does not mention toastPosition in the output', () => {
+  it('does not mention toastPosition or platform in the output', () => {
     const next = rewriteHtmlOpenTag(SAMPLE_HTML, {
       ...DEFAULT_VARIANTS,
-      platform: 'web',
+      platform: 'mobile',
       design: 'default',
       ui: 'animate-ui',
       layout: 'stacked',
       toastPosition: 'bottom-center',
     });
     expect(next).not.toContain('toast');
+    expect(next).not.toContain('platform');
     expect(next).toContain('data-layout="stacked"');
   });
 });

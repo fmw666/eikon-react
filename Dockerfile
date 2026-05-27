@@ -60,12 +60,10 @@ COPY . .
 # sequence so a future bumping of either side stays in lock-step.
 RUN pnpm --filter @eikon/preview build:all
 
-# Pre-bake the platform×supabase build matrix (6 combos) so first-paint
-# on any deployed URL hits a hot cache. Phase G collapsed the matrix from
-# 4032 to 6 — the runtime-switchable axes (design / ui / layout /
-# toastPosition) no longer affect the bundle (see `server/hash.ts`), so a
-# single build per `(platform, supabase)` covers every CSS / Context-
-# driven variant. Pre-baked dirs land in
+# Pre-bake the single max-capability preview shell so first-paint on any
+# deployed URL hits a hot cache. Playground params are runtime state now;
+# file/code truth comes from simulate-strip rather than separate Vite
+# builds. Pre-baked dirs land in
 # packages/template-react/.preview-cache/<hash>/ and survive the
 # `COPY --from=builder /app /app` in the runner stage. See
 # `packages/preview-site/scripts/prebuild-variants.ts` for the enumeration.

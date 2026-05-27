@@ -43,7 +43,7 @@ import {
 } from '../../create-eikon-react/src/strip-features';
 import { TEMPLATE_COPY_SKIP } from '../../create-eikon-react/src/skip-list';
 
-import { simulateStripTree } from '../server/simulate-strip';
+import { simulateStripFileContent, simulateStripTree } from '../server/simulate-strip';
 import { type BuildInputs } from '../server/hash';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -61,8 +61,13 @@ const SUPABASE_VALUES = [false, true] as const;
 
 const FIXED_RUNTIME_AXES: Pick<
   BuildInputs,
-  'design' | 'ui' | 'layout' | 'toastPosition'
+  'pm' | 'design' | 'ui' | 'layout' | 'toastPosition'
 > = {
+  // `pm` is part of `BuildInputs` post-Phase-H but only affects the
+  // `package.json` content rewrite, not the file set. Pin it to the
+  // default so the parity test below isolates the directory/file-name
+  // strip from the package-manager rewrite, which has its own test.
+  pm: 'pnpm',
   design: 'default',
   ui: 'animate-ui',
   layout: 'stacked',
@@ -154,5 +159,43 @@ describe('simulateStripTree ↔ CLI stripFeatures parity (Phase J drift check)',
         }
       }, 30_000);
     }
+  }
+});
+
+/**
+ * `pm` doesn't change the file set — only `package.json` content. This
+ * mirrors the CLI's `rewritePackageManagerFields` behaviour: the
+ * simulator must produce the same `package.json` a real `--pm npm|bun`
+ * scaffold would write. Holding all other axes at defaults keeps this
+ * focused on the package-manager rewrite path.
+ *
+ * Implemented as a content read against `simulateStripFileContent` (no
+ * tmp dir / template copy needed) — fast and direct.
+ */
+describe('pm content parity (Phase H)', () => {
+  for (const pm of ['pnpm', 'npm', 'bun'] as const) {
+    it(`pm=${pm} produces the package.json a CLI scaffold would write`, async () => {
+      const inputs: BuildInputs = {
+        platform: 'web',
+        supabase: true,
+        ...FIXED_RUNTIME_AXES,
+        pm,
+      };
+      const out = await simulateStripFileContent('package.json', inputs);
+      expect(out).not.toBeNull();
+      const pkg = JSON.parse(out!) as {
+        engines?: Record<string, string>;
+        packageManager?: string;
+      };
+      if (pm === 'pnpm') {
+        // pnpm is the template default — engines.pnpm should be present
+        // and `packageManager` either absent or pinned to pnpm.
+        expect(Object.keys(pkg.engines ?? {})).toContain('pnpm');
+      } else {
+        expect(Object.keys(pkg.engines ?? {})).toContain(pm);
+        expect(Object.keys(pkg.engines ?? {})).not.toContain('pnpm');
+        expect(pkg.packageManager ?? '').toMatch(new RegExp(`^${pm}@`));
+      }
+    });
   }
 });

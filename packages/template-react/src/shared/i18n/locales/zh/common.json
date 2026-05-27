@@ -7,6 +7,7 @@
     "menu": "打开导航",
     "menuDescription": "应用的主导航",
     "primary": "主导航",
+    "sectionLabel": "导航",
     "compose": "新建任务"
   },
   "actions": {
