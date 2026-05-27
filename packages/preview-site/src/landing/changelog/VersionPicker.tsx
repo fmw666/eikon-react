@@ -126,7 +126,7 @@ export function VersionPicker({
           type="button"
           onClick={onRefresh}
           disabled={refreshing}
-          className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-[var(--border-1)] bg-[var(--surface-2)] px-3 text-xs text-[var(--fg-2)] transition-colors hover:text-[var(--fg-1)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="ml-auto inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-md border border-[var(--border-1)] bg-[var(--surface-2)] px-3 text-xs text-[var(--fg-2)] transition-colors hover:text-[var(--fg-1)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           <RefreshIcon spinning={!!refreshing} />
           {t('changelog.picker.refresh')}
@@ -234,7 +234,7 @@ function DropdownRow({
       onClick={onClick}
       disabled={isExcluded}
       className={
-        'flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-xs transition-colors ' +
+        'flex w-full cursor-pointer items-center justify-between gap-2 px-3 py-1.5 text-left text-xs transition-colors ' +
         (isSelected
           ? 'bg-[var(--surface-3)] text-[var(--fg-1)]'
           : 'text-[var(--fg-2)] hover:bg-[var(--surface-3)]') +

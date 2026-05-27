@@ -599,7 +599,7 @@ function ErrorPanel({
       <button
         type="button"
         onClick={onRetry}
-        className="mt-4 rounded-md border border-red-500/50 px-3 py-1.5 text-xs text-red-200 transition-colors hover:bg-red-500/20"
+        className="mt-4 cursor-pointer rounded-md border border-red-500/50 px-3 py-1.5 text-xs text-red-200 transition-colors hover:bg-red-500/20"
       >
         {t('changelog.error.retry')}
       </button>
