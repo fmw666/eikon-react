@@ -16,12 +16,48 @@ The scaffold's `--ui` flag picks which component library lives under `src/shared
 | `shadcn`      | Official [shadcn](https://ui.shadcn.com/) registry components, copy-pasted in | present | You want shadcn's exact primitives + `npx shadcn add`     |
 | `animate-ui` (default) | [animate-ui](https://animate-ui.com/) registry components — shadcn-compatible primitives with motion built in | present | You want shadcn ergonomics + first-class motion           |
 
-Two files live in `src/shared/ui/` regardless of `--ui` choice and are owned by the scaffold across all three options:
+## How `--ui` actually works
 
-- `theme-toggle.tsx`
-- `language-switcher.tsx`
+The choice is resolved at scaffold time by `applyUiSnapshot()` in
+[`packages/create-eikon-react/src/apply-ui-snapshot.ts`](../../../create-eikon-react/src/apply-ui-snapshot.ts):
 
-Everything else is library-driven and changes with `--ui`.
+1. The CLI ships pre-baked snapshots at
+   `packages/create-eikon-react/template-snapshots/{shadcn,animate-ui}/` —
+   each contains its own `src/shared/ui/*.tsx`, a `components.json`, and a
+   `package-deps.json` listing the runtime deps that library needs.
+2. When you pick `--ui shadcn` or `--ui animate-ui`, the CLI:
+   - Deletes the seven REPLACEABLE primitives from the project's
+     `src/shared/ui/` (the project-authored ones).
+   - Copies the snapshot's `src/shared/ui/*.tsx` over them.
+   - Writes the snapshot's `components.json` to the project root (so
+     `npx shadcn add <next>` keeps working post-scaffold).
+   - Merges the snapshot's `package-deps.json` into the project's
+     `package.json` `dependencies`.
+3. When you pick `--ui custom`, none of that happens — the
+   project-authored files already in the template are exactly what
+   you get.
+
+The snapshots themselves are produced by
+[`packages/create-eikon-react/scripts/sync-ui-snapshots.mjs`](../../../create-eikon-react/scripts/sync-ui-snapshots.mjs)
+(maintainer-only; runs the upstream registry CLIs in a sandbox and
+copies the result). End users never touch that script.
+
+## What's project-owned, what's library-replaced
+
+- **Always project-owned, regardless of `--ui`**:
+  `theme-toggle.tsx`, `language-switcher.tsx`. These wire i18n + theme
+  toggles and aren't part of any UI registry; the scaffold owns them
+  in every variant.
+- **Project-owned only when `--ui custom`**: `button.tsx`, `dialog.tsx`,
+  `tabs.tsx`, `sheet.tsx`, `command.tsx`, `card.tsx`, `toaster.tsx`
+  (the seven primitives in `REPLACEABLE_UI_FILES` at
+  [apply-ui-snapshot.ts:72](../../../create-eikon-react/src/apply-ui-snapshot.ts)).
+- **Library-replaced when `--ui shadcn` or `--ui animate-ui`**: the same
+  seven primitives — sourced from the matching snapshot.
+
+After scaffold, **you own all of these files** — there's no runtime
+swap, no `--ui` switch in the generated project. Editing any primitive
+is just editing your code.
 
 ## Where primitives live
 
@@ -38,7 +74,20 @@ The right path depends on `--ui`:
   1. If the primitive has accessibility semantics (menus, dialogs, popovers, tooltips, switches, tabs, accordions), build on the matching `@radix-ui/react-*` package.
   2. Define `cva` variants, wrap in `forwardRef`, compose with `motion/react` where animation is needed.
   3. Use theme tokens (`var(--color-primary)`, `var(--radius-md)`) — never raw hex.
-  4. Add at least one test under `src/shared/ui/__tests__/<name>.test.tsx` covering accessibility (`getByRole`) and one variant.
+  4. Primitives are covered by the structural test in `shared-shape.test.ts` plus integration tests in feature folders. There is no `src/shared/ui/__tests__/` directory by convention.
+
+## Adding a new primitive to the *snapshots* (maintainers only)
+
+If you're modifying the CLI itself to add a new primitive that should
+exist for all three `--ui` choices, three places must move together:
+
+1. `REPLACEABLE_UI_FILES` in `apply-ui-snapshot.ts`.
+2. The COMPONENTS sync list in
+   `packages/create-eikon-react/scripts/sync-ui-snapshots.mjs`.
+3. The corresponding entry in the animate-ui registry mapping inside
+   the same script.
+
+A parity test asserts these three lists stay in lock-step.
 
 See [src/shared/ui/button.tsx](../../src/shared/ui/button.tsx) for the canonical example *under whichever library this project was scaffolded with*.
 

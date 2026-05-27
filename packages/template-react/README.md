@@ -1,4 +1,4 @@
-# Eikon React Template
+# Eikon for React
 
 React 19 + Tailwind CSS v4 + animate-ui starter with a feature-first architecture and a portable `.agent/` collaboration protocol that AI coding agents can read directly.
 
@@ -22,8 +22,11 @@ This package is the canonical template consumed by `npx create-eikon-react`. It 
 src/
 ├── app/             # Application shell (providers, router, layout, global pages)
 ├── features/        # Feature-first modules; each owns components/hooks/stores/services
+│   ├── auth/
+│   ├── counter/
+│   ├── examples/
 │   ├── home/
-│   └── counter/
+│   └── tasks/
 ├── shared/          # Cross-feature ui, lib, hooks, i18n, supabase, etc.
 └── styles/          # Tailwind v4 entry (@import + @theme tokens)
 __tests__/           # Global test setup; per-feature tests live alongside the feature
@@ -41,7 +44,8 @@ __tests__/           # Global test setup; per-feature tests live alongside the f
 | Command            | What it does                                |
 | ------------------ | ------------------------------------------- |
 | `pnpm dev`         | Start Vite dev server on `http://localhost:3000` |
-| `pnpm build`       | Type-check and produce a production build   |
+| `pnpm build`       | Produce a production build                  |
+| `pnpm build:check` | Typecheck (`tsc -b --noEmit`) then build    |
 | `pnpm preview`     | Preview the production build locally        |
 | `pnpm test`        | Run Vitest test suite                       |
 | `pnpm test:watch`  | Watch mode                                  |

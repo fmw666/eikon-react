@@ -41,14 +41,14 @@ multiplier.
 | **How** | Rewrite as: "**Always project-owned (across all --ui)**: `theme-toggle.tsx`, `language-switcher.tsx`. **Project-owned only when --ui custom**: 7 primitives listed by name. **Library-replaced when --ui shadcn or animate-ui**: same 7 primitives." |
 | **Verify** | Cross-reference against `apply-ui-snapshot.ts:72` `REPLACEABLE_UI_FILES`. |
 
-### P1.4 — Fix structural specs count: 10 → 12
+### P1.4 — Fix structural specs count: 10 → 11
 
 | | |
 |--|--|
 | **Where** | `packages/template-react/.agent/rules/80-quality-system.md` |
-| **What** | The rule's table claims "10 structural specs"; actual count in `__tests__/structure/` is 12 including `apps-shape.test.ts`. |
-| **How** | Re-enumerate from the actual directory. Add `apps-shape.test.ts` and any other missing entry with a one-line description of what it asserts. |
-| **Verify** | `ls packages/template-react/__tests__/structure/*.test.ts \| wc -l` matches the table row count. |
+| **What** | The rule's table claims "10 structural specs"; actual count in `__tests__/structure/` is 11 including `apps-shape.test.ts`. |
+| **How** | Re-enumerate from the actual directory. Add `apps-shape.test.ts` row to the table with a one-line description of what it asserts. |
+| **Verify** | `ls packages/template-react/__tests__/structure/*.test.ts \| wc -l` matches the table row count (11). |
 
 ### P1.5 — Fix "Adding a new primitive" `__tests__/` claim
 
@@ -88,8 +88,8 @@ multiplier.
 
 ## Phase exit criteria
 
-- [ ] All four rule files (`20-tailwind-v4.md`, `50-ui-axis.md`, `80-quality-system.md`, `customize-design/SKILL.md`) match repo reality
-- [ ] Reading `50-ui-axis.md` cold tells you exactly how `--ui` swaps work
-- [ ] Template README's features list matches `ls src/features/`
-- [ ] Brand name is consistent across user-facing prose
-- [ ] `feature-shape.test.ts` no longer contradicts an existing feature
+- [x] All four rule files (`20-tailwind-v4.md`, `50-ui-axis.md`, `80-quality-system.md`, `customize-design/SKILL.md`) match repo reality
+- [x] Reading `50-ui-axis.md` cold tells you exactly how `--ui` swaps work
+- [x] Template README's features list matches `ls src/features/`
+- [x] Brand name is consistent across user-facing prose
+- [x] `feature-shape.test.ts` no longer contradicts an existing feature
