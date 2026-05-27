@@ -5,8 +5,10 @@
 //   1. typecheck   — three packages, parallel via pnpm -r
 //   2. test        — three packages, includes strip-drift parity (6 combos)
 //   3. lint        — three packages
-//   4. build       — three packages
-//   5. e2e         — build CLI → npm pack → 7 scenarios, each: scaffold +
+//   4. audit       — pnpm audit (high+) against the public npm registry
+//   5. lockfile    — every pnpm-lock.yaml package entry has integrity
+//   6. build       — three packages
+//   7. e2e         — build CLI → npm pack → 7 scenarios, each: scaffold +
 //                    install + typecheck + test + lint + build inside the
 //                    generated project. Slowest step (~3-5 min).
 //
@@ -32,6 +34,8 @@ const STEPS = [
   { name: 'typecheck', cmd: 'pnpm', args: ['typecheck'] },
   { name: 'test',      cmd: 'pnpm', args: ['test'] },
   { name: 'lint',      cmd: 'pnpm', args: ['lint'] },
+  { name: 'audit',     cmd: 'pnpm', args: ['audit', '--audit-level=high', '--registry=https://registry.npmjs.org/'] },
+  { name: 'lockfile',  cmd: 'node', args: ['scripts/check-lockfile.mjs'] },
   { name: 'build',     cmd: 'pnpm', args: ['build'] },
   { name: 'e2e',       cmd: 'pnpm', args: ['e2e'] },
 ];

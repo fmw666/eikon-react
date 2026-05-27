@@ -17,14 +17,19 @@ So "should I release?" almost always means "should I bump
 
 `packages/create-eikon-react/package.json` has:
 ```json
-"files": ["dist", "template", "README.md", "LICENSE"]
+"files": ["dist", "template", "template-snapshots", "README.md", "LICENSE"]
 ```
 
-- `dist/` — built fresh from `src/` by `prepublishOnly: pnpm build`
+- `dist/` — built fresh from `src/` by `prepublishOnly` (typecheck → lint
+  → test → e2e:quick → build chain)
 - `template/` — the user-facing scaffold output, **synced from
   `packages/template-react/` by `scripts/sync-template.mjs`** during build
   (the in-repo `packages/create-eikon-react/template/` is the committed
   snapshot — both update together in normal commits)
+- `template-snapshots/` — pre-baked shadcn / animate-ui sources used by
+  `applyUiSnapshot()` at scaffold time when the user picks a non-`custom`
+  `--ui`. Regenerated manually via `pnpm sync-ui-snapshots` (rare, gated
+  by maintainer review of upstream changes).
 - `README.md`, `LICENSE`
 
 **Therefore commits in these paths affect what users get from
@@ -32,6 +37,7 @@ So "should I release?" almost always means "should I bump
 
 - `packages/create-eikon-react/src/**`
 - `packages/create-eikon-react/template/**`
+- `packages/create-eikon-react/template-snapshots/**`
 - `packages/create-eikon-react/README.md`
 - `packages/template-react/**` (synced into `template/` at publish time)
 

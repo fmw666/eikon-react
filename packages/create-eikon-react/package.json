@@ -27,7 +27,7 @@
     "smoke": "node ./scripts/smoke.mjs",
     "smoke:full": "node ./scripts/smoke.mjs --full",
     "sync-ui-snapshots": "node ./scripts/sync-ui-snapshots.mjs",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "pnpm typecheck && pnpm lint && pnpm test && pnpm e2e:quick && pnpm build"
   },
   "dependencies": {
     "@clack/prompts": "^0.8.2",

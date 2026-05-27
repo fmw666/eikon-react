@@ -41,6 +41,15 @@ Non-interactive flags worth knowing about:
 
 `--ui custom` keeps the project-authored Radix wrappers under `src/shared/ui/`. `--ui shadcn` and `--ui animate-ui` lay down components copied 1:1 from the upstream registry (with a `components.json` at the project root so `npx shadcn add <next>` keeps working post-scaffold).
 
+## What's in the npm package
+
+The published tarball (`pnpm pack`) contains:
+
+- `dist/` — compiled CLI binary (built fresh by `prepublishOnly`)
+- `template/` — the scaffold tree (synced from `packages/template-react/` at build time)
+- `template-snapshots/{shadcn,animate-ui}/` — pre-baked UI library sources for `--ui shadcn` and `--ui animate-ui`. Empty for `--ui custom` (project-authored components stay in `template/src/shared/ui/`).
+- `README.md`, `LICENSE`
+
 ## Local development
 
 This package ships its own template payload (`./template/`). Re-sync the source template before testing locally:
