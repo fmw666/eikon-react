@@ -59,30 +59,30 @@ describe('stripBlocksForVariant', () => {
       '  {/* @eikon:variant(ui=animate-ui) begin */}',
       '  <MotionButton/>',
       '  {/* @eikon:variant(ui=animate-ui) end */}',
-      '  {/* @eikon:variant(ui=radix) begin */}',
-      '  <RadixButton/>',
-      '  {/* @eikon:variant(ui=radix) end */}',
+      '  {/* @eikon:variant(ui=custom) begin */}',
+      '  <CustomButton/>',
+      '  {/* @eikon:variant(ui=custom) end */}',
       ');',
     ].join('\n');
 
     const out = stripBlocksForVariant(input, 'ui', 'animate-ui');
     expect(out).toContain('MotionButton');
-    expect(out).not.toContain('RadixButton');
+    expect(out).not.toContain('CustomButton');
   });
 
-  it('handles values containing dashes (e.g. shadcn-style)', () => {
+  it('handles values containing dashes (e.g. animate-ui)', () => {
     const input = [
-      '// @eikon:variant(ui=shadcn-style) begin',
-      'shadcn-style-block',
-      '// @eikon:variant(ui=shadcn-style) end',
-      '// @eikon:variant(ui=radix) begin',
-      'radix-block',
-      '// @eikon:variant(ui=radix) end',
+      '// @eikon:variant(ui=animate-ui) begin',
+      'animate-ui-block',
+      '// @eikon:variant(ui=animate-ui) end',
+      '// @eikon:variant(ui=custom) begin',
+      'custom-block',
+      '// @eikon:variant(ui=custom) end',
     ].join('\n');
 
-    const out = stripBlocksForVariant(input, 'ui', 'shadcn-style');
-    expect(out).toContain('shadcn-style-block');
-    expect(out).not.toContain('radix-block');
+    const out = stripBlocksForVariant(input, 'ui', 'animate-ui');
+    expect(out).toContain('animate-ui-block');
+    expect(out).not.toContain('custom-block');
   });
 
   it('does not swallow a structural `}` adjacent to a CSS end marker', () => {
@@ -124,7 +124,7 @@ describe('stripBlocksForVariant', () => {
       ');',
     ].join('\n');
 
-    const out = stripBlocksForVariant(input, 'ui', 'radix');
+    const out = stripBlocksForVariant(input, 'ui', 'custom');
     expect(out).not.toContain('MotionButton');
     expect(out).not.toContain('@eikon:variant(ui=animate-ui)');
     // The `render(` and `);` lines on either side must be preserved

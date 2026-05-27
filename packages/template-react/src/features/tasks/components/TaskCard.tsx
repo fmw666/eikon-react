@@ -29,7 +29,7 @@ import { Loader2, Trash2 } from 'lucide-react';
 // --- Absolute Imports ---
 import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, cardHoverableClass } from '@/shared/ui/card';
 import {
   Dialog,
   DialogClose,
@@ -104,7 +104,6 @@ function TaskCard({ task, onClick, onDelete, className }: TaskCardProps) {
   return (
     <>
       <Card
-        hoverable
         role={onClick ? 'button' : undefined}
         tabIndex={onClick ? 0 : undefined}
         onClick={onClick}
@@ -116,6 +115,7 @@ function TaskCard({ task, onClick, onDelete, className }: TaskCardProps) {
           }
         }}
         className={cn(
+          cardHoverableClass,
           'cursor-pointer transition-colors hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)]',
           !onClick && 'cursor-default',
           className

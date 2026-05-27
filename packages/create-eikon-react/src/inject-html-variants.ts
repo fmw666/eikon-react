@@ -2,28 +2,28 @@
  * @file inject-html-variants.ts
  * @description Stamps the chosen runtime axes onto the scaffolded `index.html`.
  *
- * Phase G of the runtime-variant refactor moved `design / ui / layout /
- * toastPosition` from compile-time strip-features to runtime React state
- * (CSS class on `<html>` for design/ui, React Context for layout). For
- * the playground iframe the shell pushes the active values via
+ * Phase G of the runtime-variant refactor moved `design / layout /
+ * toastPosition` from compile-time strip-features to runtime React
+ * state (CSS class on `<html>` for design, React Context for layout).
+ * For the playground iframe the shell pushes the active values via
  * postMessage, but for terminal users (`npx create-eikon-react ...`)
  * we need to bake in the picked values once at scaffold time so:
  *
- *   1. The first paint renders in the chosen design/ui without a flash —
+ *   1. The first paint renders in the chosen design without a flash —
  *      the CSS class is on `<html>` before any JS runs.
  *   2. The runtime initialisers in `src/main.tsx` and
  *      `src/app/LayoutVariantContext.tsx` (which read
- *      `<html data-design / data-ui / data-layout>`) resolve to the
- *      same value, so they're consistent regardless of whether the
- *      cascade-driven first paint already applied the class.
+ *      `<html data-design / data-layout>`) resolve to the same value,
+ *      so they're consistent regardless of whether the cascade-driven
+ *      first paint already applied the class.
  *
- * `platform` is intentionally NOT mirrored to a `<html>` class /
- * `data-` attribute. Platform-specific behaviour is gated at scaffold
- * time by `@eikon:variant(platform=…)` strip markers (see
+ * `ui` is NOT a runtime axis — it's an *implementation* switch baked
+ * into the source files at scaffold time by `apply-ui-snapshot.ts`.
+ * `platform` is similarly stripped at scaffold time (see
  * `90-platform-targets.md`); a runtime class would be a parallel
- * mechanism with no consumer. `toastPosition` is similarly inert at
- * scaffold time — its four-entry `INITIAL_POSITION` array is collapsed
- * by strip to the picked value.
+ * mechanism with no consumer. `toastPosition` is inert at scaffold
+ * time — its four-entry `INITIAL_POSITION` array is collapsed by strip
+ * to the picked value.
  *
  * The transformation is a single regex on `<html lang="en">` so it
  * tolerates extra whitespace / future attributes the template might
@@ -39,10 +39,14 @@ const HTML_OPEN_RE = /<html\b([^>]*)>/i;
 
 /**
  * Build the attributes to splice onto `<html>` for the given variant
- * selection. `default` design / `animate-ui` ui collapse to "no class"
- * (matching the runtime contract in `template-react/src/main.tsx`'s
- * `applyClassAxis` helper). `data-layout` is always emitted because
- * `LayoutVariantContext` reads it as the initial value.
+ * selection. `default` design collapses to "no class" (matching the
+ * runtime contract in `template-react/src/main.tsx`'s `applyClassAxis`
+ * helper). `data-layout` is always emitted because `LayoutVariantContext`
+ * reads it as the initial value.
+ *
+ * `ui` is intentionally NOT mirrored to a `<html>` class / data-attr.
+ * The chosen library is baked into the source files at scaffold time by
+ * `apply-ui-snapshot.ts`, so there's nothing to toggle at runtime.
  *
  * Exposed for unit tests; the CLI itself only needs `injectHtmlVariants`.
  */
@@ -56,12 +60,6 @@ export function buildHtmlVariantAttrs(
   if (design && design !== 'default') {
     classes.push(`design-${design}`);
     dataAttrs['data-design'] = design;
-  }
-
-  const ui = variants.ui;
-  if (ui && ui !== 'animate-ui') {
-    classes.push(`ui-${ui}`);
-    dataAttrs['data-ui'] = ui;
   }
 
   const layout = variants.layout;

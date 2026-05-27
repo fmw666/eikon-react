@@ -18,6 +18,7 @@ import {
 import kleur from 'kleur';
 
 import { copyTemplate } from './copy-template.js';
+import { applyUiSnapshot } from './apply-ui-snapshot.js';
 import { initGit } from './init-git.js';
 import { injectHtmlVariants } from './inject-html-variants.js';
 import { installDeps } from './install-deps.js';
@@ -71,7 +72,7 @@ const VARIANT_CHOICES = {
     'bottom-tabs',
     'bottom-tabs-fab',
   ] as const,
-  ui: ['radix', 'shadcn-style', 'animate-ui'] as const,
+  ui: ['custom', 'shadcn', 'animate-ui'] as const,
   toastPosition: ['top-right', 'top-center', 'bottom-center', 'bottom-right'] as const,
 } satisfies Record<string, readonly string[]>;
 
@@ -440,12 +441,26 @@ async function scaffold(opts: CliOptions): Promise<void> {
   await stripFeatures(opts.targetDir, opts.features, opts.variants);
   s.stop('Feature selection applied');
 
-  // Phase I: stamp the picked design / ui / layout onto `<html>` so the
+  // Phase J: bake the chosen `--ui` library's components into the
+  // project. For `--ui custom` this is a no-op (the project keeps the
+  // self-authored Radix wrappers already in `src/shared/ui/`); for
+  // `--ui shadcn` / `--ui animate-ui` it swaps the seven replaceable
+  // primitives for the upstream-registry copies pre-baked under
+  // `template-snapshots/<ui>/`, drops `components.json` at the project
+  // root, and merges the snapshot's `package-deps.json` into the
+  // project's `package.json`. Runs AFTER stripFeatures so feature-strip
+  // doesn't fight the snapshot, and BEFORE rewritePackageManagerFields
+  // so the deps merge happens on the same package.json the rewriter
+  // mutates.
+  await applyUiSnapshot(opts.targetDir, opts.variants.ui ?? 'animate-ui');
+
+  // Phase I: stamp the picked design / layout onto `<html>` so the
   // first paint renders without a flash and the runtime initialisers in
   // `src/main.tsx` + `src/app/LayoutVariantContext.tsx` resolve to the
-  // same value. `default` design / `animate-ui` ui collapse to no
-  // class/data attrs, while `data-layout` is always stamped as the
-  // layout Context's initial value.
+  // same value. `default` design collapses to no class/data attrs,
+  // while `data-layout` is always stamped as the layout Context's
+  // initial value. The `ui` axis is NOT mirrored here — it's a
+  // scaffold-time file swap (Phase J), not a runtime style.
   await injectHtmlVariants(opts.targetDir, opts.variants);
 
   // Re-flavour `package.json` for the chosen package manager. No-op on

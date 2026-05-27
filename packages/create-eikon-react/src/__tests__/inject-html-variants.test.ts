@@ -34,19 +34,21 @@ describe('buildHtmlVariantAttrs', () => {
     expect(out.dataAttrs).toEqual({ 'data-layout': 'stacked' });
   });
 
-  it('emits design + ui classes and matching data attrs for non-defaults', () => {
+  it('emits design class + matching data attr for non-defaults', () => {
     const out = buildHtmlVariantAttrs({
       ...DEFAULT_VARIANTS,
       platform: 'web',
       design: 'apple',
-      ui: 'radix',
+      ui: 'shadcn',
       layout: 'sidebar',
       toastPosition: 'top-right',
     });
-    expect(out.classes).toEqual(['design-apple', 'ui-radix']);
+    // `ui` is no longer a runtime axis — the chosen library is baked
+    // into the source files at scaffold time, so no <html> class /
+    // data-ui attr is emitted regardless of value.
+    expect(out.classes).toEqual(['design-apple']);
     expect(out.dataAttrs).toEqual({
       'data-design': 'apple',
-      'data-ui': 'radix',
       'data-layout': 'sidebar',
     });
   });
@@ -74,12 +76,12 @@ describe('rewriteHtmlOpenTag', () => {
       ...DEFAULT_VARIANTS,
       platform: 'web',
       design: 'apple',
-      ui: 'radix',
+      ui: 'shadcn',
       layout: 'sidebar',
       toastPosition: 'top-right',
     });
     expect(next).toContain(
-      '<html lang="en" class="design-apple ui-radix" data-design="apple" data-ui="radix" data-layout="sidebar">'
+      '<html lang="en" class="design-apple" data-design="apple" data-layout="sidebar">'
     );
     // Original `<head>` content untouched.
     expect(next).toContain('<title>App</title>');
@@ -127,13 +129,13 @@ describe('injectHtmlVariants', () => {
         ...DEFAULT_VARIANTS,
         platform: 'mobile',
         design: 'apple',
-        ui: 'radix',
+        ui: 'shadcn',
         layout: 'mobile-drawer',
         toastPosition: 'top-right',
       });
       const next = await readFile(file, 'utf8');
       expect(next).toContain(
-        '<html lang="en" class="design-apple ui-radix" data-design="apple" data-ui="radix" data-layout="mobile-drawer">'
+        '<html lang="en" class="design-apple" data-design="apple" data-layout="mobile-drawer">'
       );
     } finally {
       await rm(dir, { recursive: true, force: true });
@@ -148,7 +150,7 @@ describe('injectHtmlVariants', () => {
         ...DEFAULT_VARIANTS,
         platform: 'web',
         design: 'apple',
-        ui: 'radix',
+        ui: 'shadcn',
         layout: 'sidebar',
         toastPosition: 'top-right',
       });

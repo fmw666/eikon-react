@@ -36,6 +36,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { applyUiSnapshot } from '../../create-eikon-react/src/apply-ui-snapshot';
 import {
   stripFeatures,
   type FeatureFlags,
@@ -43,6 +44,7 @@ import {
 } from '../../create-eikon-react/src/strip-features';
 import { TEMPLATE_COPY_SKIP } from '../../create-eikon-react/src/skip-list';
 
+import { UI_SNAPSHOTS_ROOT } from '../server/builder';
 import { simulateStripFileContent, simulateStripTree } from '../server/simulate-strip';
 import { type BuildInputs } from '../server/hash';
 
@@ -58,10 +60,11 @@ const TEMPLATE_REACT_DIR = path.resolve(
 
 const PLATFORMS = ['web', 'desktop', 'mobile'] as const;
 const SUPABASE_VALUES = [false, true] as const;
+const UI_VALUES = ['custom', 'shadcn', 'animate-ui'] as const;
 
 const FIXED_RUNTIME_AXES: Pick<
   BuildInputs,
-  'pm' | 'design' | 'ui' | 'layout' | 'toastPosition'
+  'pm' | 'design' | 'layout' | 'toastPosition'
 > = {
   // `pm` is part of `BuildInputs` post-Phase-H but only affects the
   // `package.json` content rewrite, not the file set. Pin it to the
@@ -69,7 +72,6 @@ const FIXED_RUNTIME_AXES: Pick<
   // strip from the package-manager rewrite, which has its own test.
   pm: 'pnpm',
   design: 'default',
-  ui: 'animate-ui',
   layout: 'stacked',
   toastPosition: 'top-right',
 };
@@ -122,42 +124,50 @@ async function copyTemplate(dest: string): Promise<void> {
 describe('simulateStripTree ↔ CLI stripFeatures parity (Phase J drift check)', () => {
   for (const platform of PLATFORMS) {
     for (const supabase of SUPABASE_VALUES) {
-      it(`platform=${platform} supabase=${supabase} matches the CLI 1:1`, async () => {
-        const inputs: BuildInputs = {
-          platform,
-          supabase,
-          ...FIXED_RUNTIME_AXES,
-        };
-
-        const simulated = await simulateStripTree(inputs);
-
-        const tmp = await mkdtemp(path.join(tmpdir(), 'strip-drift-'));
-        try {
-          await copyTemplate(tmp);
-
-          const flags: FeatureFlags = { supabase };
-          const variants: VariantSelections = {
+      for (const ui of UI_VALUES) {
+        it(`platform=${platform} supabase=${supabase} ui=${ui} matches the CLI 1:1`, async () => {
+          const inputs: BuildInputs = {
             platform,
+            supabase,
+            ui,
             ...FIXED_RUNTIME_AXES,
           };
-          // No `keepAllVariants` here — terminal CLI users get the full
-          // strip, and that's the contract simulateStripTree mirrors.
-          await stripFeatures(tmp, flags, variants);
 
-          const fromCli = await walkFiles(tmp);
+          const simulated = await simulateStripTree(inputs);
 
-          // Show diffs as sorted arrays so a failure points at the exact
-          // files that drifted, not at a giant unified blob.
-          const onlyInSim = simulated.filter((p) => !fromCli.includes(p));
-          const onlyInCli = fromCli.filter((p) => !simulated.includes(p));
-          expect(
-            { onlyInSim, onlyInCli },
-            'simulateStripTree must match the actual CLI output for this combo'
-          ).toEqual({ onlyInSim: [], onlyInCli: [] });
-        } finally {
-          await rm(tmp, { recursive: true, force: true });
-        }
-      }, 30_000);
+          const tmp = await mkdtemp(path.join(tmpdir(), 'strip-drift-'));
+          try {
+            await copyTemplate(tmp);
+
+            const flags: FeatureFlags = { supabase };
+            const variants: VariantSelections = {
+              platform,
+              ui,
+              ...FIXED_RUNTIME_AXES,
+            };
+            // No `keepAllVariants` here — terminal CLI users get the full
+            // strip, and that's the contract simulateStripTree mirrors.
+            await stripFeatures(tmp, flags, variants);
+            // Phase J: the CLI runs applyUiSnapshot AFTER stripFeatures.
+            // The simulator mirrors that two-step result, so the parity
+            // fixture must do the same.
+            await applyUiSnapshot(tmp, ui, UI_SNAPSHOTS_ROOT);
+
+            const fromCli = await walkFiles(tmp);
+
+            // Show diffs as sorted arrays so a failure points at the exact
+            // files that drifted, not at a giant unified blob.
+            const onlyInSim = simulated.filter((p) => !fromCli.includes(p));
+            const onlyInCli = fromCli.filter((p) => !simulated.includes(p));
+            expect(
+              { onlyInSim, onlyInCli },
+              'simulateStripTree must match the actual CLI output for this combo'
+            ).toEqual({ onlyInSim: [], onlyInCli: [] });
+          } finally {
+            await rm(tmp, { recursive: true, force: true });
+          }
+        }, 30_000);
+      }
     }
   }
 });
@@ -178,6 +188,7 @@ describe('pm content parity (Phase H)', () => {
       const inputs: BuildInputs = {
         platform: 'web',
         supabase: true,
+        ui: 'animate-ui',
         ...FIXED_RUNTIME_AXES,
         pm,
       };

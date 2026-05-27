@@ -47,7 +47,7 @@ function ButtonShowcase() {
 
       <Group label={t('sections.button.sizesLabel')}>
         <Button size="sm">Small</Button>
-        <Button size="md">Medium</Button>
+        <Button size="default">Medium</Button>
         <Button size="lg">Large</Button>
         <Button size="icon" aria-label="icon-only">
           <Sparkles className="h-4 w-4" />

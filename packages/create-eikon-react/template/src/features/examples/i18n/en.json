@@ -41,7 +41,7 @@
     },
     "tabs": {
       "title": "Tabs",
-      "description": "Radix Tabs with a shared-layout motion indicator. The pill slides between triggers; under prefers-reduced-motion the layout id is dropped.",
+      "description": "Radix Tabs with the active trigger styled via data-[state=active]. Three panels share the same trigger row.",
       "accountTab": "Account",
       "passwordTab": "Password",
       "preferencesTab": "Preferences",

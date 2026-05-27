@@ -7,8 +7,8 @@
  *
  *   - Four edges    — Sheet anchored on each of left / right / top /
  *                     bottom, controlled by the `side` prop.
- *   - Scrollable    — long content inside a sheet body so the
- *                     SheetBody scrolls independently while the
+ *   - Scrollable    — long content inside a scrollable body wrapper
+ *                     so that body scrolls independently while the
  *                     SheetHeader / SheetFooter stay pinned.
  *
  * Sheet is mobile-first by design (the `inset-y-0` panels eat the
@@ -30,7 +30,6 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/shared/ui/button';
 import {
   Sheet,
-  SheetBody,
   SheetClose,
   SheetContent,
   SheetDescription,
@@ -110,11 +109,11 @@ interface SideSheetProps {
 function SideSheet({ side, t }: SideSheetProps) {
   const label = t(`pages.sheet.directions.${side}`);
   return (
-    <Sheet side={side}>
+    <Sheet>
       <SheetTrigger asChild>
         <Button variant="outline">{label}</Button>
       </SheetTrigger>
-      <SheetContent description={label}>
+      <SheetContent side={side}>
         <SheetHeader>
           <SheetTitle>{label}</SheetTitle>
           <SheetDescription>
@@ -123,11 +122,11 @@ function SideSheet({ side, t }: SideSheetProps) {
             })}
           </SheetDescription>
         </SheetHeader>
-        <SheetBody>
+        <div className="flex-1 overflow-y-auto px-3 py-5">
           <p className="text-sm text-[var(--color-muted-foreground)]">
             {t('pages.sheet.directions.description')}
           </p>
-        </SheetBody>
+        </div>
         <SheetFooter>
           <SheetClose asChild>
             <Button variant="outline" size="sm">
@@ -149,8 +148,8 @@ interface ScrollableSheetProps {
 }
 
 /**
- * Sheet whose body content overflows the viewport. The SheetBody owns
- * its own scroll context (`overflow-y-auto` in the primitive) so the
+ * Sheet whose body content overflows the viewport. The body wrapper
+ * owns its own scroll context (`overflow-y-auto`) so the
  * header + footer stay pinned while the inner list scrolls.
  */
 function ScrollableSheet({ t }: ScrollableSheetProps) {
@@ -159,18 +158,18 @@ function ScrollableSheet({ t }: ScrollableSheetProps) {
     []
   );
   return (
-    <Sheet side="right">
+    <Sheet>
       <SheetTrigger asChild>
         <Button>{t('pages.sheet.scroll.openLabel')}</Button>
       </SheetTrigger>
-      <SheetContent description={t('pages.sheet.scroll.header')}>
+      <SheetContent side="right">
         <SheetHeader>
           <SheetTitle>{t('pages.sheet.scroll.header')}</SheetTitle>
           <SheetDescription>
             {t('pages.sheet.scroll.description')}
           </SheetDescription>
         </SheetHeader>
-        <SheetBody>
+        <div className="flex-1 overflow-y-auto px-3 py-5">
           <ul className="flex flex-col divide-y divide-[var(--color-border)] text-sm">
             {rows.map((n) => (
               <li key={n} className="py-2">
@@ -178,7 +177,7 @@ function ScrollableSheet({ t }: ScrollableSheetProps) {
               </li>
             ))}
           </ul>
-        </SheetBody>
+        </div>
         <SheetFooter>
           <SheetClose asChild>
             <Button variant="outline" size="sm">

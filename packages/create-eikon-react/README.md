@@ -12,7 +12,7 @@ pnpm create eikon-react my-app
 
 - **React 19** + **TypeScript** + **Vite 6**
 - **Tailwind CSS v4** (CSS-first `@theme`)
-- **animate-ui style** primitives (`motion` + Radix) under `src/shared/ui/`
+- **UI primitives** under `src/shared/ui/` — choose `--ui custom` (project-authored Radix + `motion`), `--ui shadcn` ([shadcn](https://ui.shadcn.com/) registry), or `--ui animate-ui` ([animate-ui](https://animate-ui.com/) registry, default)
 - **Feature-first** architecture with ESLint-enforced boundaries
 - **`.agent/` protocol**: portable rules + skills any AI coding agent can read
 - **Vitest** + **Testing Library** wired with `__tests__/` colocation
@@ -26,6 +26,20 @@ The CLI is interactive by default. You can pass a positional project name to ski
 ```bash
 npx create-eikon-react my-awesome-app
 ```
+
+Non-interactive flags worth knowing about:
+
+| flag                           | values                              | default      | what it changes                                                                 |
+| ------------------------------ | ----------------------------------- | ------------ | ------------------------------------------------------------------------------- |
+| `--platform`                   | `web`, `desktop`, `mobile`          | `web`        | Adds `apps/desktop` (Tauri) or `apps/mobile` (Capacitor) shells                 |
+| `--supabase` / `--no-supabase` | —                                   | on           | Includes/excludes the Supabase client + auth wiring                             |
+| `--ui`                         | `custom`, `shadcn`, `animate-ui`    | `animate-ui` | **Picks which library lives in `src/shared/ui/`** (real swap, not just styling) |
+| `--design`                     | `default`, `linear`, `apple`, …     | `default`    | Picks one of 14 design presets (CSS variables + dark variants)                  |
+| `--layout`                     | `stacked`, `sidebar`, …             | `stacked`    | Picks the root layout shell                                                     |
+| `--toast-position`             | `top-right`, `bottom-center`, …     | `top-right`  | Where `<Toaster />` mounts                                                      |
+| `--pm`                         | `pnpm`, `npm`, `bun`                | `pnpm`       | Pins `engines` / `packageManager` and rewrites aggregate scripts                |
+
+`--ui custom` keeps the project-authored Radix wrappers under `src/shared/ui/`. `--ui shadcn` and `--ui animate-ui` lay down components copied 1:1 from the upstream registry (with a `components.json` at the project root so `npx shadcn add <next>` keeps working post-scaffold).
 
 ## Local development
 
@@ -49,10 +63,17 @@ pnpm e2e -- --keep              # keep the temp directory after the run
 
 Scenarios:
 
-| id      | flags             | covers                                                  |
-| ------- | ----------------- | ------------------------------------------------------- |
-| default | `--no-supabase`   | Web scaffold with TanStack Query baseline, no Supabase  |
-| full    | `--supabase`      | Adds Supabase on top of the baseline                    |
+| id                   | flags                                                                  | covers                                                              |
+| -------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| default              | `--no-supabase`                                                        | Web scaffold with TanStack Query baseline, no Supabase              |
+| full                 | `--supabase`                                                           | Adds Supabase on top of the baseline                                |
+| variants             | `--no-supabase --design linear --layout sidebar --ui custom --toast-position bottom-center` | Exercises every variant axis, custom UI primitives stay in place    |
+| variants-shadcn      | `--no-supabase --ui shadcn`                                            | Lays down the shadcn snapshot + asserts `components.json` and shadcn deps |
+| variants-animate-ui  | `--no-supabase --ui animate-ui`                                        | Lays down the animate-ui snapshot + asserts `src/components/animate-ui/` and motion deps |
+| pm-npm               | `--no-supabase --pm npm`                                               | `engines` / `packageManager` / aggregate scripts switched to npm    |
+| pm-bun               | `--no-supabase --pm bun`                                               | Same shape as pm-npm but for bun                                    |
+
+> **Note:** `variants-shadcn` and `variants-animate-ui` only run the scaffold + verify steps — install/test/build are gated until a maintainer has populated the snapshots via `pnpm sync-ui-snapshots`. See [template-snapshots/README.md](./template-snapshots/README.md) for the populate procedure.
 
 ## License
 

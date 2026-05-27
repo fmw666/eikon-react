@@ -12,6 +12,7 @@
 import { useTranslation } from 'react-i18next';
 
 // --- Absolute Imports ---
+import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui/button';
 import {
   Card,
@@ -20,6 +21,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
+  cardHoverableClass,
 } from '@/shared/ui/card';
 
 // =================================================================================================
@@ -41,7 +43,7 @@ function CardShowcase() {
         </p>
       </Card>
 
-      <Card hoverable className="p-6">
+      <Card className={cn(cardHoverableClass, 'p-6')}>
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[var(--color-muted-foreground)]">
           {t('sections.card.hoverableLabel')}
         </p>

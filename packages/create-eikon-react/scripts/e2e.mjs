@@ -226,7 +226,7 @@ const SCENARIOS = [
       '--layout',
       'sidebar',
       '--ui',
-      'radix',
+      'custom',
       '--toast-position',
       'bottom-center',
     ],
@@ -275,11 +275,12 @@ const SCENARIOS = [
         '@eikon:variant(toastPosition=top-center)',
         '@eikon:variant(toastPosition=bottom-right)',
       ],
-      // The CSS file should keep the chosen design + ui blocks and drop
-      // the non-chosen ones (the default / apple / anthropic / vercel /
-      // notion design palettes etc.). The CSS file has no `layout=` or
-      // `toastPosition=` markers — those axes live in JSX / TSX files.
-      stylesContains: ['design=linear', 'ui=radix'],
+      // The CSS file should keep the chosen design block and drop the
+      // non-chosen design palettes. The `ui` axis no longer emits CSS
+      // markers — it's a scaffold-time file swap, asserted under the
+      // `variants-shadcn` / `variants-animate-ui` scenarios via the
+      // `src/shared/ui/*` layout itself.
+      stylesContains: ['design=linear'],
       stylesAbsent: [
         'design=default',
         'design=apple',
@@ -287,7 +288,130 @@ const SCENARIOS = [
         'design=vercel',
         'design=notion',
         'ui=animate-ui',
-        'ui=shadcn-style',
+        'ui=shadcn',
+        'ui=custom',
+      ],
+      // --ui custom keeps the project-authored Radix wrappers — the
+      // template's own button.tsx ships unchanged. `sheet.tsx` is
+      // omitted here because layout=sidebar strips it (already covered
+      // in `filesAbsent` above).
+      uiFilesPresent: [
+        'src/shared/ui/button.tsx',
+        'src/shared/ui/dialog.tsx',
+        'src/shared/ui/tabs.tsx',
+        'src/shared/ui/command.tsx',
+        'src/shared/ui/card.tsx',
+        'src/shared/ui/toaster.tsx',
+        'src/shared/ui/theme-toggle.tsx',
+        'src/shared/ui/language-switcher.tsx',
+      ],
+      // No components.json on --ui custom (it's a shadcn/animate-ui artefact).
+      filesAbsentExtra: ['components.json'],
+    },
+  },
+  {
+    // --ui shadcn lays down the official shadcn registry components from
+    // template-snapshots/shadcn/. The seven project-authored primitives
+    // are deleted then refilled from the snapshot; theme-toggle /
+    // language-switcher survive untouched because they live outside
+    // `REPLACEABLE_UI_FILES`.
+    id: 'variants-shadcn',
+    projectName: 'eikon-e2e-variants-shadcn',
+    flags: ['--no-supabase', '--ui', 'shadcn'],
+    expect: {
+      filesPresent: [
+        'src/features/counter/index.ts',
+        // components.json is shipped alongside the snapshot so future
+        // `shadcn add` runs in the user's project Just Work.
+        'components.json',
+      ],
+      filesAbsent: [
+        'src/shared/supabase',
+        'pnpm-workspace.yaml',
+        // sheet.tsx carries `@eikon:variant(layout=mobile-drawer) file`,
+        // so on the default desktop-app-shell layout the strip pass
+        // removes it BEFORE applyUiSnapshot runs. Survivor-gating
+        // (apply-ui-snapshot.ts) refuses to resurrect a primitive whose
+        // template counterpart didn't survive — the snapshot's
+        // `sheet.tsx` would import dead code, so it stays absent.
+        'src/shared/ui/sheet.tsx',
+      ],
+      // shadcn pulls in `radix-ui` (the unified package) + `cmdk` +
+      // `next-themes` + `sonner` via the registry. These come from the
+      // snapshot's package-deps.json — assert at least the most
+      // distinctive ones.
+      depsPresent: [
+        '@tanstack/react-query',
+        'radix-ui',
+        'sonner',
+        'next-themes',
+        'cmdk',
+      ],
+      depsAbsent: ['@supabase/supabase-js'],
+      providersContains: ['QueryClientProvider'],
+      providersAbsent: [],
+      uiFilesPresent: [
+        // Replaceable seven — refilled from snapshot. (sheet.tsx is in
+        // `filesAbsent` because the default layout strips it before
+        // the snapshot pass even sees it; see comment above.)
+        'src/shared/ui/button.tsx',
+        'src/shared/ui/dialog.tsx',
+        'src/shared/ui/tabs.tsx',
+        'src/shared/ui/command.tsx',
+        'src/shared/ui/card.tsx',
+        'src/shared/ui/toaster.tsx',
+        // Non-replaceable — owned by the template across all `ui` choices.
+        'src/shared/ui/theme-toggle.tsx',
+        'src/shared/ui/language-switcher.tsx',
+      ],
+    },
+  },
+  {
+    // --ui animate-ui lays down animate-ui's native components plus
+    // shadcn fallbacks for primitives animate-ui doesn't ship
+    // (card/command/toaster). Native components live under
+    // `src/components/animate-ui/...` with thin re-export shims at
+    // `src/shared/ui/<name>.tsx`.
+    id: 'variants-animate-ui',
+    projectName: 'eikon-e2e-variants-animate-ui',
+    flags: ['--no-supabase', '--ui', 'animate-ui'],
+    expect: {
+      filesPresent: [
+        'src/features/counter/index.ts',
+        'components.json',
+        // Native animate-ui directory — only present when ui=animate-ui.
+        'src/components/animate-ui/components/buttons/button.tsx',
+        'src/components/animate-ui/components/radix/dialog.tsx',
+      ],
+      filesAbsent: [
+        'src/shared/supabase',
+        'pnpm-workspace.yaml',
+        // Layout-gated, see comment in variants-shadcn above.
+        'src/shared/ui/sheet.tsx',
+      ],
+      depsPresent: [
+        '@tanstack/react-query',
+        'motion',
+        'radix-ui',
+        'sonner',
+        'next-themes',
+      ],
+      depsAbsent: ['@supabase/supabase-js'],
+      providersContains: ['QueryClientProvider'],
+      providersAbsent: [],
+      uiFilesPresent: [
+        // Re-export shims at src/shared/ui — these point at the
+        // native animate-ui components.
+        'src/shared/ui/button.tsx',
+        'src/shared/ui/dialog.tsx',
+        'src/shared/ui/tabs.tsx',
+        // Shadcn-fallback primitives (animate-ui doesn't ship these).
+        'src/shared/ui/command.tsx',
+        'src/shared/ui/card.tsx',
+        'src/shared/ui/toaster.tsx',
+        // Non-replaceable.
+        'src/shared/ui/theme-toggle.tsx',
+        'src/shared/ui/language-switcher.tsx',
       ],
     },
   },
@@ -461,6 +585,18 @@ async function runScenario(scenario, tmpRoot, tarballPath) {
     return;
   }
 
+  if (scenario.scaffoldOnly) {
+    // Scenarios marked `scaffoldOnly` produce a tree that isn't
+    // installable end-to-end (typically because a downstream
+    // dependency — e.g. a populated UI snapshot — isn't available in
+    // this checkout). The scaffold + verify step has already run and
+    // is the only assertion that's stable here.
+    console.log(
+      '  (skipping install/test/build because scenario is scaffoldOnly)'
+    );
+    return;
+  }
+
   // pnpm 9+ refuses to install when `package.json` declares a different
   // `packageManager` field (the `manage-package-manager-versions` rule).
   // Mirror the user's choice end-to-end so the generated project is
@@ -533,6 +669,24 @@ async function verifyScenario(projectDir, expect) {
   for (const rel of expect.filesAbsent) {
     if (existsSync(path.join(projectDir, rel))) {
       throw new Error(`expected file absent: ${rel}`);
+    }
+  }
+  // Same shape as filesAbsent — tucked behind a separate key only so
+  // the existing scenario data stays unchanged. Use it for ad-hoc
+  // absence checks that don't fit the platform/strip rules already
+  // covered by `filesAbsent`.
+  for (const rel of expect.filesAbsentExtra ?? []) {
+    if (existsSync(path.join(projectDir, rel))) {
+      throw new Error(`expected file absent (extra): ${rel}`);
+    }
+  }
+  // UI primitives are tested separately so the assertions read
+  // ergonomically alongside the `--ui` flag changes — the file paths
+  // are all `src/shared/ui/<basename>.tsx` and the failure messages
+  // pinpoint the snapshot delete/lay-down behaviour.
+  for (const rel of expect.uiFilesPresent ?? []) {
+    if (!existsSync(path.join(projectDir, rel))) {
+      throw new Error(`expected UI file present: ${rel}`);
     }
   }
 

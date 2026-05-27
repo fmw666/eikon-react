@@ -30,31 +30,31 @@ import '@/styles/index.css';
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Root element #root not found in index.html');
 
-// Apply the initial class-based variant axes. Source of truth is the
-// `data-{design,ui}` attribute set the CLI stamps on <html> at scaffold
-// time (see `create-eikon-react/src/index.ts`). When absent — e.g.
-// running the workspace template directly with no CLI step — we leave
-// <html> untouched and Tailwind's base @theme tokens render the
-// "default" / "animate-ui" combination. The 14 design overrides live as
-// `:root.design-<name>` rules and the 2 non-default ui overrides as
-// `:root.ui-<name>` rules in `styles/index.css`; switching is a class
-// swap, no rebuild.
+// Apply the initial design variant. Source of truth is the
+// `data-design` attribute the CLI stamps on <html> at scaffold time
+// (see `create-eikon-react/src/index.ts`). When absent — e.g. running
+// the workspace template directly with no CLI step — we leave <html>
+// untouched and Tailwind's base @theme tokens render the "default"
+// design. The 14 design overrides live as `:root.design-<name>` rules
+// in `styles/index.css`; switching is a class swap, no rebuild.
+//
+// `ui` is intentionally NOT a runtime class axis: the chosen library
+// (`custom` / `shadcn` / `animate-ui`) is baked into the source files
+// at scaffold time by `apply-ui-snapshot.ts`, so there's nothing to
+// toggle once the bundle is built.
 function applyClassAxis(prefix: string, value: string | undefined): void {
   if (!value) return;
   const root = document.documentElement;
   for (const cls of Array.from(root.classList)) {
     if (cls.startsWith(`${prefix}-`)) root.classList.remove(cls);
   }
-  // 'default' (design) / 'animate-ui' (ui) means "no class" — base @theme
-  // is the active variant. Anything else gets a `<prefix>-<value>` class.
-  if (value !== 'default' && !(prefix === 'ui' && value === 'animate-ui')) {
+  if (value !== 'default') {
     root.classList.add(`${prefix}-${value}`);
   }
 }
 
 const htmlEl = rootElement.ownerDocument.documentElement;
 applyClassAxis('design', htmlEl.dataset.design);
-applyClassAxis('ui', htmlEl.dataset.ui);
 
 // Preview-shell variant bridge. Only mounted when (a) the bundle is a
 // dev build — production scaffolds drop this whole branch via Rollup's
@@ -62,25 +62,25 @@ applyClassAxis('ui', htmlEl.dataset.ui);
 // and (b) we're embedded in another window, i.e. the playground iframe.
 // Standalone `pnpm dev` skips it entirely.
 //
-// Class-axis swaps (`design`, `ui`) are handled here. `layout` and
+// Class-axis swaps for `design` are handled here. `layout` and
 // `toastPosition` are consumed by LayoutVariantContext and Toaster.
-// `platform` / `pm` / `supabase` deliberately don't ride this channel:
-// platform-specific behaviour is gated at scaffold time by
-// `@eikon:variant(platform=…)` strip markers (see
-// `90-platform-targets.md`), and the playground simulator endpoints
-// own the file-tree / package.json preview for `pm` and `supabase`.
+// `ui`, `platform`, `pm`, `supabase` deliberately don't ride this
+// channel: the library implementation behind `ui` is baked into the
+// source at scaffold time (see `apply-ui-snapshot.ts`), platform-specific
+// behaviour is gated at scaffold time by `@eikon:variant(platform=…)`
+// strip markers (see `90-platform-targets.md`), and the playground
+// simulator endpoints own the file-tree / package.json preview for
+// `pm` and `supabase`.
 if (import.meta.env.DEV && window.parent !== window) {
   window.addEventListener('message', (e: MessageEvent) => {
     const data = e.data as
       | {
           type?: string;
           design?: string;
-          ui?: string;
         }
       | null;
     if (!data || data.type !== 'eikon:set-variant') return;
     if (typeof data.design === 'string') applyClassAxis('design', data.design);
-    if (typeof data.ui === 'string') applyClassAxis('ui', data.ui);
   });
 }
 
@@ -116,6 +116,6 @@ void Promise.all(preconditions).then(() => {
   // `root.render`. We moved it into `LayoutVariantProvider`'s
   // `useEffect` so it fires AFTER the layout-axis message listener
   // is installed — see that file's header for the race that broke.
-  // design / ui still get their listener synchronously at module
-  // load (above), so they're not in the same boat.
+  // `design` still gets its listener synchronously at module load
+  // (above), so it's not in the same boat.
 });

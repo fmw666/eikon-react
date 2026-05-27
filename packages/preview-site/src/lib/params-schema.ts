@@ -210,7 +210,7 @@ export const PARAMS = [
   {
     id: 'ui',
     kind: 'enum',
-    values: ['radix', 'shadcn-style', 'animate-ui'],
+    values: ['custom', 'shadcn', 'animate-ui'],
     default: 'animate-ui',
     cliFlag: 'ui',
     label: 'UI lib',

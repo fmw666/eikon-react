@@ -41,7 +41,7 @@
     },
     "tabs": {
       "title": "Tabs",
-      "description": "Radix Tabs 配合 motion/react 的共享 layoutId 指示器。指示器在 Trigger 之间滑动；启用 prefers-reduced-motion 时会自动降级为静态。",
+      "description": "Radix Tabs，激活的 Trigger 通过 data-[state=active] 着色。三个面板共用同一行触发器。",
       "accountTab": "账户",
       "passwordTab": "密码",
       "preferencesTab": "偏好",

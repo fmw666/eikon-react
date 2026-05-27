@@ -39,7 +39,22 @@ import {
 // =================================================================================================
 
 const ALLOWED_SRC_FILES = new Set(['main.tsx', 'App.tsx', 'vite-env.d.ts']);
-const ALLOWED_SRC_DIRS = new Set(['app', 'features', 'shared', 'styles']);
+const ALLOWED_SRC_DIRS = new Set([
+  'app',
+  'features',
+  'shared',
+  'styles',
+  // @eikon:variant(ui=animate-ui) begin
+  // animate-ui's native components live under src/components/animate-ui/...
+  // and its registry items import their own helpers via `@/hooks/...` and
+  // `@/lib/...`, which the upstream CLI lays down at src/hooks/ and src/lib/.
+  // We carry those alongside src/components/ rather than fight the alias
+  // (the shadcn / custom paths don't ship any of these directories).
+  'components',
+  'hooks',
+  'lib',
+  // @eikon:variant(ui=animate-ui) end
+]);
 
 // =================================================================================================
 // Tests

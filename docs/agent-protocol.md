@@ -21,7 +21,7 @@ This document specifies the `.agent/` directory shape that every project scaffol
     │   ├── 20-tailwind-v4.md
     │   ├── 30-testing.md
     │   ├── 40-state-management.md
-    │   ├── 50-animate-ui.md
+    │   ├── 50-ui-axis.md
     │   ├── 60-i18n.md
     │   ├── 70-commit-style.md
     │   ├── 80-quality-system.md

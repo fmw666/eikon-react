@@ -1,8 +1,7 @@
 /**
  * @file TabsShowcase.tsx
- * @description Inline showcase of the animated Tabs primitive — the
- * shared layoutId indicator slides between triggers; reduced motion
- * disables the morph (handled inside the primitive itself).
+ * @description Inline showcase of the Tabs primitive — three triggers
+ * with the active panel reading from Radix's `data-state="active"`.
  */
 
 // =================================================================================================

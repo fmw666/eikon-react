@@ -106,11 +106,7 @@ function ToasterShowcasePage() {
           <Tabs value={position} onValueChange={(v) => setPosition(v as Position)}>
             <TabsList className="flex h-auto flex-wrap gap-1">
               {POSITIONS.map((p) => (
-                <TabsTrigger
-                  key={p}
-                  value={p}
-                  layoutId="examples-toaster-indicator"
-                >
+                <TabsTrigger key={p} value={p}>
                   {p}
                 </TabsTrigger>
               ))}

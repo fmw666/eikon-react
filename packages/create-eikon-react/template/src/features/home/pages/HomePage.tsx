@@ -23,6 +23,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  cardHoverableClass,
 } from '@/shared/ui/card';
 
 // =================================================================================================
@@ -69,7 +70,7 @@ function HomePage() {
       </div>
 
       <div className="mt-12 grid w-full gap-4 sm:grid-cols-3">
-        <Card hoverable>
+        <Card className={cardHoverableClass}>
           <CardHeader>
             <CardTitle>Feature-first</CardTitle>
             <CardDescription>
@@ -77,7 +78,7 @@ function HomePage() {
             </CardDescription>
           </CardHeader>
         </Card>
-        <Card hoverable>
+        <Card className={cardHoverableClass}>
           <CardHeader>
             <CardTitle>.agent protocol</CardTitle>
             <CardDescription>
@@ -85,7 +86,7 @@ function HomePage() {
             </CardDescription>
           </CardHeader>
         </Card>
-        <Card hoverable>
+        <Card className={cardHoverableClass}>
           <CardHeader>
             <CardTitle>Modern tooling</CardTitle>
             <CardDescription>

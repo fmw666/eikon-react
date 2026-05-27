@@ -60,4 +60,4 @@ Expose the variant props via `VariantProps<typeof button>` so consumers get auto
 
 ## Animation styling
 
-When a component needs animation, **import primitives from `motion/react`** (see `50-animate-ui.md`); do not write CSS keyframes in component files.
+When a component needs animation, **import primitives from `motion/react`** (see `50-ui-axis.md`); do not write CSS keyframes in component files.

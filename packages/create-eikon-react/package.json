@@ -10,6 +10,7 @@
   "files": [
     "dist",
     "template",
+    "template-snapshots",
     "README.md",
     "LICENSE"
   ],
@@ -25,6 +26,7 @@
     "e2e:quick": "node ./scripts/e2e.mjs --quick",
     "smoke": "node ./scripts/smoke.mjs",
     "smoke:full": "node ./scripts/smoke.mjs --full",
+    "sync-ui-snapshots": "node ./scripts/sync-ui-snapshots.mjs",
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {

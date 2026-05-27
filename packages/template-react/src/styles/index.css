@@ -1831,22 +1831,10 @@ body {
  * CSS hooks are needed here. Keeping this comment as a sign-post for
  * anyone hunting for the layout axis. */
 
-/* --- ui axis (radius and shadow shape) ----------------------------------- */
-
-/* @eikon:variant(ui=animate-ui) begin */
-/* animate-ui keeps the motion-friendly defaults; nothing extra. */
-/* @eikon:variant(ui=animate-ui) end */
-
-/* @eikon:variant(ui=radix) begin */
-:root.ui-radix {
-  --radius-lg: 0.25rem;
-  --radius-md: 0.125rem;
-}
-/* @eikon:variant(ui=radix) end */
-
-/* @eikon:variant(ui=shadcn-style) begin */
-:root.ui-shadcn-style {
-  --radius-lg: 0.5rem;
-  --radius-md: 0.375rem;
-}
-/* @eikon:variant(ui=shadcn-style) end */
+/* --- ui axis ---------------------------------------------------------------
+ * The `ui` axis is now a scaffold-time *implementation* switch, not a
+ * runtime style swap: `--ui custom` ships these self-authored components,
+ * `--ui shadcn` lays down the shadcn registry copies, `--ui animate-ui`
+ * lays down the animate-ui registry copies. The radius / shadow vibe
+ * each library wants lives in those component files (or in their own
+ * `:root` rules they choose to ship), not here. */

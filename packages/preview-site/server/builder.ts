@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { build as viteBuild } from 'vite';
 
 import { TEMPLATE_COPY_SKIP } from '../../create-eikon-react/src/skip-list';
+import { applyUiSnapshot } from '../../create-eikon-react/src/apply-ui-snapshot';
 import {
   stripFeatures,
   type FeatureFlags,
@@ -52,6 +53,23 @@ export const TEMPLATE_REACT_DIR = path.resolve(
   'template-react'
 );
 const CACHE_ROOT = path.join(TEMPLATE_REACT_DIR, '.preview-cache');
+
+/**
+ * Sibling-package path: `packages/create-eikon-react/template-snapshots/`.
+ * Same relative-hops from both source (`server/`) and bundle
+ * (`dist-server/`) — `..` from either lands in `packages/preview-site/`,
+ * so `../../create-eikon-react/template-snapshots` is correct in both
+ * contexts. Passed to `applyUiSnapshot` so it resolves the snapshot
+ * root relative to the create-eikon-react package, not to wherever this
+ * preview-site module happens to be bundled.
+ */
+export const UI_SNAPSHOTS_ROOT = path.resolve(
+  __dirname,
+  '..',
+  '..',
+  'create-eikon-react',
+  'template-snapshots'
+);
 
 /**
  * Recursive-rm options tuned for Windows. NTFS releases file handles
@@ -383,6 +401,11 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
   //     safe-area utilities, Vite base guards, and every layout sibling
   //     survive in the single preview bundle.
   //
+  //   - The `ui` axis is NOT in `keepAllVariants` — it's a scaffold-time
+  //     file swap (Phase J), so each `--ui` value produces a distinct
+  //     build hash + cache entry. The LRU cache size accommodates all
+  //     three.
+  //
   //   - `keepShells` preserves both desktop and mobile shell directories
   //     on disk for the cached source tree. The iframe still runs the
   //     Vite web bundle; shell presence is for source inspection only.
@@ -400,8 +423,16 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
   await stripFeatures(cacheDir, flags, variants, {
     keepAllVariantFiles: true,
     keepShells: true,
-    keepAllVariants: ['platform', 'design', 'ui', 'layout', 'toastPosition'],
+    keepAllVariants: ['platform', 'design', 'layout', 'toastPosition'],
   });
+
+  // Phase J: bake the chosen UI library's components into the cache
+  // dir. For `--ui custom` this is a no-op; for `--ui shadcn` /
+  // `--ui animate-ui` it swaps the project-authored primitives for the
+  // pre-baked snapshot copies so the iframe shows the same files the
+  // user would scaffold. Each `ui` value gets its own build hash, so
+  // the iframe rebuilds cleanly when the user cycles the selector.
+  await applyUiSnapshot(cacheDir, inputs.ui, UI_SNAPSHOTS_ROOT);
 
   await viteBuild({
     root: cacheDir,

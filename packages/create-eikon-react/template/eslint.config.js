@@ -319,5 +319,35 @@ export default tseslint.config(
       'eikon/filename-matches-export': 'off',
       'import/no-default-export': 'off',
     },
-  }
+  },
+
+  // -----------------------------------------------------------------------------------------------
+  // Vendored UI snapshots (--ui shadcn / --ui animate-ui)
+  // -----------------------------------------------------------------------------------------------
+  // For `--ui shadcn` / `--ui animate-ui` the `applyUiSnapshot` step at
+  // scaffold time writes `eslint.config.ui-snapshot.js` listing the
+  // upstream-vendored paths and turning off project-shaped rules
+  // (banner / import-order / max-lines / etc.) on those files only.
+  // The dynamic import below is a no-op for `--ui custom` (the file
+  // doesn't exist) and a no-op in the template-react package itself
+  // (also no file), so the strict rules still apply to project-authored
+  // primitives.
+  ...((await loadOptional('./eslint.config.ui-snapshot.js')) ?? [])
 );
+
+/**
+ * Best-effort import of an optional flat-config fragment. Returns the
+ * default export when the file exists, `null` otherwise. Avoids
+ * eslint blowing up on missing snapshot configs.
+ */
+async function loadOptional(specifier) {
+  try {
+    const mod = await import(specifier);
+    return mod.default ?? null;
+  } catch (err) {
+    if (err && /** @type {NodeJS.ErrnoException} */ (err).code === 'ERR_MODULE_NOT_FOUND') {
+      return null;
+    }
+    throw err;
+  }
+}

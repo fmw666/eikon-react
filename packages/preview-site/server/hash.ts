@@ -29,27 +29,31 @@ export interface BuildInputs {
  *   4 - iframe became a max-capability runtime shell; every playground
  *       param is excluded from the build hash and the file/code simulator
  *       is the CLI-output authority.
+ *   5 - the `ui` axis is again a scaffold-time switch (Phase J): each
+ *       value lays down a different `src/shared/ui/*` snapshot, so the
+ *       three values must produce distinct cache entries / built bundles.
+ *       The other axes stay runtime-only.
  */
-const CACHE_SCHEMA_VERSION = 4;
+const CACHE_SCHEMA_VERSION = 5;
 
 /**
  * Deterministic short hash of the build-relevant inputs plus a template
  * revision derived from template-react's file contents.
  *
- * The preview bundle is intentionally param-agnostic: the iframe renders a
- * superset shell and receives every playground selection at runtime. The
- * file/code panel simulator remains responsible for showing the exact CLI
- * scaffold output for those selections. Including params here would only
- * create byte-identical cache entries and reintroduce rebuilds during
- * playground interaction.
+ * The preview bundle is mostly param-agnostic: design / layout /
+ * toastPosition / platform / supabase / pm are runtime axes the iframe
+ * receives via postMessage. The `ui` axis is the exception — it bakes
+ * different component source files into the bundle, so it MUST be part
+ * of the hash so each value produces its own cache dir and Vite build.
  */
 export function hashBuildInputs(
-  _inputs: BuildInputs,
+  inputs: BuildInputs,
   templateRev: string
 ): string {
   const ordered = {
     cacheSchema: CACHE_SCHEMA_VERSION,
     templateRev,
+    ui: inputs.ui,
   };
   return createHash('sha256')
     .update(JSON.stringify(ordered))

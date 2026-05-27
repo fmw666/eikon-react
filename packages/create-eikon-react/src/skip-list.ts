@@ -57,4 +57,9 @@ export const TEMPLATE_COPY_SKIP: ReadonlySet<string> = new Set([
   // The CLI runs `initGit()` to create a fresh repo for the user; copying
   // the source `.git` would import the entire monorepo history.
   '.git',
+  // Pre-baked upstream UI library snapshots used by `--ui shadcn` /
+  // `--ui animate-ui` at scaffold time. The CLI lays down the right
+  // snapshot via `applyUiSnapshot()`; the directory itself never reaches
+  // the user's project.
+  '.snapshots',
 ]);

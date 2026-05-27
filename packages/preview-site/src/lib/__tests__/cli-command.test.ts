@@ -51,12 +51,12 @@ describe('buildCliCommand', () => {
       pm: 'npm',
       design: 'anthropic',
       layout: 'sidebar',
-      ui: 'radix',
+      ui: 'custom',
       toastPosition: 'bottom-right',
     };
     const cmd = buildCliCommand(state);
     expect(cmd).toBe(
-      'npx create-eikon-react <proj_name> --supabase --pm npm --design anthropic --layout sidebar --ui radix --toast-position bottom-right'
+      'npx create-eikon-react <proj_name> --supabase --pm npm --design anthropic --layout sidebar --ui custom --toast-position bottom-right'
     );
   });
 });

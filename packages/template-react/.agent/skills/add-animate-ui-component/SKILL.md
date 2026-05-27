@@ -8,7 +8,7 @@ applies_to: ["src/shared/ui/**"]
 
 # Skill: add an animate-ui primitive
 
-Use when the user asks to add a reusable UI primitive (Dropdown, Tooltip, Accordion, Switch, etc.). Read [rules/50-animate-ui.md](../../rules/50-animate-ui.md) before starting.
+Use when the user asks to add a reusable UI primitive (Dropdown, Tooltip, Accordion, Switch, etc.). Read [rules/50-ui-axis.md](../../rules/50-ui-axis.md) before starting.
 
 ## Step list
 

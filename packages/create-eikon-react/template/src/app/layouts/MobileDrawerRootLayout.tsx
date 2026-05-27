@@ -48,7 +48,6 @@ import { SignInButton } from '@/features/auth';
 import { cn } from '@/shared/lib/cn';
 import {
   Sheet,
-  SheetBody,
   SheetClose,
   SheetContent,
   SheetDescription,
@@ -127,7 +126,7 @@ function MobileDrawerRootLayout() {
         )}
       >
         <div className="flex h-14 items-center gap-2 px-3">
-          <Sheet open={open} onOpenChange={setOpen} side="left">
+          <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger
               aria-label={t('nav.menu', { defaultValue: 'Open navigation' })}
               className={cn(
@@ -139,7 +138,7 @@ function MobileDrawerRootLayout() {
             >
               <Menu className="h-5 w-5" />
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent side="left">
               <SheetHeader>
                 <div className="flex items-center gap-3">
                   <span
@@ -160,7 +159,7 @@ function MobileDrawerRootLayout() {
                   })}
                 </SheetDescription>
               </SheetHeader>
-              <SheetBody>
+              <div className="flex-1 overflow-y-auto px-3 py-5">
                 <p
                   className={cn(
                     'px-2 pb-3 text-[0.6875rem] font-semibold uppercase tracking-[0.14em]',
@@ -216,7 +215,7 @@ function MobileDrawerRootLayout() {
                     );
                   })}
                 </nav>
-              </SheetBody>
+              </div>
             </SheetContent>
           </Sheet>
           <Link to="/" className="text-sm font-semibold tracking-tight">

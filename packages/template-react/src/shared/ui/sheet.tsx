@@ -47,7 +47,6 @@ type SheetSide = 'left' | 'right' | 'top' | 'bottom';
 
 interface SheetContextValue {
   readonly open: boolean;
-  readonly side: SheetSide;
 }
 const SheetContext = React.createContext<SheetContextValue | null>(null);
 
@@ -63,24 +62,22 @@ function useSheetContext(): SheetContextValue {
 // Root
 // =================================================================================================
 
-interface SheetProps
-  extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root> {
-  /** Edge to anchor the panel against. Defaults to `left` (most common
-   *  for primary-nav drawers on mobile). */
-  readonly side?: SheetSide;
-}
+type SheetProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Root>;
 
 /**
- * Controlled-or-uncontrolled wrapper around Radix Dialog.Root, plus a
- * `side` prop that publishes the chosen edge to descendants via context
- * so `SheetContent` can pick the right slide axis without re-receiving
- * the prop down a long chain.
+ * Controlled-or-uncontrolled wrapper around Radix Dialog.Root that
+ * publishes the current `open` state to descendants via context so
+ * `SheetContent` can drive `AnimatePresence`'s conditional render.
+ *
+ * API matches shadcn / animate-ui's `<Sheet>` — the `side` prop lives
+ * on `<SheetContent>` (not the root), and there's no `description`
+ * prop anywhere; consumers render `<SheetDescription>` as a child for
+ * a11y, and Radix wires `aria-describedby` automatically via context.
  */
 function Sheet({
   open: openProp,
   defaultOpen,
   onOpenChange,
-  side = 'left',
   ...props
 }: SheetProps) {
   const [openInternal, setOpenInternal] = React.useState(!!defaultOpen);
@@ -95,10 +92,7 @@ function Sheet({
     [isControlled, onOpenChange]
   );
 
-  const value = React.useMemo<SheetContextValue>(
-    () => ({ open, side }),
-    [open, side]
-  );
+  const value = React.useMemo<SheetContextValue>(() => ({ open }), [open]);
 
   return (
     <SheetContext.Provider value={value}>
@@ -206,31 +200,11 @@ function panelClass(side: SheetSide): string {
 // Content
 // =================================================================================================
 
-/**
- * Visually-hidden helper for screen-reader-only descriptions. Same set
- * of utilities shadcn / Radix examples use — inlined here rather than
- * depending on a Tailwind plugin so the primitive remains drop-in for
- * projects that don't ship `@tailwindcss/forms`.
- */
-const SR_ONLY =
-  'absolute h-px w-px overflow-hidden whitespace-nowrap border-0 p-0 [clip:rect(0_0_0_0)] [clip-path:inset(50%)]';
-
 interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
-  /**
-   * Short prose describing the panel for screen readers. Honours
-   * Radix's a11y contract — every `Dialog.Content` is supposed to carry
-   * a description. Render flow:
-   *
-   *   - non-empty string → emitted as a visually-hidden
-   *     `<DialogDescription>` child (Radix auto-wires `aria-describedby`).
-   *   - `""` (empty string) → consumer explicitly opts out; the primitive
-   *     forwards `aria-describedby={undefined}` to silence the dev warning,
-   *     matching Radix's documented escape hatch.
-   *   - omitted → consumer is expected to render their OWN
-   *     `<SheetDescription>` somewhere inside the panel.
-   */
-  readonly description?: string;
+  /** Edge to anchor the panel against. Defaults to `right` to match
+   *  shadcn / animate-ui's `<SheetContent>` API. */
+  readonly side?: SheetSide;
 }
 
 /**
@@ -239,36 +213,22 @@ interface SheetContentProps
  * branch). `AnimatePresence` keeps the exit animation alive until the
  * spring settles before unmount.
  *
- * The `description` prop is the recommended path: pass a one-line
- * summary and the primitive renders an `sr-only` `<DialogDescription>`
- * — Radix wires `aria-describedby` itself via context. Pass
- * `description=""` if no description is appropriate; the primitive will
- * forward `aria-describedby={undefined}` so the dev-mode warning stays
- * silent. Other props are forwarded to Radix's `Dialog.Content`
- * unchanged.
+ * For accessibility, render a `<SheetDescription>` child somewhere
+ * inside the panel — Radix's Dialog primitive auto-wires
+ * `aria-describedby` via context, no manual hook-up needed. If a
+ * description is intentionally absent, pass `aria-describedby={undefined}`
+ * to silence Radix's dev warning (the documented escape hatch).
  */
 function SheetContent({
   className,
   children,
-  description,
+  side = 'right',
   ...props
 }: SheetContentProps) {
-  const { open, side } = useSheetContext();
+  const { open } = useSheetContext();
   const reduceMotion = useReducedMotion();
   const overlayAnim = reduceMotion ? STATIC_MOTION : overlayMotion;
   const panelAnim = reduceMotion ? STATIC_MOTION : panelMotion(side);
-
-  // When `description=""` the consumer is opting out — forward
-  // `aria-describedby={undefined}` so Radix's dev warning stays quiet.
-  // When `description` is undefined, leave aria-describedby alone:
-  // either the consumer passed it directly (we forward as-is) or
-  // they're rendering their own <SheetDescription> child (Radix
-  // auto-wires it via context).
-  const isOptOut = description === '';
-  const contentProps =
-    isOptOut && !('aria-describedby' in props)
-      ? { ...props, 'aria-describedby': undefined }
-      : props;
 
   return (
     <AnimatePresence>
@@ -280,20 +240,8 @@ function SheetContent({
               className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
             />
           </DialogPrimitive.Overlay>
-          <DialogPrimitive.Content asChild forceMount {...contentProps}>
+          <DialogPrimitive.Content asChild forceMount {...props}>
             <motion.div {...panelAnim} className={cn(panelClass(side), className)}>
-              {/*
-                Radix's <Dialog.Description> registers itself with the
-                surrounding <Dialog.Content> through context — rendering
-                it anywhere under Content is enough; the parent picks up
-                the generated id and points its `aria-describedby` at it
-                automatically. No manual wiring needed.
-              */}
-              {description !== undefined && description !== '' && (
-                <DialogPrimitive.Description className={SR_ONLY}>
-                  {description}
-                </DialogPrimitive.Description>
-              )}
               {children}
               <DialogPrimitive.Close
                 className="absolute right-3 top-3.5 inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--color-muted-foreground)] opacity-70 transition-[opacity,background-color,color] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)] hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
@@ -323,18 +271,6 @@ function SheetHeader({
         'flex flex-col gap-2 border-b border-[var(--color-border)] px-5 py-6 pr-16',
         className
       )}
-      {...props}
-    />
-  );
-}
-
-function SheetBody({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn('flex-1 overflow-y-auto px-3 py-5', className)}
       {...props}
     />
   );
@@ -385,7 +321,6 @@ SheetDescription.displayName = 'SheetDescription';
 
 export {
   Sheet,
-  SheetBody,
   SheetClose,
   SheetContent,
   SheetDescription,
