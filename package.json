@@ -29,7 +29,9 @@
     "clean": "pnpm -r exec rimraf dist node_modules .turbo"
   },
   "devDependencies": {
+    "next-themes": "^0.4.6",
     "prettier": "^3.3.3",
+    "radix-ui": "^1.4.3",
     "rimraf": "^6.0.1",
     "typescript": "^5.6.3"
   }

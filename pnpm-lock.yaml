@@ -8,9 +8,15 @@ importers:
 
   .:
     devDependencies:
+      next-themes:
+        specifier: ^0.4.6
+        version: 0.4.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       prettier:
         specifier: ^3.3.3
         version: 3.8.3
+      radix-ui:
+        specifier: ^1.4.3
+        version: 1.4.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       rimraf:
         specifier: ^6.0.1
         version: 6.1.3

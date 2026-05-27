@@ -53,15 +53,25 @@ interface RuntimeVariantInputs {
   toastPosition: string;
 }
 
-const PREVIEW_BUILD_INPUTS: BuildInputs = {
+/**
+ * Static portion of the build inputs. Every axis here is either runtime
+ * (design / layout / toastPosition flow through postMessage on the
+ * already-built bundle) or shell-only (platform / supabase / pm don't
+ * affect the iframe bundle — they drive simulator endpoints / chrome).
+ *
+ * `ui` is the exception: post-Phase J it bakes different `src/shared/ui/*`
+ * snapshots into the bundle, so cycling it MUST trigger a fresh
+ * `/api/build`. We keep it out of this constant and pull it from the
+ * store inside the component.
+ */
+const PREVIEW_BUILD_INPUTS_BASE = {
   platform: 'web',
   supabase: true,
   pm: 'pnpm',
   design: 'default',
   layout: 'stacked',
-  ui: 'animate-ui',
   toastPosition: 'top-right',
-};
+} as const;
 
 const KNOWN_PLATFORMS: ReadonlySet<DevicePlatform> = new Set([
   'web',
@@ -360,7 +370,14 @@ function selectRuntimeVariants(s: ParamsStore): RuntimeVariantInputs {
 }
 
 export function PreviewFrame() {
-  const buildInputs = PREVIEW_BUILD_INPUTS;
+  // Subscribe to `ui` separately as a primitive: it's the only build-axis
+  // that flows into `/api/build`, and we want a string change (not an
+  // object identity change) to drive the build effect's dep array.
+  const buildUi = useShellStore((s) => String(s.state.ui));
+  const buildInputs = useMemo<BuildInputs>(
+    () => ({ ...PREVIEW_BUILD_INPUTS_BASE, ui: buildUi }),
+    [buildUi]
+  );
   const runtimeVariants = useShellStore(useShallow(selectRuntimeVariants));
   // The device chrome (web / desktop / mobile) is shell-only — it doesn't
   // ride the `eikon:set-variant` postMessage channel because the iframe
@@ -539,9 +556,13 @@ export function PreviewFrame() {
 
   // ---- Build orchestration ----------------------------------------------
   //
-  // We re-run only on `templateRev` (the watcher's "source changed,
-  // rebuild" signal). Playground params deliberately do not drive this
-  // effect; they update via postMessage and simulator endpoints.
+  // Re-run on `templateRev` (the watcher's "source changed, rebuild"
+  // signal) AND on `buildUi` — `ui` is the one playground param that
+  // bakes different files into the bundle (Phase J snapshots), so a
+  // cycle MUST trigger a fresh `/api/build`. The other axes
+  // (design / layout / toastPosition) stay runtime-postMessage and
+  // deliberately don't drive this effect; they update the existing
+  // bundle in-place via `eikon:set-variant`.
   useEffect(() => {
     const seq = ++requestSeq.current;
     let cancelled = false;
@@ -632,7 +653,7 @@ export function PreviewFrame() {
     // `setIframeReadyHash`) are stable across renders; omitting them
     // intentionally so the build effect doesn't re-run on store init.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [templateRev]);
+  }, [templateRev, buildUi]);
 
   // ---- Quick-jump navigation requested from the Toolbar -----------------
   //
