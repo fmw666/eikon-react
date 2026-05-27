@@ -173,6 +173,66 @@ describe('applyUiSnapshot', () => {
     ).toBe(false);
   });
 
+  it('scrubs leftover snapshot artefacts when re-running with --ui custom', async () => {
+    // Simulate a previous `--ui shadcn` / `--ui animate-ui` run that
+    // landed orphan files in projectDir. Re-running with `--ui custom`
+    // must clean these up, otherwise the user ends up with `components.json`
+    // pointing at the old shadcn layout, an `eslint.config.ui-snapshot.js`
+    // disabling rules nothing imports, and dead animate-ui subtrees.
+    await writeFile(
+      path.join(fx.projectDir, 'components.json'),
+      JSON.stringify({ stale: 'shadcn' }),
+      'utf8'
+    );
+    await writeFile(
+      path.join(fx.projectDir, 'eslint.config.ui-snapshot.js'),
+      'export default [];\n',
+      'utf8'
+    );
+    await mkdir(
+      path.join(fx.projectDir, 'src', 'components', 'animate-ui'),
+      { recursive: true }
+    );
+    await writeFile(
+      path.join(fx.projectDir, 'src', 'components', 'animate-ui', 'icon.tsx'),
+      '// stale animate-ui leftover\n',
+      'utf8'
+    );
+    await mkdir(path.join(fx.projectDir, 'src', 'hooks'), { recursive: true });
+    await writeFile(
+      path.join(fx.projectDir, 'src', 'hooks', 'use-orphan.tsx'),
+      '// stale hook\n',
+      'utf8'
+    );
+
+    await applyUiSnapshot(fx.projectDir, 'custom', fx.snapshotsRoot);
+
+    expect(
+      await pathExists(path.join(fx.projectDir, 'components.json'))
+    ).toBe(false);
+    expect(
+      await pathExists(
+        path.join(fx.projectDir, 'eslint.config.ui-snapshot.js')
+      )
+    ).toBe(false);
+    expect(
+      await pathExists(
+        path.join(fx.projectDir, 'src', 'components', 'animate-ui')
+      )
+    ).toBe(false);
+    expect(
+      await pathExists(path.join(fx.projectDir, 'src', 'hooks'))
+    ).toBe(false);
+    // Sticky project-authored files still survive.
+    for (const name of REPLACEABLE_UI_FILES) {
+      const text = await readFile(
+        path.join(fx.projectDir, 'src/shared/ui', name),
+        'utf8'
+      );
+      expect(text).toContain('project-authored');
+    }
+  });
+
   it('throws on unknown ui values', async () => {
     await expect(
       applyUiSnapshot(fx.projectDir, 'totally-fake', fx.snapshotsRoot)

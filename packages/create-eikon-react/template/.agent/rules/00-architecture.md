@@ -26,11 +26,11 @@ src/
 │       ├── store/                # ONE Zustand store per feature (vanilla + subscribeWithSelector)
 │       │   └── <feature>Store.ts
 │       ├── selectors/            # Read-side / write-side hooks built on the store
-│       │   ├── basic.ts          #   - thin slice subscriptions
-│       │   ├── computed.ts       #   - derived data
-│       │   ├── memoized.ts       #   - id-keyed lookups, expensive derivations
-│       │   ├── actions.ts        #   - useXActions() bundle of write ops
-│       │   └── index.ts
+│       │   ├── basic.ts          #   - thin slice subscriptions (REQUIRED)
+│       │   ├── computed.ts       #   - derived data (REQUIRED)
+│       │   ├── actions.ts        #   - useXActions() bundle of write ops (REQUIRED)
+│       │   ├── index.ts          #   - barrel (REQUIRED)
+│       │   └── memoized.ts       #   - id-keyed lookups, expensive derivations (optional; add when needed)
 │       ├── services/             # API / data access — interface + dual impl + factory
 │       │   ├── interfaces/I<Feature>Service.ts
 │       │   ├── implementations/

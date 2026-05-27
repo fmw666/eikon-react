@@ -37,18 +37,27 @@ system so users immediately recognise the look. Anchor colours below
 are the **brand-source values**; the actual `index.css` blocks
 translate them to OKLCH for perceptual-uniform contrast checking.
 
-| value       | Inspired by                  | Anchor palette                          | Typography                | Density (`--spacing` / base text)         | Vibe                                |
-| ----------- | ---------------------------- | --------------------------------------- | ------------------------- | ----------------------------------------- | ----------------------------------- |
-| `default`   | (none — neutral baseline)    | violet `#7B5BD9`-ish on white           | system-ui                 | Tailwind defaults (0.25rem / 16px)        | Brand-agnostic; safe start.         |
-| `apple`     | Apple HIG / iOS 17+          | `#007AFF` systemBlue on `#FAFAFA`       | SF Pro / -apple-system    | Spacious (0.27rem) · 17px body            | Friendly, generous radii, native.   |
-| `linear`    | [linear.app/brand]           | `#5E6AD2` lavender-blue on `#F4F5F8`    | Inter Variable            | Tight (0.22rem) · 15px body               | Crisp, productivity tool, compact.  |
-| `anthropic` | [Anthropic brand guidelines] | `#d97757` Crail orange on `#faf9f5`     | Lora serif (body)         | Editorial (0.28rem) · 17px body / 1.7 LH  | Warm, humanist, editorial, serif.   |
-| `vercel`    | [Vercel Geist]               | Ink `#000` / `#FFF` + `#0070F3` accent  | Geist Sans + Geist Mono   | Tight (0.22rem) · 14px body · 1px ring sh.| Strict monochrome, "less is more".  |
-| `notion`    | Notion editor                | warm gray + `#2eaadc` blue              | Inter                     | Standard (0.25rem) · 16px / 1.6 LH        | Document-heavy, dashboard-friendly. |
+| value             | Inspired by                  | Anchor palette                          | Typography                | Density (`--spacing` / base text)         | Vibe                                |
+| ----------------- | ---------------------------- | --------------------------------------- | ------------------------- | ----------------------------------------- | ----------------------------------- |
+| `default`         | (none — neutral baseline)    | violet `#7B5BD9`-ish on white           | system-ui                 | Tailwind defaults (0.25rem / 16px)        | Brand-agnostic; safe start.         |
+| `apple`           | Apple HIG / iOS 17+          | `#007AFF` systemBlue on `#FAFAFA`       | SF Pro / -apple-system    | Spacious (0.27rem) · 17px body            | Friendly, generous radii, native.   |
+| `linear`          | [linear.app/brand]           | `#5E6AD2` lavender-blue on `#F4F5F8`    | Inter Variable            | Tight (0.22rem) · 15px body               | Crisp, productivity tool, compact.  |
+| `anthropic`       | [Anthropic brand guidelines] | `#d97757` Crail orange on `#faf9f5`     | Lora serif (body)         | Editorial (0.28rem) · 17px body / 1.7 LH  | Warm, humanist, editorial, serif.   |
+| `vercel`          | [Vercel Geist]               | Ink `#000` / `#FFF` + `#0070F3` accent  | Geist Sans + Geist Mono   | Tight (0.22rem) · 14px body · 1px ring sh.| Strict monochrome, "less is more".  |
+| `notion`          | Notion editor                | warm gray + `#2eaadc` blue              | Inter                     | Standard (0.25rem) · 16px / 1.6 LH        | Document-heavy, dashboard-friendly. |
+| `flat`            | Flat / Metro / Swiss         | strong color blocks, visible borders    | system-ui                 | Standard                                  | Zero shadows; depth from contrast.  |
+| `material`        | Material Design 3            | M3 tonal palette + key accent           | Roboto                    | Standard · 1rem container radii           | Elevation-driven, no borders.       |
+| `skeuomorphism`   | Realistic 3D                 | warm neutrals + bright primary          | system-ui                 | Standard                                  | Inset highlights, deep shadows.     |
+| `neumorphism`     | Soft UI                      | matching-tone fills (no high contrast)  | system-ui                 | Standard                                  | Soft extruded plastic, paired shadows. |
+| `liquid-glass`    | Apple iOS 26                 | refractive overlay on photo backdrop    | SF Pro / -apple-system    | Standard                                  | Heavy backdrop-blur + specular rim. |
+| `claymorphism`    | [clay.css] (Adrian Bece)     | playful pastel palette                  | Fredoka + Nunito          | Generous radii                            | Puffy clay, soft outer + inset glow.|
+| `aurora`          | Aurora UI                    | dark base + green-cyan / magenta glows  | system-ui                 | Standard                                  | Northern-lights dual-hue shadows.   |
+| `neo-brutalism`   | Brutalist web                | high-saturation block + ink black       | bold sans                 | Standard                                  | 3px black borders, hard-offset shadow. |
 
 [linear.app/brand]: https://linear.app/brand
 [Anthropic brand guidelines]: https://github.com/anthropics/skills/blob/main/skills/brand-guidelines/SKILL.md
 [Vercel Geist]: https://vercel.com/geist/colors
+[clay.css]: https://github.com/adrianbece/claymorphism
 
 What "density" means here: each preset overrides `--spacing` (Tailwind
 v4's base step, consumed by EVERY `p-N` / `gap-N` / `m-N` / `size-*`
@@ -73,12 +82,20 @@ Or pick one interactively in the playground (`pnpm preview:dev` → Design dropd
 │ src/styles/index.css        ← ONE FILE, the only place tokens    │
 │ ├── @theme  { … }           ← base tokens (colours, radii, fonts)│
 │ ├── .dark   { … }           ← dark-mode colour overrides         │
-│ ├── @eikon:variant(design=default)   ← presets, each pair of     │
-│ ├── @eikon:variant(design=apple)     │ @theme + .dark overrides; │
-│ ├── @eikon:variant(design=linear)    │ each @theme adds typo-    │
-│ ├── @eikon:variant(design=anthropic) │ graphy / density / shadow │
-│ ├── @eikon:variant(design=vercel)    │ tokens on top of palette  │
-│ └── @eikon:variant(design=notion)    ┘                           │
+│ ├── @eikon:variant(design=default)        ← presets, each pair of│
+│ ├── @eikon:variant(design=apple)          │ @theme + .dark      │
+│ ├── @eikon:variant(design=linear)         │ overrides; each     │
+│ ├── @eikon:variant(design=anthropic)      │ @theme adds         │
+│ ├── @eikon:variant(design=vercel)         │ typography /        │
+│ ├── @eikon:variant(design=notion)         │ density / shadow    │
+│ ├── @eikon:variant(design=flat)           │ tokens on top of    │
+│ ├── @eikon:variant(design=material)       │ palette. 14 in all. │
+│ ├── @eikon:variant(design=skeuomorphism)  │                     │
+│ ├── @eikon:variant(design=neumorphism)    │                     │
+│ ├── @eikon:variant(design=liquid-glass)   │                     │
+│ ├── @eikon:variant(design=claymorphism)   │                     │
+│ ├── @eikon:variant(design=aurora)         │                     │
+│ └── @eikon:variant(design=neo-brutalism)  ┘                     │
 └──────────────────────────────────────────────────────────────────┘
         │                                          │
         ▼                                          ▼

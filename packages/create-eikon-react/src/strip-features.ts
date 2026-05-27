@@ -303,28 +303,41 @@ async function runWithConcurrency(
   await Promise.all(workers);
 }
 
+/**
+ * True iff `p` (absolute path with mixed separators OR a POSIX-relative
+ * template-rooted path) is one of `segments` itself or a descendant of
+ * any of them. Replaces six near-duplicate predicates that each
+ * normalised separators inline before checking a single segment.
+ *
+ * `segments` are POSIX-relative path roots (e.g. `'src/shared/supabase'`,
+ * `'apps/desktop'`). The rule is intentionally segment-aware: matching
+ * `'src/shared/supabase'` does NOT match `'src/shared/supabase-helpers'`
+ * because the comparison uses path-component boundaries.
+ */
+function isInsideAny(p: string, segments: readonly string[]): boolean {
+  const norm = p.replace(/\\/g, '/');
+  for (const seg of segments) {
+    if (norm === seg || norm.endsWith(`/${seg}`)) return true;
+    if (norm.includes(`/${seg}/`)) return true;
+    if (norm.startsWith(`${seg}/`)) return true;
+  }
+  return false;
+}
+
+const SUPABASE_SEGMENTS = ['src/shared/supabase'] as const;
+const DESKTOP_SHELL_SEGMENTS = ['apps/desktop'] as const;
+const MOBILE_SHELL_SEGMENTS = ['apps/mobile'] as const;
+
 function isInsideSupabaseDir(p: string): boolean {
   const norm = p.replace(/\\/g, '/');
   return norm.endsWith('/src/shared/supabase');
 }
 
-/**
- * The Tauri 2 desktop shell lives in `apps/desktop/`. The directory is
- * unconditionally removed unless the chosen platform is `desktop` (or
- * the playground's `keepShells` opt-out is set). This is the platform
- * analog of `isInsideSupabaseDir` — JSON / TOML files inside don't
- * accept `@eikon:variant(...) file` markers, so directory-level
- * removal is the right hammer.
- */
 function isInsideDesktopShellDir(p: string): boolean {
   const norm = p.replace(/\\/g, '/');
   return norm.endsWith('/apps/desktop');
 }
 
-/**
- * The Capacitor 6 mobile shell lives in `apps/mobile/`. Same removal
- * semantics as the desktop shell above, gated on `platform !== 'mobile'`.
- */
 function isInsideMobileShellDir(p: string): boolean {
   const norm = p.replace(/\\/g, '/');
   return norm.endsWith('/apps/mobile');
@@ -455,6 +468,13 @@ function stripBlocksForVariant(
   axis: string,
   keepValue: string
 ): string {
+  // The closing-marker pattern uses a `\1` back-reference so a single
+  // regex pass correctly pairs `begin` with the matching `end` for the
+  // SAME variant value. Capture group 1 is `([^)]+)` — the variant
+  // value (e.g. `mobile-drawer`). Adding any capture group BEFORE this
+  // point will shift `\1` to a different group and silently mis-pair
+  // markers, leaving dead text behind. If you must add a group, use a
+  // non-capturing group `(?:...)` or update `\1` to the new index.
   return input.replace(regexForVariantAxis(axis), (match, value: string) =>
     value === keepValue ? match : ''
   );
@@ -468,17 +488,88 @@ async function isBinary(file: string): Promise<boolean> {
     return true;
   }
   const ext = path.extname(file).toLowerCase();
-  return (
-    ext === '.png' ||
-    ext === '.jpg' ||
-    ext === '.jpeg' ||
-    ext === '.gif' ||
-    ext === '.webp' ||
-    ext === '.ico' ||
-    ext === '.woff' ||
-    ext === '.woff2' ||
-    ext === '.ttf'
-  );
+  if (BINARY_EXTENSIONS.has(ext)) return true;
+  if (TEXT_EXTENSIONS.has(ext)) return false;
+  // Unknown extension — fall back to magic-byte sniffing so a `.bin`
+  // checked in by mistake doesn't get treated as text and a
+  // text-disguised-as-other-extension still gets stripped. Reading 512
+  // bytes is cheap and only happens for the long-tail of unknown
+  // extensions, not the bulk of `.ts/.tsx/.css/.md` files.
+  return await magicByteIsBinary(file);
+}
+
+const BINARY_EXTENSIONS: ReadonlySet<string> = new Set([
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.webp',
+  '.avif',
+  '.ico',
+  '.icns',
+  '.bmp',
+  '.woff',
+  '.woff2',
+  '.ttf',
+  '.otf',
+  '.eot',
+  '.zip',
+  '.tar',
+  '.gz',
+  '.7z',
+  '.mp3',
+  '.mp4',
+  '.mov',
+  '.webm',
+  '.pdf',
+  '.wasm',
+]);
+
+const TEXT_EXTENSIONS: ReadonlySet<string> = new Set([
+  '.ts',
+  '.tsx',
+  '.js',
+  '.jsx',
+  '.mjs',
+  '.cjs',
+  '.json',
+  '.md',
+  '.mdx',
+  '.css',
+  '.scss',
+  '.html',
+  '.svg',
+  '.toml',
+  '.yaml',
+  '.yml',
+  '.txt',
+  '.rs',
+  '.sh',
+  '.gitignore',
+]);
+
+async function magicByteIsBinary(file: string): Promise<boolean> {
+  const { open } = await import('node:fs/promises');
+  let fh: Awaited<ReturnType<typeof open>> | null = null;
+  try {
+    fh = await open(file, 'r');
+    const buf = Buffer.alloc(512);
+    const { bytesRead } = await fh.read(buf, 0, 512, 0);
+    if (bytesRead === 0) return false; // empty file is text
+    let nonPrintable = 0;
+    for (let i = 0; i < bytesRead; i++) {
+      const b = buf[i]!;
+      if (b === 0) return true; // any null byte → definitely binary
+      // Printable ASCII range + common whitespace (\t \n \r).
+      const printable = (b >= 0x20 && b < 0x7f) || b === 0x09 || b === 0x0a || b === 0x0d;
+      if (!printable) nonPrintable++;
+    }
+    return nonPrintable / bytesRead > 0.3;
+  } catch {
+    return true;
+  } finally {
+    await fh?.close();
+  }
 }
 
 async function pruneDependencies(
@@ -674,14 +765,11 @@ export const PLATFORM_ROOT_FILES = PLATFORM_ONLY_ROOT_FILES;
  * `'apps/desktop/src-tauri/Cargo.toml'`.
  */
 export function isInsideSupabaseTree(relPath: string): boolean {
-  return (
-    relPath === 'src/shared/supabase' ||
-    relPath.startsWith('src/shared/supabase/')
-  );
+  return isInsideAny(relPath, SUPABASE_SEGMENTS);
 }
 export function isInsideDesktopShellTree(relPath: string): boolean {
-  return relPath === 'apps/desktop' || relPath.startsWith('apps/desktop/');
+  return isInsideAny(relPath, DESKTOP_SHELL_SEGMENTS);
 }
 export function isInsideMobileShellTree(relPath: string): boolean {
-  return relPath === 'apps/mobile' || relPath.startsWith('apps/mobile/');
+  return isInsideAny(relPath, MOBILE_SHELL_SEGMENTS);
 }

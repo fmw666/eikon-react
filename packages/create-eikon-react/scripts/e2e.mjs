@@ -510,12 +510,16 @@ async function main() {
     tarballPath = await packCli(tmp);
     console.log(`        -> ${path.basename(tarballPath)}`);
 
+    step('install tarball into shared sandbox (once)');
+    const cliBin = await installSharedSandbox(tmp, tarballPath);
+    console.log(`        -> bin: ${path.relative(tmp, cliBin)}`);
+
     for (const scenario of selected) {
       console.log(
         `\n[e2e] === scenario: ${scenario.id} ` +
           `(flags: ${scenario.flags.join(' ')}) ===`
       );
-      await runScenario(scenario, tmp, tarballPath);
+      await runScenario(scenario, tmp, cliBin);
     }
 
     console.log(`\n[e2e] ALL PASSED (${selected.length} scenarios)`);
@@ -528,15 +532,23 @@ async function main() {
   }
 }
 
-async function runScenario(scenario, tmpRoot, tarballPath) {
-  const sandbox = path.join(tmpRoot, `sandbox-${scenario.id}`);
+/**
+ * Install the packed CLI tarball into a single shared sandbox once and
+ * return the absolute path to its `node_modules/.bin/create-eikon-react`.
+ *
+ * The earlier shape did this `npm install --no-save tarball` step inside
+ * every scenario, which on a 9-scenario run cost ~9× the install
+ * overhead even though the tarball is identical across all of them.
+ * The shared install drops that to one fixed cost; each scenario only
+ * pays for its own scaffold + verify (+ optional pnpm install).
+ *
+ * The bin file is the same across scenarios — it's a thin shim that
+ * resolves the CLI's dist/index.js. Scenarios run in their own scratch
+ * dirs and never write into the sandbox, so reuse is safe.
+ */
+async function installSharedSandbox(tmpRoot, tarballPath) {
+  const sandbox = path.join(tmpRoot, 'sandbox');
   await mkdir(sandbox, { recursive: true });
-
-  // Stand up an empty npm project so we can `npm install --no-save` the tarball
-  // and end up with a working `node_modules/.bin/create-eikon-react`. This is
-  // closer to what `npx <pkg>` resolves to after a registry fetch than calling
-  // dist/index.js directly.
-  step('  install tarball into sandbox');
   await writeJson(path.join(sandbox, 'package.json'), {
     name: 'eikon-e2e-sandbox',
     version: '0.0.0',
@@ -553,6 +565,12 @@ async function runScenario(scenario, tmpRoot, tarballPath) {
   if (!existsSync(cliBin)) {
     throw new Error(`expected bin not found: ${cliBin}`);
   }
+  return cliBin;
+}
+
+async function runScenario(scenario, tmpRoot, cliBin) {
+  const scratch = path.join(tmpRoot, `scratch-${scenario.id}`);
+  await mkdir(scratch, { recursive: true });
 
   step('  invoke CLI');
   // Default to pnpm so the existing scenarios stay green; pm-* scenarios
@@ -569,10 +587,10 @@ async function runScenario(scenario, tmpRoot, tarballPath) {
       '--no-install',
       '--no-git',
     ],
-    sandbox
+    scratch
   );
 
-  const projectDir = path.join(sandbox, scenario.projectName);
+  const projectDir = path.join(scratch, scenario.projectName);
   if (!existsSync(projectDir)) {
     throw new Error(`CLI did not create ${projectDir}`);
   }
@@ -602,6 +620,21 @@ async function runScenario(scenario, tmpRoot, tarballPath) {
   // Mirror the user's choice end-to-end so the generated project is
   // exercised with its declared pm.
   if (pm !== 'pnpm' && !(await commandExists(pm))) {
+    // Locally, missing bun is a soft skip — the scaffold + verify step
+    // already validated the rewrite. In CI we MUST fail loud, otherwise
+    // a regression in the bun rewrite path would silently land because
+    // none of the downstream assertions ran. The `CI=1` env that
+    // `run()` injects into child processes is set by GitHub Actions
+    // and (locally) by this very script's `run()` helper — so we look
+    // at process.env directly here, which carries the user's outer
+    // shell value.
+    if (process.env.CI === 'true' || process.env.CI === '1') {
+      throw new Error(
+        `[e2e] scenario "${scenario.id}" requires '${pm}' on PATH but it ` +
+          `is not installed. CI must run with all package managers ` +
+          `available — install '${pm}' on the runner or remove the scenario.`
+      );
+    }
     console.log(
       `  (skipping install/build because '${pm}' is not on PATH; ` +
         'scaffold + verify already passed)'

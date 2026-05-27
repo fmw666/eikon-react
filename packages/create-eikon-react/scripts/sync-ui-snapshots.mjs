@@ -128,9 +128,19 @@ const ANIMATE_UI_NATIVE_TARGETS = {
   'sheet.tsx': 'components/animate-ui/components/radix/sheet',
 };
 
+// Pin the shadcn CLI to a specific minor so a maintainer running this
+// script today gets the same registry CLI behaviour they got the last
+// time the snapshots were regenerated. The CLI itself is responsible
+// for fetching components — the shadcn / animate-ui REGISTRY content
+// is server-side and not version-pinnable from here, so this pin only
+// freezes the CLI's behaviour (component-resolution rules, output
+// paths, components.json schema). Bump intentionally when adopting a
+// newer shadcn release that changes those rules.
+const SHADCN_CLI_PIN = 'shadcn@2.5.0';
+
 const REGISTRIES = {
   shadcn: {
-    addCmd: (component) => ['shadcn@latest', 'add', component, '--yes', '--overwrite'],
+    addCmd: (component) => [SHADCN_CLI_PIN, 'add', component, '--yes', '--overwrite'],
   },
   'animate-ui': {
     // animate-ui ships shadcn-compatible registry items, but its
@@ -139,7 +149,7 @@ const REGISTRIES = {
     // registry (animate-ui is shadcn-compatible, so they coexist).
     addCmd: (component) => {
       const target = ANIMATE_UI_REGISTRY_MAP[component] ?? component;
-      return ['shadcn@latest', 'add', target, '--yes', '--overwrite'];
+      return [SHADCN_CLI_PIN, 'add', target, '--yes', '--overwrite'];
     },
   },
 };
@@ -314,38 +324,56 @@ async function harvestSnapshot(tmp, ui) {
   // shadcn's `dialog`, but if animate-ui shipped a native `dialog` we
   // want that one to win).
   if (ui === 'animate-ui') {
-    await generateAnimateUiShims(dest);
+    const shims = await generateAnimateUiShims(dest);
+    if (shims.count === 0) {
+      throw new Error(
+        `[${ui}] generateAnimateUiShims wrote 0 shims — animate-ui's ` +
+          `native components didn't materialise under src/components/animate-ui/. ` +
+          `Either the registry layout changed or none of the upstream items shipped.`
+      );
+    }
+    console.log(`[${ui}] wrote ${shims.count} animate-ui shim(s)`);
   }
 
-  // The template's call sites import both `Toaster` and `toast` from
-  // `@/shared/ui/toaster`. Upstream shadcn / animate-ui ship only the
-  // `Toaster` component (the `toast()` helper lives in the `sonner`
-  // package). Append a thin re-export so the template's contract
-  // ("`@/shared/ui/toaster` exports both") holds across all UI choices.
-  await ensureToasterExportsToast(dest);
-
-  // The template's HomePage / TaskCard / CardShowcase use a
-  // `cardHoverableClass` exported from `@/shared/ui/card` to opt cards
-  // into a hover-shadow lift. Upstream Card primitives don't ship this
-  // class — append it so all three `--ui` choices satisfy the template
-  // contract.
-  await ensureCardHoverableClass(dest);
-
-  // The template's structural test (and our a11y intent) requires
-  // `CardTitle` to render as an `<h3>`. Upstream shadcn ships it as a
-  // `<div>` so authors can pick their own heading level — we re-pin
-  // it to `<h3>` to preserve the template's conventions across all
-  // `--ui` choices.
-  await ensureCardTitleIsHeading(dest);
+  // Each post-harvest patcher returns { changed: boolean } and we abort
+  // when a patch we expected to apply silently no-op'd — the most
+  // dangerous failure mode here is "upstream layout changed → regex
+  // didn't match → patcher returned without touching the file → snapshot
+  // ships missing the project's contract". `changed: false` can ALSO
+  // mean "patch already applied" (idempotent re-run), but on a fresh
+  // npx-shadcn-add harvest that's also a sign something is wrong, so
+  // either case fails loud.
+  assertPatched(ui, 'ensureToasterExportsToast', await ensureToasterExportsToast(dest));
+  assertPatched(ui, 'ensureCardHoverableClass', await ensureCardHoverableClass(dest));
+  assertPatched(ui, 'ensureCardTitleIsHeading', await ensureCardTitleIsHeading(dest));
 
   return { dest, fileCount };
 }
 
+function assertPatched(ui, name, result) {
+  if (!result || typeof result.changed !== 'boolean') {
+    throw new Error(`[${ui}] ${name}: expected { changed: boolean } result`);
+  }
+  if (!result.changed) {
+    throw new Error(
+      `[${ui}] ${name}: did not change the snapshot (reason: ${result.reason ?? 'unknown'}). ` +
+        `Either the upstream registry layout changed and the regex needs updating, ` +
+        `or the file the patcher targets is missing from the harvest.`
+    );
+  }
+}
+
 async function ensureToasterExportsToast(dest) {
   const toasterPath = path.join(dest, 'src', 'shared', 'ui', 'toaster.tsx');
-  if (!(await pathExists(toasterPath))) return;
+  if (!(await pathExists(toasterPath))) {
+    return { changed: false, reason: 'toaster.tsx missing from snapshot' };
+  }
   const body = await readFile(toasterPath, 'utf8');
-  if (/\bexport\s*\{\s*toast\s*\}/.test(body)) return; // already exports it
+  if (/\bexport\s*\{\s*toast\s*\}/.test(body)) {
+    // Upstream already exports `toast` — no patch needed. Treat as a
+    // legitimate change so the driver doesn't false-alarm.
+    return { changed: true, reason: 'upstream already exports toast' };
+  }
   const trailingNewline = body.endsWith('\n') ? '' : '\n';
   const appended =
     body +
@@ -355,13 +383,18 @@ async function ensureToasterExportsToast(dest) {
     `// \`--ui\` choices. Inserted by sync-ui-snapshots.mjs.\n` +
     `export { toast } from 'sonner';\n`;
   await writeFile(toasterPath, appended, 'utf8');
+  return { changed: true };
 }
 
 async function ensureCardHoverableClass(dest) {
   const cardPath = path.join(dest, 'src', 'shared', 'ui', 'card.tsx');
-  if (!(await pathExists(cardPath))) return;
+  if (!(await pathExists(cardPath))) {
+    return { changed: false, reason: 'card.tsx missing from snapshot' };
+  }
   const body = await readFile(cardPath, 'utf8');
-  if (/\bcardHoverableClass\b/.test(body)) return;
+  if (/\bcardHoverableClass\b/.test(body)) {
+    return { changed: true, reason: 'upstream already exports cardHoverableClass' };
+  }
   const trailingNewline = body.endsWith('\n') ? '' : '\n';
   const appended =
     body +
@@ -373,14 +406,19 @@ async function ensureCardHoverableClass(dest) {
     `export const cardHoverableClass =\n` +
     `  'transition-shadow duration-200 hover:[box-shadow:var(--surface-hover-shadow)] active:[box-shadow:var(--surface-active-shadow)]';\n`;
   await writeFile(cardPath, appended, 'utf8');
+  return { changed: true };
 }
 
 async function ensureCardTitleIsHeading(dest) {
   const cardPath = path.join(dest, 'src', 'shared', 'ui', 'card.tsx');
-  if (!(await pathExists(cardPath))) return;
+  if (!(await pathExists(cardPath))) {
+    return { changed: false, reason: 'card.tsx missing from snapshot' };
+  }
   const body = await readFile(cardPath, 'utf8');
-  // Already an h-element? Nothing to do.
-  if (/function\s+CardTitle[\s\S]*?<h[1-6]\b/.test(body)) return;
+  // Already an h-element? Upstream did the right thing on its own.
+  if (/function\s+CardTitle[\s\S]*?<h[1-6]\b/.test(body)) {
+    return { changed: true, reason: 'upstream already renders CardTitle as <h*>' };
+  }
   // Use [\s\S]*? for cross-line content — `[^)]*?` stops short on the
   // `)` inside the type annotation. We match the function signature's
   // `<"div">` annotation and the JSX `<div ... />` that follows, and
@@ -389,13 +427,28 @@ async function ensureCardTitleIsHeading(dest) {
     /(function\s+CardTitle\s*\([\s\S]*?React\.ComponentProps<")div("\s*>[\s\S]*?return\s*\(\s*)<div([\s\S]*?\/>)/,
     '$1h3$2<h3$3'
   );
-  if (next === body) return; // pattern didn't match; bail rather than corrupt
+  if (next === body) {
+    // Pattern didn't match. The most likely cause is an upstream layout
+    // change (shadcn switched away from `React.ComponentProps<"div">`
+    // or stopped using a single `return (<div ... />)` body). Bail loud
+    // — silently shipping a snapshot whose CardTitle is still a `<div>`
+    // would break the template's structural a11y test in a way that's
+    // hard to trace back to this script.
+    return {
+      changed: false,
+      reason:
+        'CardTitle regex did not match — upstream shadcn layout likely changed; ' +
+        'inspect template-snapshots/<ui>/src/shared/ui/card.tsx and update the regex.',
+    };
+  }
   await writeFile(cardPath, next, 'utf8');
+  return { changed: true };
 }
 
 async function generateAnimateUiShims(dest) {
   const shimDir = path.join(dest, 'src', 'shared', 'ui');
   await mkdir(shimDir, { recursive: true });
+  let count = 0;
   for (const [filename, targetRel] of Object.entries(ANIMATE_UI_NATIVE_TARGETS)) {
     const targetAbs = path.join(dest, 'src', `${targetRel}.tsx`);
     // Only write the shim when animate-ui actually shipped the
@@ -412,7 +465,9 @@ async function generateAnimateUiShims(dest) {
       `// change behaviour; this file is overwritten on next sync.\n` +
       `export * from '${importPath}';\n`;
     await writeFile(shimPath, body, 'utf8');
+    count += 1;
   }
+  return { count };
 }
 
 async function copyTreeWithRewrites(src, dest) {

@@ -16,12 +16,18 @@ interface CopyOptions {
  * Kept as an explicit allow-list rather than walking every file because:
  *
  *   1. The placeholder is intentionally narrow — only the desktop /
- *      mobile shell configs use it. Walking everything risks false
- *      positives in user docs that happen to mention the literal string.
+ *      mobile shell configs use it. A blanket scan would also rewrite
+ *      doc prose that legitimately mentions the literal marker (e.g.
+ *      a contributor writing "replace `__PROJECT_NAME__` with your
+ *      project name" in user-facing prose).
  *   2. Each entry is a path relative to the scaffold root; missing
  *      files are tolerated (the strip-features pass may have removed
  *      `apps/desktop/` or `apps/mobile/` before this runs in some
  *      future ordering).
+ *
+ * Drift is fenced by `__tests__/no-orphan-tokens.test.ts` (P2.5):
+ * adding a new template file containing `__PROJECT_NAME__` without a
+ * corresponding entry here fails CI.
  */
 const PROJECT_NAME_TARGETS: readonly string[] = [
   'apps/desktop/package.json',

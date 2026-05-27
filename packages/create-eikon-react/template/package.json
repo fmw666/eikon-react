@@ -1,7 +1,7 @@
 {
   "name": "@eikon/react",
   "private": true,
-  "version": "2.0.0",
+  "version": "0.0.0-private",
   "description": "React 19 + Tailwind v4 + animate-ui feature-first starter template (consumed by create-eikon-react).",
   "type": "module",
   "engines": {

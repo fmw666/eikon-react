@@ -52,6 +52,8 @@ import {
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { runWithConcurrency } from './strip-features.js';
+
 // =================================================================================================
 // Constants
 // =================================================================================================
@@ -128,6 +130,14 @@ async function pathExists(p: string): Promise<boolean> {
   }
 }
 
+/**
+ * Concurrency cap for the snapshot-copy walk. Snapshots are small
+ * (≤ ~30 files for animate-ui's superset), and the cap is per-directory
+ * — child dirs get their own pass. 8 keeps in-flight fds modest while
+ * still saturating IO on cold disks.
+ */
+const SNAPSHOT_COPY_CONCURRENCY = 8;
+
 async function copyDirRecursive(
   src: string,
   dest: string,
@@ -136,6 +146,12 @@ async function copyDirRecursive(
 ): Promise<void> {
   await mkdir(dest, { recursive: true });
   const entries = await readdir(src, { withFileTypes: true });
+  // Recurse into subdirectories sequentially (bounded depth, predictable
+  // fd usage) but race the leaf-file copyFile calls — that's where the
+  // wall-clock wins are. Empirically the snapshot has 1–2 nested levels
+  // and 5–25 files per dir, so flattening to a single mass copy is
+  // unnecessary.
+  const fileTasks: Array<() => Promise<void>> = [];
   for (const e of entries) {
     const s = path.join(src, e.name);
     const d = path.join(dest, e.name);
@@ -144,9 +160,10 @@ async function copyDirRecursive(
       await copyDirRecursive(s, d, filter, next);
     } else if (e.isFile()) {
       if (filter && !filter(next)) continue;
-      await copyFile(s, d);
+      fileTasks.push(() => copyFile(s, d));
     }
   }
+  await runWithConcurrency(fileTasks, SNAPSHOT_COPY_CONCURRENCY);
 }
 
 /**
@@ -291,7 +308,10 @@ export async function readSnapshotDeps(
 /**
  * Replace the project's `src/shared/ui/*` library files with the chosen
  * snapshot, drop in `components.json`, and merge `package-deps.json`
- * into the project's `package.json`. No-op for `--ui custom`.
+ * into the project's `package.json`. For `--ui custom`, scrubs any
+ * orphans a previous snapshot may have left under `projectDir` (matters
+ * when the same dir is reused — e.g. preview-site cache reuse — never
+ * for a fresh scaffold).
  *
  * Callers run this AFTER `stripFeatures` (so any feature-strip rules
  * have already pruned files) and BEFORE `rewritePackageManagerFields`
@@ -309,6 +329,12 @@ export async function applyUiSnapshot(
         `(expected one of: ${Array.from(UI_VARIANTS).join(', ')})`
     );
   }
+  // Scrub any leftover snapshot artefacts before bailing on `custom` —
+  // re-running this fn over a tree that previously had `--ui shadcn`
+  // would otherwise leave `components.json`, the snapshot eslint
+  // override, and any animate-ui-only subtrees behind. Cheap on a fresh
+  // scaffold (every unlink is ENOENT-ignored).
+  await scrubSnapshotArtefacts(projectDir);
   if (ui === 'custom') return;
 
   const snapshotDir = path.join(snapshotsRoot, ui);
@@ -400,7 +426,36 @@ export async function applyUiSnapshot(
   //    no-ops when it isn't — so `--ui custom` and the template-react
   //    package itself stay strict on their own project-authored
   //    primitives.
-  await writeUiSnapshotEslintOverride(projectDir, ui);
+  await writeUiSnapshotEslintOverride(projectDir, ui, snapshotDir);
+}
+
+/**
+ * Remove any orphan artefacts a previous snapshot run may have written
+ * into `projectDir`. Idempotent and ENOENT-tolerant — safe to call on a
+ * fresh scaffold (every removal is a no-op there). Necessary when the
+ * same dir is reused across `applyUiSnapshot` invocations (preview-site
+ * cache reuse, manual re-scaffold over the same target) so a previous
+ * `--ui shadcn` run doesn't leave `components.json` /
+ * `eslint.config.ui-snapshot.js` lying around when the new run is
+ * `--ui custom`, or animate-ui-only subtrees when the new run is shadcn.
+ */
+async function scrubSnapshotArtefacts(projectDir: string): Promise<void> {
+  await Promise.all([
+    rm(path.join(projectDir, 'components.json'), { force: true }),
+    rm(path.join(projectDir, UI_SNAPSHOT_ESLINT_FILE), { force: true }),
+    rm(path.join(projectDir, 'src', 'components', 'animate-ui'), {
+      force: true,
+      recursive: true,
+    }),
+    rm(path.join(projectDir, 'src', 'hooks'), {
+      force: true,
+      recursive: true,
+    }),
+    rm(path.join(projectDir, 'src', 'lib'), {
+      force: true,
+      recursive: true,
+    }),
+  ]);
 }
 
 async function mergePackageDeps(
@@ -466,16 +521,36 @@ const SNAPSHOT_RULES_OFF = {
   'react-refresh/only-export-components': 'off',
 } as const;
 
-function buildUiSnapshotEslintConfig(ui: UiVariant): string {
+/**
+ * Walk the snapshot's `src/` tree and return one glob per top-level
+ * subdirectory the snapshot ships, EXCEPT `shared/ui/` (already covered
+ * by per-file globs in `SNAPSHOT_UI_FILE_GLOBS`). Empty array when the
+ * snapshot ships nothing outside `src/shared/ui/` (today this is the
+ * shadcn shape).
+ *
+ * Derived rather than hard-coded so a future shadcn registry that
+ * starts shipping `src/hooks/` or `src/lib/` doesn't silently lint-fail
+ * on the snapshot files until someone remembers to update a list here.
+ */
+async function deriveExtraEslintGlobs(snapshotDir: string): Promise<string[]> {
+  const srcDir = path.join(snapshotDir, 'src');
+  if (!(await pathExists(srcDir))) return [];
+  const entries = await readdir(srcDir, { withFileTypes: true });
+  const out: string[] = [];
+  for (const e of entries) {
+    if (!e.isDirectory()) continue;
+    if (e.name === 'shared') continue;
+    out.push(`src/${e.name}/**/*.{ts,tsx}`);
+  }
+  return out.sort();
+}
+
+async function buildUiSnapshotEslintConfig(
+  ui: UiVariant,
+  snapshotDir: string
+): Promise<string> {
   if (ui === 'custom') return '';
-  const extraGlobs =
-    ui === 'animate-ui'
-      ? [
-          'src/components/animate-ui/**/*.{ts,tsx}',
-          'src/hooks/**/*.{ts,tsx}',
-          'src/lib/**/*.{ts,tsx}',
-        ]
-      : [];
+  const extraGlobs = await deriveExtraEslintGlobs(snapshotDir);
   const files = [...SNAPSHOT_UI_FILE_GLOBS, ...extraGlobs];
   const filesLiteral = files.map((f) => `    '${f}'`).join(',\n');
   const rulesLiteral = Object.entries(SNAPSHOT_RULES_OFF)
@@ -515,10 +590,11 @@ function buildUiSnapshotEslintConfig(ui: UiVariant): string {
 
 async function writeUiSnapshotEslintOverride(
   projectDir: string,
-  ui: UiVariant
+  ui: UiVariant,
+  snapshotDir: string
 ): Promise<void> {
   if (ui === 'custom') return;
-  const text = buildUiSnapshotEslintConfig(ui);
+  const text = await buildUiSnapshotEslintConfig(ui, snapshotDir);
   if (!text) return;
   await writeFile(
     path.join(projectDir, UI_SNAPSHOT_ESLINT_FILE),
@@ -531,5 +607,5 @@ async function writeUiSnapshotEslintOverride(
 // Exports
 // =================================================================================================
 
-export { REPLACEABLE_UI_FILES, buildUiSnapshotEslintConfig };
+export { REPLACEABLE_UI_FILES };
 export const UI_SNAPSHOT_ESLINT_FILE = 'eslint.config.ui-snapshot.js';

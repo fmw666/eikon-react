@@ -21,7 +21,7 @@ mandatory** and both fail the CI pipeline shipped at
 
 `pnpm ci` is identical plus `build` and is what CI invokes.
 
-`pnpm test:structure` runs only the 10 structural tests (fast, for
+`pnpm test:structure` runs only the 12 structural tests (fast, for
 inner-loop iteration).
 
 Note on `.agent/`: the meta-protocol surface (rules, skills, this
@@ -37,7 +37,7 @@ the conventions in `.agent/README.md` as guidance, not as a gate.
 
 Lives under [`__tests__/structure/`](../../__tests__/structure/) with
 a shared helper [`_helpers.ts`](../../__tests__/structure/_helpers.ts).
-The 10 specs map 1:1 to the structural concerns in
+The 12 specs map 1:1 to the structural concerns in
 [`00-architecture.md`](./00-architecture.md):
 
 | Spec | Guards |
@@ -46,12 +46,14 @@ The 10 specs map 1:1 to the structural concerns in
 | `feature-public-api.test.ts` | Each feature `index.ts` exports the canonical set of symbols and does not leak private subpaths |
 | `feature-i18n-parity.test.ts` | en/zh key sets match exactly per feature; key segments are camelCase |
 | `app-shell.test.ts` | `src/app/` has providers/router/RootLayout + sibling layout(s) + no feature-flavoured subdirs |
+| `apps-shape.test.ts` | Platform-shell directories (`apps/desktop` Tauri 2, `apps/mobile` Capacitor 6) match the build layout each shell expects; absent under `--platform web` |
 | `shared-shape.test.ts` | `src/shared/` only contains whitelisted subdirs; barrels exist where required |
 | `styles-shape.test.ts` | Only `src/styles/index.css` exists; `@theme` declared; no `tailwind.config.*` |
 | `src-root.test.ts` | `src/` root has only `main.tsx`/`App.tsx`/`vite-env.d.ts` + 4 fixed dirs |
 | `tests-root.test.ts` | `__tests__/` has setup/test-utils + the 4 fixed subfolders; no loose specs |
 | `repo-root-files.test.ts` | Every config file the workflow assumes exists; `package.json` has the full script set |
 | `boundary-imports.test.ts` | Rules 1–5 of the import boundary contract enforced via filesystem scan |
+| `marker-balance.test.ts` | Per-file balance of `@eikon:variant(axis=value) begin / end` pairs across `src/**/*.{ts,tsx,css}` + root `index.html` |
 
 When adding a new feature, the first three (`feature-shape`,
 `feature-public-api`, `feature-i18n-parity`) get coverage automatically

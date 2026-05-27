@@ -452,7 +452,7 @@ async function scaffold(opts: CliOptions): Promise<void> {
   // doesn't fight the snapshot, and BEFORE rewritePackageManagerFields
   // so the deps merge happens on the same package.json the rewriter
   // mutates.
-  await applyUiSnapshot(opts.targetDir, opts.variants.ui ?? 'animate-ui');
+  await applyUiSnapshot(opts.targetDir, opts.variants.ui ?? DEFAULT_VARIANTS.ui!);
 
   // Phase I: stamp the picked design / layout onto `<html>` so the
   // first paint renders without a flash and the runtime initialisers in
@@ -475,8 +475,16 @@ async function scaffold(opts: CliOptions): Promise<void> {
   if (opts.initGit) {
     s.start('Initializing git repository');
     try {
-      await initGit(opts.targetDir);
-      s.stop('Git repository initialized');
+      const result = await initGit(opts.targetDir);
+      if (result.commitWarning) {
+        s.stop('Git repository initialized (no initial commit)');
+        log.warn(
+          `git commit skipped: ${result.commitWarning}. ` +
+            `Set user.email / user.name and run \`git commit\` manually.`
+        );
+      } else {
+        s.stop('Git repository initialized');
+      }
     } catch (err) {
       s.stop('Skipping git init (git not available or already initialized)');
       log.warn(String(err));
@@ -532,17 +540,92 @@ function parseArgs(argv: string[]): ParsedArgs {
       if (a.indexOf('=') === -1) i += 1;
     } else if (!a.startsWith('-') && out.name === undefined) {
       out.name = a;
+    } else if (a.startsWith('-')) {
+      reportUnknownFlag(a);
     }
   }
   return out;
 }
 
 /**
+ * Every long-form flag the CLI recognises. Used to suggest a "did you
+ * mean" candidate when the user typo's a flag name. Variant flags come
+ * straight from `VARIANT_FLAG_ALIASES` so a future axis automatically
+ * lands in the suggestion set without a second touch-point here.
+ */
+function knownFlags(): readonly string[] {
+  const variantFlags: string[] = [];
+  for (const axis of Object.keys(VARIANT_FLAG_ALIASES) as VariantAxis[]) {
+    for (const alias of VARIANT_FLAG_ALIASES[axis]) {
+      variantFlags.push(`--${alias}`);
+    }
+  }
+  return [
+    '--yes',
+    '-y',
+    '--supabase',
+    '--no-supabase',
+    '--install',
+    '--no-install',
+    '--git',
+    '--no-git',
+    '--pm',
+    ...variantFlags,
+  ];
+}
+
+/**
+ * Print a clear "Unknown flag: --x. Did you mean --y?" and exit non-zero.
+ * The previous behaviour silently ignored typos, which meant
+ * `create-eikon-react my-app --platfrom=mobile` ran as `web` with no
+ * indication anything had gone wrong — the user thought they'd asked
+ * for mobile and didn't notice until much later.
+ */
+function reportUnknownFlag(typed: string): never {
+  const flagOnly = typed.split('=')[0]!;
+  const candidates = knownFlags();
+  let best: { flag: string; dist: number } | null = null;
+  for (const cand of candidates) {
+    const d = levenshtein(flagOnly, cand);
+    if (best === null || d < best.dist) best = { flag: cand, dist: d };
+  }
+  console.error(kleur.red(`Unknown flag: ${flagOnly}`));
+  if (best && best.dist <= Math.max(2, Math.floor(flagOnly.length / 3))) {
+    console.error(`Did you mean ${kleur.cyan(best.flag)}?`);
+  }
+  console.error(`Run ${kleur.cyan('create-eikon-react --help')} to see all flags.`);
+  process.exit(1);
+}
+
+function levenshtein(a: string, b: string): number {
+  if (a === b) return 0;
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const prev = new Array<number>(b.length + 1);
+  const curr = new Array<number>(b.length + 1);
+  for (let j = 0; j <= b.length; j++) prev[j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    curr[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      curr[j] = Math.min(curr[j - 1]! + 1, prev[j]! + 1, prev[j - 1]! + cost);
+    }
+    for (let j = 0; j <= b.length; j++) prev[j] = curr[j]!;
+  }
+  return prev[b.length]!;
+}
+
+/**
  * Parse one of the variant flags (`--design / --layout / --ui`) in either
- * `--flag value` or `--flag=value` form. Returns true if the token belonged to
- * a known variant axis (and was therefore consumed) regardless of whether the
- * value was valid; invalid values are silently ignored so unknown values still
- * fall through to the interactive prompt or the default.
+ * `--flag value` or `--flag=value` form. Returns true if the token belonged
+ * to a known variant axis (and was therefore consumed) regardless of
+ * whether the value was valid.
+ *
+ * Always records the typed value when one was supplied (skipping only
+ * tokens shaped like another flag, e.g. `--ui --design`), so
+ * `resolveVariants` can produce a single, descriptive warning naming the
+ * value, the axis, and the chosen default — visible in `--yes` mode
+ * where there's no interactive re-prompt to soften the failure.
  */
 function tryParseVariant(
   token: string,
@@ -562,10 +645,7 @@ function tryParseVariant(
       } else {
         continue;
       }
-      if (
-        value !== undefined &&
-        (VARIANT_CHOICES[axis] as readonly string[]).includes(value)
-      ) {
+      if (value !== undefined && !value.startsWith('-')) {
         out.variants ??= {};
         out.variants[axis] = value;
       }
