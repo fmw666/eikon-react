@@ -56,3 +56,6 @@ coverage
 *.pem
 *.local
 .git-commit-msg.tmp
+
+# Claude Code — local-machine permission overrides
+.claude/settings.local.json
