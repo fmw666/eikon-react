@@ -183,10 +183,10 @@ return (
 
 Important:
 
-- `<Command>` is gated by `@eikon:feature(examples) file` and `cmdk`
-  is pruned from `package.json` when the `examples` feature is
-  stripped. To ship a command palette in a scaffolded project, copy
-  the file, drop the marker, and add `cmdk` back to dependencies.
+- `<Command>` ships unconditionally with every scaffold (the examples
+  showcase is its only template-internal consumer; the `cmdk` runtime
+  dependency is on by default). Import it in your own pages directly
+  from `@/shared/ui/command`.
 - The shortcut listener must `preventDefault()` on match — Chrome
   binds ⌘K to the address bar otherwise.
 - Items invoke `onSelect`, not `onClick` — `cmdk` only fires the

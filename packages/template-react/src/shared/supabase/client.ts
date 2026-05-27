@@ -23,6 +23,29 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 const url = import.meta.env.VITE_SUPABASE_URL;
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+/**
+ * The literal example URL Supabase prints in their "create project"
+ * docs. If a developer copies the example into `.env.local` without
+ * editing, fail fast at module load instead of letting it ride until
+ * the first `.from()` call hits the network and 401s.
+ *
+ * Empty env (the shape inside the playground iframe and in tests that
+ * forgot to mock `@/shared/supabase`) is a separate case: we keep the
+ * stub-client fallback below so module loading doesn't crash a context
+ * that never actually calls Supabase. Production misconfig is the bug
+ * we want loud; missing env in non-prod isn't.
+ */
+const PLACEHOLDER_URL_RE = /^(?:https?:\/\/)?your-project-id\.supabase\.co\/?$/i;
+
+if (url && PLACEHOLDER_URL_RE.test(url)) {
+  throw new Error(
+    '[supabase] VITE_SUPABASE_URL is still set to the example value ' +
+      '(your-project-id.supabase.co). Replace it with your real ' +
+      'Supabase project URL in `.env.local`, or scaffold with ' +
+      '`--no-supabase` if you do not want a backend yet.'
+  );
+}
+
 if (!url || !anonKey) {
   console.warn(
     '[supabase] VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is missing; the client will not work until configured.'

@@ -4,12 +4,23 @@
  *
  * Two shapes are recognised (see `.agent/rules/00-architecture.md`):
  *
- *   - pure-client: index.ts + routes.tsx + pages/ ; optional stores/,
- *     components/, hooks/, i18n/.
- *   - data-layer (has services/): index.ts + routes.tsx + pages/ +
- *     store/<feature>Store.ts + selectors/{basic,computed,actions,index}.ts +
- *     services/{interfaces/I<F>Service.ts, factory/<f>ServiceFactory.ts,
- *     <f>Service.ts, implementations/<X><F>Service.ts (>=1)} + types.ts.
+ *   - pure-client (e.g. `counter`): index.ts + routes.tsx + pages/ ;
+ *     optional `stores/` (plural — multiple small zustand stores allowed),
+ *     `components/`, `hooks/`, `i18n/`. NO `services/`, `selectors/`, or
+ *     singular `store/`.
+ *   - data-layer (e.g. `tasks`, `auth` — has `services/`):
+ *     index.ts + routes.tsx + pages/ +
+ *     `store/<feature>Store.ts` (singular — exactly ONE zustand store
+ *     per feature) +
+ *     `selectors/{basic,computed,actions,index}.ts` +
+ *     `services/{interfaces/I<F>Service.ts, factory/<f>ServiceFactory.ts,
+ *     <f>Service.ts, implementations/<X><F>Service.ts (>=1)}` + types.ts.
+ *
+ * The `store/` (singular) vs `stores/` (plural) split is intentional:
+ * data-layer features always have exactly one store, and the convention
+ * makes that visible in the directory shape. Both shapes are
+ * allowlisted below; `_helpers.ts:listFeatures()` decides which shape
+ * a given feature claims based on the presence of `services/`.
  *
  * A failure here means a feature's filesystem footprint diverged from
  * the contract and downstream consumers (selectors, app shell, service

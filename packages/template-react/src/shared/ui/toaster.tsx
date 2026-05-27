@@ -44,7 +44,7 @@ type Position =
   | 'bottom-right'
   | 'bottom-center';
 
-const INITIAL_POSITION = [
+const INITIAL_POSITION = ([
   // @eikon:variant(toastPosition=top-right) begin
   'top-right',
   // @eikon:variant(toastPosition=top-right) end
@@ -57,7 +57,7 @@ const INITIAL_POSITION = [
   // @eikon:variant(toastPosition=bottom-right) begin
   'bottom-right',
   // @eikon:variant(toastPosition=bottom-right) end
-].at(0)! as Position;
+].at(0) ?? 'top-right') as Position;
 
 // =================================================================================================
 // Component

@@ -79,10 +79,9 @@ const leftTabs: TabSpec[] = [
 
 const rightTabs: TabSpec[] = [
   { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks', icon: CheckSquare },
-  // @eikon:feature(examples) begin
-  // Examples is a DEV-ONLY showcase route; in production builds and in
-  // scaffolded projects this entry collapses out, leaving a single tab
-  // on the right side.
+  // Examples is a DEV-ONLY showcase route; in production builds the
+  // ternary falls through to `/profile`, leaving a single tab on the
+  // right side instead of two.
   ...(import.meta.env.DEV
     ? [
         {
@@ -100,7 +99,6 @@ const rightTabs: TabSpec[] = [
           icon: User,
         },
       ]),
-  // @eikon:feature(examples) end
 ];
 
 // =================================================================================================

@@ -16,8 +16,8 @@
  *     no bespoke active-state hooks needed.
  *
  * Tabs displayed: Home / Counter / Tasks (+ Examples in dev). The
- * `Examples` tab is gated by `import.meta.env.DEV` and stripped from
- * scaffolded projects via the `@eikon:feature(examples)` markers.
+ * `Examples` tab is gated by `import.meta.env.DEV` so production
+ * bundles drop it.
  *
  * One of the layout variants selected via `--layout` at scaffold time;
  * the dispatcher at `./RootLayout.tsx` re-exports whichever variant won.
@@ -70,11 +70,9 @@ const tabs: TabSpec[] = [
   { to: '/', key: 'nav.home', fallback: 'Home', icon: Home, end: true },
   { to: '/counter', key: 'nav.counter', fallback: 'Counter', icon: Plus },
   { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks', icon: CheckSquare },
-  // @eikon:feature(examples) begin
   // Examples is a DEV-ONLY showcase. The route only registers when
-  // `import.meta.env.DEV` is true (see app/router.tsx); the CLI strips
-  // this entry from scaffolded projects so end users never see a
-  // broken tab.
+  // `import.meta.env.DEV` is true (see `app/router.tsx`); production
+  // bundles drop the entry.
   ...(import.meta.env.DEV
     ? [
         {
@@ -85,7 +83,6 @@ const tabs: TabSpec[] = [
         },
       ]
     : []),
-  // @eikon:feature(examples) end
 ];
 
 // =================================================================================================

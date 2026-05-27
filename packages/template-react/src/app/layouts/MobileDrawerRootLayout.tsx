@@ -79,11 +79,9 @@ const navLinks: NavLinkSpec[] = [
   { to: '/', key: 'nav.home', fallback: 'Home', icon: Home, end: true },
   { to: '/counter', key: 'nav.counter', fallback: 'Counter', icon: Plus },
   { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks', icon: CheckSquare },
-  // @eikon:feature(examples) begin
   // Examples is a DEV-ONLY showcase. The route only registers when
-  // `import.meta.env.DEV` is true (see app/router.tsx); the CLI strips
-  // this entry from scaffolded projects so end users never see a
-  // broken link in their drawer.
+  // `import.meta.env.DEV` is true (see `app/router.tsx`); production
+  // bundles drop the entry.
   ...(import.meta.env.DEV
     ? [
         {
@@ -94,7 +92,6 @@ const navLinks: NavLinkSpec[] = [
         },
       ]
     : []),
-  // @eikon:feature(examples) end
 ];
 
 // =================================================================================================

@@ -1,0 +1,7 @@
+# Build-cache directories must never end up inside a `git archive`
+# tarball or a `git diff` patch even if someone bypasses .gitignore
+# with `git add -f`. The `export-ignore` attribute removes them from
+# the archive output; pair this with the .gitignore entries which
+# keep them out of `git add` in the first place.
+.preview-cache/ export-ignore
+.preview-cache export-ignore

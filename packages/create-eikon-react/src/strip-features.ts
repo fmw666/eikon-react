@@ -140,14 +140,15 @@ export interface StripOptions {
  * Walk the project tree and remove code/files corresponding to disabled
  * features and to non-chosen variants.
  *
- * `variants` is optional for backward compatibility (callers that only deal
- * with feature flags can omit it); when not provided, no variant marker is
- * stripped — the template behaves exactly as it did before variants existed.
+ * `variants` is required: every caller (CLI's `index.ts`, the playground's
+ * `builder.ts`, every test) constructs an explicit selection. A
+ * fallback default would silently mask regressions where variants
+ * accidentally drop from the call site.
  */
 export async function stripFeatures(
   root: string,
   flags: FeatureFlags,
-  variants: VariantSelections = {},
+  variants: VariantSelections,
   options: StripOptions = {}
 ): Promise<void> {
   const disabled = new Set<string>();

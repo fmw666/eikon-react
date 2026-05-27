@@ -47,18 +47,14 @@ const navLinks: NavLinkSpec[] = [
   { to: '/', key: 'nav.home', fallback: 'Home', end: true },
   { to: '/counter', key: 'nav.counter', fallback: 'Counter' },
   { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks' },
-  // @eikon:feature(examples) begin
   // Examples is a DEV-ONLY showcase. The route only registers when
-  // `import.meta.env.DEV` is true (see app/router.tsx), so production
-  // template builds never wire it in. The CLI additionally strips this
-  // whole entry out of scaffolded projects so end users never see a
-  // broken link in their nav. The preview playground keeps the showcase
-  // and builds the template as `mode: 'development'`, so the gate stays
-  // open inside its iframe.
+  // `import.meta.env.DEV` is true (see `app/router.tsx`), so production
+  // template builds never wire it in. The preview playground keeps the
+  // showcase and builds the template as `mode: 'development'`, so the
+  // gate stays open inside its iframe.
   ...(import.meta.env.DEV
     ? [{ to: '/examples', key: 'nav.examples', fallback: 'Examples' }]
     : []),
-  // @eikon:feature(examples) end
 ];
 
 // =================================================================================================

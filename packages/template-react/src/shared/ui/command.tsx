@@ -1,14 +1,13 @@
-// @eikon:feature(examples) file
 /**
  * @file command.tsx
  * @description Command-palette primitive built on top of `cmdk`.
  *
- * Whole file is gated by `@eikon:feature(examples) file`: the only
- * consumer in the unstripped template is the examples showcase, and
- * the `cmdk` runtime dependency is pruned by the CLI's
- * `PACKAGE_DEPS_BY_FEATURE.examples` entry. Scaffolded end-user
- * projects that want a command palette can re-add the file +
- * dependency in one paste (see `.agent/skills/add-modal/SKILL.md`).
+ * The only consumer in the unstripped template is the examples
+ * showcase, which ships unconditionally in scaffolded projects (the
+ * runtime `import.meta.env.DEV` gate in `app/router.tsx` keeps it out
+ * of production bundles). End users that want a command palette in
+ * their own pages can re-use this primitive; see
+ * `.agent/skills/add-modal/SKILL.md` for the patterns.
  *
  * Public surface mirrors the shadcn/ui shape so existing patterns
  * carry over:

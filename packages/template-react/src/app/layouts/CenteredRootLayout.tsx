@@ -61,12 +61,10 @@ const navLinks: NavLinkSpec[] = [
   { to: '/', key: 'nav.home', fallback: 'Home', end: true },
   { to: '/counter', key: 'nav.counter', fallback: 'Counter' },
   { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks' },
-  // @eikon:feature(examples) begin
   // Dev-only — see StackedRootLayout for the full rationale.
   ...(import.meta.env.DEV
     ? [{ to: '/examples', key: 'nav.examples', fallback: 'Examples' }]
     : []),
-  // @eikon:feature(examples) end
 ];
 
 // =================================================================================================

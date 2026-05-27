@@ -49,9 +49,6 @@ Thumbs.db
 coverage
 .nyc_output
 
-# Husky
-.husky/_
-
 # OS / misc
 *.pem
 *.local

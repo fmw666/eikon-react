@@ -56,7 +56,7 @@ describe('stripFeatures — file marker is first-line-only', () => {
       file,
       ['// @eikon:feature(supabase) file', 'export const x = 1;'].join('\n')
     );
-    await stripFeatures(dir, FLAGS);
+    await stripFeatures(dir, FLAGS, {});
     expect(existsSync(file)).toBe(false);
   });
 
@@ -77,7 +77,7 @@ describe('stripFeatures — file marker is first-line-only', () => {
         '```',
       ].join('\n')
     );
-    await stripFeatures(dir, FLAGS);
+    await stripFeatures(dir, FLAGS, {});
     expect(existsSync(file)).toBe(true);
   });
 
@@ -91,7 +91,7 @@ describe('stripFeatures — file marker is first-line-only', () => {
         'Open the file with `// @eikon:feature(supabase) file` on line 1.',
       ].join('\n')
     );
-    await stripFeatures(dir, FLAGS);
+    await stripFeatures(dir, FLAGS, {});
     expect(existsSync(file)).toBe(true);
   });
 
@@ -104,7 +104,7 @@ describe('stripFeatures — file marker is first-line-only', () => {
         'export const x = 1;',
       ].join('\n')
     );
-    await stripFeatures(dir, FLAGS);
+    await stripFeatures(dir, FLAGS, {});
     expect(existsSync(file)).toBe(false);
   });
 
@@ -114,7 +114,7 @@ describe('stripFeatures — file marker is first-line-only', () => {
       file,
       ['', '// @eikon:feature(supabase) file', 'export const x = 1;'].join('\n')
     );
-    await stripFeatures(dir, FLAGS);
+    await stripFeatures(dir, FLAGS, {});
     // Line-1 must be the marker; empty line 1 doesn't count.
     expect(existsSync(file)).toBe(true);
   });
@@ -134,7 +134,7 @@ describe('stripFeatures — file marker is first-line-only', () => {
         '// @eikon:feature(supabase) file',
       ].join('\n')
     );
-    await stripFeatures(dir, FLAGS);
+    await stripFeatures(dir, FLAGS, {});
     expect(existsSync(file)).toBe(true);
   });
 });

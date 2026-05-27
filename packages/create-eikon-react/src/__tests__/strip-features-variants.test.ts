@@ -220,7 +220,7 @@ describe('stripFeatures with variants (file-level)', () => {
 
     await stripFeatures(tmp, {
       supabase: false,
-    });
+    }, {});
 
     const after = await readFile(filePath, 'utf8');
     expect(after).toBe(original);

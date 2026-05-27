@@ -30,6 +30,7 @@
     "postinstall": "simple-git-hooks || true"
   },
   "simple-git-hooks": {
+    "pre-commit": "node scripts/check-no-preview-cache.mjs",
     "pre-push": "pnpm verify"
   },
   "pnpm": {

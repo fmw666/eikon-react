@@ -13,11 +13,6 @@
  * The preview playground builds the template with `mode: 'development'`,
  * which keeps that gate open inside its iframe and renders the
  * showcase routes for in-browser preview.
- *
- * The `@eikon:feature(examples)` markers across the tree are now inert
- * (no consumer adds 'examples' to strip-features' disabled set), but
- * they're left in place as documentation and as a ready hook should
- * the strip ever need to come back.
  */
 
 // =================================================================================================

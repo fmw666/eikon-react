@@ -53,7 +53,6 @@ function HomePage() {
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
-        {/* @eikon:feature(examples) begin */}
         {import.meta.env.DEV && (
           <Button asChild size="lg" variant="secondary">
             <Link to="/examples">
@@ -61,7 +60,6 @@ function HomePage() {
             </Link>
           </Button>
         )}
-        {/* @eikon:feature(examples) end */}
         <Button asChild size="lg" variant="outline">
           <a href="https://github.com/fmw666/eikon-react" target="_blank" rel="noreferrer noopener">
             GitHub

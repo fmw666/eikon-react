@@ -448,10 +448,21 @@ async function scaffold(opts: CliOptions): Promise<void> {
   // primitives for the upstream-registry copies pre-baked under
   // `template-snapshots/<ui>/`, drops `components.json` at the project
   // root, and merges the snapshot's `package-deps.json` into the
-  // project's `package.json`. Runs AFTER stripFeatures so feature-strip
-  // doesn't fight the snapshot, and BEFORE rewritePackageManagerFields
-  // so the deps merge happens on the same package.json the rewriter
-  // mutates.
+  // project's `package.json`.
+  //
+  // Scaffold step order:
+  //   stripFeatures → applyUiSnapshot → injectHtmlVariants → rewritePackageManagerFields
+  //
+  // - applyUiSnapshot runs AFTER stripFeatures so feature-strip doesn't
+  //   fight the snapshot files we're about to drop in.
+  // - applyUiSnapshot runs BEFORE rewritePackageManagerFields so the
+  //   deps merge happens on the same package.json the rewriter mutates.
+  // - The order between applyUiSnapshot and injectHtmlVariants is
+  //   convention rather than necessity — applyUiSnapshot only touches
+  //   `src/shared/ui/*.tsx`, `components.json`, and `package.json`,
+  //   while injectHtmlVariants only edits `index.html`. The two are
+  //   disjoint; if the snapshot ever starts rewriting `index.html` this
+  //   ordering MUST be preserved (snapshot first).
   await applyUiSnapshot(opts.targetDir, opts.variants.ui ?? DEFAULT_VARIANTS.ui!);
 
   // Phase I: stamp the picked design / layout onto `<html>` so the

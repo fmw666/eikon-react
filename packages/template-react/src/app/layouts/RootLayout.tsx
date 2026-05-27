@@ -75,7 +75,7 @@ import { BottomTabsFabRootLayout } from './BottomTabsFabRootLayout';
  * variant's entry remains; the dispatcher then resolves to the single
  * component (or falls back via `Object.values(...)[0]`).
  */
-const LAYOUT_BY_VARIANT: Partial<Record<LayoutVariant, () => React.ReactElement>> = {
+const LAYOUT_BY_VARIANT: Partial<Record<LayoutVariant, React.ComponentType>> = {
   // @eikon:variant(layout=stacked) begin
   stacked: StackedRootLayout,
   // @eikon:variant(layout=stacked) end

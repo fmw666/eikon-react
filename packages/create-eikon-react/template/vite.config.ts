@@ -85,9 +85,9 @@ export default defineConfig(({ mode: _mode }) => ({
             return 'ui-vendor';
           }
           if (
-            id.includes('node_modules/react/') ||
-            id.includes('node_modules/react-dom/') ||
-            id.includes('node_modules/scheduler/')
+            /node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?react\//.test(id) ||
+            /node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?react-dom\//.test(id) ||
+            /node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?scheduler\//.test(id)
           ) {
             return 'react';
           }
