@@ -361,7 +361,6 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
     // the file/code simulator remains the source of truth for whether a
     // real CLI scaffold would include or strip those files.
     supabase: true,
-    i18n: true,
   };
   const variants: VariantSelections = {
     // These values only seed marker-aware helpers. Every playground axis

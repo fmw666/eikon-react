@@ -24,15 +24,15 @@ describe('stripBlocksForFeature', () => {
       '// @eikon:feature(supabase) begin',
       'import { supabase } from "@/shared/supabase";',
       '// @eikon:feature(supabase) end',
-      '// @eikon:feature(i18n) begin',
-      'import { useTranslation } from "react-i18next";',
-      '// @eikon:feature(i18n) end',
+      '// @eikon:feature(analytics) begin',
+      'import { trackEvent } from "@/shared/analytics";',
+      '// @eikon:feature(analytics) end',
     ].join('\n');
 
     const out = stripBlocksForFeature(input, 'supabase');
     expect(out).not.toContain('supabase');
-    expect(out).toContain('useTranslation');
-    expect(out).toContain('@eikon:feature(i18n)');
+    expect(out).toContain('trackEvent');
+    expect(out).toContain('@eikon:feature(analytics)');
   });
 
   it('handles JSX-style {/* … */} block markers', () => {

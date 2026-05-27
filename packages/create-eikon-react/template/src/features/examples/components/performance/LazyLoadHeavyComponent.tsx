@@ -16,9 +16,7 @@
 import * as React from 'react';
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 
 // --- Third-party Libraries ---
 import { CheckCircle2 } from 'lucide-react';
@@ -28,13 +26,8 @@ import { CheckCircle2 } from 'lucide-react';
 // =================================================================================================
 
 function LazyLoadHeavyComponent({ onMount }: { onMount?: () => void }) {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation('examples');
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (_k: string) => _k;
-  // @eikon:feature(i18n:fallback) end
 
   React.useEffect(() => {
     onMount?.();

@@ -94,17 +94,17 @@ describe('strip block regex caching', () => {
       '// @eikon:feature(supabase) begin',
       'const s = sb();',
       '// @eikon:feature(supabase) end',
-      '// @eikon:feature(i18n) begin',
-      'const t = useTranslation();',
-      '// @eikon:feature(i18n) end',
+      '// @eikon:feature(analytics) begin',
+      'const t = trackEvent();',
+      '// @eikon:feature(analytics) end',
     ].join('\n');
     const removedSupabase = stripBlocksForFeature(mixed, 'supabase');
-    expect(removedSupabase).toContain('const t = useTranslation();');
+    expect(removedSupabase).toContain('const t = trackEvent();');
     expect(removedSupabase).not.toContain('const s = sb();');
 
-    const removedI18n = stripBlocksForFeature(mixed, 'i18n');
-    expect(removedI18n).toContain('const s = sb();');
-    expect(removedI18n).not.toContain('const t = useTranslation();');
+    const removedAnalytics = stripBlocksForFeature(mixed, 'analytics');
+    expect(removedAnalytics).toContain('const s = sb();');
+    expect(removedAnalytics).not.toContain('const t = trackEvent();');
   });
 });
 

@@ -37,7 +37,7 @@ import {
 // Fixture
 // =================================================================================================
 
-const FLAGS = { supabase: false, i18n: true } as const;
+const FLAGS = { supabase: false } as const;
 
 /**
  * Build a temp directory containing the four files that participate in

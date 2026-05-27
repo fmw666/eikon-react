@@ -26,9 +26,7 @@
 // =================================================================================================
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 
 // --- Third-party Libraries ---
 import { LogIn, LogOut } from 'lucide-react';
@@ -54,14 +52,8 @@ interface SignInButtonProps {
 }
 
 function SignInButton({ className }: SignInButtonProps) {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation('auth');
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (k: string, opts?: { defaultValue?: string; email?: string }) =>
-  //   (opts?.defaultValue ?? k).replace('{{email}}', opts?.email ?? '');
-  // @eikon:feature(i18n:fallback) end
 
   const user = useSignedInUser();
   const isSubmitting = useAuthSubmitting();

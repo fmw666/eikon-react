@@ -21,9 +21,7 @@
 import * as React from 'react';
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 
 // --- Third-party Libraries ---
 import { Loader2, Trash2 } from 'lucide-react';
@@ -83,28 +81,8 @@ const STATUS_CLASS: Record<TaskStatus, string> = {
 // =================================================================================================
 
 function TaskCard({ task, onClick, onDelete, className }: TaskCardProps) {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation('tasks');
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (k: string, opts?: { defaultValue?: string; title?: string }) => {
-  //   const fallback: Record<string, string> = {
-  //     'status.pending': 'Pending',
-  //     'status.in_progress': 'In progress',
-  //     'status.completed': 'Completed',
-  //     'delete.button': 'Delete task',
-  //     'delete.confirmTitle': 'Delete this task?',
-  //     'delete.confirmBody': 'This cannot be undone.',
-  //     'delete.cancel': 'Cancel',
-  //     'delete.confirm': 'Delete',
-  //   };
-  //   return (fallback[k] ?? opts?.defaultValue ?? k).replace(
-  //     '{{title}}',
-  //     opts?.title ?? ''
-  //   );
-  // };
-  // @eikon:feature(i18n:fallback) end
 
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);

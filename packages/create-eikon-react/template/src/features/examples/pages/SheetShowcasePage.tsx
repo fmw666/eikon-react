@@ -24,9 +24,7 @@
 import * as React from 'react';
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 
 // --- Absolute Imports ---
 import { Button } from '@/shared/ui/button';
@@ -58,14 +56,8 @@ type Side = (typeof SIDES)[number];
 // =================================================================================================
 
 function SheetShowcasePage() {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation('examples');
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (_k: string, opts?: { defaultValue?: string }) =>
-  //   opts?.defaultValue ?? _k;
-  // @eikon:feature(i18n:fallback) end
 
   return (
     <div className="flex flex-col gap-8">

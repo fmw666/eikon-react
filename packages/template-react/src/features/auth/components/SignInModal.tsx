@@ -21,9 +21,7 @@
 import * as React from 'react';
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 
 // --- Third-party Libraries ---
 import { Github, Loader2 } from 'lucide-react';
@@ -108,13 +106,8 @@ function SignInModal({
   onSubmit,
   onOAuth,
 }: SignInModalProps) {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation('auth');
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k;
-  // @eikon:feature(i18n:fallback) end
 
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');

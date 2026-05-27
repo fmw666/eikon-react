@@ -12,9 +12,7 @@
 // =================================================================================================
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 import { Link } from 'react-router-dom';
 
 // --- Absolute Imports ---
@@ -25,20 +23,8 @@ import { Button } from '@/shared/ui/button';
 // =================================================================================================
 
 function NotFoundPage() {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation();
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (k: string) =>
-  //   ({
-  //     'notFound.code': '404',
-  //     'notFound.title': 'Page not found',
-  //     'notFound.description':
-  //       'The page you are looking for does not exist or has been moved.',
-  //     'notFound.back': 'Go home',
-  //   })[k] ?? k;
-  // @eikon:feature(i18n:fallback) end
 
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">

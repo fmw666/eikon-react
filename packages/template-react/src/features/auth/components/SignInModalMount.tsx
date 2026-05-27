@@ -20,12 +20,10 @@
 import * as React from 'react';
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
 
 // --- Absolute Imports ---
 import { loadNamespace } from '@/shared/i18n';
-// @eikon:feature(i18n) end
 
 import { toast } from '@/shared/ui/toaster';
 
@@ -61,7 +59,6 @@ function SignInModalMount() {
     signInWithOAuth,
   } = useAuthActions();
 
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation('auth');
 
   // Pre-load the auth namespace once so the modal renders translated
@@ -69,11 +66,7 @@ function SignInModalMount() {
   React.useEffect(() => {
     void loadNamespace('auth');
   }, []);
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (k: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? k;
-  // @eikon:feature(i18n:fallback) end
 
   const handleSubmit = async (out: SignInSubmit) => {
     try {

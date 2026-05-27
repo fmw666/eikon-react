@@ -125,69 +125,14 @@ t('items', { count: n });
 Do not preemptively suffix every key — only when the rendered string
 actually depends on plurality.
 
-## `@eikon:feature(i18n)` markers
+## i18n is baseline — no markers
 
-The i18n integration itself is an optional feature (the CLI's
-`--no-i18n` strips it). Two marker forms appear in source — both
-wrap content with `// @eikon:feature(<name>) begin` /
-`// @eikon:feature(<name>) end` lines, plus a
-`// @eikon:feature(i18n) file` form for file-level gating.
-
-- `@eikon:feature(i18n)` — **removed when stripped**. Wraps the
-  `useTranslation` import and the `const { t } = useTranslation('ns');`
-  line. After the strip there is no `t` in scope unless the matching
-  `i18n:fallback` block is also present.
-- `@eikon:feature(i18n:fallback)` — **uncommented when stripped**.
-  Wraps a block of *commented-out* fallback code that defines a local
-  `t` function. When `--no-i18n` runs, the strip removes the leading
-  `//` from every line inside the block, turning it into a working
-  hard-coded `t` shim. The visible JSX never changes.
-
-The canonical shape (copy from
-[src/features/home/pages/HomePage.tsx](../../../src/features/home/pages/HomePage.tsx)):
-
-```tsx
-// @eikon:feature(i18n) begin
-import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
-
-function MyPage() {
-  // @eikon:feature(i18n) begin
-  const { t } = useTranslation('myFeature');
-  // @eikon:feature(i18n) end
-
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (k: string) =>
-  //   ({
-  //     title: 'My title',
-  //     body: 'Body copy here',
-  //   })[k] ?? k;
-  // @eikon:feature(i18n:fallback) end
-
-  return <h1>{t('title')}</h1>;
-}
-```
-
-Rules when adding new copy to a component that already has the markers:
-
-- Add the new key + value to the commented-out fallback object so the
-  stripped variant still renders something sensible.
-- **Keep the fallback keys unprefixed** — they shadow `t('key')` calls
-  that themselves don't carry the namespace prefix in the new
-  per-feature layout.
-- Match the same English copy `en.json` uses (or a sensible default
-  for non-English-default keys).
-- If the component does not yet have the fallback block, add both
-  blocks together — never add the `useTranslation` block without the
-  fallback in a component that needs to render text.
-
-When `--no-i18n` is NOT a concern for your component (e.g. internal
-devtools, error overlays), you may omit the fallback block; just
-include the bare `useTranslation` markers so a future strip still
-compiles. If the file is *entirely* i18n-only (like
-`src/shared/i18n/index.ts`), use `// @eikon:feature(i18n) file` as
-the very first line of the file — the strip removes the file
-altogether.
+i18n is unconditional template infrastructure. Every scaffold ships
+with `react-i18next` wired up; there is no `--no-i18n` flag and no
+strip path. Adding a key is just the four steps above — no
+`@eikon:feature(...)` markers, no commented-out fallback shim, no
+ceremony. Write `useTranslation('ns')` and `t('key')` like normal
+React code.
 
 ## Completion checklist
 

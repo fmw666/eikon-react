@@ -67,9 +67,7 @@ Every non-trivial source file follows the v1 banner convention. Tooling (Prettie
 import { useEffect } from 'react';
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 import { useNavigate } from 'react-router-dom';
 
 // --- Third-party Libraries ---

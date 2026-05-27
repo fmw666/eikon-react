@@ -1,14 +1,8 @@
-// @eikon:feature(i18n) file
 /**
  * @file I18nShowcase.tsx
  * @description Inline showcase of the per-feature i18n contract. Lists
  * the active language + a sample copy block that re-renders the moment
  * the user toggles the LanguageSwitcher in the header.
- *
- * This file carries the `@eikon:feature(i18n) file` marker so that when
- * the CLI strips i18n out of the template the whole showcase disappears
- * with it (the index page imports this file via barrel, so the import
- * site is wrapped in `@eikon:feature(i18n) begin/end` too).
  */
 
 // =================================================================================================

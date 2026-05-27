@@ -15,9 +15,7 @@
 import { useEffect } from 'react';
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 import { useNavigate } from 'react-router-dom';
 
 // --- Third-party Libraries ---
@@ -42,19 +40,8 @@ import {
 // =================================================================================================
 
 function TasksIndexPage() {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation('tasks');
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (k: string) =>
-  //   ({
-  //     'index.title': 'Tasks',
-  //     'index.new': 'New task',
-  //     'index.loading': 'Loading tasks…',
-  //     'index.empty': 'No tasks yet — create the first one.',
-  //   })[k] ?? k;
-  // @eikon:feature(i18n:fallback) end
 
   const navigate = useNavigate();
   const tasks = useTasks();

@@ -25,9 +25,7 @@
 import * as React from 'react';
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 
 // --- Third-party Libraries ---
 import { toast, Toaster as SonnerToaster } from 'sonner';
@@ -61,14 +59,8 @@ const POSITIONS: Position[] = [
 // =================================================================================================
 
 function ToasterShowcasePage() {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation('examples');
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (_k: string, opts?: { defaultValue?: string }) =>
-  //   opts?.defaultValue ?? _k;
-  // @eikon:feature(i18n:fallback) end
 
   const [position, setPosition] = React.useState<Position>('top-right');
 

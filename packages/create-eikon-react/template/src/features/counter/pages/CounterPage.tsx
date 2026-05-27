@@ -12,9 +12,7 @@
 // =================================================================================================
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 
 // --- Third-party Libraries ---
 import { Minus, Plus, RotateCcw } from 'lucide-react';
@@ -39,25 +37,8 @@ import { useCounterStore } from '../stores/counterStore';
 // =================================================================================================
 
 function CounterPage() {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation('counter');
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (k: string, opts?: { value?: number }) =>
-  //   k === 'current'
-  //     ? `Current value: ${opts?.value ?? 0}`
-  //     : ({
-  //         title: 'Counter demo',
-  //         description:
-  //           'Demonstrates a feature-first module with Zustand state and tests.',
-  //         increment: 'Increment',
-  //         decrement: 'Decrement',
-  //         reset: 'Reset',
-  //         toastIncreased: 'Counter increased',
-  //         toastReset: 'Counter reset to zero',
-  //       })[k] ?? k;
-  // @eikon:feature(i18n:fallback) end
 
   const value = useCounterStore((s) => s.value);
   const increment = useCounterStore((s) => s.increment);

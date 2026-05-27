@@ -21,9 +21,7 @@ import { lazy } from 'react';
 import { Route } from 'react-router-dom';
 
 // --- Absolute Imports ---
-// @eikon:feature(i18n) begin
 import { loadNamespace } from '@/shared/i18n';
-// @eikon:feature(i18n) end
 
 // =================================================================================================
 // Lazy pages
@@ -32,9 +30,7 @@ import { loadNamespace } from '@/shared/i18n';
 const CounterPage = lazy(async () => {
   const [mod] = await Promise.all([
     import('./pages/CounterPage'),
-    // @eikon:feature(i18n) begin
     loadNamespace('counter'),
-    // @eikon:feature(i18n) end
   ]);
   return { default: mod.CounterPage };
 });

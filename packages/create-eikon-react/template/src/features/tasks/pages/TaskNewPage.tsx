@@ -16,9 +16,7 @@
 import { useState } from 'react';
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 import { useNavigate } from 'react-router-dom';
 
 // --- Absolute Imports ---
@@ -34,19 +32,8 @@ import { useTaskActions } from '../selectors';
 // =================================================================================================
 
 function TaskNewPage() {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation('tasks');
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (k: string) =>
-  //   ({
-  //     'new.title': 'New task',
-  //     'new.back': 'Back to list',
-  //     'new.created': 'Task created',
-  //     'new.error': 'Failed to create task',
-  //   })[k] ?? k;
-  // @eikon:feature(i18n:fallback) end
 
   const navigate = useNavigate();
   const { addTask } = useTaskActions();

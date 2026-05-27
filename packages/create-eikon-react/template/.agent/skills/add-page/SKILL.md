@@ -59,9 +59,7 @@ Use when the user asks to "add a page" or "create a new route" that belongs to a
    import { Route } from 'react-router-dom';
 
    // --- Absolute Imports ---
-   // @eikon:feature(i18n) begin
    import { loadNamespace } from '@/shared/i18n';
-   // @eikon:feature(i18n) end
 
    // =================================================================================================
    // Lazy pages
@@ -70,18 +68,14 @@ Use when the user asks to "add a page" or "create a new route" that belongs to a
    const <ExistingPage> = lazy(async () => {
      const [mod] = await Promise.all([
        import('./pages/<ExistingPage>'),
-       // @eikon:feature(i18n) begin
        loadNamespace('<feature>'),
-       // @eikon:feature(i18n) end
      ]);
      return { default: mod.<ExistingPage> };
    });
    const <PageName> = lazy(async () => {
      const [mod] = await Promise.all([
        import('./pages/<PageName>'),
-       // @eikon:feature(i18n) begin
        loadNamespace('<feature>'),
-       // @eikon:feature(i18n) end
      ]);
      return { default: mod.<PageName> };
    });

@@ -1,4 +1,3 @@
-// @eikon:feature(i18n) file
 /**
  * @file language-switcher.tsx
  * @description Icon-only button that rotates through the supported
@@ -10,12 +9,6 @@
  * `i18next-browser-languagedetector` (configured in
  * `src/shared/i18n/index.ts` with `caches: ['localStorage']`), so this
  * component never touches storage directly.
- *
- * Marked as a whole-file feature gate: when the `i18n` feature is
- * stripped at scaffold time the component is removed alongside the
- * single language it would otherwise expose. RootLayout wraps its
- * import in matching markers, so the strip is a single coordinated
- * snip.
  */
 
 // =================================================================================================

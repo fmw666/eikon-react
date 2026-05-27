@@ -1,4 +1,3 @@
-// @eikon:feature(i18n) file
 /**
  * @file index.ts
  * @description Lazy, namespace-based i18next bootstrap.

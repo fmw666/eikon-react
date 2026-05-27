@@ -238,16 +238,12 @@ translations land at the same time:
 
 ```tsx
 // --- Absolute Imports ---
-// @eikon:feature(i18n) begin
 import { loadNamespace } from '@/shared/i18n';
-// @eikon:feature(i18n) end
 
 const <Feature>IndexPage = lazy(async () => {
   const [mod] = await Promise.all([
     import('./pages/<Feature>IndexPage'),
-    // @eikon:feature(i18n) begin
     loadNamespace('<feature>'),
-    // @eikon:feature(i18n) end
   ]);
   return { default: mod.<Feature>IndexPage };
 });

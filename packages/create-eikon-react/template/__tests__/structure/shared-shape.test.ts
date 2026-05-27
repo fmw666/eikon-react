@@ -211,7 +211,7 @@ describe('structure: src/shared/', () => {
   // shared/i18n — bootstrap + locales
   // -----------------------------------------------------------------------------------------------
 
-  describe.skipIf(!featureEnabled('i18n'))('shared/i18n/', () => {
+  describe('shared/i18n/', () => {
     const dir = path.join(SHARED_ROOT, 'i18n');
 
     it('has index.ts and locales/ tree', () => {

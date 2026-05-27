@@ -21,9 +21,7 @@
 // =================================================================================================
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 import { Link } from 'react-router-dom';
 
 // --- Third-party Libraries ---
@@ -51,14 +49,8 @@ function ShowcasePageHeader({
   subtitle,
   showBack = false,
 }: ShowcasePageHeaderProps) {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation('examples');
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (_k: string, opts?: { defaultValue?: string }) =>
-  //   opts?.defaultValue ?? _k;
-  // @eikon:feature(i18n:fallback) end
 
   return (
     <header className="flex flex-col gap-4">

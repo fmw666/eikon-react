@@ -14,9 +14,7 @@
 import { type FormEvent } from 'react';
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 
 // --- Third-party Libraries ---
 import { Loader2 } from 'lucide-react';
@@ -59,19 +57,8 @@ function TaskForm({
   onSubmit,
   isSubmitting = false,
 }: TaskFormProps) {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation('tasks');
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (k: string) =>
-  //   ({
-  //     'new.form.title': 'Title',
-  //     'new.form.description': 'Description',
-  //     'new.form.submit': 'Create task',
-  //     'new.form.submitting': 'Creating…',
-  //   })[k] ?? k;
-  // @eikon:feature(i18n:fallback) end
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();

@@ -77,10 +77,6 @@ import { type BuildInputs } from './hash';
 function flagsFromInputs(inputs: BuildInputs): FeatureFlags {
   return {
     supabase: !!inputs.supabase,
-    // i18n is non-strippable in this template (see strip-features.ts);
-    // mirror the builder's hard-coded `true` so the simulator's tree
-    // matches what `runBuild` actually produces.
-    i18n: true,
   };
 }
 
@@ -101,7 +97,6 @@ function packageManagerFromInputs(inputs: BuildInputs): PackageManager {
 function disabledFeaturesFromFlags(flags: FeatureFlags): Set<string> {
   const disabled = new Set<string>();
   if (!flags.supabase) disabled.add('supabase');
-  if (!flags.i18n) disabled.add('i18n');
   return disabled;
 }
 

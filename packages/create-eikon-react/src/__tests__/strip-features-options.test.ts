@@ -40,7 +40,7 @@ import { stripFeatures } from '../strip-features.js';
 // Fixtures
 // =================================================================================================
 
-const FLAGS = { supabase: false, i18n: true } as const;
+const FLAGS = { supabase: false } as const;
 const DEFAULT_VARIANTS = {
   platform: 'web',
   design: 'default',

@@ -22,17 +22,13 @@
 // =================================================================================================
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 
 // --- Relative Imports ---
 import { AnimationShowcase } from '../components/inline/AnimationShowcase';
 import { ButtonShowcase } from '../components/inline/ButtonShowcase';
 import { CardShowcase } from '../components/inline/CardShowcase';
-// @eikon:feature(i18n) begin
 import { I18nShowcase } from '../components/inline/I18nShowcase';
-// @eikon:feature(i18n) end
 import { TabsShowcase } from '../components/inline/TabsShowcase';
 import { ThemeShowcase } from '../components/inline/ThemeShowcase';
 import { ShowcasePageHeader } from '../components/ShowcasePageHeader';
@@ -44,14 +40,8 @@ import { ShowcaseTOC, type TOCGroup } from '../components/ShowcaseTOC';
 // =================================================================================================
 
 function ExamplesIndexPage() {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation('examples');
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (_k: string, opts?: { defaultValue?: string }) =>
-  //   opts?.defaultValue ?? _k;
-  // @eikon:feature(i18n:fallback) end
 
   const tocGroups: TOCGroup[] = [
     {
@@ -66,9 +56,7 @@ function ExamplesIndexPage() {
       label: t('toc.patterns'),
       items: [
         { type: 'anchor', id: 'theme', label: t('sections.theme.title') },
-        // @eikon:feature(i18n) begin
         { type: 'anchor', id: 'i18n', label: t('sections.i18n.title') },
-        // @eikon:feature(i18n) end
         { type: 'anchor', id: 'animation', label: t('sections.animation.title') },
         { type: 'route', to: '/examples/motion', label: t('pages.motion.title') },
       ],
@@ -165,7 +153,6 @@ function ExamplesIndexPage() {
               <ThemeShowcase />
             </ShowcaseSection>
 
-            {/* @eikon:feature(i18n) begin */}
             <ShowcaseSection
               anchor="i18n"
               eyebrow={t('toc.label')}
@@ -174,7 +161,6 @@ function ExamplesIndexPage() {
             >
               <I18nShowcase />
             </ShowcaseSection>
-            {/* @eikon:feature(i18n) end */}
 
             <ShowcaseSection
               anchor="animation"

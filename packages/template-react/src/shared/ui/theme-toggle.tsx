@@ -20,9 +20,7 @@ import { useState } from 'react';
 
 // --- Third-party Libraries ---
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 import { Check, Monitor, Moon, Sun } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 
@@ -52,14 +50,8 @@ const ICONS: Record<Theme, typeof Sun> = {
 // =================================================================================================
 
 function ThemeToggle() {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation();
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (_k: string, opts?: { defaultValue?: string }) =>
-  //   opts?.defaultValue ?? _k;
-  // @eikon:feature(i18n:fallback) end
 
   const theme = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);

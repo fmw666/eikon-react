@@ -170,7 +170,7 @@ describe('stripFeatures with variants (file-level)', () => {
 
     await stripFeatures(
       tmp,
-      { supabase: false, i18n: true },
+      { supabase: false },
       { layout: 'sidebar' }
     );
 
@@ -199,7 +199,7 @@ describe('stripFeatures with variants (file-level)', () => {
 
     await stripFeatures(
       tmp,
-      { supabase: false, i18n: true },
+      { supabase: false },
       { design: 'bar' }
     );
 
@@ -220,7 +220,6 @@ describe('stripFeatures with variants (file-level)', () => {
 
     await stripFeatures(tmp, {
       supabase: false,
-      i18n: true,
     });
 
     const after = await readFile(filePath, 'utf8');

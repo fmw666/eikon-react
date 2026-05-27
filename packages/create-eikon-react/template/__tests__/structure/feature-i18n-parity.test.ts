@@ -8,9 +8,8 @@
  * missing key surfaces as the literal key string in the UI, which is a
  * user-visible defect — `60-i18n.md` calls this out as a hard rule.
  *
- * When the CLI strips i18n (`--no-i18n`), `src/shared/i18n/` is gone
- * and per-feature `i18n/` folders are too; in that case this suite
- * is a no-op (every assertion short-circuits via featureEnabled()).
+ * i18n is baseline infrastructure (every scaffold ships it), so this
+ * suite always runs.
  */
 
 // =================================================================================================
@@ -27,7 +26,6 @@ import { describe, expect, it } from 'vitest';
 import {
   APP_ROOT,
   SHARED_ROOT,
-  featureEnabled,
   flattenKeys,
   isDir,
   isFile,
@@ -68,11 +66,6 @@ const VALID_KEY_SEGMENT = /^[a-z][a-zA-Z0-9_]*$/;
 // =================================================================================================
 
 describe('structure: i18n parity', () => {
-  if (!featureEnabled('i18n')) {
-    it.skip('i18n feature stripped — parity check disabled', () => {});
-    return;
-  }
-
   // --- shared common namespace ---
   describe('shared/i18n/locales/<lng>/common.json', () => {
     const localesDir = path.join(SHARED_ROOT, 'i18n', 'locales');

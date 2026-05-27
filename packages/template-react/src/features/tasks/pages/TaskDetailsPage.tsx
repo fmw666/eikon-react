@@ -15,9 +15,7 @@
 import { useEffect, useState } from 'react';
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 import { useNavigate, useParams } from 'react-router-dom';
 
 // --- Third-party Libraries ---
@@ -55,27 +53,8 @@ const STATUS_CLASS: Record<TaskStatus, string> = {
 // =================================================================================================
 
 function TaskDetailsPage() {
-  // @eikon:feature(i18n) begin
   const { t, i18n } = useTranslation('tasks');
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (k: string) =>
-  //   ({
-  //     'details.title': 'Task details',
-  //     'details.back': 'Back to list',
-  //     'details.loading': 'Loading task…',
-  //     'details.notFound': 'Task not found',
-  //     'details.notFoundDescription':
-  //       'It may have been deleted or the link is stale.',
-  //     'details.createdAt': 'Created',
-  //     'details.id': 'ID',
-  //     'status.pending': 'Pending',
-  //     'status.in_progress': 'In progress',
-  //     'status.completed': 'Completed',
-  //   })[k] ?? k;
-  // const i18n = { language: 'en' as string };
-  // @eikon:feature(i18n:fallback) end
 
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();

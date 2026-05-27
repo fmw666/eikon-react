@@ -139,18 +139,17 @@ export function detectFeatureShape(dir: string): FeatureShape {
 /**
  * Detects whether an optional template feature is present in the
  * current tree. Structure tests must wrap optional-feature assertions
- * (i18n parity, supabase shape, …) in `if (featureEnabled('i18n')) { … }`
- * so a CLI-stripped project still passes the suite.
+ * (e.g. supabase shape) in `if (featureEnabled('supabase')) { … }` so a
+ * CLI-stripped project still passes the suite.
  *
- * Note: TanStack Query was previously listed here as a strippable
- * feature. It's now baseline infrastructure (always present in every
- * scaffold), so it's intentionally absent from this union — any test
- * may import from `@tanstack/react-query` without a feature gate.
+ * Note: TanStack Query and i18n were previously listed here as
+ * strippable features. They're now baseline infrastructure (always
+ * present in every scaffold), so they're intentionally absent from
+ * this union — any test may import from `@tanstack/react-query` /
+ * `react-i18next` without a feature gate.
  */
-export function featureEnabled(name: 'i18n' | 'supabase'): boolean {
+export function featureEnabled(name: 'supabase'): boolean {
   switch (name) {
-    case 'i18n':
-      return isDir(path.join(SHARED_ROOT, 'i18n'));
     case 'supabase':
       return isDir(path.join(SHARED_ROOT, 'supabase'));
   }

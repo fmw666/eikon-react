@@ -10,9 +10,7 @@
 // =================================================================================================
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 import { Link } from 'react-router-dom';
 
 // --- Third-party Libraries ---
@@ -32,22 +30,11 @@ import {
 // =================================================================================================
 
 function HomePage() {
-  // @eikon:feature(i18n) begin
   // Bind to the per-feature namespace; the bundle is fetched lazily
   // via routes.tsx's `loadNamespace('home')` call (in parallel with
   // the page chunk), so by the time we render it's resident.
   const { t } = useTranslation('home');
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (k: string) =>
-  //   ({
-  //     title: 'Welcome to Eikon App',
-  //     subtitle:
-  //       'An AI-Agent-friendly React starter built on TypeScript, Vite, and Tailwind v4.',
-  //     cta: 'Get Started',
-  //   })[k] ?? k;
-  // @eikon:feature(i18n:fallback) end
 
   return (
     <section className="flex flex-col items-center justify-center py-16 text-center">

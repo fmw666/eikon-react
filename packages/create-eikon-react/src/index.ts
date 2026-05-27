@@ -285,7 +285,7 @@ function isCwdShortcut(value: string): boolean {
 }
 
 async function resolveFeatures(argv: ParsedArgs): Promise<FeatureFlags> {
-  const flags: FeatureFlags = { supabase: false, i18n: true };
+  const flags: FeatureFlags = { supabase: false };
 
   if (argv.supabase !== undefined) flags.supabase = argv.supabase;
 

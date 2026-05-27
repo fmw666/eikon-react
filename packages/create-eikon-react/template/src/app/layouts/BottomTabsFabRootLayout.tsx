@@ -31,9 +31,7 @@
 import { Suspense } from 'react';
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
 // --- Third-party Libraries ---
@@ -49,9 +47,7 @@ import {
 // --- Absolute Imports ---
 import { SignInButton } from '@/features/auth';
 import { cn } from '@/shared/lib/cn';
-// @eikon:feature(i18n) begin
 import { LanguageSwitcher } from '@/shared/ui/language-switcher';
-// @eikon:feature(i18n) end
 import { ThemeToggle } from '@/shared/ui/theme-toggle';
 
 // =================================================================================================
@@ -112,14 +108,8 @@ const rightTabs: TabSpec[] = [
 // =================================================================================================
 
 function BottomTabsFabRootLayout() {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation();
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (_k: string, opts?: { defaultValue?: string }) =>
-  //   opts?.defaultValue ?? _k;
-  // @eikon:feature(i18n:fallback) end
 
   return (
     <div className="flex min-h-[100dvh] flex-col">
@@ -135,9 +125,7 @@ function BottomTabsFabRootLayout() {
             Eikon App
           </Link>
           <div className="flex items-center gap-1">
-            {/* @eikon:feature(i18n) begin */}
             <LanguageSwitcher />
-            {/* @eikon:feature(i18n) end */}
             <ThemeToggle />
             <SignInButton />
           </div>

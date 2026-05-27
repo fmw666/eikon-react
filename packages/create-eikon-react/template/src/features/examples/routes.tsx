@@ -28,9 +28,7 @@ import { lazy } from 'react';
 import { Route } from 'react-router-dom';
 
 // --- Absolute Imports ---
-// @eikon:feature(i18n) begin
 import { loadNamespace } from '@/shared/i18n';
-// @eikon:feature(i18n) end
 
 // =================================================================================================
 // Lazy pages
@@ -39,9 +37,7 @@ import { loadNamespace } from '@/shared/i18n';
 const ExamplesIndexPage = lazy(async () => {
   const [mod] = await Promise.all([
     import('./pages/ExamplesIndexPage'),
-    // @eikon:feature(i18n) begin
     loadNamespace('examples'),
-    // @eikon:feature(i18n) end
   ]);
   return { default: mod.ExamplesIndexPage };
 });
@@ -49,9 +45,7 @@ const ExamplesIndexPage = lazy(async () => {
 const ToasterShowcasePage = lazy(async () => {
   const [mod] = await Promise.all([
     import('./pages/ToasterShowcasePage'),
-    // @eikon:feature(i18n) begin
     loadNamespace('examples'),
-    // @eikon:feature(i18n) end
   ]);
   return { default: mod.ToasterShowcasePage };
 });
@@ -59,9 +53,7 @@ const ToasterShowcasePage = lazy(async () => {
 const DialogShowcasePage = lazy(async () => {
   const [mod] = await Promise.all([
     import('./pages/DialogShowcasePage'),
-    // @eikon:feature(i18n) begin
     loadNamespace('examples'),
-    // @eikon:feature(i18n) end
   ]);
   return { default: mod.DialogShowcasePage };
 });
@@ -70,9 +62,7 @@ const DialogShowcasePage = lazy(async () => {
 const SheetShowcasePage = lazy(async () => {
   const [mod] = await Promise.all([
     import('./pages/SheetShowcasePage'),
-    // @eikon:feature(i18n) begin
     loadNamespace('examples'),
-    // @eikon:feature(i18n) end
   ]);
   return { default: mod.SheetShowcasePage };
 });
@@ -81,9 +71,7 @@ const SheetShowcasePage = lazy(async () => {
 const CommandShowcasePage = lazy(async () => {
   const [mod] = await Promise.all([
     import('./pages/CommandShowcasePage'),
-    // @eikon:feature(i18n) begin
     loadNamespace('examples'),
-    // @eikon:feature(i18n) end
   ]);
   return { default: mod.CommandShowcasePage };
 });
@@ -91,9 +79,7 @@ const CommandShowcasePage = lazy(async () => {
 const SignInModalShowcasePage = lazy(async () => {
   const [mod] = await Promise.all([
     import('./pages/SignInModalShowcasePage'),
-    // @eikon:feature(i18n) begin
     loadNamespace('examples'),
-    // @eikon:feature(i18n) end
   ]);
   return { default: mod.SignInModalShowcasePage };
 });
@@ -101,9 +87,7 @@ const SignInModalShowcasePage = lazy(async () => {
 const MotionShowcasePage = lazy(async () => {
   const [mod] = await Promise.all([
     import('./pages/MotionShowcasePage'),
-    // @eikon:feature(i18n) begin
     loadNamespace('examples'),
-    // @eikon:feature(i18n) end
   ]);
   return { default: mod.MotionShowcasePage };
 });
@@ -111,9 +95,7 @@ const MotionShowcasePage = lazy(async () => {
 const PerformanceShowcasePage = lazy(async () => {
   const [mod] = await Promise.all([
     import('./pages/PerformanceShowcasePage'),
-    // @eikon:feature(i18n) begin
     loadNamespace('examples'),
-    // @eikon:feature(i18n) end
   ]);
   return { default: mod.PerformanceShowcasePage };
 });

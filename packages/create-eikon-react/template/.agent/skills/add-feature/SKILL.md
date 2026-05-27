@@ -102,9 +102,7 @@ Examples:
    import { Route } from 'react-router-dom';
 
    // --- Absolute Imports ---
-   // @eikon:feature(i18n) begin
    import { loadNamespace } from '@/shared/i18n';
-   // @eikon:feature(i18n) end
 
    // =================================================================================================
    // Lazy pages
@@ -113,9 +111,7 @@ Examples:
    const <Page> = lazy(async () => {
      const [mod] = await Promise.all([
        import('./pages/<Page>'),
-       // @eikon:feature(i18n) begin
        loadNamespace('<name>'),
-       // @eikon:feature(i18n) end
      ]);
      return { default: mod.<Page> };
    });

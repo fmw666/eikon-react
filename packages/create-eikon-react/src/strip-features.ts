@@ -3,7 +3,6 @@ import path from 'node:path';
 
 export interface FeatureFlags {
   supabase: boolean;
-  i18n: boolean;
 }
 
 /**
@@ -50,7 +49,7 @@ const BLOCK_END_RE_SRC =
   '[ \\t]*(?:\\/\\/|\\/\\*|\\{\\/\\*|#|<!--)\\s*@eikon:feature\\(NAME\\)\\s*end\\s*(?:\\*\\/\\}?|-->)?[ \\t]*\\r?\\n?';
 // File-level markers are only honoured on the FIRST LINE of the file. This is
 // the convention used by every real consumer in the template (see
-// `src/shared/supabase/client.ts:1`, `src/shared/i18n/index.ts:1`, …) and the
+// `src/shared/supabase/client.ts:1`, …) and the
 // constraint is load-bearing: without it, any documentation file that quotes
 // the marker as a literal — like `.agent/skills/enable-supabase/SKILL.md` —
 // gets silently deleted whenever the corresponding feature is stripped.
@@ -79,10 +78,10 @@ const VARIANT_FILE_MARKER_RE =
 
 const PACKAGE_DEPS_BY_FEATURE: Record<string, string[]> = {
   supabase: ['@supabase/supabase-js'],
-  // i18n and TanStack Query are non-strippable in this template; if a
-  // future template strips one of them, its deps would go here. TanStack
-  // Query (`@tanstack/react-query`) is treated as baseline infrastructure
-  // alongside React / React Router — every scaffold ships with it.
+  // TanStack Query (`@tanstack/react-query`) is treated as baseline
+  // infrastructure alongside React / React Router / i18next — every
+  // scaffold ships with it. If a future template strips it, its deps
+  // would go here.
   //
   // `examples` used to live here (pruning `web-vitals` /
   // `@tanstack/react-virtual` / `cmdk`), but the showcase is now shipped
@@ -153,7 +152,6 @@ export async function stripFeatures(
 ): Promise<void> {
   const disabled = new Set<string>();
   if (!flags.supabase) disabled.add('supabase');
-  if (!flags.i18n) disabled.add('i18n'); // currently never disabled by the CLI
   // The `examples` feature used to be stripped by default — end users
   // were considered to never want a template-internal showcase in their
   // scaffolded project. That decision was reversed: examples now ships

@@ -135,7 +135,7 @@ describe('simulateStripTree ↔ CLI stripFeatures parity (Phase J drift check)',
         try {
           await copyTemplate(tmp);
 
-          const flags: FeatureFlags = { supabase, i18n: true };
+          const flags: FeatureFlags = { supabase };
           const variants: VariantSelections = {
             platform,
             ...FIXED_RUNTIME_AXES,

@@ -77,7 +77,6 @@ Fields not listed here may be added by callers but should be ignored by parsers.
 - Optional modules are wrapped with comment markers:
   - `// @eikon:feature(<name>) begin … // @eikon:feature(<name>) end` — removed when the feature is stripped. Can appear anywhere in the file.
   - `// @eikon:feature(<name>) file` — the entire file is removed when the feature is stripped. **Must be on the very first line of the file** (leading whitespace is fine). Anywhere else and the marker is treated as inert prose, so documentation files like this one can quote the literal safely.
-  - `// @eikon:feature(<name>:fallback) begin … end` — wraps a block of commented-out fallback code that gets uncommented when the feature is stripped (used for i18n shims).
   - `// @eikon:variant(<axis>=<value>) begin … end` — keeps only the chosen value when scaffolding; non-chosen blocks are removed.
   - `// @eikon:variant(<axis>=<value>) file` — same as the feature file marker, including the first-line constraint.
 

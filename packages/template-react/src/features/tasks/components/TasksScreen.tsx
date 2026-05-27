@@ -17,9 +17,7 @@
 import type { ReactNode } from 'react';
 
 // --- Core-related Libraries ---
-// @eikon:feature(i18n) begin
 import { useTranslation } from 'react-i18next';
-// @eikon:feature(i18n) end
 
 // --- Absolute Imports ---
 import { serviceConfig } from '@/shared/services';
@@ -49,20 +47,8 @@ function TasksScreen({
   children,
   className,
 }: TasksScreenProps) {
-  // @eikon:feature(i18n) begin
   const { t } = useTranslation('tasks');
-  // @eikon:feature(i18n) end
 
-  // @eikon:feature(i18n:fallback) begin
-  // const t = (k: string) =>
-  //   ({
-  //     'layout.notice':
-  //       'This demo simulates latency. State resets when you refresh.',
-  //     'layout.mode': 'Service mode:',
-  //     'layout.modeMock': 'Mock',
-  //     'layout.modeSupabase': 'Supabase',
-  //   })[k] ?? k;
-  // @eikon:feature(i18n:fallback) end
 
   const isOnline = !serviceConfig.useMock;
   const modeLabel = isOnline
