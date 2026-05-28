@@ -86,6 +86,24 @@
   --surface-hover-shadow: 0 4px 12px -2px oklch(0 0 0 / 0.1);
   --surface-active-shadow: 0 1px 2px oklch(0 0 0 / 0.08);
 
+  /* shadcn / animate-ui registry components (Command, Toaster, etc.) reference
+   * the bare names `--popover`, `--border`, `--radius`, plus the Tailwind
+   * tokens `--color-popover` / `--color-popover-foreground`. Eikon's design
+   * tokens already define the matching prefixed forms (`--color-card`,
+   * `--color-card-foreground`, `--color-border`, `--radius-md`) and every
+   * design preset / dark-mode block overrides those — so alias the shadcn
+   * names to them. Registry-pulled components then inherit the active
+   * design preset and dark-mode cascade automatically, without per-snapshot
+   * patching. The CSS variable cascade resolves at use-site, so swapping
+   * `<html class="design-apple">` updates `--color-card` which transparently
+   * updates `--popover` for any inline style that reads it. */
+  --color-popover: var(--color-card);
+  --color-popover-foreground: var(--color-card-foreground);
+  --popover: var(--color-card);
+  --popover-foreground: var(--color-card-foreground);
+  --border: var(--color-border);
+  --radius: var(--radius-md);
+
   /* Shadow scale defaults — match Tailwind v4's built-in `shadow-{sm,md,lg}`
    * so a base scaffold (no design class on <html>) renders identical
    * shadows to vanilla Tailwind. Design presets override via the

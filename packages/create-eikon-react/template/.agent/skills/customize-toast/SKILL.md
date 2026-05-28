@@ -27,18 +27,28 @@ regardless of configuration** — business code in features never changes.
 ## Architecture (one-screen primer)
 
 ```
-src/shared/ui/toaster.tsx        ← single file, design-driven
-   │
-   ├── re-exports `toast` from 'sonner'   ← identical API everywhere
-   └── renders <SonnerToaster> with:
-       • position from @eikon:variant(toastPosition=...) markers
-       • classNames using CSS design tokens (--color-card, etc.)
+src/app/providers.tsx           ← owns ALL toast config (variant strip + visual defaults)
+   │   • INITIAL_TOAST_POSITION array gated by @eikon:variant(toastPosition=...)
+   │   • TOAST_OPTIONS — Eikon-tuned classNames (rounded, border, bg via design tokens)
+   │   • DEV postMessage bridge for live playground swap
+   └── <Toaster richColors closeButton position={...} toastOptions={TOAST_OPTIONS} />
+
+src/shared/ui/toaster.tsx        ← thin pure pass-through (no defaults of its own)
+   │   • re-exports `toast` from 'sonner'   ← identical API everywhere
+   └── return <SonnerToaster {...props} />
+       (the snapshot files at template-snapshots/<ui>/ are 1:1 from upstream
+        and likewise spread `...props`, so providers' wiring drives every --ui)
 ```
 
-The toast **styling** is design-driven — it reads CSS tokens
-(`--color-card`, `--color-border`, `--radius-md`, `--surface-border-width`)
-that each design preset already overrides. No per-toast-style files exist;
-the active `design` preset controls the look automatically.
+The toast **styling** is design-driven — `TOAST_OPTIONS.classNames` in
+providers.tsx references CSS tokens (`--color-card`, `--color-border`,
+`--radius-md`, `--surface-border-width`) that each design preset already
+overrides. No per-toast-style files exist; the active `design` preset
+controls the look automatically. For `--ui shadcn` / `--ui animate-ui`
+the registry snapshots additionally reference shadcn token names
+(`--popover`, `--border`, `--radius`, `--color-popover`) — those are
+aliased to the Eikon equivalents at the top of `src/styles/index.css`,
+so the same design preset cascade flows through.
 
 The only user-facing toast config is **position** (`--toast-position`):
 `top-right` (default), `top-center`, `bottom-center`, `bottom-right`.
@@ -46,21 +56,24 @@ The only user-facing toast config is **position** (`--toast-position`):
 ## How position wiring works
 
 Position is selected at scaffold time via `--toast-position <value>`.
-Inside `toaster.tsx`, the `@eikon:variant(toastPosition=...)` markers
-narrow the array to one entry:
+Inside `src/app/providers.tsx`, the `@eikon:variant(toastPosition=...)`
+markers narrow the array to one entry:
 
 ```tsx
-const POSITION = [
+const INITIAL_TOAST_POSITION = ([
   // @eikon:variant(toastPosition=top-right) begin
   'top-right',
   // @eikon:variant(toastPosition=top-right) end
   // @eikon:variant(toastPosition=top-center) begin
   'top-center',
   // ...
-].at(0)! as Position;
+].at(0) ?? 'top-right') as ToastPosition;
 ```
 
-After strip, only the chosen position string survives.
+After strip, only the chosen position string survives. The provider
+renders `<Toaster position={toastPosition} ... />`; `toaster.tsx` (and
+the shadcn / animate-ui snapshot equivalents) just forward every prop
+to Sonner — so the same wiring drives every `--ui` choice.
 
 ## Decision tree — which task am I doing?
 
@@ -98,26 +111,32 @@ Two places:
 
 ## Task B — tweak toast styling
 
-Edit `src/shared/ui/toaster.tsx`, specifically the `toastOptions.classNames`
+Edit `src/app/providers.tsx`, specifically the `TOAST_OPTIONS.classNames`
 object. Use design tokens so the style responds to presets and dark mode:
 
 ```tsx
-toastOptions={{
+const TOAST_OPTIONS = {
   classNames: {
     toast: 'rounded-[var(--radius-md)] border-[length:var(--surface-border-width)] ...',
     title: 'text-sm font-medium',
     description: 'text-xs text-[var(--color-muted-foreground)]',
   },
-}}
+} as const;
 ```
+
+These flow through the `<Toaster ... toastOptions={TOAST_OPTIONS} />`
+spread to Sonner regardless of `--ui`, so all three UI choices pick up
+the same Eikon-tuned look.
 
 ---
 
 ## Task C — change Sonner props
 
-Edit the `<SonnerToaster>` props in `src/shared/ui/toaster.tsx`:
+Edit the `<Toaster>` props in `src/app/providers.tsx`:
 `richColors`, `closeButton`, `expand`, `duration`, `offset`, `gap`,
-`visibleToasts`, `theme`, etc. See Sonner docs for the full list.
+`visibleToasts`, `theme`, etc. The `toaster.tsx` wrapper is a pure
+pass-through — never edit it for prop tweaks. See Sonner docs for the
+full list.
 
 ---
 

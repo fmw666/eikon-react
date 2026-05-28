@@ -107,7 +107,7 @@ These three primitives + the feature-level Modal pattern are showcased end-to-en
 
 - Toasts are mounted exactly once in [src/app/providers.tsx](../../src/app/providers.tsx) via `<Toaster />` from `@/shared/ui/toaster`. Business code fires events imperatively via `import { toast } from '@/shared/ui/toaster'` (`toast.success`, `toast.error`, `toast.promise`, …). The imperative API surface comes from [`sonner`](https://sonner.emilkowal.ski/).
 - Toast **styling** is design-driven — it reads CSS tokens (`--color-card`, `--color-border`, `--radius-md`, `--surface-border-width`) that the active design preset already controls. No separate style files exist; the design preset determines the look automatically.
-- Toast **position** is the only user-facing config (`--toast-position`): `top-right` (default), `top-center`, `bottom-center`, `bottom-right`. Position is wired via `@eikon:variant(toastPosition=...)` markers inside `toaster.tsx`.
+- Toast **position** is the only user-facing config (`--toast-position`): `top-right` (default), `top-center`, `bottom-center`, `bottom-right`. Position is wired via `@eikon:variant(toastPosition=...)` markers inside [src/app/providers.tsx](../../src/app/providers.tsx) — `<Toaster position={...}>` is a pure pass-through to Sonner so the registry snapshots for `--ui shadcn` / `--ui animate-ui` accept the same prop without per-snapshot patching.
 - Tweaking toast styling or position is covered in [skills/customize-toast/SKILL.md](../skills/customize-toast/SKILL.md).
 
 ## When to use `motion/react`

@@ -246,8 +246,20 @@ const SCENARIOS = [
       ],
       depsPresent: ['@tanstack/react-query'],
       depsAbsent: ['@supabase/supabase-js'],
-      providersContains: ['QueryClientProvider'],
-      providersAbsent: [],
+      providersContains: [
+        'QueryClientProvider',
+        // Toast position lives in providers.tsx (not toaster.tsx) so the
+        // shadcn/animate-ui registry snapshots can stay 1:1 with upstream
+        // — strip-features must keep ONLY the chosen position's variant
+        // block here and drop the others.
+        '@eikon:variant(toastPosition=bottom-center)',
+        "'bottom-center'",
+      ],
+      providersAbsent: [
+        '@eikon:variant(toastPosition=top-right)',
+        '@eikon:variant(toastPosition=top-center)',
+        '@eikon:variant(toastPosition=bottom-right)',
+      ],
       // Strip-features must keep ONLY the chosen variant block in
       // RootLayout.tsx. The dispatcher imports each sibling layout by
       // PascalCase name (SidebarRootLayout / StackedRootLayout / …), so
@@ -263,17 +275,6 @@ const SCENARIOS = [
         '@eikon:variant(layout=stacked)',
         '@eikon:variant(layout=topbar-sidebar)',
         '@eikon:variant(layout=centered)',
-      ],
-      // The toaster.tsx must keep ONLY the chosen position's variant block
-      // and strip the others.
-      toasterContains: [
-        '@eikon:variant(toastPosition=bottom-center)',
-        "'bottom-center'",
-      ],
-      toasterAbsent: [
-        '@eikon:variant(toastPosition=top-right)',
-        '@eikon:variant(toastPosition=top-center)',
-        '@eikon:variant(toastPosition=bottom-right)',
       ],
       // The CSS file should keep the chosen design block and drop the
       // non-chosen design palettes. The `ui` axis no longer emits CSS
@@ -847,24 +848,13 @@ async function verifyScenario(projectDir, expect) {
   }
 
   if (expect.toasterContains || expect.toasterAbsent) {
-    const toaster = await readFile(
-      path.join(projectDir, 'src', 'shared', 'ui', 'toaster.tsx'),
-      'utf8'
+    // Position assertions moved to providersContains / providersAbsent
+    // when the variant-strip surface for `--toast-position` was lifted
+    // into providers.tsx. Toaster.tsx is now a pure pass-through and
+    // has no per-scenario fingerprint to assert.
+    throw new Error(
+      'expect.toasterContains/Absent are deprecated — use providersContains/Absent instead'
     );
-    for (const needle of expect.toasterContains ?? []) {
-      if (!toaster.includes(needle)) {
-        throw new Error(
-          `expected toaster.tsx to contain ${JSON.stringify(needle)}`
-        );
-      }
-    }
-    for (const needle of expect.toasterAbsent ?? []) {
-      if (toaster.includes(needle)) {
-        throw new Error(
-          `expected toaster.tsx to NOT contain ${JSON.stringify(needle)}`
-        );
-      }
-    }
   }
 
   if (expect.scriptsPresent || expect.scriptsAbsent) {
