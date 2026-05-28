@@ -514,7 +514,12 @@ export async function handleClearCache(
   sendJson(res, { ok: true });
 }
 
-const PREVIEW_PATH_RE = /^\/preview\/([0-9a-f]{6,64})(\/.*)?$/;
+// `hash.ts` slices `hashBuildInputs` output to 12 hex characters; this
+// regex pins to that exact length so a crafted /preview/abcdef/ request
+// (shorter than any real hash) cannot poison the `lastServed` map with
+// a never-served entry. Audit close-out: previously accepted [6,64], a
+// dead generosity range that left a Map-leak vector.
+const PREVIEW_PATH_RE = /^\/preview\/([0-9a-f]{12})(\/.*)?$/;
 
 /**
  * Pull the runtime axes the playground appended to `iframe.src` as
@@ -627,11 +632,24 @@ export async function handlePreviewServe(
       const variants = readVariantsFromUrl(req.url ?? '/');
       const stamped = rewriteHtmlOpenTag(data.toString('utf8'), variants);
       res.setHeader('Content-Type', mime);
+      // HTML is variant-stamped per request, so we must NOT cache it —
+      // a stamped `class="design-apple"` response would otherwise be
+      // served to a later request that asked for a different design.
       res.setHeader('Cache-Control', 'no-store');
       res.end(stamped);
     } else {
       res.setHeader('Content-Type', mime);
-      res.setHeader('Cache-Control', 'no-store');
+      // Audit close-out: hashed Vite chunks under /preview/<hash>/assets/*
+      // are content-addressed (the file basename includes a hash like
+      // `index-CS6Z3agH.js`). They're truly immutable for the lifetime
+      // of the parent build hash — serving them with `no-store` forced a
+      // re-download on every iframe navigation. Match what `prod.ts`
+      // already does for the top-level static dist (1y immutable).
+      if (rest.startsWith('/assets/')) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      } else {
+        res.setHeader('Cache-Control', 'no-store');
+      }
       res.end(data);
     }
   } catch {

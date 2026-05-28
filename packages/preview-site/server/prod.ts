@@ -299,14 +299,23 @@ server.listen(PORT, HOST, () => {
 
 // Fly sends SIGTERM when migrating / scaling down. Drain in-flight
 // requests cleanly so users don't see truncated responses.
+//
+// Audit close-out: the prior 10 s blanket cap could SIGKILL a viteBuild
+// mid-`writeFile`, leaving exactly the half-built dir that
+// `scrubHalfBuiltCacheDirs` is designed to clean up — circular
+// dependency between deploy and recovery. The new budget is
+// `BUILD_TIMEOUT_MS + 5 s` (currently 65 s), giving the longest legal
+// build a chance to finish writing its `.build-ok` marker. After that,
+// hard exit — the recovery scrub on next boot picks up anything
+// genuinely orphaned.
+const SHUTDOWN_BUDGET_MS = 65_000;
 const shutdown = (signal: string): void => {
   log(`${signal} received, draining...`);
   server.close((err) => {
     if (err) log(`close error: ${err.message}`);
     process.exit(err ? 1 : 0);
   });
-  // Hard cap so a stuck connection can't keep the process alive forever.
-  setTimeout(() => process.exit(1), 10_000).unref();
+  setTimeout(() => process.exit(1), SHUTDOWN_BUDGET_MS).unref();
 };
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
