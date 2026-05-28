@@ -166,11 +166,29 @@ pnpm e2e -- --keep                   # keep the temp workspace on disk for inspe
 
 The e2e runner lives at [packages/create-eikon-react/scripts/e2e.mjs](packages/create-eikon-react/scripts/e2e.mjs).
 
-Releasing the CLI (manual for now):
+Releasing the CLI is driven by the `release-decision` Claude skill at
+[.claude/skills/release-decision/SKILL.md](.claude/skills/release-decision/SKILL.md).
+It walks the commits since the last `create-eikon-react@*` tag, buckets
+them by tarball impact, picks a semver bump, drafts the release commit,
+and pauses for explicit approval before tag / push / publish. Invoke it
+in a Claude session by typing `/release-decision`.
+
+The underlying steps the skill orchestrates (for reference / manual
+operation):
 
 ```bash
-pnpm --filter create-eikon-react build
-cd packages/create-eikon-react && npm publish --access public
+# 1. Decide a version bump (skill recommends one based on commit history).
+# 2. Bump packages/create-eikon-react/package.json's `version` field.
+# 3. Commit, tag, push.
+git commit -m "chore(create-eikon-react): release vX.Y.Z" -- packages/create-eikon-react/package.json
+git tag create-eikon-react@X.Y.Z
+git push origin main && git push origin create-eikon-react@X.Y.Z
+
+# 4. Publish (prepublishOnly runs typecheck/lint/test/e2e:quick/build first).
+pnpm --filter create-eikon-react publish
+
+# 5. Post-publish smoke against the live registry.
+pnpm --filter create-eikon-react smoke
 ```
 
 ## Documentation

@@ -30,7 +30,22 @@ that pairs with a service layer.
 
 Best for: counter-style local UI state, toggles, transient view models.
 
-1. **Decide ownership.** Feature-scoped state → `src/features/<feature>/stores/<name>Store.ts` (plural folder). Cross-feature state → `src/shared/stores/<name>Store.ts` (rare; justify it in the PR description).
+> **Folder name: singular vs plural matters.** Pure-client features
+> with no service layer use the plural `stores/<x>Store.ts` shape (e.g.
+> `features/counter/stores/counterStore.ts`). Data-layer features that
+> swap between Mock and a real backend use the singular `store/<x>Store.ts`
+> alongside `services/`, `selectors/` (e.g.
+> `features/auth/store/authStore.ts`). Pick by feature shape, not by
+> taste — both are canonical (see `00-architecture.md` for the
+> distinction).
+
+1. **Decide ownership.** Feature-scoped pure-client state →
+   `src/features/<feature>/stores/<name>Store.ts` (plural folder).
+   Feature-scoped state for a feature that already has a `services/`
+   layer → `src/features/<feature>/store/<name>Store.ts` (singular —
+   it's the data-layer shape). Cross-feature state →
+   `src/shared/stores/<name>Store.ts` (rare; justify it in the PR
+   description).
 
 2. **Define the state shape and actions** in one file:
 

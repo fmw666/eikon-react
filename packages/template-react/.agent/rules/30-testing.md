@@ -56,12 +56,14 @@ severity: must
   ```
 
 - Shared utility tests live in `src/shared/<area>/__tests__/`.
-- True cross-cutting tests (e.g. router smoke tests, app shell wiring, integration tests) live in the top-level `__tests__/`:
+- True cross-cutting tests (e.g. router smoke tests, app shell wiring, integration tests) live in the top-level `__tests__/`. Five canonical subdirectories plus two required files; the structural fence at `__tests__/structure/tests-root.test.ts` enforces them:
   - `__tests__/setup.ts` — global setup (do not delete or rename)
   - `__tests__/test-utils.tsx` — shared helpers (`renderWithRouter`, `supabaseMockTrap`) importable as `@test/test-utils`
+  - `__tests__/structure/` — repo-shape tests (this rule, file naming, marker balance, etc.)
   - `__tests__/app/` — tests for things in `src/app/` (e.g. `RootLayout.test.tsx`)
   - `__tests__/integration/` — multi-layer integration tests that cross feature boundaries
-  - `__tests__/browser/` — browser-mode (real Chromium) e2e-ish specs
+  - `__tests__/eslint-rules/` — unit tests for the project's local eslint rules under `eslint-rules/`
+  - `__tests__/browser/` — browser-mode (real Chromium) e2e-ish specs (optional, opt-in via `vitest.browser.config.ts`)
 - File suffix is `.test.ts` or `.test.tsx`. Do not use `.spec.*` (Vitest config does accept both, but the convention is `.test`).
 
 ## What to test

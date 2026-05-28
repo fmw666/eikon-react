@@ -53,7 +53,11 @@ src/
 The expanded `store / selectors / services` shape exists for any feature that
 swaps between **Mock** and a real backend (Supabase, REST, …). For pure-client
 features with no data layer (e.g. `counter`) the simpler `stores/<x>Store.ts`
-shape from the legacy template is still accepted.
+shape is canonical — both forms are first-class. Pick by feature
+shape: data-layer features use singular `store/`; pure-client
+features use plural `stores/`. The `counter` feature in the
+template is an example of the pure-client form; `auth` and `tasks` are
+examples of the data-layer form.
 
 ## Import boundary rules
 
