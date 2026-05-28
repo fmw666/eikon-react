@@ -29,6 +29,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { stat, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { randomUUID } from 'node:crypto';
 
 import {
   handleBuild,
@@ -36,6 +37,7 @@ import {
   handleClearCache,
   handleFileContent,
   handleFilesTree,
+  handleMetrics,
   handlePreviewServe,
   handleTemplateRev,
   isPreviewPath,
@@ -43,6 +45,7 @@ import {
 } from './handlers';
 import { scrubHalfBuiltCacheDirs, TEMPLATE_REACT_DIR } from './builder';
 import { getTemplateRev } from './fingerprint';
+import { logEvent } from './log';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -177,6 +180,9 @@ async function dispatch(
   if (pathname === '/api/file-content') return handleFileContent(req, res);
   if (pathname === '/api/clear-cache') return handleClearCache(req, res);
 
+  // -- Operator endpoints ----------------------------------------------
+  if (pathname === '/metrics') return handleMetrics(req, res);
+
   // -- /preview/<hash>/* iframe content --------------------------------
   if (isPreviewPath(url)) {
     await handlePreviewServe(req, res);
@@ -217,14 +223,29 @@ async function dispatch(
 }
 
 const server = createServer((req, res) => {
+  // Stamp every request with an `x-request-id` header so log lines
+  // emitted from any handler can be correlated by an operator running
+  // `fly logs | grep <reqId>`. Honours an inbound id if Fly's edge
+  // attached one (forward compatibility), otherwise mints a UUID.
+  const incoming = req.headers['x-request-id'];
+  const requestId =
+    typeof incoming === 'string' && incoming.length > 0
+      ? incoming
+      : randomUUID();
+  res.setHeader('x-request-id', requestId);
+
   // P4.25: tag every unhandled-error log line with method+URL so a
   // failure in production can be traced back to the exact route that
-  // triggered it. The `log()` function already prefixes a wallclock
-  // timestamp; combined with the URL this gives a usable structured
-  // line for `fly logs | grep`.
+  // triggered it. The structured logger now also carries the request
+  // id, so operators can `fly logs | grep <reqId>` for the full trail.
   dispatch(req, res).catch((e: unknown) => {
-    const msg = e instanceof Error ? (e.stack ?? e.message) : String(e);
-    log(`unhandled error [${req.method ?? '?'} ${req.url ?? '?'}]: ${msg}`);
+    logEvent('http_unhandled', {
+      request_id: requestId,
+      method: req.method ?? '?',
+      url: req.url ?? '?',
+      error_message: e instanceof Error ? e.message : String(e),
+      ...(e instanceof Error && e.stack ? { error_stack: e.stack } : {}),
+    });
     if (!res.headersSent) {
       res.statusCode = 500;
       res.setHeader('Content-Type', 'text/plain; charset=utf-8');

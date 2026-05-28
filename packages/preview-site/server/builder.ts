@@ -16,6 +16,8 @@ import {
 
 import { getTemplateRev } from './fingerprint';
 import { hashBuildInputs, type BuildInputs } from './hash';
+import { logError, logEvent } from './log';
+import { incr, observe } from './metrics';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -231,7 +233,10 @@ export async function ensureBuild(inputs: BuildInputs): Promise<BuildState> {
   const templateRev = await getTemplateRev(TEMPLATE_REACT_DIR);
   const hash = hashBuildInputs(inputs, templateRev);
 
-  if (isReady(hash)) return { hash, status: 'ready' };
+  if (isReady(hash)) {
+    incr('cache_hit');
+    return { hash, status: 'ready' };
+  }
 
   // A previous attempt errored; surface the failure instead of silently
   // retrying — UNLESS the error has aged past ERROR_TTL_MS, in which
@@ -240,17 +245,39 @@ export async function ensureBuild(inputs: BuildInputs): Promise<BuildState> {
   const prevErr = errors.get(hash);
   if (prevErr) {
     if (Date.now() - prevErr.at < ERROR_TTL_MS) {
+      incr('cache_error_replay');
       return { hash, status: 'error', error: prevErr.message };
     }
     errors.delete(hash);
   }
 
   if (!inflight.has(hash)) {
+    incr('cache_miss');
+    const startedAt = Date.now();
+    logEvent('build_started', { hash });
     const promise = runBuildGated(hash, inputs)
-      .catch((e) => {
+      .then(() => {
+        const duration_ms = Date.now() - startedAt;
+        incr('build_completed');
+        observe('build_duration_ms', duration_ms);
+        logEvent('build_completed', { hash, duration_ms });
+      })
+      .catch((e: unknown) => {
         const msg = e instanceof Error ? (e.stack ?? e.message) : String(e);
         errors.set(hash, { message: msg, at: Date.now() });
         capErrors();
+        const duration_ms = Date.now() - startedAt;
+        // Distinguish a timeout-kill from a genuine failure for at-a-glance
+        // grep-ability. The `kill` signal is included by `runViteBuildSpawn`'s
+        // rejection message; a tighter contract would be a typed error.
+        const isTimeout = msg.includes('timed out') || msg.includes('killed');
+        incr(isTimeout ? 'build_timeout' : 'build_failed');
+        logEvent('build_failed', {
+          hash,
+          duration_ms,
+          timeout: isTimeout,
+          error_message: e instanceof Error ? e.message : String(e),
+        });
       })
       .finally(() => {
         inflight.delete(hash);
@@ -339,11 +366,7 @@ export async function scrubHalfBuiltCacheDirs(): Promise<string[]> {
           removed.push(name);
         }
       } catch (err) {
-        console.warn(
-          `[builder] scrub: failed to inspect ${name}: ${
-            err instanceof Error ? err.message : String(err)
-          }`
-        );
+        logError('builder_scrub_inspect_failed', err, { dir: name });
       }
     })
   );
@@ -368,11 +391,11 @@ function scheduleEviction(): void {
       // P4.26: previously this catch was implicit via .finally swallowing
       // the rejection. A failing eviction (rare, but possible if Windows
       // antivirus permanently locks a tree) was completely silent — the
-      // disk would just keep growing. Surface it via console.warn so it
-      // shows up in Fly's logs and a maintainer can investigate. Eviction
-      // is best-effort; we never want a failure here to crash the server.
-      const msg = e instanceof Error ? (e.stack ?? e.message) : String(e);
-      console.warn(`[builder] eviction failed (best-effort): ${msg}`);
+      // disk would just keep growing. Surface it as a structured event so
+      // it shows up in Fly's logs and a maintainer can investigate.
+      // Eviction is best-effort; we never want a failure here to crash
+      // the server.
+      logError('builder_eviction_failed', e);
     })
     .finally(() => {
       evictionInflight = null;
@@ -462,6 +485,7 @@ async function evictCacheLru(): Promise<void> {
         await rm(path.join(CACHE_ROOT, name), RM_OPTS);
         errors.delete(name);
         lastServed.delete(name);
+        incr('cache_eviction');
       } catch {
         // Best-effort: even with RM_OPTS retries, a directory might still be
         // held open by Vite/AV on Windows past our retry budget. We'll pick

@@ -42,6 +42,8 @@ import {
 import { rewriteHtmlOpenTag } from '../../create-eikon-react/src/inject-html-variants';
 import { type VariantSelections } from '../../create-eikon-react/src/strip-features';
 import { getParam } from '../src/lib/params-schema';
+import { logError } from './log';
+import { incr, renderText } from './metrics';
 
 // ---------------------------------------------------------------------------
 // Shared helpers
@@ -127,14 +129,23 @@ function sendServerError(
   e: unknown,
   fallback = 'Internal Server Error'
 ): void {
-  const detail = e instanceof Error ? (e.stack ?? e.message) : String(e);
-  console.warn(`[handlers] ${detail}`);
   const status =
     e &&
     typeof e === 'object' &&
     typeof (e as { statusCode?: number }).statusCode === 'number'
       ? (e as { statusCode: number }).statusCode
       : 500;
+  // Tag every error log with the request id (`x-request-id`) so an
+  // operator can grep `fly logs | grep <reqId>` to assemble the full
+  // trail for a single failed request. The id is set by `prod.ts`
+  // before dispatch; default to `-` for tests / unattached calls.
+  const reqId = res.getHeader('x-request-id');
+  logError('http_error', e, {
+    request_id: typeof reqId === 'string' ? reqId : '-',
+    status,
+  });
+  if (status >= 500) incr('http_5xx');
+  else if (status >= 400) incr('http_4xx');
   res.statusCode = status;
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.end(status === 413 ? 'Payload too large' : fallback);
@@ -512,6 +523,19 @@ export async function handleClearCache(
   await clearAllCache();
   clearSimTreeCache();
   sendJson(res, { ok: true });
+}
+
+/**
+ * Plain-text metrics endpoint. One `key=value` line per counter or
+ * observation so `curl /metrics | grep build_` is the operator UX.
+ * Not Prometheus textfmt — keep the surface tiny until a scraper
+ * actually shows up that needs the proper exposition format.
+ */
+export function handleMetrics(_req: IncomingMessage, res: ServerResponse): void {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store');
+  res.end(renderText());
 }
 
 // `hash.ts` slices `hashBuildInputs` output to 12 hex characters; this
