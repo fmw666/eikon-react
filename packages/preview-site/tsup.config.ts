@@ -35,6 +35,11 @@ export default defineConfig({
   entry: {
     prod: 'server/prod.ts',
     'prebuild-variants': 'scripts/prebuild-variants.ts',
+    // Killable viteBuild wrapper. Spawned by `runBuild` in prod so the
+    // parent can SIGKILL a wedged build instead of leaving the orphan
+    // consuming RAM (Vite has no AbortSignal). See server/build-worker.ts
+    // header for the full rationale.
+    'build-worker': 'server/build-worker.ts',
   },
   outDir: 'dist-server',
   format: ['esm'],

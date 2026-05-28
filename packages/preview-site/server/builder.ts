@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { copyFile, mkdir, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawn, type ChildProcess } from 'node:child_process';
 
 import { build as viteBuild } from 'vite';
 
@@ -470,6 +471,14 @@ async function evictCacheLru(): Promise<void> {
       // serialises eviction passes, but doesn't synchronise with build
       // start — so the read-then-rm is the actual race window.)
       if (inflight.has(name)) return;
+      // Audit Lane B close-out: also re-check `lastServed`. A
+      // /preview/<hash>/* request landing between `keep` selection
+      // (above) and `rm` (below) calls `touchHashServed(name)` and
+      // marks the dir as currently displayed. Without this guard,
+      // eviction would still delete it and the iframe would 404 on
+      // its next chunk fetch. Window is sub-millisecond but observable
+      // under sustained navigation.
+      if (lastServed.has(name)) return;
       try {
         await rm(path.join(CACHE_ROOT, name), RM_OPTS);
         errors.delete(name);
@@ -571,6 +580,118 @@ async function withTimeout<T>(
   }
 }
 
+/**
+ * Path to the bundled `build-worker.js` next to `prod.js`. Resolved at
+ * module load: in the prod image this resolves to `dist-server/build-worker.js`,
+ * in dev (running TS source through Vite's loader) the file does not exist
+ * and `runViteBuild` falls back to an in-process call. Auto-detection
+ * keeps the dev story the same (no separate `tsup --watch` dance) while
+ * letting prod inherit kill-on-timeout semantics for free.
+ */
+const BUILD_WORKER_PATH = path.resolve(__dirname, 'build-worker.js');
+const USE_BUILD_WORKER = existsSync(BUILD_WORKER_PATH);
+/**
+ * Grace window between SIGTERM and SIGKILL. SIGTERM gives Vite a chance
+ * to flush partial state; if the process is wedged on CPU, SIGKILL goes
+ * out 2 s later. The choice of 2 s is conservative — viteBuild's only
+ * meaningful response to SIGTERM is "exit fast", so a healthy build
+ * exits well within this window.
+ */
+const BUILD_KILL_GRACE_MS = 2_000;
+
+/**
+ * Run a single viteBuild with a hard timeout. In production (when the
+ * bundled `build-worker.js` exists next to this module) the call is
+ * delegated to a child process so the timeout can SIGKILL a wedged
+ * build — releasing its memory immediately, instead of leaving an
+ * orphan running until it completes or the parent exits. In dev the
+ * call stays in-process; the killability win is a prod concern and the
+ * dev story should not require a separate tsup watcher.
+ */
+async function runViteBuild(
+  options: Parameters<typeof viteBuild>[0],
+  hash: string
+): Promise<void> {
+  if (!USE_BUILD_WORKER) {
+    await withTimeout(
+      viteBuild(options).then(() => undefined),
+      BUILD_TIMEOUT_MS,
+      hash
+    );
+    return;
+  }
+  await runViteBuildSpawn(options, hash);
+}
+
+/**
+ * Spawn `build-worker.js` to run viteBuild in a child process; SIGTERM
+ * (then SIGKILL after `BUILD_KILL_GRACE_MS`) on timeout. The worker's
+ * stdout/stderr is forwarded to the parent so build errors land in
+ * `fly logs` next to the "[builder]" lines that already provide hash
+ * context.
+ *
+ * `env: { ...process.env, NODE_ENV: 'development' }` is the load-bearing
+ * detail: the parent runs with `NODE_ENV=production` (Fly config), but
+ * the worker MUST see `development` so Vite's `import.meta.env.DEV`
+ * evaluates to true in the produced bundle (see the module-level
+ * comment on the older in-process global mutation). Passing the env
+ * here scopes the override to just this child — no global pollution.
+ */
+async function runViteBuildSpawn(
+  options: Parameters<typeof viteBuild>[0],
+  hash: string
+): Promise<void> {
+  const json = JSON.stringify(options);
+  const child: ChildProcess = spawn(
+    process.execPath,
+    [BUILD_WORKER_PATH, json],
+    {
+      stdio: ['ignore', 'inherit', 'inherit'],
+      env: { ...process.env, NODE_ENV: 'development' },
+    }
+  );
+  let killed = false;
+  const timer = setTimeout(() => {
+    killed = true;
+    child.kill('SIGTERM');
+    setTimeout(() => {
+      if (child.exitCode === null && child.signalCode === null) {
+        child.kill('SIGKILL');
+      }
+    }, BUILD_KILL_GRACE_MS).unref?.();
+  }, BUILD_TIMEOUT_MS);
+  timer.unref?.();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      child.once('exit', (code, signal) => {
+        if (killed || signal === 'SIGTERM' || signal === 'SIGKILL') {
+          reject(
+            new Error(
+              `build worker killed after ${(BUILD_TIMEOUT_MS / 1000).toFixed(
+                0
+              )}s timeout (hash=${hash}, signal=${signal ?? 'SIGTERM'})`
+            )
+          );
+          return;
+        }
+        if (code === 0) {
+          resolve();
+          return;
+        }
+        reject(
+          new Error(
+            `build worker exited with code ${code ?? 'null'} (hash=${hash}). ` +
+              `See preceding stderr lines for the viteBuild rejection.`
+          )
+        );
+      });
+      child.once('error', (err) => reject(err));
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
   const cacheDir = getCacheDir(hash);
 
@@ -645,32 +766,36 @@ async function runBuild(hash: string, inputs: BuildInputs): Promise<void> {
   // the iframe rebuilds cleanly when the user cycles the selector.
   await applyUiSnapshot(cacheDir, inputs.ui, UI_SNAPSHOTS_ROOT);
 
-  await viteBuild({
-    root: cacheDir,
-    base: `/preview/${hash}/`,
-    configFile: path.join(cacheDir, 'vite.config.ts'),
-    // `mode` flips `import.meta.env.DEV` to `true` in the produced
-    // bundle, which is the second half of "the playground is the
-    // template's dev environment". The first half (source files
-    // present) is now handled by the unconditional `examples` ship in
-    // the CLI's strip-features.ts — the showcase directory is part of
-    // every scaffold. NOTE: mode alone is NOT sufficient when the host
-    // has NODE_ENV='production' (Vite OR-s the two flags) — see the
-    // module-level NODE_ENV override at the top of this file for the
-    // load-bearing other half.
-    mode: 'development',
-    build: {
-      outDir: 'dist',
-      emptyOutDir: true,
-      sourcemap: false,
-      // We still want production-grade output (minified, no HMR client)
-      // because the iframe loads the static dist via the server's
-      // pass-through middleware. Only the env semantics change.
-      minify: true,
+  await runViteBuild(
+    {
+      root: cacheDir,
+      base: `/preview/${hash}/`,
+      configFile: path.join(cacheDir, 'vite.config.ts'),
+      // `mode` flips `import.meta.env.DEV` to `true` in the produced
+      // bundle, which is the second half of "the playground is the
+      // template's dev environment". The first half (source files
+      // present) is now handled by the unconditional `examples` ship in
+      // the CLI's strip-features.ts — the showcase directory is part of
+      // every scaffold. NOTE: mode alone is NOT sufficient when the host
+      // has NODE_ENV='production' (Vite OR-s the two flags) — see
+      // `runViteBuildSpawn` for the prod story (per-spawn env override)
+      // and the module-level NODE_ENV='development' for the dev story
+      // (in-process fallback).
+      mode: 'development',
+      build: {
+        outDir: 'dist',
+        emptyOutDir: true,
+        sourcemap: false,
+        // We still want production-grade output (minified, no HMR client)
+        // because the iframe loads the static dist via the server's
+        // pass-through middleware. Only the env semantics change.
+        minify: true,
+      },
+      logLevel: 'warn',
+      clearScreen: false,
     },
-    logLevel: 'warn',
-    clearScreen: false,
-  });
+    hash
+  );
 
   // Write the integrity marker LAST, after viteBuild has fully
   // resolved. A cache dir without this file is treated as half-built

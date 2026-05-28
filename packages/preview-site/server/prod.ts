@@ -186,6 +186,27 @@ async function dispatch(
   // -- Liveness probe used by Fly's HTTP health check ------------------
   if (pathname === '/healthz') {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    if (!bootReady) {
+      // Fly's health check polls /healthz on `interval = "15s"` with a
+      // 45 s `grace_period` (fly.toml). During boot we still need to
+      // run `scrubHalfBuiltCacheDirs` before any /api/build can land
+      // safely — without that, a leftover dist/index.html from a prior
+      // boot's mid-build crash would falsely satisfy `isReady()`. Reply
+      // 503 until scrub finishes so Fly's first probe correctly sees a
+      // not-yet-ready machine; after scrub, every subsequent probe
+      // gets 200.
+      res.statusCode = 503;
+      res.end('booting');
+      return;
+    }
+    if (bootDegraded) {
+      // Service is functional (handles /api/build on demand), but the
+      // boot pre-warm errored out so the cold-start path is
+      // un-prewarmed. Fly should still consider us healthy enough to
+      // route traffic to — operator visibility is the only goal here.
+      res.end('degraded');
+      return;
+    }
     res.end('ok');
     return;
   }
@@ -214,13 +235,34 @@ const server = createServer((req, res) => {
   });
 });
 
+/**
+ * Boot-state flags consulted by `/healthz`. Audit close-out: previously
+ * /healthz unconditionally returned 200 the moment listen() succeeded —
+ * even if the boot scrub hadn't finished and a leftover half-built dir
+ * could still flash through `isReady()`, and even if `prewarmDefault`
+ * silently threw and left the machine serving 500 on every /api/build.
+ *
+ *  - `bootReady` flips true after `scrubHalfBuiltCacheDirs` resolves.
+ *    /healthz returns 503 until then so Fly's grace-period probes see
+ *    the machine come up cleanly.
+ *  - `bootDegraded` flips true if the warm-cache pre-bake threw. The
+ *    machine is still functional (every /api/build can run on demand);
+ *    the flag exists so operators can grep `fly logs` for "degraded"
+ *    after a deploy and decide whether to investigate.
+ */
+let bootReady = false;
+let bootDegraded = false;
+
 server.listen(PORT, HOST, () => {
   log(`listening on http://${HOST}:${PORT}`);
   log(`static dist: ${STATIC_DIR}`);
   // Boot-time integrity sweep: a previous boot may have crashed mid-build,
   // leaving a `dist/index.html` without a `.build-ok` marker. Such a cache
   // entry would falsely satisfy `isReady()` and serve a half-built bundle.
-  // Remove them before any request can find them.
+  // Audit close-out: scrub MUST flip `bootReady` before /healthz starts
+  // returning 200; doing scrub-first (and gating /healthz behind it)
+  // guarantees no /api/build can land on a half-built cache during the
+  // window between listen() and scrub completion.
   scrubHalfBuiltCacheDirs()
     .then((removed) => {
       if (removed.length > 0) {
@@ -230,6 +272,10 @@ server.listen(PORT, HOST, () => {
     .catch((e: unknown) => {
       const msg = e instanceof Error ? e.message : String(e);
       log(`scrub failed (non-fatal): ${msg}`);
+    })
+    .finally(() => {
+      bootReady = true;
+      log('bootReady=true');
     });
   // P4.10: pre-warm the template-rev so the first /api/build (often
   // fired before prewarmDefault completes) doesn't pay the ~50–200ms
@@ -242,8 +288,13 @@ server.listen(PORT, HOST, () => {
       log(`template-rev pre-warm failed: ${msg}`);
     });
   // Best-effort warm of the default combo so the first /api/build lands
-  // on a hot cache. Fire-and-forget; failures only show in logs.
-  prewarmDefault(log);
+  // on a hot cache. Fire-and-forget; failures flip `bootDegraded` so
+  // operators can spot un-prewarmed machines in `fly logs`.
+  Promise.resolve(prewarmDefault(log)).catch((e: unknown) => {
+    const msg = e instanceof Error ? e.message : String(e);
+    bootDegraded = true;
+    log(`prewarmDefault failed (machine is degraded but functional): ${msg}`);
+  });
 });
 
 // Fly sends SIGTERM when migrating / scaling down. Drain in-flight
