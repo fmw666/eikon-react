@@ -26,7 +26,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
-import { PLATFORM_SCRIPT_TAGS } from '../strip-features.js';
+import { PLATFORM_SCRIPT_TAGS, PLATFORM_ROOT_FILES } from '../strip-features.js';
 
 // =================================================================================================
 // Helpers
@@ -160,5 +160,28 @@ describe('platform parity', () => {
         `PLATFORM_SCRIPT_TAGS.${p} missing — declare it as [] if the platform owns no scripts`
       ).toBe(true);
     }
+  });
+
+  it('every PLATFORM_ROOT_FILES keepFor entry references a known platform', async () => {
+    // Audit Lane A close-out: PLATFORM_ROOT_FILES (alias for the inline
+    // PLATFORM_ONLY_ROOT_FILES) carries `keepFor: [...]` arrays naming
+    // the platforms whose scaffolds should retain each root file. A typo
+    // in `keepFor` (e.g. `desktopp`) would silently keep the file on
+    // every platform — the value drops out of the inclusion check
+    // without raising. This fence catches that drift.
+    const indexSrc = await readFile(path.join(SRC_ROOT, 'index.ts'), 'utf8');
+    const platforms = new Set(extractPlatformValues(indexSrc));
+    const offenders: string[] = [];
+    for (const entry of PLATFORM_ROOT_FILES) {
+      for (const p of entry.keepFor) {
+        if (!platforms.has(p)) {
+          offenders.push(`${entry.path}.keepFor=${p}`);
+        }
+      }
+    }
+    expect(
+      offenders,
+      `PLATFORM_ROOT_FILES references unknown platforms: ${offenders.join(', ')}`
+    ).toEqual([]);
   });
 });
