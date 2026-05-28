@@ -6,7 +6,7 @@
  * generic shell — best for marketing sites, blogs, docs landings, and any
  * content-first app where the navigation belongs above the fold.
  *
- * One of the four layout variants selected via `--layout` at scaffold time;
+ * One of the seven layout variants selected via `--layout` at scaffold time;
  * the dispatcher at `./RootLayout.tsx` re-exports whichever variant won.
  */
 

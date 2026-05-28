@@ -1,19 +1,30 @@
 /**
  * @file navLinks.ts
  * @description Single source of truth for the global nav menu shape and
- * entries. Consumed by every layout in `src/app/layouts/*RootLayout.tsx`
- * — adding or renaming an item here updates every layout simultaneously,
- * with no hand-mirrored arrays.
+ * entries. Consumed by the **five full-nav layouts** in
+ * `src/app/layouts/*RootLayout.tsx`:
  *
- * The icons are only rendered by `MobileDrawerRootLayout`; the other
- * layouts (Stacked / Sidebar / TopbarSidebar / Centered) read `to`,
- * `key`, `fallback`, `end` and ignore the icon field. Bundle cost is
- * negligible — `lucide-react` is a baseline dep and tree-shaking drops
- * unused icons in layouts that don't render them.
+ *   - StackedRootLayout
+ *   - SidebarRootLayout
+ *   - TopbarSidebarRootLayout
+ *   - CenteredRootLayout
+ *   - MobileDrawerRootLayout
+ *
+ * Adding or renaming an item here updates all five simultaneously,
+ * with no hand-mirrored arrays. The two BottomTabs layouts
+ * (`BottomTabsRootLayout`, `BottomTabsFabRootLayout`) use their own
+ * curated `tabs[]` arrays inline — bottom-tab UIs deliberately show a
+ * smaller, hand-picked subset of routes, so they're intentionally not
+ * driven by this file. If a route should appear in BottomTabs too,
+ * also add it to those layouts' inline arrays.
+ *
+ * The icons are rendered only by `MobileDrawerRootLayout`; the other
+ * four full-nav layouts read `to`, `key`, `fallback`, `end` and ignore
+ * the icon field.
  *
  * Adding a feature with a top-level route: append one entry here, add
  * the matching `nav.<key>` translation in `shared/i18n/locales/{en,zh}/common.json`,
- * and that's the whole layout-side wire-up.
+ * and that's the whole layout-side wire-up for the full-nav layouts.
  */
 
 import {

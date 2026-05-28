@@ -7,7 +7,7 @@
  * dashboards, and any "tool" app where navigation is the spine of the
  * experience (Linear, Notion, Supabase Studio, …).
  *
- * One of the four layout variants selected via `--layout` at scaffold time;
+ * One of the seven layout variants selected via `--layout` at scaffold time;
  * the dispatcher at `./RootLayout.tsx` re-exports whichever variant won.
  */
 

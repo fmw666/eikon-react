@@ -8,7 +8,7 @@
  * where the top bar carries cross-app concerns and the side rail carries
  * the in-product nav (GitHub, Jira, Sentry, GitLab, Confluence, …).
  *
- * One of the four layout variants selected via `--layout` at scaffold time;
+ * One of the seven layout variants selected via `--layout` at scaffold time;
  * the dispatcher at `./RootLayout.tsx` re-exports whichever variant won.
  */
 
