@@ -346,21 +346,16 @@ export function FileExplorer() {
 
   const [tree, setTree] = useState<FileNode[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Track which `inputs` snapshot the currently-rendered `tree` was
+  // fetched for. Identity comparison works because `useShallow` keeps
+  // the `inputs` reference stable until its contents change.
+  const [resolvedInputs, setResolvedInputs] = useState<SimInputs | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   useScrollFade(wrapRef);
   const [size, setSize] = useState<{ w: number; h: number }>({
     w: 240,
     h: 400,
   });
-
-  // Mirror the freshest currentHash into a ref so the fetch's
-  // `setTreeReadyHash` call doesn't capture a stale value when the
-  // build completes mid-flight. The overlay coordinator reads
-  // `treeReadyHash === currentHash` to decide if the tree is in sync.
-  const currentHashRef = useRef(currentHash);
-  useEffect(() => {
-    currentHashRef.current = currentHash;
-  }, [currentHash]);
 
   // Fetch on every input change. The new endpoint is decoupled from
   // the build cache: it walks `template-react/` through the simulator
@@ -375,27 +370,31 @@ export function FileExplorer() {
     fetchTree(inputs, ctrl.signal)
       .then((r) => {
         setTree(r.tree);
+        setResolvedInputs(inputs);
         setError(null);
-        // The tree is now in sync with the current input snapshot. The
-        // overlay coordinator gates on `treeReadyHash === currentHash`
-        // — when no build is in flight `currentHash` already names the
-        // last-ready hash, so this assertion clears the overlay
-        // immediately. During a build, `currentHash` updates only
-        // after the build dist exists; the next fetch (triggered by
-        // the platform/supabase change that drove the build) will
-        // refresh `treeReadyHash` to match.
-        const h = currentHashRef.current;
-        if (h) setTreeReadyHash(h);
       })
       .catch((e: unknown) => {
         if ((e as { name?: string }).name === 'AbortError') return;
         setError(e instanceof Error ? e.message : String(e));
       });
     return () => ctrl.abort();
-    // `setTreeReadyHash` is a stable zustand setter; omitting it from
-    // deps keeps this effect from re-running on store init.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputs]);
+
+  // Sync `treeReadyHash` to `currentHash` whenever the rendered tree IS
+  // for the current inputs. This handles two cases at once:
+  //   1) tree fetch resolves first → tree settles for inputs, currentHash
+  //      not yet known (or just settled) — fire as soon as both align.
+  //   2) build resolves first (cached) → currentHash advances, tree fetch
+  //      still in flight (resolvedInputs !== inputs) so this is a no-op
+  //      until the new tree lands; then it fires.
+  // Without this, a fast tree fetch resolving before /api/build POST
+  // would lock in the OLD currentHash and leave the overlay stuck on
+  // every ui-axis flip.
+  useEffect(() => {
+    if (resolvedInputs === inputs && currentHash) {
+      setTreeReadyHash(currentHash);
+    }
+  }, [currentHash, resolvedInputs, inputs, setTreeReadyHash]);
 
   useEffect(() => {
     const el = wrapRef.current;
