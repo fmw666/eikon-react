@@ -147,18 +147,20 @@ install path:
 
 1. Builds the CLI bundle and syncs the template payload.
 2. Runs `npm pack` to produce the exact tarball that `npm publish` would.
-3. For each scenario (`lean` / `default` / `full`) installs the tarball into a
-   throwaway sandbox so the binary is invoked the same way `npx` would invoke
-   it after a registry pull.
-4. Verifies the generated project's file tree, `package.json` deps, and the
+3. Installs the tarball into a throwaway sandbox so the binary is invoked the
+   same way `npx` would invoke it after a registry pull.
+4. Scaffolds each configured scenario — `default`, `full` (Supabase on),
+   `desktop` (Tauri shell), `mobile` (Capacitor shell), `variants` (custom UI
+   axis variants), `variants-shadcn`, `variants-animate-ui`, `pm-npm`,
+   `pm-bun` — and verifies its file tree, `package.json` deps, and the
    contents of `src/app/providers.tsx` after feature stripping.
-5. In full mode, runs `pnpm install && pnpm typecheck && pnpm test && pnpm lint && pnpm build`
+5. Without `--quick`, also runs `pnpm install && pnpm typecheck && pnpm test && pnpm lint && pnpm build`
    inside each generated project.
 
 ```bash
 pnpm e2e:quick                       # ~20s, no install/build — just scaffolding
 pnpm e2e                             # ~2-5 min, full pipeline inside each scenario
-pnpm e2e -- --only lean              # run only the named scenario
+pnpm e2e -- --only default           # run a single named scenario
 pnpm e2e -- --keep                   # keep the temp workspace on disk for inspection
 ```
 
