@@ -62,19 +62,34 @@ const PLATFORMS = ['web', 'desktop', 'mobile'] as const;
 const SUPABASE_VALUES = [false, true] as const;
 const UI_VALUES = ['custom', 'shadcn', 'animate-ui'] as const;
 
-const FIXED_RUNTIME_AXES: Pick<
-  BuildInputs,
-  'pm' | 'design' | 'layout' | 'toastPosition'
+/**
+ * Per-platform layout subset, mirroring `params-schema.ts`'s
+ * `layout.valuesWhen`. The simulator and the CLI both honour this
+ * narrowing — adding a layout to one without the other (or routing it
+ * to the wrong platform) silently ships the wrong file set. The
+ * combinatorial cost is contained to ~4 layouts × the existing
+ * (platform × supabase × ui) = ~72 cases at ~1 s each, well under the
+ * 30 s per-case timeout.
+ */
+const LAYOUTS_BY_PLATFORM: Record<
+  (typeof PLATFORMS)[number],
+  ReadonlyArray<string>
 > = {
-  // `pm` is part of `BuildInputs` post-Phase-H but only affects the
-  // `package.json` content rewrite, not the file set. Pin it to the
-  // default so the parity test below isolates the directory/file-name
-  // strip from the package-manager rewrite, which has its own test.
-  pm: 'pnpm',
-  design: 'default',
-  layout: 'stacked',
-  toastPosition: 'top-right',
+  web: ['stacked', 'sidebar', 'topbar-sidebar', 'centered'],
+  desktop: ['stacked', 'sidebar', 'topbar-sidebar', 'centered'],
+  mobile: ['centered', 'mobile-drawer', 'bottom-tabs', 'bottom-tabs-fab'],
 };
+
+const FIXED_RUNTIME_AXES: Pick<BuildInputs, 'pm' | 'design' | 'toastPosition'> =
+  {
+    // `pm` is part of `BuildInputs` post-Phase-H but only affects the
+    // `package.json` content rewrite, not the file set. Pin it to the
+    // default so the parity test below isolates the directory/file-name
+    // strip from the package-manager rewrite, which has its own test.
+    pm: 'pnpm',
+    design: 'default',
+    toastPosition: 'top-right',
+  };
 
 /**
  * Walk a directory tree and emit POSIX-relative paths for every file,
@@ -125,48 +140,52 @@ describe('simulateStripTree ↔ CLI stripFeatures parity (Phase J drift check)',
   for (const platform of PLATFORMS) {
     for (const supabase of SUPABASE_VALUES) {
       for (const ui of UI_VALUES) {
-        it(`platform=${platform} supabase=${supabase} ui=${ui} matches the CLI 1:1`, async () => {
-          const inputs: BuildInputs = {
-            platform,
-            supabase,
-            ui,
-            ...FIXED_RUNTIME_AXES,
-          };
-
-          const simulated = await simulateStripTree(inputs);
-
-          const tmp = await mkdtemp(path.join(tmpdir(), 'strip-drift-'));
-          try {
-            await copyTemplate(tmp);
-
-            const flags: FeatureFlags = { supabase };
-            const variants: VariantSelections = {
+        for (const layout of LAYOUTS_BY_PLATFORM[platform]) {
+          it(`platform=${platform} supabase=${supabase} ui=${ui} layout=${layout} matches the CLI 1:1`, async () => {
+            const inputs: BuildInputs = {
               platform,
+              supabase,
               ui,
+              layout,
               ...FIXED_RUNTIME_AXES,
             };
-            // No `keepAllVariants` here — terminal CLI users get the full
-            // strip, and that's the contract simulateStripTree mirrors.
-            await stripFeatures(tmp, flags, variants);
-            // Phase J: the CLI runs applyUiSnapshot AFTER stripFeatures.
-            // The simulator mirrors that two-step result, so the parity
-            // fixture must do the same.
-            await applyUiSnapshot(tmp, ui, UI_SNAPSHOTS_ROOT);
 
-            const fromCli = await walkFiles(tmp);
+            const simulated = await simulateStripTree(inputs);
 
-            // Show diffs as sorted arrays so a failure points at the exact
-            // files that drifted, not at a giant unified blob.
-            const onlyInSim = simulated.filter((p) => !fromCli.includes(p));
-            const onlyInCli = fromCli.filter((p) => !simulated.includes(p));
-            expect(
-              { onlyInSim, onlyInCli },
-              'simulateStripTree must match the actual CLI output for this combo'
-            ).toEqual({ onlyInSim: [], onlyInCli: [] });
-          } finally {
-            await rm(tmp, { recursive: true, force: true });
-          }
-        }, 30_000);
+            const tmp = await mkdtemp(path.join(tmpdir(), 'strip-drift-'));
+            try {
+              await copyTemplate(tmp);
+
+              const flags: FeatureFlags = { supabase };
+              const variants: VariantSelections = {
+                platform,
+                ui,
+                layout,
+                ...FIXED_RUNTIME_AXES,
+              };
+              // No `keepAllVariants` here — terminal CLI users get the full
+              // strip, and that's the contract simulateStripTree mirrors.
+              await stripFeatures(tmp, flags, variants);
+              // Phase J: the CLI runs applyUiSnapshot AFTER stripFeatures.
+              // The simulator mirrors that two-step result, so the parity
+              // fixture must do the same.
+              await applyUiSnapshot(tmp, ui, UI_SNAPSHOTS_ROOT);
+
+              const fromCli = await walkFiles(tmp);
+
+              // Show diffs as sorted arrays so a failure points at the exact
+              // files that drifted, not at a giant unified blob.
+              const onlyInSim = simulated.filter((p) => !fromCli.includes(p));
+              const onlyInCli = fromCli.filter((p) => !simulated.includes(p));
+              expect(
+                { onlyInSim, onlyInCli },
+                'simulateStripTree must match the actual CLI output for this combo'
+              ).toEqual({ onlyInSim: [], onlyInCli: [] });
+            } finally {
+              await rm(tmp, { recursive: true, force: true });
+            }
+          }, 30_000);
+        }
       }
     }
   }

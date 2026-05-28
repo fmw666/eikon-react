@@ -54,11 +54,24 @@ export { PROJECT_NAME_TARGETS };
  * is produced by scripts/sync-template.mjs which already handles the rename.
  */
 export async function copyTemplate(opts: CopyOptions): Promise<void> {
+  // Audit close-out (accepted-debt A.13): the basename filter would
+  // also skip any deeply-nested directory whose name happens to
+  // collide with a top-level skip entry — e.g. a future
+  // `src/features/dist-utils/` would lose its `dist/` lookalike on
+  // accident. Anchor the skip to direct children of the source root
+  // by computing the depth from `opts.src`. Top-level matches still
+  // pass through; depths > 0 ignore the skip set entirely.
+  const srcRoot = path.resolve(opts.src);
   await cp(opts.src, opts.dest, {
     recursive: true,
     filter: (source) => {
-      const base = path.basename(source);
-      return !TEMPLATE_COPY_SKIP.has(base);
+      const rel = path.relative(srcRoot, source);
+      // The src root itself is always copied.
+      if (rel === '') return true;
+      // Only the first path segment is checked. Anything nested below
+      // the top level passes through regardless of its basename.
+      const top = rel.split(path.sep)[0]!;
+      return !TEMPLATE_COPY_SKIP.has(top);
     },
   });
 

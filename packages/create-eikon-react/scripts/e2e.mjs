@@ -515,12 +515,39 @@ async function main() {
     const cliBin = await installSharedSandbox(tmp, tarballPath);
     console.log(`        -> bin: ${path.relative(tmp, cliBin)}`);
 
-    for (const scenario of selected) {
+    // Audit close-out (accepted-debt A.6): scenarios run with bounded
+    // concurrency. Each scenario writes to its own scratch dir under
+    // `tmp` and pnpm/npm/bun installs into the scenario's own
+    // `node_modules`, so they're independent past the shared sandbox
+    // install above. Default concurrency is 1 in CI (deterministic
+    // logs, predictable wall-clock under a single-CPU runner) and 3
+    // locally (halves full-mode wall time on 4+ core dev boxes
+    // without saturating slower laptops). Override with
+    // `--concurrency N` either way.
+    const isCi = process.env.CI === '1' || process.env.CI === 'true';
+    const concurrency = Math.max(
+      1,
+      args.concurrency ?? (isCi ? 1 : 3)
+    );
+    if (concurrency === 1) {
+      for (const scenario of selected) {
+        console.log(
+          `\n[e2e] === scenario: ${scenario.id} ` +
+            `(flags: ${scenario.flags.join(' ')}) ===`
+        );
+        await runScenario(scenario, tmp, cliBin);
+      }
+    } else {
       console.log(
-        `\n[e2e] === scenario: ${scenario.id} ` +
-          `(flags: ${scenario.flags.join(' ')}) ===`
+        `\n[e2e] running ${selected.length} scenarios with concurrency=${concurrency}`
       );
-      await runScenario(scenario, tmp, cliBin);
+      await runWithConcurrency(selected, concurrency, async (scenario) => {
+        console.log(
+          `\n[e2e] === scenario: ${scenario.id} ` +
+            `(flags: ${scenario.flags.join(' ')}) ===`
+        );
+        await runScenario(scenario, tmp, cliBin);
+      });
     }
 
     console.log(`\n[e2e] ALL PASSED (${selected.length} scenarios)`);
@@ -1042,7 +1069,7 @@ function step(label) {
 }
 
 function parseArgs(argv) {
-  const out = { quick: false, keep: false, only: null };
+  const out = { quick: false, keep: false, only: null, concurrency: null };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--quick') out.quick = true;
@@ -1057,6 +1084,21 @@ function parseArgs(argv) {
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean);
+    } else if (a === '--concurrency') {
+      const next = argv[++i];
+      if (!next) throw new Error('--concurrency requires a value');
+      const n = Number.parseInt(next, 10);
+      if (!Number.isFinite(n) || n < 1) {
+        throw new Error(`--concurrency must be a positive integer (got "${next}")`);
+      }
+      out.concurrency = n;
+    } else if (a.startsWith('--concurrency=')) {
+      const v = a.slice('--concurrency='.length);
+      const n = Number.parseInt(v, 10);
+      if (!Number.isFinite(n) || n < 1) {
+        throw new Error(`--concurrency must be a positive integer (got "${v}")`);
+      }
+      out.concurrency = n;
     }
   }
   return out;
@@ -1065,3 +1107,37 @@ function parseArgs(argv) {
 // Reference REPO_ROOT to keep it available for future test variants that may
 // want to install pnpm from the workspace root, etc.
 void REPO_ROOT;
+
+/**
+ * Run `task(item)` for every item in `items`, with at most `concurrency`
+ * tasks in flight at once. Resolves when all complete; rejects on the
+ * first failure (and waits for in-flight tasks to settle so their stdio
+ * doesn't keep landing after the script exits).
+ */
+async function runWithConcurrency(items, concurrency, task) {
+  const queue = [...items];
+  const errors = [];
+  async function worker() {
+    while (queue.length > 0) {
+      const item = queue.shift();
+      try {
+        await task(item);
+      } catch (e) {
+        errors.push(e);
+        // Drain remaining items so the worker pool empties promptly,
+        // but skip executing them — fail-fast semantics with clean
+        // stdio on the way out.
+        queue.length = 0;
+        return;
+      }
+    }
+  }
+  const workers = Array.from(
+    { length: Math.min(concurrency, items.length) },
+    () => worker()
+  );
+  await Promise.all(workers);
+  if (errors.length > 0) {
+    throw errors[0];
+  }
+}
