@@ -54,6 +54,7 @@ const ALLOWED_SHARED_DIRS = new Set([
   'ui',
   'lib',
   'hooks',
+  'nav',
   'stores',
   'theme',
   'i18n',
@@ -61,7 +62,13 @@ const ALLOWED_SHARED_DIRS = new Set([
   'supabase',
 ]);
 
-const BARREL_REQUIRED_DIRS = new Set(['theme', 'i18n', 'services', 'supabase']);
+const BARREL_REQUIRED_DIRS = new Set([
+  'theme',
+  'i18n',
+  'services',
+  'supabase',
+  'nav',
+]);
 
 /**
  * Subdirectories allowed inside `shared/ui/`. `shared/ui/` is otherwise

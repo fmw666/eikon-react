@@ -24,38 +24,9 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 // --- Absolute Imports ---
 import { SignInButton } from '@/features/auth';
 import { cn } from '@/shared/lib/cn';
+import { navLinks } from '@/shared/nav';
 import { LanguageSwitcher } from '@/shared/ui/language-switcher';
 import { ThemeToggle } from '@/shared/ui/theme-toggle';
-
-// =================================================================================================
-// Types
-// =================================================================================================
-
-interface NavLinkSpec {
-  to: string;
-  /** i18n key for the label. */
-  key: string;
-  fallback: string;
-  end?: boolean;
-}
-
-// =================================================================================================
-// Constants
-// =================================================================================================
-
-const navLinks: NavLinkSpec[] = [
-  { to: '/', key: 'nav.home', fallback: 'Home', end: true },
-  { to: '/counter', key: 'nav.counter', fallback: 'Counter' },
-  { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks' },
-  // Examples is a DEV-ONLY showcase. The route only registers when
-  // `import.meta.env.DEV` is true (see `app/router.tsx`), so production
-  // template builds never wire it in. The preview playground keeps the
-  // showcase and builds the template as `mode: 'development'`, so the
-  // gate stays open inside its iframe.
-  ...(import.meta.env.DEV
-    ? [{ to: '/examples', key: 'nav.examples', fallback: 'Examples' }]
-    : []),
-];
 
 // =================================================================================================
 // Component

@@ -102,9 +102,12 @@ Use when the user asks to "add a page" or "create a new route" that belongs to a
 
 4. **Add a navigation entry** (if the page should be reachable from
    the header). Edit
-   [src/app/layouts/RootLayout.tsx](../../../src/app/layouts/RootLayout.tsx)'s
-   `navLinks` array, and add the `nav.<key>` translation in every
-   locale's `src/shared/i18n/locales/<lng>/common.json`.
+   [src/shared/nav/navLinks.ts](../../../src/shared/nav/navLinks.ts) —
+   the single `navLinks` array consumed by every layout. Append a
+   `{ to, key, fallback, icon }` entry; the icon comes from
+   `lucide-react` and is rendered only by the mobile-drawer layout
+   (the others ignore it). Then add the `nav.<key>` translation in
+   every locale's `src/shared/i18n/locales/<lng>/common.json`.
 
 5. **Add i18n keys** to the host feature's namespace at
    `src/features/<feature>/i18n/{en,zh}.json` — under the

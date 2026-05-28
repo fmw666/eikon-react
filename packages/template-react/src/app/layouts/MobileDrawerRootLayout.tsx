@@ -34,18 +34,12 @@ import { useTranslation } from 'react-i18next';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
 // --- Third-party Libraries ---
-import {
-  CheckSquare,
-  Home,
-  type LucideIcon,
-  Menu,
-  Plus,
-  Sparkles,
-} from 'lucide-react';
+import { Menu } from 'lucide-react';
 
 // --- Absolute Imports ---
 import { SignInButton } from '@/features/auth';
 import { cn } from '@/shared/lib/cn';
+import { navLinks } from '@/shared/nav';
 import {
   Sheet,
   SheetClose,
@@ -62,37 +56,13 @@ import { ThemeToggle } from '@/shared/ui/theme-toggle';
 // Types
 // =================================================================================================
 
-interface NavLinkSpec {
-  to: string;
-  /** i18n key for the label. */
-  key: string;
-  fallback: string;
-  icon: LucideIcon;
-  end?: boolean;
-}
+// (NavLinkSpec is now imported from `@/shared/nav` — single source of truth
+// across all 5 layouts. The `icon` field is optional in the shared spec;
+// only this layout actually renders it.)
 
 // =================================================================================================
-// Constants
+// Component
 // =================================================================================================
-
-const navLinks: NavLinkSpec[] = [
-  { to: '/', key: 'nav.home', fallback: 'Home', icon: Home, end: true },
-  { to: '/counter', key: 'nav.counter', fallback: 'Counter', icon: Plus },
-  { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks', icon: CheckSquare },
-  // Examples is a DEV-ONLY showcase. The route only registers when
-  // `import.meta.env.DEV` is true (see `app/router.tsx`); production
-  // bundles drop the entry.
-  ...(import.meta.env.DEV
-    ? [
-        {
-          to: '/examples',
-          key: 'nav.examples',
-          fallback: 'Examples',
-          icon: Sparkles,
-        },
-      ]
-    : []),
-];
 
 // =================================================================================================
 // Component
