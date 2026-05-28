@@ -208,6 +208,7 @@ describe('pm content parity (Phase H)', () => {
         platform: 'web',
         supabase: true,
         ui: 'animate-ui',
+        layout: 'stacked',
         ...FIXED_RUNTIME_AXES,
         pm,
       };
