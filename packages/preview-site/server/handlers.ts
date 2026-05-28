@@ -41,6 +41,7 @@ import {
 } from './simulate-strip';
 import { rewriteHtmlOpenTag } from '../../create-eikon-react/src/inject-html-variants';
 import { type VariantSelections } from '../../create-eikon-react/src/strip-features';
+import { getParam } from '../src/lib/params-schema';
 
 // ---------------------------------------------------------------------------
 // Shared helpers
@@ -529,17 +530,43 @@ const PREVIEW_PATH_RE = /^\/preview\/([0-9a-f]{6,64})(\/.*)?$/;
  * arrives without any `__eikon*` params produces unchanged HTML —
  * matching the legacy behaviour for any caller that hasn't been taught
  * to attach the snapshot.
+ *
+ * Each value is validated against the schema's enum white-list before
+ * being passed to `rewriteHtmlOpenTag` — `rewriteHtmlOpenTag` interpolates
+ * its inputs straight into HTML attribute strings, so unsanitized URL
+ * input would let a crafted `?__eikonDesign=x"><script>...` request break
+ * out of the attribute. Unknown values silently drop, matching the
+ * "missing key collapses to no-op" contract above.
+ *
+ * Exported for tests so the white-list behaviour can be asserted directly
+ * without a full HTTP round-trip.
  */
-function readVariantsFromUrl(rawUrl: string): VariantSelections {
+export function readVariantsFromUrl(rawUrl: string): VariantSelections {
   const u = new URL(rawUrl, 'http://localhost');
   const out: VariantSelections = {};
-  const d = u.searchParams.get('__eikonDesign');
-  const i = u.searchParams.get('__eikonUi');
-  const l = u.searchParams.get('__eikonLayout');
+  const d = validateAxisValue('design', u.searchParams.get('__eikonDesign'));
+  const i = validateAxisValue('ui', u.searchParams.get('__eikonUi'));
+  const l = validateAxisValue('layout', u.searchParams.get('__eikonLayout'));
   if (d) out.design = d;
   if (i) out.ui = i;
   if (l) out.layout = l;
   return out;
+}
+
+/**
+ * Look the raw value up against `params-schema.PARAMS`'s enum for `axis`.
+ * Returns the value when it's a known enum member, `undefined` otherwise.
+ * Unknown / missing axes also return `undefined` — callers treat both as
+ * "axis not specified".
+ */
+function validateAxisValue(
+  axis: 'design' | 'ui' | 'layout',
+  raw: string | null
+): string | undefined {
+  if (!raw) return undefined;
+  const def = getParam(axis);
+  if (!def || def.kind !== 'enum') return undefined;
+  return def.values.includes(raw) ? raw : undefined;
 }
 
 /**
