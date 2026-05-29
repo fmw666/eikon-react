@@ -5,6 +5,22 @@ import type { DevicePlatform } from '@/shell/device-shell';
 const SCREEN_FONT: CSSProperties['fontFamily'] =
   '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif';
 
+// Same AA playbook as the outer `.eikon-stack-card` rule (device-shell.css)
+// and `INNER_BASE_STYLE` (constants.ts): `backface-visibility:hidden` plus
+// `filter:blur(0)` force WebKit / Chromium's high-quality compositor AA on
+// this layer. Without it, the side cards' rotation rasterises the screen
+// content's 1px borders + SVG icon strokes + hairline dividers with
+// visible aliasing — the previous wireframe-style content hid this; the
+// refined app-style content (more high-frequency detail) makes it
+// obvious. Lift it into a shared const so it stays consistent across
+// the three platform layouts.
+const SCREEN_AA_STYLE: CSSProperties = {
+  backfaceVisibility: 'hidden',
+  WebkitBackfaceVisibility: 'hidden',
+  filter: 'blur(0)',
+  WebkitFontSmoothing: 'antialiased',
+};
+
 // Brand palette baked into the device-screen mockups so the three
 // platforms read as one coherent product (the orange ramp matches the
 // landing page's `--accent`). Centralised here so any future palette
@@ -46,6 +62,7 @@ function Icon({
       strokeWidth={1.7}
       strokeLinecap="round"
       strokeLinejoin="round"
+      shapeRendering="geometricPrecision"
       aria-hidden="true"
     >
       {children}
@@ -163,7 +180,7 @@ function WebScreenContent({
   return (
     <div
       className="relative flex h-full w-full flex-col overflow-hidden"
-      style={{ fontFamily: SCREEN_FONT, background: '#fff' }}
+      style={{ ...SCREEN_AA_STYLE, fontFamily: SCREEN_FONT, background: '#fff' }}
     >
       {/* Top nav — brand mark · nav items · search · avatar */}
       <div
@@ -291,7 +308,7 @@ function DesktopScreenContent({
   return (
     <div
       className="relative flex h-full w-full overflow-hidden"
-      style={{ fontFamily: SCREEN_FONT, background: '#fff' }}
+      style={{ ...SCREEN_AA_STYLE, fontFamily: SCREEN_FONT, background: '#fff' }}
     >
       {/* Sidebar */}
       <div
@@ -502,7 +519,7 @@ function MobileScreenContent({
   return (
     <div
       className="relative flex h-full w-full flex-col overflow-hidden"
-      style={{ fontFamily: SCREEN_FONT, background: '#fff' }}
+      style={{ ...SCREEN_AA_STYLE, fontFamily: SCREEN_FONT, background: '#fff' }}
     >
       {/* Top app bar */}
       <div
