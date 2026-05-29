@@ -18,12 +18,31 @@
  * and is the layer that actually performs the rotate(±deg) for side cards.
  * Without `filter: blur(0)` on that selector too, the side cards' rotated
  * border-radius rasterizes jagged even when the inner layer is clean.
+ *
+ * Separately, `.eikon-shimmer-hover` and `.eikon-tab-flash` use
+ * `mix-blend-mode: plus-lighter` on a transformed ::before. Safari/WebKit
+ * has a long-standing bug where overflow:hidden + border-radius alone
+ * fails to clip such descendants — the diagonal streak bleeds past the
+ * host's rounded corners as a rectangle. The fix is a full-cover mask
+ * layer (`-webkit-mask-image: -webkit-radial-gradient(white, black)`),
+ * which is visually a no-op but forces WebKit's real clip-path codepath.
+ * Guard the mask declarations so they survive future sweeps too.
  */
 
 import { describe, expect, it } from 'vitest';
 
 import { INNER_BASE_STYLE } from '../constants';
 import deviceShellCss from '../../../../styles/device-shell.css?raw';
+import effectsCss from '../../../../styles/effects.css?raw';
+
+const SAFARI_MASK_RE =
+  /-webkit-mask-image\s*:\s*-webkit-radial-gradient\(\s*white\s*,\s*black\s*\)/;
+
+function extractRule(css: string, selector: string): string | null {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = css.match(new RegExp(`${escaped}\\s*\\{([^}]*)\\}`));
+  return match?.[1] ?? null;
+}
 
 describe('ScaledDeviceShell rendering quality', () => {
   it('INNER_BASE_STYLE includes blur(0px) filter for anti-aliasing on GPU layers', () => {
@@ -37,11 +56,10 @@ describe('ScaledDeviceShell rendering quality', () => {
 });
 
 describe('.eikon-stack-card rendering quality', () => {
-  const blockMatch = deviceShellCss.match(/\.eikon-stack-card\s*\{([^}]*)\}/);
-  const block = blockMatch?.[1] ?? '';
+  const block = extractRule(deviceShellCss, '.eikon-stack-card');
 
   it('defines a .eikon-stack-card rule block', () => {
-    expect(blockMatch).not.toBeNull();
+    expect(block).not.toBeNull();
   });
 
   it('includes backface-visibility: hidden (the property that needs the blur fix)', () => {
@@ -50,6 +68,21 @@ describe('.eikon-stack-card rendering quality', () => {
 
   it('includes filter: blur(0) AA fix for the rotated outer layer', () => {
     expect(block).toMatch(/filter\s*:\s*blur\(\s*0(?:px)?\s*\)/);
+  });
+});
+
+describe('Safari border-radius clip fix (mix-blend-mode + transform)', () => {
+  const tabFlash = extractRule(deviceShellCss, '.eikon-tab-flash');
+  const shimmerHover = extractRule(effectsCss, '.eikon-shimmer-hover');
+
+  it('.eikon-tab-flash includes the WebKit mask hack', () => {
+    expect(tabFlash).not.toBeNull();
+    expect(tabFlash).toMatch(SAFARI_MASK_RE);
+  });
+
+  it('.eikon-shimmer-hover includes the WebKit mask hack', () => {
+    expect(shimmerHover).not.toBeNull();
+    expect(shimmerHover).toMatch(SAFARI_MASK_RE);
   });
 });
 

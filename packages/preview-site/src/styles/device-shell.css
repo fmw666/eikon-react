@@ -28,6 +28,13 @@
      composites as a rectangle that bleeds past the pill on macOS
      Safari. The cousin `eikon-shimmer-hover` already does this. */
   isolation: isolate;
+  /* DO NOT REMOVE — Safari/WebKit fix (same root cause as the mask
+     on .eikon-shimmer-hover). isolation:isolate above gives us a
+     stacking context but Safari still won't apply the parent pill's
+     border-radius as a clip when the ::before below uses
+     mix-blend-mode + transform. The mask layer forces WebKit's real
+     clip-path codepath; it's a visual no-op. */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 
 .eikon-tab-flash::before {

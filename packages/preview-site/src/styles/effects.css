@@ -196,6 +196,16 @@
   position: relative;
   overflow: hidden;
   isolation: isolate;
+  /* DO NOT REMOVE — Safari/WebKit fix.
+     overflow:hidden + border-radius does NOT clip a descendant that
+     uses mix-blend-mode + transform: the streak in ::before below
+     bleeds past rounded corners as a rectangle on macOS/iOS Safari
+     (visible as a square halo behind a pill button). Adding any mask
+     layer forces WebKit to allocate a real clipping path that follows
+     border-radius. The radial gradient covers the full box so it is
+     visually a no-op. isolation:isolate alone is NOT sufficient — it
+     fixes the stacking context but not the clipping path. */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 
 .eikon-shimmer-hover::before {
