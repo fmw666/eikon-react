@@ -150,6 +150,14 @@
   contain: layout style;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  /* Engage the 3D rasterisation path (paired with the stage's
+     `perspective: 1400px`). The card uses `rotate3d(0,0,1,deg)` for its
+     fan tilt; `preserve-3d` ensures the GPU keeps a 3D-composited
+     surface for the rasterisation, which uses bilinear sampling and
+     produces a much smoother edge than the 2D rotate path's
+     stair-step on 1px hairlines. */
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
   /* DO NOT REMOVE — same AA fix as INNER_BASE_STYLE.filter in
      platform-picker/constants.ts. backface-visibility:hidden above
      promotes this card to its own compositor layer (intentional, so
