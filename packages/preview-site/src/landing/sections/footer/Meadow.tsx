@@ -274,15 +274,11 @@ export function Meadow({
       ref={ref}
       aria-hidden="true"
       className={meadowClass}
-      style={
-        {
-          '--eikon-meadow-mx': '-9999px',
-          '--eikon-meadow-my': '-9999px',
-        } as CSSProperties
-      }
     >
-      {/* Dim outer layer — visible across the wide soft halo of the
-          spotlight, simulating the grass that's *almost* in shadow. */}
+      {/* `--eikon-meadow-mx/my` are owned by JS — Footer.tsx drives them
+          via setProperty on this root every rAF tick. The CSS rule on
+          `.eikon-footer-meadow` provides the -9999px default for the
+          first paint before any input arrives. */}
       <div className="eikon-footer-meadow__shade">
         <GrassBlades
           mode="shade"
@@ -290,9 +286,6 @@ export function Meadow({
         />
       </div>
 
-      {/* Bright inner layer — the hot spot. Tight mask + brighter
-          greens, stacked over the shade layer so the cursor's centre
-          reads as actually lit. */}
       <div className="eikon-footer-meadow__light">
         <GrassBlades
           mode="light"
@@ -300,9 +293,6 @@ export function Meadow({
         />
       </div>
 
-      {/* Flower layer — covers the whole meadow so its mask shares
-          the same coordinate origin as the grass layers above. Only
-          paints one tiny flower at the right end of the meadow. */}
       <div className="eikon-footer-meadow__flower">
         <InteractiveFlower onBurst={handleFlowerClick} />
       </div>

@@ -286,6 +286,17 @@
   --eikon-meadow-mx: -9999px;
   --eikon-meadow-my: -9999px;
 
+  /* Mask radii for the three reveal layers below. They are sized to
+     match the cursor / touch spotlight (`Footer.tsx` uses SPOT_HALF
+     = 360 desktop / 180 mobile). When the spotlight shrinks on touch
+     these have to shrink too — otherwise grass reveals over a much
+     bigger circle than the visible light, and the meadow looks
+     "lit everywhere". The mobile override lives in the `@media
+     (hover: none)` block at the bottom of this file. */
+  --eikon-meadow-shade-r: 320px;
+  --eikon-meadow-light-r: 135px;
+  --eikon-meadow-flower-r: 210px;
+
   opacity: 0;
   transition: opacity 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -306,6 +317,14 @@
   position: absolute;
   inset: 0;
   transform: translateZ(0);
+  /* Explicit opacity for the idle state. iOS/macOS Safari can leave
+     `animation-fill-mode: forwards` styles "stuck" on the element after
+     the .eikon-meadow-lit / .eikon-meadow-dimming classes are removed,
+     so without this declaration the layers can stay at the fadeout
+     keyframe's opacity:0 (= grass invisible everywhere even though the
+     mask is in place). The lit/dimming rules below have higher
+     specificity, so they still win during the celebration animation. */
+  opacity: 1;
 }
 
 /* Outer halo — wide soft reveal of the *dim* grass copy.
@@ -314,13 +333,13 @@
    so the spotlight has a soft outer edge instead of a hard cutout. */
 .eikon-footer-meadow__shade {
   mask-image: radial-gradient(
-    circle 320px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    circle var(--eikon-meadow-shade-r) at var(--eikon-meadow-mx) var(--eikon-meadow-my),
     black 0%,
     black 32%,
     transparent 92%
   );
   -webkit-mask-image: radial-gradient(
-    circle 320px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    circle var(--eikon-meadow-shade-r) at var(--eikon-meadow-mx) var(--eikon-meadow-my),
     black 0%,
     black 32%,
     transparent 92%
@@ -334,13 +353,13 @@
    and shadowed at the rim. This is the meadow’s "light falloff". */
 .eikon-footer-meadow__light {
   mask-image: radial-gradient(
-    circle 135px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    circle var(--eikon-meadow-light-r) at var(--eikon-meadow-mx) var(--eikon-meadow-my),
     black 0%,
     black 28%,
     transparent 80%
   );
   -webkit-mask-image: radial-gradient(
-    circle 135px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    circle var(--eikon-meadow-light-r) at var(--eikon-meadow-mx) var(--eikon-meadow-my),
     black 0%,
     black 28%,
     transparent 80%
@@ -353,13 +372,13 @@
    end, but doesn’t have to land on a pixel-precise spot. */
 .eikon-footer-meadow__flower {
   mask-image: radial-gradient(
-    circle 210px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    circle var(--eikon-meadow-flower-r) at var(--eikon-meadow-mx) var(--eikon-meadow-my),
     black 0%,
     black 40%,
     transparent 86%
   );
   -webkit-mask-image: radial-gradient(
-    circle 210px at var(--eikon-meadow-mx) var(--eikon-meadow-my),
+    circle var(--eikon-meadow-flower-r) at var(--eikon-meadow-mx) var(--eikon-meadow-my),
     black 0%,
     black 40%,
     transparent 86%
@@ -460,8 +479,12 @@
 .eikon-meadow-lit .eikon-footer-meadow__shade,
 .eikon-meadow-lit .eikon-footer-meadow__light,
 .eikon-meadow-lit .eikon-footer-meadow__flower {
-  mask-image: none !important;
-  -webkit-mask-image: none !important;
+  /* Full-cover mask instead of `mask-image: none`. WebKit can leave
+     `none` cached on the element after the class is removed, blocking
+     the var()-driven radial mask from re-applying — transitioning
+     between two valid mask-image values avoids that codepath. */
+  mask-image: linear-gradient(black, black) !important;
+  -webkit-mask-image: linear-gradient(black, black) !important;
 }
 
 .eikon-meadow-lit .eikon-footer-meadow__light {
@@ -526,11 +549,40 @@
 @media (hover: none) {
   .eikon-footer-meadow {
     display: none;
+    /* Mobile spotlight is half-size (Footer.tsx SPOT_HALF: 360 → 180);
+       scale the mask reveal radii proportionally so grass only shows
+       within the visible light, not in a much bigger surrounding area. */
+    --eikon-meadow-shade-r: 160px;
+    --eikon-meadow-light-r: 68px;
+    --eikon-meadow-flower-r: 105px;
   }
-  /* When gyroscope activates, bring the meadow back */
+  /* When the visitor first interacts (touch drag, tap, or gyroscope
+     tilt — see Footer.tsx), bring the meadow back. The class name is
+     historical; touch input now activates it too. */
   .eikon-footer-gyro .eikon-footer-meadow {
     display: block;
     opacity: 1;
+  }
+}
+
+/* eikon-footer-light-active — added to <footer> only while a long-press
+   gesture is in progress (see Footer.tsx touch path). Suppresses native
+   browser affordances so the gesture is a pure light-control surface:
+     - touch-action:none  — blocks page scroll for any new touch.
+     - user-select:none   — blocks text selection (prevents the iOS
+                            text-lookup popup).
+     - -webkit-touch-callout:none — blocks the iOS long-press callout
+                            menu (link / image / copy submenu).
+   These are scoped to the active state so a normal tap on a footer
+   link still opens the link, and a quick scroll over the footer still
+   scrolls. The touchmove handler also calls preventDefault for the
+   already-tracked finger; the class covers any *additional* fingers. */
+@media (hover: none) {
+  .eikon-footer-light-active {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -585,44 +637,5 @@
   .eikon-footer-status-dot::after {
     animation: none;
     display: none;
-  }
-}
-
-/* ------------------------------------------------------------------
- * eikon-footer-tilt-hint — mobile "tilt to explore" prompt
- *
- * Only visible on touch devices before the gyroscope activates.
- * Hidden on desktop via (hover: hover). Fades in with a gentle
- * pulse to draw attention without shouting.
- * ------------------------------------------------------------------ */
-
-.eikon-footer-tilt-hint {
-  display: none;
-  margin-top: 0.75rem;
-  text-align: center;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--fg-4);
-  opacity: 0.7;
-  animation: eikon-tilt-hint-pulse 3s ease-in-out infinite;
-}
-
-@media (hover: none) {
-  .eikon-footer-tilt-hint {
-    display: block;
-  }
-}
-
-@keyframes eikon-tilt-hint-pulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 0.9; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .eikon-footer-tilt-hint {
-    animation: none;
-    opacity: 0.7;
   }
 }
