@@ -523,7 +523,7 @@
   --color-card: oklch(1 0 0);
   --color-card-foreground: oklch(0.2 0.005 240);
   --color-muted: oklch(0.96 0.002 240);
-  --color-muted-foreground: oklch(0.55 0.01 240);
+  --color-muted-foreground: oklch(0.51 0.01 240);
   --color-border: oklch(0.9 0.005 240);
   --color-input: oklch(0.9 0.005 240);
   --color-primary: oklch(0.6 0.22 256);
@@ -1034,13 +1034,15 @@
   --color-muted-foreground: oklch(0.52 0.008 60);
   --color-border: oklch(0.91 0.005 60);
   --color-input: oklch(0.91 0.005 60);
-  --color-primary: oklch(0.68 0.13 220);
+  /* Primary darkened from L0.68 → L0.54 so white-label buttons clear the
+   * WCAG large-text bar (≥3:1); still unmistakably the Notion blue. */
+  --color-primary: oklch(0.54 0.13 230);
   --color-primary-foreground: oklch(0.98 0 0);
   --color-secondary: oklch(0.96 0.004 80);
   --color-secondary-foreground: oklch(0.27 0.005 60);
   --color-accent: oklch(0.94 0.02 220);
   --color-accent-foreground: oklch(0.27 0.005 60);
-  --color-ring: oklch(0.68 0.13 220);
+  --color-ring: oklch(0.54 0.13 230);
   --radius-lg: 0.375rem;
   --radius-md: 0.25rem;
   --radius-sm: 0.125rem;
@@ -1509,7 +1511,9 @@
   --color-card: oklch(0.28 0.01 250);
   --color-card-foreground: oklch(0.92 0.005 250);
   --color-muted: oklch(0.28 0.01 250);
-  --color-muted-foreground: oklch(0.62 0.01 250);
+  /* Lifted L0.62 → L0.68 so muted/secondary copy clears 4.5:1 on the dark
+   * extruded-plastic surface. */
+  --color-muted-foreground: oklch(0.68 0.01 250);
   --color-border: oklch(0.28 0.01 250);
   --color-input: oklch(0.28 0.01 250);
   --color-primary: oklch(0.68 0.12 250);
@@ -1846,7 +1850,9 @@
    * needing to memorise hex codes. */
   --color-background: oklch(0.92 0.075 95);
   --color-foreground: oklch(0.28 0.04 260);
-  --color-card: oklch(0.7 0.16 25);
+  /* Coral card deepened from L0.7 → L0.52 so the white card text clears
+   * 4.5:1 (body-text AA) while keeping the demo's signature coral hue. */
+  --color-card: oklch(0.52 0.18 25);
   --color-card-foreground: oklch(0.99 0 0);
   --color-muted: oklch(0.95 0.045 95);
   --color-muted-foreground: oklch(0.42 0.05 260);

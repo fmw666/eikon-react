@@ -24,6 +24,7 @@
     "e2e:quick": "pnpm --filter create-eikon-react e2e:quick",
     "lint": "pnpm -r --filter=./packages/* lint",
     "verify": "node scripts/verify.mjs",
+    "audit:design": "node packages/template-react/scripts/audit-design.mjs",
     "format": "prettier --write \"packages/*/{src,__tests__}/**/*.{ts,tsx,js,jsx,json,md}\"",
     "cli": "pnpm --filter create-eikon-react start",
     "clean": "pnpm -r exec rimraf dist node_modules .turbo",
