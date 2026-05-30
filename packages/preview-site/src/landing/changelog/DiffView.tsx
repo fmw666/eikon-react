@@ -198,12 +198,13 @@ export function DiffView({
       <div
         className="eikon-scroll-panel"
         style={{
-          // Cap super-long diffs at ~70vh so a 5000-line patch
-          // doesn't stretch the page taller than the viewport; once
-          // we hit the cap, the body becomes its own scroll
-          // container. For short diffs the body hugs its content
-          // and the surrounding workspace card hugs us back.
-          maxHeight: 'min(70vh, 720px)',
+          // Fixed height — short diffs no longer leave whitespace
+          // below the hunks, long diffs scroll internally past the
+          // cap. 70vh keeps the body within the viewport on common
+          // laptop displays; 720px caps it on tall monitors so the
+          // diff doesn't grow into a strip taller than is comfortable
+          // to scan in one glance.
+          height: 'min(70vh, 720px)',
           overflow: 'auto',
           fontFamily:
             'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
