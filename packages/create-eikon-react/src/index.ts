@@ -63,6 +63,9 @@ const VARIANT_CHOICES = {
     'aurora',
     'neo-brutalism',
     'cyberpunk',
+    'terminal',
+    'carbon',
+    'editorial',
   ] as const,
   layout: [
     'stacked',

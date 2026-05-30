@@ -666,6 +666,87 @@ const SPECS = {
       ),
     ],
   },
+
+  terminal: {
+    label: 'Terminal (green phosphor CRT)',
+    inspiration: 'CRT / phosphor terminal',
+    voice: [
+      check('mono', '等宽字体', 1, (c) =>
+        bool(/Mono|Fira Code/i.test(c.fontSans), `font-sans=${short(c.fontSans)}`)
+      ),
+      check('phosphor', '磷光绿 primary (hue 130–165, C ≥ 0.12)', 2, (c) => {
+        const p = c.color(c.L['--color-primary']);
+        if (!p) return bool(false, 'primary 无法解析');
+        const ok = p.oklch.H >= 125 && p.oklch.H <= 170 && p.oklch.C >= 0.12;
+        return bool(ok, `primary hue=${p.oklch.H.toFixed(0)}° C=${p.oklch.C.toFixed(2)}`);
+      }),
+      check('dark-base', '深色基底 bg L < 0.25', 1, (c) => {
+        const bg = c.color(c.L['--color-background']);
+        if (!bg) return bool(false, 'bg 无法解析');
+        return bool(bg.oklch.L < 0.25, `bg L=${bg.oklch.L.toFixed(2)}`);
+      }),
+      check('zero-radius', '零圆角 --radius-lg ≤ 0.15rem', 1, (c) =>
+        atMost(lenRem(c.L['--radius-lg']), 0.15, 'rem')
+      ),
+      check('glow', '绿色辉光阴影', 1, (c) =>
+        bool(
+          /0 0 \d+px/.test(c.L['--shadow-md'] || ''),
+          `shadow-md=${short(c.L['--shadow-md'])}`
+        )
+      ),
+    ],
+  },
+
+  carbon: {
+    label: 'IBM Carbon (enterprise blue)',
+    inspiration: 'IBM Carbon Design System',
+    anchors: { primary: '#0F62FE' },
+    voice: [
+      check('font', 'IBM Plex Sans 字体', 2, (c) =>
+        bool(/IBM Plex/i.test(c.fontSans), `font-sans=${short(c.fontSans)}`)
+      ),
+      check('square', '直角 --radius-lg ≤ 0.1rem', 2, (c) =>
+        atMost(lenRem(c.L['--radius-lg']), 0.1, 'rem')
+      ),
+      check('dense', '密集密度 --spacing ≤ 0.24rem', 1, (c) =>
+        atMost(lenRem(c.L['--spacing']), 0.24, 'rem')
+      ),
+      check('focus', '2px 焦点边框 --ring-width ≥ 2px', 1, (c) =>
+        atLeast(lenRem(c.L['--ring-width']) * 16, 2, 'px')
+      ),
+    ],
+  },
+
+  editorial: {
+    label: 'Editorial (black-and-white print)',
+    inspiration: 'Broadsheet / magazine print',
+    inkPrimary: true, // primary IS ink: near-black light / near-white dark
+    voice: [
+      check('serif', '衬线字体 (Playfair/Georgia/serif)', 2, (c) =>
+        bool(
+          /Playfair|Georgia|serif/i.test(c.fontSans),
+          `font-sans=${short(c.fontSans)}`
+        )
+      ),
+      check('leading', '编辑式行高 --text-base--line-height ≥ 1.7rem', 2, (c) =>
+        atLeast(lenRem(c.L['--text-base--line-height']), 1.7, 'rem')
+      ),
+      check('mono-ink', '黑白无彩 (foreground chroma ≈ 0)', 1, (c) => {
+        const fg = c.color(c.L['--color-foreground']);
+        if (!fg) return bool(false, 'fg 无法解析');
+        return bool(fg.oklch.C < 0.02, `fg C=${fg.oklch.C.toFixed(3)}`);
+      }),
+      check('flat', '扁平阴影（印刷无投影）', 1, (c) =>
+        bool(
+          /0 1px 0|0 2px 0|none/.test(c.L['--shadow-md'] || ''),
+          `shadow-md=${short(c.L['--shadow-md'])}`
+        )
+      ),
+      check('radius', '近零圆角 --radius-lg ≤ 0.2rem', 1, (c) =>
+        atMost(lenRem(c.L['--radius-lg']), 0.2, 'rem')
+      ),
+    ],
+  },
 };
 
 // Small result builders for voice checks → { score: 0..1, detail }.

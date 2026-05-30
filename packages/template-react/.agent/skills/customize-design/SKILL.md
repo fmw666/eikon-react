@@ -54,6 +54,9 @@ translate them to OKLCH for perceptual-uniform contrast checking.
 | `aurora`          | Aurora UI                    | dark base + green-cyan / magenta glows  | Space Grotesk             | Standard                                  | Northern-lights dual-hue shadows.   |
 | `neo-brutalism`   | Brutalist web                | high-saturation block + ink black       | JetBrains Mono            | Standard                                  | 3px black borders, hard-offset shadow. |
 | `cyberpunk`       | Synthwave / cyberpunk        | neon magenta `#d9259e` + electric cyan  | JetBrains Mono            | Tight (0.22rem)                           | Neon outer glow, near-zero radii.   |
+| `terminal`        | CRT / phosphor terminal      | phosphor green on near-black            | JetBrains / IBM Plex Mono | Tight (0.22rem)                           | Green-glow shadows, zero radii, mono. |
+| `carbon`          | IBM Carbon Design System     | IBM Blue `#0F62FE` on layered grays     | IBM Plex Sans             | Dense (0.22rem)                           | Square corners, 2px focus, enterprise. |
+| `editorial`       | Broadsheet / magazine print  | black ink `#262626` on white paper      | Playfair Display / Georgia | Editorial (0.27rem) · 17px · 1.85 LH      | Stark B&W serif, hairline rules, flat. |
 
 [linear.app/brand]: https://linear.app/brand
 [Anthropic brand guidelines]: https://github.com/anthropics/skills/blob/main/skills/brand-guidelines/SKILL.md

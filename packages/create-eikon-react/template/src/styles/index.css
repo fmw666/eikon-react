@@ -2516,6 +2516,302 @@
 }
 /* @eikon:variant(design=cyberpunk) end */
 
+/* @eikon:variant(design=terminal) begin */
+/* Terminal / CRT — green phosphor on near-black, monospace, zero radius,
+ * single-hue green-glow shadows. Distinct from cyberpunk (magenta + cyan):
+ * this is one phosphor green, like a VT220 / matrix console. Dark by default
+ * (light mode is already a dark console); dark mode deepens the black and
+ * lifts the phosphor. */
+:root.design-terminal {
+  --color-background: oklch(0.16 0.02 150);
+  --color-foreground: oklch(0.9 0.16 150);
+  --color-card: oklch(0.19 0.02 150);
+  --color-card-foreground: oklch(0.9 0.16 150);
+  --color-muted: oklch(0.24 0.02 150);
+  --color-muted-foreground: oklch(0.74 0.12 150);
+  --color-border: oklch(0.4 0.1 150);
+  --color-input: oklch(0.2 0.02 150);
+  --color-primary: oklch(0.82 0.2 150);
+  --color-primary-foreground: oklch(0.14 0.02 150);
+  --color-secondary: oklch(0.24 0.02 150);
+  --color-secondary-foreground: oklch(0.9 0.16 150);
+  --color-accent: oklch(0.3 0.08 150);
+  --color-accent-foreground: oklch(0.9 0.16 150);
+  --color-destructive: oklch(0.62 0.22 25);
+  --color-destructive-foreground: oklch(0.98 0 0);
+  --color-ring: oklch(0.82 0.2 150);
+
+  --radius-lg: 0rem;
+  --radius-md: 0rem;
+  --radius-sm: 0rem;
+
+  --font-sans:
+    'JetBrains Mono', 'IBM Plex Mono', 'Fira Code', ui-monospace,
+    SFMono-Regular, Menlo, monospace;
+  --font-mono:
+    'JetBrains Mono', 'IBM Plex Mono', 'Fira Code', ui-monospace,
+    SFMono-Regular, Menlo, monospace;
+
+  --spacing: 0.22rem;
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.4rem;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --tracking-tight: 0em;
+
+  /* Phosphor glow — single green hue, symmetric halo + 1px chroma rim. */
+  --shadow-sm: 0 0 0 1px oklch(0.82 0.2 150 / 0.35);
+  --shadow-md:
+    0 0 12px -2px oklch(0.82 0.2 150 / 0.45),
+    0 0 0 1px oklch(0.82 0.2 150 / 0.5);
+  --shadow-lg:
+    0 0 24px -4px oklch(0.82 0.2 150 / 0.55),
+    0 0 0 1px oklch(0.82 0.2 150 / 0.6);
+
+  --surface-border-width: 1px;
+  --surface-hover-shadow:
+    0 0 20px -3px oklch(0.82 0.2 150 / 0.6),
+    0 0 0 1px oklch(0.82 0.2 150 / 0.7);
+
+  --color-sidebar: oklch(0.12 0.02 150);
+  --color-sidebar-foreground: oklch(0.9 0.16 150);
+  --color-sidebar-border: oklch(0.35 0.08 150);
+
+  --chart-1: oklch(0.82 0.2 150);
+  --chart-2: oklch(0.7 0.16 160);
+  --chart-3: oklch(0.75 0.18 135);
+  --chart-4: oklch(0.68 0.14 175);
+  --chart-5: oklch(0.6 0.12 150);
+
+  --color-success: oklch(0.82 0.2 150);
+  --color-success-foreground: oklch(0.14 0.02 150);
+  --color-warning: oklch(0.82 0.16 90);
+  --color-warning-foreground: oklch(0.14 0.02 90);
+  --color-info: oklch(0.8 0.14 200);
+  --color-info-foreground: oklch(0.14 0.02 200);
+
+  --duration-fast: 80ms;
+  --duration-normal: 140ms;
+
+  --ring-width: 2px;
+  --ring-offset-width: 0px;
+
+  --scrollbar-size: 12px;
+  --scrollbar-thumb: oklch(0.4 0.1 150);
+  --scrollbar-thumb-hover: oklch(0.7 0.16 150);
+  --scrollbar-thumb-radius: 0rem;
+  --scrollbar-thumb-border: 3px;
+}
+.dark.design-terminal {
+  --color-background: oklch(0.1 0.02 150);
+  --color-card: oklch(0.14 0.02 150);
+  --color-muted: oklch(0.2 0.02 150);
+  --color-primary: oklch(0.86 0.2 150);
+  --color-primary-foreground: oklch(0.1 0.02 150);
+  --color-ring: oklch(0.86 0.2 150);
+  --color-sidebar: oklch(0.08 0.02 150);
+  --scrollbar-thumb: oklch(0.35 0.1 150);
+  --scrollbar-thumb-hover: oklch(0.7 0.16 150);
+}
+/* @eikon:variant(design=terminal) end */
+
+/* @eikon:variant(design=carbon) begin */
+/* IBM Carbon Design System — IBM Blue (#0F62FE) on layered grays, IBM Plex
+ * Sans, square corners (0 radius), dense productivity grid, 2px focus border.
+ * Fills the "enterprise / data-dense" niche between vercel (minimal) and
+ * notion (document). Source: https://carbondesignsystem.com (White + Gray100). */
+:root.design-carbon {
+  --color-background: oklch(0.96 0 0);
+  --color-foreground: oklch(0.2 0 0);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.2 0 0);
+  --color-muted: oklch(0.93 0 0);
+  --color-muted-foreground: oklch(0.42 0 0);
+  --color-border: oklch(0.84 0 0);
+  --color-input: oklch(0.99 0 0);
+  --color-primary: oklch(0.5 0.2 262);
+  --color-primary-foreground: oklch(1 0 0);
+  --color-secondary: oklch(0.93 0 0);
+  --color-secondary-foreground: oklch(0.2 0 0);
+  --color-accent: oklch(0.92 0.04 262);
+  --color-accent-foreground: oklch(0.2 0 0);
+  --color-destructive: oklch(0.52 0.22 27);
+  --color-destructive-foreground: oklch(1 0 0);
+  --color-ring: oklch(0.5 0.2 262);
+
+  --radius-lg: 0rem;
+  --radius-md: 0rem;
+  --radius-sm: 0rem;
+
+  --font-sans:
+    'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, sans-serif;
+  --font-mono:
+    'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+
+  --spacing: 0.22rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.35rem;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --tracking-tight: 0em;
+
+  /* Carbon depth — mostly flat; a faint productivity drop on raised tiers. */
+  --shadow-sm: 0 1px 0 0 oklch(0 0 0 / 0.06);
+  --shadow-md: 0 2px 6px -1px oklch(0 0 0 / 0.16);
+  --shadow-lg: 0 8px 16px -4px oklch(0 0 0 / 0.2);
+
+  --surface-border-width: 1px;
+
+  --color-sidebar: oklch(0.99 0 0);
+  --color-sidebar-border: oklch(0.86 0 0);
+
+  --chart-1: oklch(0.5 0.2 262);
+  --chart-2: oklch(0.6 0.16 200);
+  --chart-3: oklch(0.55 0.18 320);
+  --chart-4: oklch(0.65 0.15 145);
+  --chart-5: oklch(0.6 0.16 40);
+
+  --color-success: oklch(0.55 0.15 150);
+  --color-warning: oklch(0.7 0.16 75);
+  --color-info: oklch(0.5 0.2 262);
+
+  --duration-fast: 110ms;
+  --duration-normal: 170ms;
+
+  /* Carbon focus — signature 2px solid inner border in IBM blue. */
+  --ring-width: 2px;
+  --ring-offset-width: 1px;
+
+  --scrollbar-size: 12px;
+  --scrollbar-thumb: oklch(0.7 0 0);
+  --scrollbar-thumb-hover: oklch(0.5 0 0);
+  --scrollbar-thumb-radius: 0rem;
+  --scrollbar-thumb-border: 3px;
+}
+.dark.design-carbon {
+  --color-background: oklch(0.18 0 0);
+  --color-foreground: oklch(0.95 0 0);
+  --color-card: oklch(0.24 0 0);
+  --color-card-foreground: oklch(0.95 0 0);
+  --color-muted: oklch(0.28 0 0);
+  --color-muted-foreground: oklch(0.72 0 0);
+  --color-border: oklch(0.34 0 0);
+  --color-input: oklch(0.26 0 0);
+  --color-primary: oklch(0.62 0.18 258);
+  --color-primary-foreground: oklch(0.14 0 0);
+  --color-secondary: oklch(0.28 0 0);
+  --color-secondary-foreground: oklch(0.95 0 0);
+  --color-accent: oklch(0.32 0.05 262);
+  --color-accent-foreground: oklch(0.95 0 0);
+  --color-ring: oklch(0.62 0.18 258);
+  --color-sidebar: oklch(0.14 0 0);
+  --color-sidebar-border: oklch(0.3 0 0);
+  --scrollbar-thumb: oklch(0.4 0 0);
+  --scrollbar-thumb-hover: oklch(0.6 0 0);
+}
+/* @eikon:variant(design=carbon) end */
+
+/* @eikon:variant(design=editorial) begin */
+/* Editorial / Broadsheet — stark black ink on white paper, strong serif
+ * display + body, generous leading, hairline rules, near-zero radius. The
+ * cold black-and-white print counterpart to anthropic's warm humanist serif.
+ * Dark mode inverts to a "night reading" black page. */
+:root.design-editorial {
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.15 0 0);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.15 0 0);
+  --color-muted: oklch(0.96 0 0);
+  --color-muted-foreground: oklch(0.4 0 0);
+  --color-border: oklch(0.82 0 0);
+  --color-input: oklch(0.98 0 0);
+  --color-primary: oklch(0.15 0 0);
+  --color-primary-foreground: oklch(1 0 0);
+  --color-secondary: oklch(0.95 0 0);
+  --color-secondary-foreground: oklch(0.15 0 0);
+  --color-accent: oklch(0.93 0 0);
+  --color-accent-foreground: oklch(0.15 0 0);
+  --color-destructive: oklch(0.5 0.2 27);
+  --color-destructive-foreground: oklch(1 0 0);
+  --color-ring: oklch(0.15 0 0);
+
+  --radius-lg: 0.125rem;
+  --radius-md: 0.0625rem;
+  --radius-sm: 0rem;
+
+  --font-sans:
+    'Playfair Display', 'Iowan Old Style', Georgia, 'Times New Roman',
+    ui-serif, serif;
+  --font-serif:
+    'Playfair Display', 'Iowan Old Style', Georgia, 'Times New Roman',
+    ui-serif, serif;
+  --font-display:
+    'Playfair Display', 'Iowan Old Style', Georgia, ui-serif, serif;
+
+  --spacing: 0.27rem;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.55rem;
+  --text-base: 1.0625rem;
+  --text-base--line-height: 1.85rem;
+  --text-lg: 1.25rem;
+  --text-lg--line-height: 2rem;
+  --leading-relaxed: 1.8;
+  --leading-loose: 2.1;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 700;
+  --tracking-tight: 0em;
+
+  /* Print is flat — depth comes from hairline rules, not drop shadow. */
+  --shadow-sm: 0 1px 0 0 oklch(0.15 0 0 / 0.12);
+  --shadow-md: 0 1px 0 0 oklch(0.15 0 0 / 0.16);
+  --shadow-lg: 0 2px 0 0 oklch(0.15 0 0 / 0.2);
+
+  --surface-border-width: 1px;
+
+  --color-sidebar: oklch(0.98 0 0);
+  --color-sidebar-border: oklch(0.82 0 0);
+
+  --chart-1: oklch(0.15 0 0);
+  --chart-2: oklch(0.38 0 0);
+  --chart-3: oklch(0.55 0 0);
+  --chart-4: oklch(0.7 0 0);
+  --chart-5: oklch(0.5 0.2 27);
+
+  --scrollbar-size: 13px;
+  --scrollbar-thumb: oklch(0.7 0 0);
+  --scrollbar-thumb-hover: oklch(0.3 0 0);
+  --scrollbar-thumb-radius: 0rem;
+  --scrollbar-thumb-border: 3px;
+
+  --ring-width: 2px;
+  --ring-offset-width: 1px;
+}
+.dark.design-editorial {
+  --color-background: oklch(0.16 0 0);
+  --color-foreground: oklch(0.95 0 0);
+  --color-card: oklch(0.19 0 0);
+  --color-card-foreground: oklch(0.95 0 0);
+  --color-muted: oklch(0.24 0 0);
+  --color-muted-foreground: oklch(0.72 0 0);
+  --color-border: oklch(0.34 0 0);
+  --color-input: oklch(0.22 0 0);
+  --color-primary: oklch(0.95 0 0);
+  --color-primary-foreground: oklch(0.15 0 0);
+  --color-secondary: oklch(0.24 0 0);
+  --color-secondary-foreground: oklch(0.95 0 0);
+  --color-accent: oklch(0.28 0 0);
+  --color-accent-foreground: oklch(0.95 0 0);
+  --color-ring: oklch(0.95 0 0);
+  --color-sidebar: oklch(0.13 0 0);
+  --color-sidebar-border: oklch(0.3 0 0);
+  --scrollbar-thumb: oklch(0.4 0 0);
+  --scrollbar-thumb-hover: oklch(0.6 0 0);
+}
+/* @eikon:variant(design=editorial) end */
+
 /* --- layout axis -----------------------------------------------------------
  * Each layout (stacked / sidebar / topbar-sidebar / centered) is its own
  * top-level component file under src/app/layouts/, so layout-specific
