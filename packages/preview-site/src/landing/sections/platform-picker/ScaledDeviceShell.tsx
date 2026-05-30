@@ -14,7 +14,6 @@ import { ActiveAmbience } from './ActiveAmbience';
 import {
   type StackSlot,
   INNER_BASE_STYLE,
-  SCREEN_DIM_SCRIM,
   SCREEN_DIM_SCRIM_INACTIVE,
   STACK_SLOT_SCALE,
 } from './constants';
@@ -102,15 +101,13 @@ export const ScaledDeviceShell = memo(function ScaledDeviceShell({
       >
         {renderScreen}
       </DeviceShell>
-      {(!active || glassNonce === 0) && (
+      {!active && (
         <span
           aria-hidden="true"
           className="pointer-events-none absolute z-[3]"
           style={{
             ...overlayStyle,
-            backgroundColor: !active
-              ? SCREEN_DIM_SCRIM_INACTIVE
-              : SCREEN_DIM_SCRIM,
+            backgroundColor: SCREEN_DIM_SCRIM_INACTIVE,
           }}
         />
       )}

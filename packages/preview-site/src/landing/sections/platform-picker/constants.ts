@@ -17,7 +17,6 @@ export interface PlatformOption {
   Icon: (props: { className: string }) => ReactNode;
 }
 
-export const SCREEN_DIM_SCRIM = 'rgba(10, 10, 14, 0.58)';
 export const SCREEN_DIM_SCRIM_INACTIVE = 'rgba(10, 10, 14, 0.76)';
 
 // Side cards sit at 0.88 of the centre slot's natural size (was 0.82).
