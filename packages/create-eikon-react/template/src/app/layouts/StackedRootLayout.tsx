@@ -6,7 +6,7 @@
  * generic shell — best for marketing sites, blogs, docs landings, and any
  * content-first app where the navigation belongs above the fold.
  *
- * One of the four layout variants selected via `--layout` at scaffold time;
+ * One of the seven layout variants selected via `--layout` at scaffold time;
  * the dispatcher at `./RootLayout.tsx` re-exports whichever variant won.
  */
 
@@ -24,38 +24,9 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 // --- Absolute Imports ---
 import { SignInButton } from '@/features/auth';
 import { cn } from '@/shared/lib/cn';
+import { navLinks } from '@/shared/nav';
 import { LanguageSwitcher } from '@/shared/ui/language-switcher';
 import { ThemeToggle } from '@/shared/ui/theme-toggle';
-
-// =================================================================================================
-// Types
-// =================================================================================================
-
-interface NavLinkSpec {
-  to: string;
-  /** i18n key for the label. */
-  key: string;
-  fallback: string;
-  end?: boolean;
-}
-
-// =================================================================================================
-// Constants
-// =================================================================================================
-
-const navLinks: NavLinkSpec[] = [
-  { to: '/', key: 'nav.home', fallback: 'Home', end: true },
-  { to: '/counter', key: 'nav.counter', fallback: 'Counter' },
-  { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks' },
-  // Examples is a DEV-ONLY showcase. The route only registers when
-  // `import.meta.env.DEV` is true (see `app/router.tsx`), so production
-  // template builds never wire it in. The preview playground keeps the
-  // showcase and builds the template as `mode: 'development'`, so the
-  // gate stays open inside its iframe.
-  ...(import.meta.env.DEV
-    ? [{ to: '/examples', key: 'nav.examples', fallback: 'Examples' }]
-    : []),
-];
 
 // =================================================================================================
 // Component
@@ -67,7 +38,7 @@ function StackedRootLayout() {
 
   return (
     <div className="flex min-h-[100dvh] flex-col">
-      <header className="border-b-[length:var(--surface-border-width)] border-[var(--color-border)] bg-[var(--color-card)]/70 backdrop-blur">
+      <header className="border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)] bg-[var(--color-sidebar)]/70 text-[var(--color-sidebar-foreground)] backdrop-blur">
         {/*
           3-column grid pattern: brand (left, 1fr) | nav (auto, centered) |
           actions (right, 1fr). The matching 1fr columns on either side force
@@ -89,9 +60,9 @@ function StackedRootLayout() {
                 className={({ isActive }) =>
                   cn(
                     'rounded-md px-3 py-1.5 text-sm transition-colors',
-                    'text-[var(--color-muted-foreground)] hover:bg-[var(--color-primary)]/8 hover:text-[var(--color-foreground)]',
+                    'text-[var(--color-muted-foreground)] hover:bg-[var(--color-sidebar-primary)]/8 hover:text-[var(--color-sidebar-foreground)]',
                     isActive &&
-                      'bg-[var(--color-primary)]/12 text-[var(--color-primary)]'
+                      'bg-[var(--color-sidebar-primary)]/12 text-[var(--color-sidebar-primary)]'
                   )
                 }
               >

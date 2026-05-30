@@ -86,9 +86,9 @@ describe('<BottomTabsRootLayout />', () => {
     expect(screen.getByText('tasks page')).toBeInTheDocument();
   });
 
-  it('marks the active tab with the primary-color class', () => {
+  it('marks the active tab with the sidebar-primary class', () => {
     renderShell('/tasks');
     const tasksLink = screen.getByRole('link', { name: /tasks/i });
-    expect(tasksLink.className).toMatch(/var\(--color-primary\)/);
+    expect(tasksLink.className).toMatch(/var\(--color-sidebar-primary\)/);
   });
 });

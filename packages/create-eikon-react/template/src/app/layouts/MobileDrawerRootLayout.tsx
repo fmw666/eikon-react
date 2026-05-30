@@ -34,18 +34,12 @@ import { useTranslation } from 'react-i18next';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
 // --- Third-party Libraries ---
-import {
-  CheckSquare,
-  Home,
-  type LucideIcon,
-  Menu,
-  Plus,
-  Sparkles,
-} from 'lucide-react';
+import { Menu } from 'lucide-react';
 
 // --- Absolute Imports ---
 import { SignInButton } from '@/features/auth';
 import { cn } from '@/shared/lib/cn';
+import { navLinks } from '@/shared/nav';
 import {
   Sheet,
   SheetClose,
@@ -62,37 +56,13 @@ import { ThemeToggle } from '@/shared/ui/theme-toggle';
 // Types
 // =================================================================================================
 
-interface NavLinkSpec {
-  to: string;
-  /** i18n key for the label. */
-  key: string;
-  fallback: string;
-  icon: LucideIcon;
-  end?: boolean;
-}
+// (NavLinkSpec is now imported from `@/shared/nav` — single source of truth
+// across all 5 layouts. The `icon` field is optional in the shared spec;
+// only this layout actually renders it.)
 
 // =================================================================================================
-// Constants
+// Component
 // =================================================================================================
-
-const navLinks: NavLinkSpec[] = [
-  { to: '/', key: 'nav.home', fallback: 'Home', icon: Home, end: true },
-  { to: '/counter', key: 'nav.counter', fallback: 'Counter', icon: Plus },
-  { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks', icon: CheckSquare },
-  // Examples is a DEV-ONLY showcase. The route only registers when
-  // `import.meta.env.DEV` is true (see `app/router.tsx`); production
-  // bundles drop the entry.
-  ...(import.meta.env.DEV
-    ? [
-        {
-          to: '/examples',
-          key: 'nav.examples',
-          fallback: 'Examples',
-          icon: Sparkles,
-        },
-      ]
-    : []),
-];
 
 // =================================================================================================
 // Component
@@ -117,8 +87,8 @@ function MobileDrawerRootLayout() {
       */}
       <header
         className={cn(
-          'sticky top-0 z-30 border-b-[length:var(--surface-border-width)] border-[var(--color-border)]',
-          'bg-[var(--color-card)]/85 backdrop-blur',
+          'sticky top-0 z-30 border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',
+          'bg-[var(--color-sidebar)]/85 text-[var(--color-sidebar-foreground)] backdrop-blur',
           'pt-[env(safe-area-inset-top)]'
         )}
       >
@@ -130,7 +100,7 @@ function MobileDrawerRootLayout() {
                 'inline-flex items-center justify-center rounded-md',
                 'min-h-[var(--touch-target-min,44px)] min-w-[var(--touch-target-min,44px)]',
                 'text-[var(--color-foreground)] transition-colors',
-                'hover:bg-[var(--color-primary)]/8 hover:text-[var(--color-foreground)]'
+                'hover:bg-[var(--color-sidebar-primary)]/8 hover:text-[var(--color-foreground)]'
               )}
             >
               <Menu className="h-5 w-5" />
@@ -177,8 +147,8 @@ function MobileDrawerRootLayout() {
                             cn(
                               'group flex items-center gap-3 rounded-xl px-2 py-2 text-[0.9375rem] transition-colors',
                               isActive
-                                ? 'bg-[var(--color-accent)]/60'
-                                : 'hover:bg-[var(--color-accent)]/40'
+                                ? 'bg-[var(--color-sidebar-primary)]/15 text-[var(--color-sidebar-primary)]'
+                                : 'hover:bg-[var(--color-sidebar-primary)]/8'
                             )
                           }
                         >
@@ -189,7 +159,7 @@ function MobileDrawerRootLayout() {
                                 className={cn(
                                   'grid h-9 w-9 shrink-0 place-items-center rounded-lg transition-colors',
                                   isActive
-                                    ? 'bg-[var(--color-primary)]/15 text-[var(--color-primary)]'
+                                    ? 'bg-[var(--color-sidebar-primary)]/15 text-[var(--color-sidebar-primary)]'
                                     : 'bg-[var(--color-muted)]/70 text-[var(--color-muted-foreground)] group-hover:bg-[var(--color-muted)] group-hover:text-[var(--color-foreground)]'
                                 )}
                               >

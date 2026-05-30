@@ -54,6 +54,21 @@ const COMPONENTS = [
   'command',
   'card',
   'sonner', // shadcn's name for the toaster primitive; renamed to toaster.tsx on harvest
+  // Form + display primitives shipped by the design-system audit pass.
+  // Keep this list in lock-step with `apply-ui-snapshot.ts:REPLACEABLE_UI_FILES`.
+  'input',
+  'textarea',
+  'label',
+  'select',
+  'checkbox',
+  'radio-group',
+  'switch',
+  'badge',
+  'avatar',
+  'skeleton',
+  'tooltip',
+  'popover',
+  'alert',
 ];
 
 // Map upstream basename → our canonical basename. shadcn ships sonner.tsx,
@@ -84,6 +99,23 @@ const ANIMATE_UI_REGISTRY_MAP = {
   command: 'command',
   card: 'card',
   sonner: 'sonner',
+  // Form + display primitives — most aren't in animate-ui's registry,
+  // so they fall through to shadcn. If/when animate-ui ships native
+  // animated versions of any of these (most likely tooltip/popover/
+  // switch as radix-* slugs), update the URL inline.
+  input: 'input',
+  textarea: 'textarea',
+  label: 'label',
+  select: 'select',
+  checkbox: 'checkbox',
+  'radio-group': 'radio-group',
+  switch: 'switch',
+  badge: 'badge',
+  avatar: 'avatar',
+  skeleton: 'skeleton',
+  tooltip: 'tooltip',
+  popover: 'popover',
+  alert: 'alert',
 };
 
 // Minimal components.json each temp project needs so the registry CLI

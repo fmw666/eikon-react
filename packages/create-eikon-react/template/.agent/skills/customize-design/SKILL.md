@@ -44,15 +44,16 @@ translate them to OKLCH for perceptual-uniform contrast checking.
 | `linear`          | [linear.app/brand]           | `#5E6AD2` lavender-blue on `#F4F5F8`    | Inter Variable            | Tight (0.22rem) · 15px body               | Crisp, productivity tool, compact.  |
 | `anthropic`       | [Anthropic brand guidelines] | `#d97757` Crail orange on `#faf9f5`     | Lora serif (body)         | Editorial (0.28rem) · 17px body / 1.7 LH  | Warm, humanist, editorial, serif.   |
 | `vercel`          | [Vercel Geist]               | Ink `#000` / `#FFF` + `#0070F3` accent  | Geist Sans + Geist Mono   | Tight (0.22rem) · 14px body · 1px ring sh.| Strict monochrome, "less is more".  |
-| `notion`          | Notion editor                | warm gray + `#2eaadc` blue              | Inter                     | Standard (0.25rem) · 16px / 1.6 LH        | Document-heavy, dashboard-friendly. |
-| `flat`            | Flat / Metro / Swiss         | strong color blocks, visible borders    | system-ui                 | Standard                                  | Zero shadows; depth from contrast.  |
-| `material`        | Material Design 3            | M3 tonal palette + key accent           | Roboto                    | Standard · 1rem container radii           | Elevation-driven, no borders.       |
-| `skeuomorphism`   | Realistic 3D                 | warm neutrals + bright primary          | system-ui                 | Standard                                  | Inset highlights, deep shadows.     |
-| `neumorphism`     | Soft UI                      | matching-tone fills (no high contrast)  | system-ui                 | Standard                                  | Soft extruded plastic, paired shadows. |
+| `notion`          | Notion editor                | warm gray + `#2eaadc` blue              | Inter                     | Standard (Tailwind default) · 16px / 1.6 LH | Document-heavy, dashboard-friendly. |
+| `flat`            | Flat / Metro / Swiss         | strong color blocks, visible borders    | Inter Tight               | Standard                                  | Zero shadows; depth from contrast.  |
+| `material`        | Material Design 3            | M3 tonal palette + key accent           | Roboto Flex               | Standard · 1rem container radii           | Elevation-driven, no borders.       |
+| `skeuomorphism`   | Realistic 3D                 | warm neutrals + bright primary          | Georgia serif             | Standard                                  | Inset highlights, deep shadows.     |
+| `neumorphism`     | Soft UI                      | matching-tone fills (no high contrast)  | Quicksand / SF Rounded    | Standard                                  | Soft extruded plastic, paired shadows. |
 | `liquid-glass`    | Apple iOS 26                 | refractive overlay on photo backdrop    | SF Pro / -apple-system    | Standard                                  | Heavy backdrop-blur + specular rim. |
 | `claymorphism`    | [clay.css] (Adrian Bece)     | playful pastel palette                  | Fredoka + Nunito          | Generous radii                            | Puffy clay, soft outer + inset glow.|
-| `aurora`          | Aurora UI                    | dark base + green-cyan / magenta glows  | system-ui                 | Standard                                  | Northern-lights dual-hue shadows.   |
-| `neo-brutalism`   | Brutalist web                | high-saturation block + ink black       | bold sans                 | Standard                                  | 3px black borders, hard-offset shadow. |
+| `aurora`          | Aurora UI                    | dark base + green-cyan / magenta glows  | Space Grotesk             | Standard                                  | Northern-lights dual-hue shadows.   |
+| `neo-brutalism`   | Brutalist web                | high-saturation block + ink black       | JetBrains Mono            | Standard                                  | 3px black borders, hard-offset shadow. |
+| `cyberpunk`       | Synthwave / cyberpunk        | neon magenta `#d9259e` + electric cyan  | JetBrains Mono            | Tight (0.22rem)                           | Neon outer glow, near-zero radii.   |
 
 [linear.app/brand]: https://linear.app/brand
 [Anthropic brand guidelines]: https://github.com/anthropics/skills/blob/main/skills/brand-guidelines/SKILL.md
@@ -111,19 +112,21 @@ Token namespaces (Tailwind v4 CSS-first config) consumed by utilities:
 
 | Namespace             | Drives utility                           | Source of truth in this template               |
 | --------------------- | ---------------------------------------- | ---------------------------------------------- |
-| `--color-*`           | `bg-* / text-* / border-* / ring-*`      | base `@theme` + every preset's `@theme` + `.dark` |
+| `--color-*`           | `bg-* / text-* / border-* / ring-*`      | base `@theme` + every preset's `@theme` + `.dark` — covers `primary/secondary/accent/muted/destructive` plus state colours `success/warning/info`, `sidebar*` chrome family, `overlay`, `popover`, `chart-1..5` |
 | `--radius-*`          | `rounded-*`                              | base `@theme` + every preset's `@theme`        |
-| `--font-{sans,serif,mono}` | `font-sans / font-serif / font-mono` | base `@theme` (preset overrides per brand)     |
+| `--font-{sans,serif,mono,display}` | `font-sans / font-serif / font-mono / font-display` | base `@theme` (preset overrides per brand). `--font-display` defaults to `--font-sans` and is auto-applied to `:is(h1,h2,h3)` via a global rule in `@layer base` — claymorphism / cyberpunk override it to a distinct headline face |
 | `--font-weight-*`     | `font-medium / font-semibold / ...`      | preset `@theme` (Tailwind defaults otherwise)  |
-| `--text-*`            | `text-xs / text-sm / text-base / ...`    | preset `@theme` (Tailwind defaults otherwise)  |
+| `--text-*`            | `text-xs / text-sm / text-base / ...`    | base `@theme` covers `text-3xl..6xl` (display); preset `@theme` overrides body sizes per brand |
 | `--text-*--line-height` | line-height paired to each `text-*` size | preset `@theme`                              |
 | `--leading-*`         | `leading-tight / leading-relaxed / ...`  | preset `@theme` (selective overrides)          |
 | `--tracking-*`        | `tracking-tight / tracking-wide / ...`   | preset `@theme` (selective overrides)          |
 | `--spacing`           | EVERY `p-N / m-N / gap-N / size-*`       | preset `@theme` (per-density)                  |
-| `--shadow-*`          | `shadow-sm / shadow-md / shadow-lg`      | preset `@theme` (per brand shadow personality) |
+| `--shadow-*`          | `shadow-sm / shadow-md / shadow-lg / shadow-xl` | preset `@theme` (per brand shadow personality). `--shadow-xl` is rerouted alongside sm/md/lg via `[class*="design-"]` + `.dark` rules so Tailwind utilities pick up preset overrides at runtime |
+| `--ease-*` + `--duration-*` | `ease-{in,out,in-out,spring}` + custom-property reads | preset `@theme` (motion personality — apple's spring, linear's snappy, material's emphasized, cyberpunk's hard-cut) |
+| `--chart-1..5`        | `bg-chart-1 / text-chart-2 / ...` (Tailwind v4 reads any `--color-chart-*` form too) | base `@theme` + per-preset (anchored at brand hue) |
 
-Non-utility tokens (consumed directly via `var()` inside `@layer base`,
-not exposed as Tailwind utilities):
+Non-utility tokens (consumed directly via `var()` inside `@layer base` or
+component styles, not exposed as Tailwind utilities):
 
 | Token                       | Drives                                                       | Per-preset override?               |
 | --------------------------- | ------------------------------------------------------------ | ---------------------------------- |
@@ -133,6 +136,10 @@ not exposed as Tailwind utilities):
 | `--scrollbar-track`         | track / gutter background (defaults transparent)              | rarely overridden                  |
 | `--scrollbar-thumb-radius`  | thumb `border-radius`                                         | yes — square-ish for `vercel`, generous for `apple` |
 | `--scrollbar-thumb-border`  | transparent border on the thumb (faux gutter inset)           | yes — 2 px for tight presets, 3 px for spacious ones |
+| `--surface-{border-width,backdrop,inset-shadow,ring-width,ring-color,hover-shadow,active-shadow}` | Card / Button / Sheet / Dialog surface treatment via `border-[length:var(...)]`, `[backdrop-filter:var(...)]`, `ring-[length:var(...)]`, `[box-shadow:var(...)]` | yes — `liquid-glass` overrides `--surface-backdrop` to enable `backdrop-blur(28px)`, `neo-brutalism` overrides `--surface-border-width` to 3px, etc. |
+| `--ring-width` / `--ring-offset-{width,color}` | Focus halo geometry consumed by Input / Switch / Checkbox / Select via arbitrary classes | yes — Vercel 3px+offset, Linear tight 2px no-offset, Apple 4px halo |
+| `--z-{base,dropdown,sticky,fixed,overlay,modal,popover,toast,tooltip}` | Modal / popover / toast layering via `z-[var(--z-modal)]` etc. | rarely overridden — same scale for all presets |
+| `--bg-ambient`              | `body { background-image }` ambient backdrop                  | yes — `liquid-glass` (multi-layer radial gradient stack), `claymorphism` (paper-noise SVG); other presets default to `none` |
 
 These don't generate utility classes (no namespace match), but they DO
 live inside `@theme { }` so each preset can override them in lock-step
@@ -451,10 +458,14 @@ end marker or a value that's in the CSS but not in `VARIANT_CHOICES`.
 
 ---
 
-## Task D — add a new colour token (e.g. `--color-success`)
+## Task D — add a new colour token (e.g. `--color-brand-secondary`)
 
 Use when the design needs a semantic colour that isn't covered by the
-existing token set (most common: success / warning / info).
+existing token set. The previous edition of this skill used
+`--color-success` as the example, but success/warning/info now ship by
+default — pick a token name that doesn't collide with anything in the
+base `@theme` (use `grep -n "^  --color-" src/styles/index.css` to
+audit the current set).
 
 1. Add the variable to the **base** `@theme` and the base `.dark` in
    [src/styles/index.css](../../../src/styles/index.css):
@@ -462,13 +473,13 @@ existing token set (most common: success / warning / info).
    ```css
    @theme {
      ...
-     --color-success: oklch(0.55 0.16 150);
-     --color-success-foreground: oklch(0.98 0 0);
+     --color-brand-secondary: oklch(0.68 0.16 200);
+     --color-brand-secondary-foreground: oklch(0.98 0 0);
    }
    .dark {
      ...
-     --color-success: oklch(0.72 0.16 150);
-     --color-success-foreground: oklch(0.14 0.05 150);
+     --color-brand-secondary: oklch(0.78 0.16 200);
+     --color-brand-secondary-foreground: oklch(0.14 0.04 200);
    }
    ```
 
@@ -476,14 +487,13 @@ existing token set (most common: success / warning / info).
    matching entries to that preset's `@theme` AND `.dark` blocks too.
    It's fine — and usually preferred — for presets to inherit the
    base value silently; only override when the preset's identity
-   demands a different success colour (e.g. `vercel` would want a
-   monochrome success badge with a black-on-white check icon, not a
-   coloured pill).
+   demands a different value (e.g. `vercel` would want a monochrome
+   variant, not a coloured pill).
 
 3. Consume in components via the same pattern:
 
    ```tsx
-   className="bg-[var(--color-success)] text-[var(--color-success-foreground)]"
+   className="bg-[var(--color-brand-secondary)] text-[var(--color-brand-secondary-foreground)]"
    ```
 
 4. Don't forget the corresponding `*-foreground` pair. Every colour

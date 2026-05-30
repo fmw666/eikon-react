@@ -280,15 +280,17 @@ describe('applyUiSnapshot', () => {
   });
 
   it('replaces the seven owned files, keeps theme-toggle / language-switcher', async () => {
-    await writeSnapshot(fx.snapshotsRoot, 'shadcn', {
-      'src/shared/ui/button.tsx': '// shadcn button\n',
-      'src/shared/ui/dialog.tsx': '// shadcn dialog\n',
-      'src/shared/ui/tabs.tsx': '// shadcn tabs\n',
-      'src/shared/ui/sheet.tsx': '// shadcn sheet\n',
-      'src/shared/ui/command.tsx': '// shadcn command\n',
-      'src/shared/ui/card.tsx': '// shadcn card\n',
-      'src/shared/ui/toaster.tsx': '// shadcn toaster\n',
-    });
+    // Seed the snapshot with one entry per replaceable primitive so the
+    // copy phase below has a counterpart to lay down for every survivor.
+    // Driven off the live REPLACEABLE_UI_FILES list so adding a primitive
+    // here doesn't desync from the production source of truth.
+    const seeded = Object.fromEntries(
+      REPLACEABLE_UI_FILES.map((name) => [
+        `src/shared/ui/${name}`,
+        `// shadcn ${name.replace('.tsx', '')}\n`,
+      ])
+    );
+    await writeSnapshot(fx.snapshotsRoot, 'shadcn', seeded);
 
     await applyUiSnapshot(fx.projectDir, 'shadcn', fx.snapshotsRoot);
 

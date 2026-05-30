@@ -97,8 +97,8 @@ function BottomTabsRootLayout() {
     <div className="flex min-h-[100dvh] flex-col">
       <header
         className={cn(
-          'sticky top-0 z-30 border-b-[length:var(--surface-border-width)] border-[var(--color-border)]',
-          'bg-[var(--color-card)]/85 backdrop-blur',
+          'sticky top-0 z-30 border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',
+          'bg-[var(--color-sidebar)]/85 text-[var(--color-sidebar-foreground)] backdrop-blur',
           'pt-[env(safe-area-inset-top)]'
         )}
       >
@@ -137,8 +137,8 @@ function BottomTabsRootLayout() {
       <nav
         aria-label={t('nav.primary', { defaultValue: 'Primary navigation' })}
         className={cn(
-          'fixed inset-x-0 bottom-0 z-30 border-t-[length:var(--surface-border-width)] border-[var(--color-border)]',
-          'bg-[var(--color-card)]/95 backdrop-blur',
+          'fixed inset-x-0 bottom-0 z-30 border-t-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',
+          'bg-[var(--color-sidebar)]/95 text-[var(--color-sidebar-foreground)] backdrop-blur',
           'pb-[env(safe-area-inset-bottom)]'
         )}
       >
@@ -155,7 +155,7 @@ function BottomTabsRootLayout() {
                     'min-h-[var(--touch-target-min,44px)]',
                     'transition-colors',
                     isActive
-                      ? 'text-[var(--color-primary)]'
+                      ? 'text-[var(--color-sidebar-primary)]'
                       : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
                   )
                 }

@@ -8,7 +8,7 @@
  * where the top bar carries cross-app concerns and the side rail carries
  * the in-product nav (GitHub, Jira, Sentry, GitLab, Confluence, …).
  *
- * One of the four layout variants selected via `--layout` at scaffold time;
+ * One of the seven layout variants selected via `--layout` at scaffold time;
  * the dispatcher at `./RootLayout.tsx` re-exports whichever variant won.
  */
 
@@ -26,33 +26,9 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 // --- Absolute Imports ---
 import { SignInButton } from '@/features/auth';
 import { cn } from '@/shared/lib/cn';
+import { navLinks } from '@/shared/nav';
 import { LanguageSwitcher } from '@/shared/ui/language-switcher';
 import { ThemeToggle } from '@/shared/ui/theme-toggle';
-
-// =================================================================================================
-// Types
-// =================================================================================================
-
-interface NavLinkSpec {
-  to: string;
-  key: string;
-  fallback: string;
-  end?: boolean;
-}
-
-// =================================================================================================
-// Constants
-// =================================================================================================
-
-const navLinks: NavLinkSpec[] = [
-  { to: '/', key: 'nav.home', fallback: 'Home', end: true },
-  { to: '/counter', key: 'nav.counter', fallback: 'Counter' },
-  { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks' },
-  // Dev-only — see StackedRootLayout for the full rationale.
-  ...(import.meta.env.DEV
-    ? [{ to: '/examples', key: 'nav.examples', fallback: 'Examples' }]
-    : []),
-];
 
 // =================================================================================================
 // Component
@@ -66,8 +42,8 @@ function TopbarSidebarRootLayout() {
     <div className="flex min-h-[100dvh] flex-col">
       <header
         className={cn(
-          'sticky top-0 z-10 border-b-[length:var(--surface-border-width)] border-[var(--color-border)]',
-          'bg-[var(--color-card)]/70 backdrop-blur'
+          'sticky top-0 z-10 border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',
+          'bg-[var(--color-sidebar)]/70 text-[var(--color-sidebar-foreground)] backdrop-blur'
         )}
       >
         {/*
@@ -96,8 +72,8 @@ function TopbarSidebarRootLayout() {
         <aside
           className={cn(
             'sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-56 shrink-0 md:flex',
-            'flex-col border-r-[length:var(--surface-border-width)] border-[var(--color-border)]',
-            'bg-[var(--color-card)]/50'
+            'flex-col border-r-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',
+            'bg-[var(--color-sidebar)]/50 text-[var(--color-sidebar-foreground)]'
           )}
         >
           <nav className="flex flex-1 flex-col gap-1 p-2">
@@ -109,9 +85,9 @@ function TopbarSidebarRootLayout() {
                 className={({ isActive }) =>
                   cn(
                     'rounded-md px-3 py-2 text-sm transition-colors',
-                    'text-[var(--color-muted-foreground)] hover:bg-[var(--color-primary)]/8 hover:text-[var(--color-foreground)]',
+                    'text-[var(--color-muted-foreground)] hover:bg-[var(--color-sidebar-primary)]/8 hover:text-[var(--color-sidebar-foreground)]',
                     isActive &&
-                      'bg-[var(--color-primary)]/12 text-[var(--color-primary)]'
+                      'bg-[var(--color-sidebar-primary)]/12 text-[var(--color-sidebar-primary)]'
                   )
                 }
               >

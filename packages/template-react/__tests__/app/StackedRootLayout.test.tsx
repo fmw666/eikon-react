@@ -103,9 +103,9 @@ describe('<StackedRootLayout />', () => {
     expect(screen.getByText('counter page')).toBeInTheDocument();
   });
 
-  it('marks the active nav link with the primary background', () => {
+  it('marks the active nav link with the sidebar-primary background', () => {
     renderShell('/tasks');
     const tasksLink = screen.getByRole('link', { name: /tasks/i });
-    expect(tasksLink.className).toMatch(/bg-\[var\(--color-primary\)\]/);
+    expect(tasksLink.className).toMatch(/bg-\[var\(--color-sidebar-primary\)\]/);
   });
 });

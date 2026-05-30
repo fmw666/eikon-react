@@ -123,6 +123,7 @@ export const PARAMS = [
       'claymorphism',
       'aurora',
       'neo-brutalism',
+      'cyberpunk',
     ],
     default: 'default',
     cliFlag: 'design',
@@ -143,6 +144,7 @@ export const PARAMS = [
       claymorphism: 'Claymorphism (puffy 3D)',
       aurora: 'Aurora (gradient glow)',
       'neo-brutalism': 'NEO-Brutalism (hard outlines)',
+      cyberpunk: 'Cyberpunk (neon magenta + cyan)',
     },
   },
   {

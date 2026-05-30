@@ -163,7 +163,7 @@ const STATIC_MOTION = {
  */
 function panelClass(side: SheetSide): string {
   const base =
-    'fixed z-50 flex flex-col bg-[var(--color-card)] text-[var(--color-card-foreground)] shadow-xl ring-[length:var(--surface-ring-width)] ring-[var(--surface-ring-color)] [backdrop-filter:var(--surface-backdrop)]';
+    'fixed z-[var(--z-modal)] flex flex-col bg-[var(--color-card)] text-[var(--color-card-foreground)] shadow-xl ring-[length:var(--surface-ring-width)] ring-[var(--surface-ring-color)] [backdrop-filter:var(--surface-backdrop)]';
   switch (side) {
     case 'left':
       return cn(
@@ -237,7 +237,7 @@ function SheetContent({
           <DialogPrimitive.Overlay asChild forceMount>
             <motion.div
               {...overlayAnim}
-              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+              className="fixed inset-0 z-[var(--z-overlay)] bg-[var(--color-overlay)] backdrop-blur-sm"
             />
           </DialogPrimitive.Overlay>
           <DialogPrimitive.Content asChild forceMount {...props}>

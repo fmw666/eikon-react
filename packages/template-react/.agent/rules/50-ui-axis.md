@@ -48,12 +48,17 @@ copies the result). End users never touch that script.
   `theme-toggle.tsx`, `language-switcher.tsx`. These wire i18n + theme
   toggles and aren't part of any UI registry; the scaffold owns them
   in every variant.
-- **Project-owned only when `--ui custom`**: `button.tsx`, `dialog.tsx`,
-  `tabs.tsx`, `sheet.tsx`, `command.tsx`, `card.tsx`, `toaster.tsx`
-  (the seven primitives in `REPLACEABLE_UI_FILES` at
-  [apply-ui-snapshot.ts:72](../../../create-eikon-react/src/apply-ui-snapshot.ts)).
+- **Project-owned only when `--ui custom`**: the **twenty** primitives in
+  `REPLACEABLE_UI_FILES` at
+  [apply-ui-snapshot.ts:74](../../../create-eikon-react/src/apply-ui-snapshot.ts) —
+  the original 7 (`button.tsx`, `dialog.tsx`, `tabs.tsx`, `sheet.tsx`,
+  `command.tsx`, `card.tsx`, `toaster.tsx`) plus the 13 form / display
+  primitives shipped by the design-system audit pass (`input.tsx`,
+  `textarea.tsx`, `label.tsx`, `select.tsx`, `checkbox.tsx`,
+  `radio-group.tsx`, `switch.tsx`, `badge.tsx`, `avatar.tsx`,
+  `skeleton.tsx`, `tooltip.tsx`, `popover.tsx`, `alert.tsx`).
 - **Library-replaced when `--ui shadcn` or `--ui animate-ui`**: the same
-  seven primitives — sourced from the matching snapshot.
+  twenty primitives — sourced from the matching snapshot.
 
 After scaffold, **you own all of these files** — there's no runtime
 swap, no `--ui` switch in the generated project. Editing any primitive

@@ -7,7 +7,7 @@
  * dashboards, and any "tool" app where navigation is the spine of the
  * experience (Linear, Notion, Supabase Studio, …).
  *
- * One of the four layout variants selected via `--layout` at scaffold time;
+ * One of the seven layout variants selected via `--layout` at scaffold time;
  * the dispatcher at `./RootLayout.tsx` re-exports whichever variant won.
  */
 
@@ -25,33 +25,9 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 // --- Absolute Imports ---
 import { SignInButton } from '@/features/auth';
 import { cn } from '@/shared/lib/cn';
+import { navLinks } from '@/shared/nav';
 import { LanguageSwitcher } from '@/shared/ui/language-switcher';
 import { ThemeToggle } from '@/shared/ui/theme-toggle';
-
-// =================================================================================================
-// Types
-// =================================================================================================
-
-interface NavLinkSpec {
-  to: string;
-  key: string;
-  fallback: string;
-  end?: boolean;
-}
-
-// =================================================================================================
-// Constants
-// =================================================================================================
-
-const navLinks: NavLinkSpec[] = [
-  { to: '/', key: 'nav.home', fallback: 'Home', end: true },
-  { to: '/counter', key: 'nav.counter', fallback: 'Counter' },
-  { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks' },
-  // Dev-only — see StackedRootLayout for the full rationale.
-  ...(import.meta.env.DEV
-    ? [{ to: '/examples', key: 'nav.examples', fallback: 'Examples' }]
-    : []),
-];
 
 // =================================================================================================
 // Component
@@ -72,10 +48,10 @@ function SidebarRootLayout() {
       <aside
         className={cn(
           'sticky top-0 flex h-[100dvh] w-60 shrink-0 flex-col',
-          'border-r-[length:var(--surface-border-width)] border-[var(--color-border)] bg-[var(--color-card)]/70 backdrop-blur'
+          'border-r-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)] bg-[var(--color-sidebar)]/70 text-[var(--color-sidebar-foreground)] backdrop-blur'
         )}
       >
-        <div className="flex h-14 items-center border-b-[length:var(--surface-border-width)] border-[var(--color-border)] px-4">
+        <div className="flex h-14 items-center border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)] px-4">
           <Link to="/" className="text-sm font-semibold tracking-tight">
             Eikon App
           </Link>
@@ -89,9 +65,9 @@ function SidebarRootLayout() {
               className={({ isActive }) =>
                 cn(
                   'rounded-md px-3 py-2 text-sm transition-colors',
-                  'text-[var(--color-muted-foreground)] hover:bg-[var(--color-primary)]/8 hover:text-[var(--color-foreground)]',
+                  'text-[var(--color-muted-foreground)] hover:bg-[var(--color-sidebar-primary)]/8 hover:text-[var(--color-sidebar-foreground)]',
                   isActive &&
-                    'bg-[var(--color-primary)]/12 text-[var(--color-primary)]'
+                    'bg-[var(--color-sidebar-primary)]/12 text-[var(--color-sidebar-primary)]'
                 )
               }
             >
@@ -99,7 +75,7 @@ function SidebarRootLayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="flex flex-wrap items-center gap-1 border-t-[length:var(--surface-border-width)] border-[var(--color-border)] p-2">
+        <div className="flex flex-wrap items-center gap-1 border-t-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)] p-2">
           <LanguageSwitcher />
           <ThemeToggle />
           <SignInButton />

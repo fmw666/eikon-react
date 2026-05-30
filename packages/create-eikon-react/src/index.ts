@@ -62,6 +62,7 @@ const VARIANT_CHOICES = {
     'claymorphism',
     'aurora',
     'neo-brutalism',
+    'cyberpunk',
   ] as const,
   layout: [
     'stacked',

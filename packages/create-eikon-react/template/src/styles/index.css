@@ -131,6 +131,143 @@
   --scrollbar-thumb-radius: 8px;
   --scrollbar-thumb-border: 3px;
 
+  /* Semantic state colours (success / warning / info). Paired with
+   * `*-foreground` tokens so any colour used as a background has an
+   * adequate-contrast partner. Kept separate from `--color-destructive`
+   * so callers can express "negative confirmation" (destructive) vs
+   * "non-fatal alert" (warning) vs "positive confirmation" (success)
+   * vs "neutral notice" (info). Each design preset is free to override
+   * — `vercel` flattens to monochrome, `neo-brutalism` saturates them
+   * to match its primary palette, `cyberpunk` rebinds them to neon. */
+  --color-success: oklch(0.6 0.16 150);
+  --color-success-foreground: oklch(0.98 0 0);
+  --color-warning: oklch(0.75 0.16 75);
+  --color-warning-foreground: oklch(0.18 0.02 75);
+  --color-info: oklch(0.62 0.18 230);
+  --color-info-foreground: oklch(0.98 0 0);
+
+  /* Sidebar tokens — chrome surface for nav rails, drawers, top bars.
+   * Default to the card surface so existing layouts (which were written
+   * against `--color-card`) get a zero-visual-change migration; design
+   * presets that want a distinct chrome (linear's slightly-darker rail,
+   * vercel's contrast aside) re-bind these without touching components.
+   * `-primary` / `-accent` exist so an active nav item can pull its own
+   * pair instead of bleeding the page-level brand colour into chrome. */
+  --color-sidebar: var(--color-card);
+  --color-sidebar-foreground: var(--color-card-foreground);
+  --color-sidebar-primary: var(--color-primary);
+  --color-sidebar-primary-foreground: var(--color-primary-foreground);
+  --color-sidebar-accent: var(--color-accent);
+  --color-sidebar-accent-foreground: var(--color-accent-foreground);
+  --color-sidebar-border: var(--color-border);
+  --color-sidebar-ring: var(--color-ring);
+
+  /* Chart palette — five hues spaced ~60° around the OKLCH wheel so
+   * adjacent series don't read as the same colour at low chroma.
+   * Anchored at the brand primary's hue family for the 1st slot;
+   * presets with a strong identity hue (anthropic warm, aurora dual,
+   * vercel mono) override these to keep dataviz on-brand. */
+  --chart-1: oklch(0.62 0.19 280);
+  --chart-2: oklch(0.65 0.17 160);
+  --chart-3: oklch(0.7 0.16 80);
+  --chart-4: oklch(0.66 0.2 30);
+  --chart-5: oklch(0.6 0.2 320);
+
+  /* Motion — durations + easing curves. NOT a Tailwind namespace; the
+   * `--duration-*` token name overlaps with Tailwind v4's
+   * `transition-duration` lookup, so writing `duration-fast` resolves
+   * via the same cascade. Easing curves are exposed via the
+   * `--ease-*` namespace which Tailwind v4 reads for `ease-*`
+   * utilities. Each preset overrides to express its motion language —
+   * apple's heavier spring, linear's snappy fast, neo-brutalism's
+   * hard-cut zero-blur, cyberpunk's near-instant flicker. */
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 320ms;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* Focus-ring geometry. `--color-ring` already drives the ring's hue;
+   * these add the ring width + offset which differ per design system
+   * (Vercel uses a 3px offset ring, Apple uses a thicker halo, Linear
+   * uses a tight 2px no-offset ring). Components consume via
+   * `[--tw-ring-offset-width:var(--ring-offset-width)]` style escapes
+   * or directly via arbitrary classes. Default offset uses the page
+   * background so the ring "punches through" any chrome. */
+  --ring-width: 2px;
+  --ring-offset-width: 2px;
+  --ring-offset-color: var(--color-background);
+
+  /* Z-index scale. Tailwind v4 inlines numeric `z-*` utilities so we
+   * don't try to rebind those; instead these named tokens exist for
+   * components to consume via arbitrary classes (`z-[var(--z-modal)]`)
+   * and stay coherent across dialog / popover / toast / tooltip
+   * stacking. Spaced 100 apart so consumers can drop ad-hoc layers
+   * between named tiers if absolutely needed. */
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-fixed: 1200;
+  --z-overlay: 1300;
+  --z-modal: 1400;
+  --z-popover: 1500;
+  --z-toast: 1600;
+  --z-tooltip: 1700;
+
+  /* Modal / sheet / drawer overlay scrim. Replaces hardcoded
+   * `bg-black/60` and `bg-black/50` literals that previously lived
+   * inside dialog.tsx and sheet.tsx — those bypass the design cascade
+   * (you can't tint or lighten the scrim per preset). Default tracks
+   * the historical 60% black; `liquid-glass` and `cyberpunk` override
+   * to match their own ambient mood. */
+  --color-overlay: oklch(0 0 0 / 0.6);
+
+  /* Display font face. Promoted from claymorphism-only to a base token
+   * so any preset can have a distinct headline face (e.g. anthropic
+   * could pair Lora body with a Newsreader display, vercel could keep
+   * Geist Sans body and use Geist Mono for headings). Defaults to
+   * `--font-sans` so presets that don't opt in see no change. */
+  --font-display: var(--font-sans);
+
+  /* Display type-scale — Tailwind v4's defaults for `text-3xl/4xl/5xl/6xl`
+   * are inlined into the utility classes, so per-preset overrides only
+   * applied to claymorphism's local block. Promoting these to base
+   * makes the scale per-preset overridable without each preset having
+   * to duplicate the four declarations; cyberpunk + claymorphism
+   * actually opt in. */
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: 2.5rem;
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 1;
+  --text-6xl: 3.75rem;
+  --text-6xl--line-height: 1;
+
+  /* Modal-tier shadow. Tailwind v4 ships `--shadow-xl` as a built-in
+   * but the per-design overrides only cover sm/md/lg, so dialog/sheet
+   * panels that reach for `shadow-xl` keep the vanilla rgba drop in
+   * every preset (visible regression on vercel / brutalism / neumorphism
+   * / cyberpunk where lower tiers have already been redefined to
+   * something dramatic). Adding xl as a token + matching reroute below
+   * lets dialog/sheet stay on `shadow-xl` and inherit the design's
+   * elevation language. */
+  --shadow-xl:
+    0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* Ambient body backdrop. Most presets render `body` as a flat
+   * `var(--color-background)` fill (so this stays `none`); the
+   * morphism presets that paint a vivid backdrop behind translucent
+   * cards (`liquid-glass` photo refraction, `claymorphism` paper
+   * grain) override `--bg-ambient` to a multi-layer gradient/SVG
+   * string. Pulling that out of `body { ... }` rules into a token
+   * means a future preset can borrow the same backdrop mechanism
+   * without re-declaring a body selector — and strip-features keeps
+   * the @theme block intact when the preset is the survivor. */
+  --bg-ambient: none;
+
   /* @eikon:variant(platform=mobile) begin */
   /* Mobile touch-target floor (not a Tailwind namespace). Apple HIG
    * recommends 44pt; Android Material recommends 48dp. We pick 44px
@@ -212,6 +349,7 @@
 .dark .shadow-sm { --tw-shadow: var(--shadow-sm); }
 .dark .shadow-md { --tw-shadow: var(--shadow-md); }
 .dark .shadow-lg { --tw-shadow: var(--shadow-lg); }
+.dark .shadow-xl { --tw-shadow: var(--shadow-xl); }
 
 /* Same problem in light mode once design classes can override --shadow-* at
  * runtime: Tailwind only inlined the BASE @theme defaults into the utility,
@@ -223,6 +361,7 @@
 :root[class*="design-"] .shadow-sm { --tw-shadow: var(--shadow-sm); }
 :root[class*="design-"] .shadow-md { --tw-shadow: var(--shadow-md); }
 :root[class*="design-"] .shadow-lg { --tw-shadow: var(--shadow-lg); }
+:root[class*="design-"] .shadow-xl { --tw-shadow: var(--shadow-xl); }
 
 .dark {
   --color-background: oklch(0.16 0.01 260);
@@ -247,6 +386,30 @@
   --color-accent: oklch(0.26 0.02 280);
   --color-accent-foreground: oklch(0.97 0 0);
 
+  /* State colours — lifted lightness so they stay legible on a dark
+   * background; foreground swaps to dark to keep WCAG. */
+  --color-success: oklch(0.72 0.16 150);
+  --color-success-foreground: oklch(0.14 0.04 150);
+  --color-warning: oklch(0.82 0.16 75);
+  --color-warning-foreground: oklch(0.18 0.04 75);
+  --color-info: oklch(0.74 0.16 230);
+  --color-info-foreground: oklch(0.14 0.04 230);
+
+  /* Sidebar tokens stay transparent passthroughs — `--color-card` is
+   * already redefined for dark mode three lines up, so chrome keeps
+   * tracking it without a separate dark-mode declaration. */
+
+  /* Chart palette — same hue spacing, lifted L for dark legibility. */
+  --chart-1: oklch(0.72 0.18 280);
+  --chart-2: oklch(0.74 0.16 160);
+  --chart-3: oklch(0.78 0.15 80);
+  --chart-4: oklch(0.74 0.18 30);
+  --chart-5: oklch(0.7 0.18 320);
+
+  /* Overlay scrim deepens slightly so the modal still reads as
+   * "behind a tint" against an already-dark page. */
+  --color-overlay: oklch(0 0 0 / 0.7);
+
   --scrollbar-thumb: oklch(0.36 0.01 260);
   --scrollbar-thumb-hover: oklch(0.55 0.02 260);
 }
@@ -266,6 +429,14 @@
   }
   body {
     background-color: var(--color-background);
+    /* Ambient backdrop — defaults to `none` so most presets render a flat
+     * page colour. Morphism presets (liquid-glass, claymorphism, future
+     * sunset/blueprint) override `--bg-ambient` to a multi-layer
+     * gradient or SVG noise string and inherit the same fixed/cover
+     * positioning here. */
+    background-image: var(--bg-ambient);
+    background-attachment: fixed;
+    background-size: cover;
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
@@ -297,6 +468,15 @@
   }
   ::-webkit-scrollbar-corner {
     background: var(--scrollbar-track);
+  }
+
+  /* Headline display face. Each preset defines `--font-display` (the
+   * base default tracks `--font-sans`, so presets that don't opt in
+   * see no change — `claymorphism` sets Fredoka, `cyberpunk` sets
+   * JetBrains Mono, etc.). Scoping to h1-h3 keeps body copy on the
+   * sans face; if a preset wants display on h4+ too, add it locally. */
+  :is(h1, h2, h3) {
+    font-family: var(--font-display);
   }
 }
 
@@ -394,6 +574,27 @@
   --scrollbar-thumb-hover: oklch(0.5 0.005 240);
   --scrollbar-thumb-radius: 7px;
   --scrollbar-thumb-border: 3px;
+
+  /* Apple chart — five tones around systemBlue with one warm break
+   * (orange) so the eye can separate adjacent series. Mirrors the
+   * SF system-color palette HIG showcases for charts. */
+  --chart-1: oklch(0.6 0.22 256);
+  --chart-2: oklch(0.7 0.18 200);
+  --chart-3: oklch(0.7 0.18 145);
+  --chart-4: oklch(0.7 0.2 30);
+  --chart-5: oklch(0.65 0.2 320);
+
+  /* Apple motion — heavier spring + slightly longer normal duration.
+   * HIG calls for "natural-feeling" motion; the spring overshoot
+   * shows up in iOS sheet snaps and macOS dock magnification. */
+  --duration-fast: 140ms;
+  --duration-normal: 280ms;
+  --duration-slow: 420ms;
+
+  /* Apple focus ring — HIG halo is a thicker glow with a transparent
+   * 2px offset from the focused element. */
+  --ring-width: 4px;
+  --ring-offset-width: 2px;
 }
 .dark.design-apple {
   --color-background: oklch(0.16 0.005 240);
@@ -483,6 +684,32 @@
   --scrollbar-thumb-hover: oklch(0.5 0.012 264);
   --scrollbar-thumb-radius: 0.25rem;
   --scrollbar-thumb-border: 2px;
+
+  /* Linear sidebar — slightly darker than card so the productivity
+   * rail reads with weight. Border deepens with it. */
+  --color-sidebar: oklch(0.95 0.005 264);
+  --color-sidebar-border: oklch(0.85 0.008 264);
+
+  /* Linear chart — five lavender-leaning hues (purple, blue, teal,
+   * mint, amber) so adjacent series stay distinguishable on Linear
+   * surfaces (which already lean cool). */
+  --chart-1: oklch(0.53 0.17 282);
+  --chart-2: oklch(0.62 0.16 220);
+  --chart-3: oklch(0.65 0.15 175);
+  --chart-4: oklch(0.7 0.14 140);
+  --chart-5: oklch(0.7 0.18 60);
+
+  /* Linear motion — snappy. Productivity tools want responses that
+   * feel instant; 100ms / 160ms / 240ms hits the "fast software"
+   * Linear is famous for. */
+  --duration-fast: 100ms;
+  --duration-normal: 160ms;
+  --duration-slow: 240ms;
+
+  /* Linear focus ring — tight 2px, no offset (Linear's UI hugs
+   * elements; a halo would push the layout). */
+  --ring-width: 2px;
+  --ring-offset-width: 0px;
 }
 .dark.design-linear {
   --color-background: oklch(0.18 0.005 264);
@@ -500,6 +727,9 @@
   --color-accent: oklch(0.28 0.05 280);
   --color-accent-foreground: oklch(0.95 0.005 264);
   --color-ring: oklch(0.69 0.18 280);
+
+  --color-sidebar: oklch(0.16 0.005 264);
+  --color-sidebar-border: oklch(0.24 0.005 264);
 
   --scrollbar-thumb: oklch(0.36 0.005 264);
   --scrollbar-thumb-hover: oklch(0.55 0.012 264);
@@ -581,6 +811,29 @@
   --scrollbar-thumb-hover: oklch(0.55 0.025 60);
   --scrollbar-thumb-radius: 7px;
   --scrollbar-thumb-border: 3px;
+
+  /* Anthropic sidebar — warm-toned chrome, slightly muted from card
+   * so the cream-on-cream still reads as a distinct surface. */
+  --color-sidebar: oklch(0.95 0.012 90);
+  --color-sidebar-border: oklch(0.86 0.018 80);
+
+  /* Anthropic chart — earthy palette anchored at Crail orange, with
+   * supporting tones (terracotta, ochre, sage, navy ink) lifted
+   * straight out of editorial-design conventions. */
+  --chart-1: oklch(0.66 0.14 40);
+  --chart-2: oklch(0.6 0.12 25);
+  --chart-3: oklch(0.7 0.13 80);
+  --chart-4: oklch(0.55 0.1 145);
+  --chart-5: oklch(0.4 0.08 240);
+
+  /* Anthropic state colours — warm-leaning. Success on warm green
+   * keeps continuity with the cream page; warning leans into the
+   * brand orange (calls back to primary); info drops to a low-
+   * saturation editorial blue so it reads as "neutral notice"
+   * rather than competing with primary. */
+  --color-success: oklch(0.6 0.13 145);
+  --color-warning: oklch(0.66 0.14 40);
+  --color-info: oklch(0.55 0.1 240);
 }
 .dark.design-anthropic {
   --color-background: oklch(0.2 0 90);
@@ -598,6 +851,12 @@
   --color-accent: oklch(0.32 0.04 40);
   --color-accent-foreground: oklch(0.94 0.006 90);
   --color-ring: oklch(0.74 0.14 40);
+
+  --color-sidebar: oklch(0.18 0 90);
+  --color-sidebar-border: oklch(0.3 0.005 90);
+  --color-success: oklch(0.72 0.14 145);
+  --color-warning: oklch(0.74 0.14 40);
+  --color-info: oklch(0.65 0.12 240);
 
   --scrollbar-thumb: oklch(0.4 0.01 90);
   --scrollbar-thumb-hover: oklch(0.6 0.02 60);
@@ -675,6 +934,44 @@
   --scrollbar-thumb-hover: oklch(0.4 0 0);
   --scrollbar-thumb-radius: 2px;
   --scrollbar-thumb-border: 2px;
+
+  /* Vercel sidebar — slightly lifted-off-card (off-white #fafafa) to
+   * give the chrome a flat tonal step without breaking the strict
+   * monochrome rule. Border deepens to a hairline. */
+  --color-sidebar: oklch(0.985 0 0);
+  --color-sidebar-border: oklch(0.88 0 0);
+
+  /* Vercel chart — five-step grayscale ramp. Geist's philosophy is
+   * "color is a brand asset, not a chart axis"; data viz follows the
+   * same rule. Authors who need hue can opt in via per-component
+   * overrides. */
+  --chart-1: oklch(0.09 0 0);
+  --chart-2: oklch(0.35 0 0);
+  --chart-3: oklch(0.55 0 0);
+  --chart-4: oklch(0.7 0 0);
+  --chart-5: oklch(0.82 0 0);
+
+  /* Vercel state colours — mono for success/info (Geist: accents
+   * stay sparing). Warning carries a single warm tone because amber
+   * actually denotes "attention" in Geist's iconography. Destructive
+   * already exists as a saturated colour; warning sits between. */
+  --color-success: oklch(0.35 0 0);
+  --color-success-foreground: oklch(1 0 0);
+  --color-warning: oklch(0.72 0.14 70);
+  --color-warning-foreground: oklch(0.18 0.04 70);
+  --color-info: oklch(0.55 0 0);
+  --color-info-foreground: oklch(1 0 0);
+
+  /* Vercel motion — instant. Geist UI is famous for "no animation if
+   * it's not load-bearing"; we keep micro-transitions but cut their
+   * duration to the minimum that still reads as a state change. */
+  --duration-fast: 100ms;
+  --duration-normal: 160ms;
+  --duration-slow: 220ms;
+
+  /* Vercel focus ring — Geist's signature 3px halo with 2px offset. */
+  --ring-width: 3px;
+  --ring-offset-width: 2px;
 }
 .dark.design-vercel {
   --color-background: oklch(0.09 0 0);
@@ -692,6 +989,23 @@
   --color-accent: oklch(0.22 0 0);
   --color-accent-foreground: oklch(0.98 0 0);
   --color-ring: oklch(0.7 0.2 257);
+
+  --color-sidebar: oklch(0.07 0 0);
+  --color-sidebar-border: oklch(0.18 0 0);
+  --color-success: oklch(0.65 0 0);
+  --color-success-foreground: oklch(0.09 0 0);
+  --color-warning: oklch(0.78 0.14 70);
+  --color-warning-foreground: oklch(0.14 0.04 70);
+  --color-info: oklch(0.45 0 0);
+  --color-info-foreground: oklch(0.98 0 0);
+
+  /* Dark-mode chart inverts the ramp lightness so the grayscale
+   * stays legible against the deep-black page. */
+  --chart-1: oklch(0.98 0 0);
+  --chart-2: oklch(0.78 0 0);
+  --chart-3: oklch(0.6 0 0);
+  --chart-4: oklch(0.42 0 0);
+  --chart-5: oklch(0.28 0 0);
 
   --scrollbar-thumb: oklch(0.3 0 0);
   --scrollbar-thumb-hover: oklch(0.55 0 0);
@@ -734,7 +1048,10 @@
     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica,
     'Apple Color Emoji', Arial, sans-serif;
 
-  --spacing: 0.25rem;
+  /* Notion's spacing matches Tailwind v4 default (0.25rem) — no need
+   * to set `--spacing` here; falling through keeps the @theme block
+   * leaner and removes redundant noise in strip-features output.
+   * (Removed in the design-system audit pass.) */
 
   --text-xs: 0.75rem;
   --text-xs--line-height: 1.1rem;
@@ -765,6 +1082,20 @@
   --scrollbar-thumb-hover: oklch(0.55 0.015 60);
   --scrollbar-thumb-radius: 5px;
   --scrollbar-thumb-border: 2px;
+
+  /* Notion sidebar — slightly cooler / more neutral than the warm
+   * cream content area, like the editor's panel rail. */
+  --color-sidebar: oklch(0.97 0.005 240);
+  --color-sidebar-border: oklch(0.88 0.006 220);
+
+  /* Notion chart — five-tone palette anchored at the Notion blue
+   * with warm complement (peach), green, indigo, mustard. Mirrors
+   * the colour swatches Notion uses for tags / database statuses. */
+  --chart-1: oklch(0.68 0.13 220);
+  --chart-2: oklch(0.7 0.15 30);
+  --chart-3: oklch(0.65 0.13 145);
+  --chart-4: oklch(0.6 0.15 290);
+  --chart-5: oklch(0.7 0.14 80);
 }
 .dark.design-notion {
   --color-background: oklch(0.21 0.003 60);
@@ -782,6 +1113,9 @@
   --color-accent: oklch(0.32 0.04 220);
   --color-accent-foreground: oklch(0.96 0.003 60);
   --color-ring: oklch(0.78 0.13 220);
+
+  --color-sidebar: oklch(0.19 0.003 60);
+  --color-sidebar-border: oklch(0.28 0.005 60);
 
   --scrollbar-thumb: oklch(0.42 0.008 60);
   --scrollbar-thumb-hover: oklch(0.6 0.015 60);
@@ -815,23 +1149,53 @@
   --radius-md: 0rem;
   --radius-sm: 0rem;
 
+  /* Flat font — Inter Tight keeps the Swiss / Metro typographic
+   * voice: clean grotesque with a slightly tighter aperture than
+   * regular Inter, which suits flat surfaces where letterforms
+   * carry a lot of the visual weight. */
+  --font-sans:
+    'Inter Tight', 'Inter', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', system-ui, sans-serif;
+
   --surface-border-width: 2px;
-  --surface-backdrop: none;
-  --surface-inset-shadow: none;
-  --surface-ring-width: 0px;
-  --surface-ring-color: transparent;
   --surface-hover-shadow: none;
   --surface-active-shadow: none;
 
   --shadow-sm: none;
   --shadow-md: none;
   --shadow-lg: none;
+  --shadow-xl: none;
 
   --scrollbar-size: 10px;
   --scrollbar-thumb: oklch(0.7 0.01 220);
   --scrollbar-thumb-hover: oklch(0.5 0.015 220);
   --scrollbar-thumb-radius: 0rem;
   --scrollbar-thumb-border: 2px;
+
+  /* Flat sidebar — strongly distinct block colour to lean into Metro's
+   * "block of bright colour next to block of white" composition.
+   * Border thickens to 2px to match flat's surface language. */
+  --color-sidebar: oklch(0.55 0.22 230);
+  --color-sidebar-foreground: oklch(1 0 0);
+  --color-sidebar-primary: oklch(1 0 0);
+  --color-sidebar-primary-foreground: oklch(0.55 0.22 230);
+  --color-sidebar-accent: oklch(0.45 0.22 230);
+  --color-sidebar-accent-foreground: oklch(1 0 0);
+  --color-sidebar-border: oklch(0.45 0.22 230);
+
+  /* Flat chart — Metro-style saturated primaries. Hue-stepped wide
+   * (60–80°) and held at high chroma so blocks read as "filled
+   * tiles" rather than gradients. */
+  --chart-1: oklch(0.55 0.22 230);
+  --chart-2: oklch(0.62 0.2 30);
+  --chart-3: oklch(0.65 0.22 145);
+  --chart-4: oklch(0.7 0.18 90);
+  --chart-5: oklch(0.55 0.22 320);
+
+  /* Flat state colours — saturated to match the Metro palette. */
+  --color-success: oklch(0.6 0.22 145);
+  --color-warning: oklch(0.7 0.18 75);
+  --color-info: oklch(0.6 0.18 230);
 }
 .dark.design-flat {
   --color-background: oklch(0.13 0.005 220);
@@ -851,6 +1215,14 @@
   --color-destructive: oklch(0.6 0.2 25);
   --color-destructive-foreground: oklch(1 0 0);
   --color-ring: oklch(0.68 0.2 230);
+
+  --color-sidebar: oklch(0.68 0.2 230);
+  --color-sidebar-foreground: oklch(0.13 0.005 220);
+  --color-sidebar-primary: oklch(0.13 0.005 220);
+  --color-sidebar-primary-foreground: oklch(0.68 0.2 230);
+  --color-sidebar-accent: oklch(0.55 0.2 230);
+  --color-sidebar-accent-foreground: oklch(1 0 0);
+  --color-sidebar-border: oklch(0.55 0.2 230);
 
   --scrollbar-thumb: oklch(0.35 0.005 220);
   --scrollbar-thumb-hover: oklch(0.55 0.01 220);
@@ -884,7 +1256,7 @@
   --radius-md: 0.875rem;
   --radius-sm: 0.5rem;
   --font-sans:
-    'Google Sans', Roboto, system-ui, -apple-system, sans-serif;
+    'Roboto Flex', 'Roboto', 'Google Sans', system-ui, -apple-system, sans-serif;
 
   --surface-border-width: 0px;
   --surface-backdrop: none;
@@ -903,6 +1275,23 @@
   --scrollbar-thumb-hover: oklch(0.5 0.015 270);
   --scrollbar-thumb-radius: 8px;
   --scrollbar-thumb-border: 3px;
+
+  /* Material chart — M3 tonal palette: brand violet anchor, then four
+   * supporting hues at the same chroma so series compare cleanly. */
+  --chart-1: oklch(0.5 0.22 270);
+  --chart-2: oklch(0.62 0.18 200);
+  --chart-3: oklch(0.65 0.18 145);
+  --chart-4: oklch(0.7 0.16 75);
+  --chart-5: oklch(0.62 0.18 330);
+
+  /* Material motion — M3 emphasized easing. The "emphasized" curve
+   * (cubic-bezier(0.2, 0, 0, 1)) is M3's hallmark; pairs with M3
+   * recommended duration ramps (200ms / 300ms / 500ms). */
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in-out: cubic-bezier(0.2, 0, 0, 1);
 }
 .dark.design-material {
   --color-background: oklch(0.15 0.01 270);
@@ -989,6 +1378,21 @@
   --scrollbar-thumb-hover: oklch(0.5 0.03 55);
   --scrollbar-thumb-radius: 7px;
   --scrollbar-thumb-border: 3px;
+
+  /* Skeuomorphism sidebar — leather-toned chrome distinct from the
+   * paper-cream content surface. Echoes the iOS-pre-7 calendar app's
+   * green-felt header / cream cells separation. */
+  --color-sidebar: oklch(0.88 0.02 55);
+  --color-sidebar-border: oklch(0.66 0.03 55);
+
+  /* Skeuomorphism chart — earthy palette pulled from a 1990s
+   * desk-stationery box: ochre, muted teal, terracotta, sage,
+   * burgundy. Reads as "real-world materials" rather than digital. */
+  --chart-1: oklch(0.62 0.13 55);
+  --chart-2: oklch(0.55 0.1 200);
+  --chart-3: oklch(0.5 0.13 25);
+  --chart-4: oklch(0.55 0.1 145);
+  --chart-5: oklch(0.4 0.13 15);
 }
 .dark.design-skeuomorphism {
   --color-background: oklch(0.16 0.01 50);
@@ -1016,6 +1420,9 @@
   --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3), 0 2px 4px oklch(0 0 0 / 0.2);
   --shadow-md: 0 2px 4px oklch(0 0 0 / 0.3), 0 4px 10px -1px oklch(0 0 0 / 0.25), 0 6px 14px -2px oklch(0 0 0 / 0.15);
   --shadow-lg: 0 4px 8px oklch(0 0 0 / 0.3), 0 8px 20px -2px oklch(0 0 0 / 0.25), 0 12px 28px -4px oklch(0 0 0 / 0.15);
+
+  --color-sidebar: oklch(0.26 0.01 50);
+  --color-sidebar-border: oklch(0.4 0.018 50);
 
   --scrollbar-thumb: oklch(0.4 0.015 50);
   --scrollbar-thumb-hover: oklch(0.58 0.02 55);
@@ -1052,6 +1459,13 @@
   --radius-md: 0.875rem;
   --radius-sm: 0.625rem;
 
+  /* Neumorphism font — Quicksand / SF Pro Rounded. Soft geometric
+   * grotesque with rounded terminals; matches the "softly extruded
+   * plastic" feel of the dual-shadow surfaces. */
+  --font-sans:
+    'Quicksand', 'SF Pro Rounded', -apple-system, BlinkMacSystemFont,
+    'Segoe UI Variable', system-ui, sans-serif;
+
   --surface-border-width: 0px;
   --surface-backdrop: none;
   --surface-inset-shadow: inset 3px 3px 6px oklch(0.72 0.005 250 / 0.45), inset -3px -3px 6px oklch(1 0 0 / 0.7);
@@ -1069,6 +1483,25 @@
   --scrollbar-thumb-hover: oklch(0.6 0.012 250);
   --scrollbar-thumb-radius: 6px;
   --scrollbar-thumb-border: 3px;
+
+  /* Neumorphism sidebar — INTENTIONALLY equal to background so chrome
+   * dissolves into the surface (the whole point of neumorphism). Active
+   * states still pop because the dual-shadow inset is what reads as
+   * "selected", not a distinct fill. */
+  --color-sidebar: var(--color-background);
+  --color-sidebar-border: var(--color-background);
+
+  /* Neumorphism chart — single-hue family at varied L. Five steps of
+   * the same lavender-grey so chart "blocks" feel sculpted from the
+   * same plastic as the cards. */
+  --chart-1: oklch(0.55 0.12 250);
+  --chart-2: oklch(0.65 0.1 250);
+  --chart-3: oklch(0.5 0.12 220);
+  --chart-4: oklch(0.6 0.1 280);
+  --chart-5: oklch(0.7 0.08 250);
+
+  /* Neumorphism motion — gentle spring for inflate / press feel. */
+  --ease-out: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .dark.design-neumorphism {
   --color-background: oklch(0.28 0.01 250);
@@ -1215,6 +1648,34 @@
   --scrollbar-thumb-hover: oklch(1 0 0 / 0.4);
   --scrollbar-thumb-radius: 10px;
   --scrollbar-thumb-border: 2px;
+
+  /* Liquid-glass sidebar — matches the glass card treatment so the
+   * chrome reads as another translucent panel sitting over the
+   * forest backdrop, not a flat opaque rail. */
+  --color-sidebar: oklch(0.32 0.025 155 / 0.32);
+  --color-sidebar-foreground: oklch(0.98 0.005 155);
+  --color-sidebar-border: oklch(1 0 0 / 0.18);
+
+  /* Liquid-glass chart — cool emerald / teal / cyan / blurple
+   * palette pulls from the iOS 26 marketing screens; everything sits
+   * in the cool half of the wheel so the saturate(180%) backdrop-
+   * filter on cards doesn't oversaturate the chart fills. */
+  --chart-1: oklch(0.62 0.19 275);
+  --chart-2: oklch(0.65 0.16 200);
+  --chart-3: oklch(0.7 0.14 165);
+  --chart-4: oklch(0.6 0.16 230);
+  --chart-5: oklch(0.7 0.12 145);
+
+  /* Liquid-glass moves the multi-layer body backdrop into the
+   * `--bg-ambient` token so future presets can borrow the same
+   * mechanism. The base `body` rule consumes it. */
+  --bg-ambient:
+    radial-gradient(ellipse 80% 60% at 18% 12%, oklch(0.78 0.16 90 / 0.32), transparent 60%),
+    radial-gradient(ellipse 70% 55% at 82% 38%, oklch(0.62 0.12 130 / 0.28), transparent 65%),
+    radial-gradient(ellipse 90% 70% at 50% 95%, oklch(0.18 0.06 155 / 0.55), transparent 70%),
+    radial-gradient(circle at 30% 70%, oklch(0.45 0.1 160 / 0.35), transparent 55%),
+    radial-gradient(circle at 75% 80%, oklch(0.4 0.09 145 / 0.35), transparent 50%),
+    linear-gradient(180deg, oklch(0.3 0.05 160) 0%, oklch(0.2 0.05 155) 60%, oklch(0.14 0.04 155) 100%);
 }
 .dark.design-liquid-glass {
   /* Forest "night" — push the base darker so the droplets' inset top
@@ -1271,32 +1732,10 @@
 
   --scrollbar-thumb: oklch(1 0 0 / 0.16);
   --scrollbar-thumb-hover: oklch(1 0 0 / 0.35);
-}
 
-/* Body ambience — a layered radial-gradient stack that fakes the
- * "photo behind the glass" depth seen in iOS 26 marketing material:
- *
- *   • two warm sun-spots high-left and mid-right    (golden glints)
- *   • two cool mid-tone radials                     (depth haze)
- *   • a deep emerald base                           (forest floor)
- *
- * backdrop-filter on the Card uses these gradients as its source, so
- * the panels appear to refract real foliage even though no <img> is
- * involved. Strip-features keeps this rule alongside its design tokens. */
-body {
-  background-color: var(--color-background);
-  background-image:
-    radial-gradient(ellipse 80% 60% at 18% 12%, oklch(0.78 0.16 90 / 0.32), transparent 60%),
-    radial-gradient(ellipse 70% 55% at 82% 38%, oklch(0.62 0.12 130 / 0.28), transparent 65%),
-    radial-gradient(ellipse 90% 70% at 50% 95%, oklch(0.18 0.06 155 / 0.55), transparent 70%),
-    radial-gradient(circle at 30% 70%, oklch(0.45 0.1 160 / 0.35), transparent 55%),
-    radial-gradient(circle at 75% 80%, oklch(0.4 0.09 145 / 0.35), transparent 50%),
-    linear-gradient(180deg, oklch(0.3 0.05 160) 0%, oklch(0.2 0.05 155) 60%, oklch(0.14 0.04 155) 100%);
-  background-attachment: fixed;
-  background-size: cover;
-}
-.dark body {
-  background-image:
+  /* Dark mode rebinds the ambient backdrop to the night-forest
+   * variant. Same multi-layer composition, deeper stops. */
+  --bg-ambient:
     radial-gradient(ellipse 80% 60% at 18% 12%, oklch(0.55 0.14 90 / 0.28), transparent 60%),
     radial-gradient(ellipse 70% 55% at 82% 38%, oklch(0.42 0.1 130 / 0.3), transparent 65%),
     radial-gradient(ellipse 90% 70% at 50% 95%, oklch(0.1 0.05 155 / 0.6), transparent 70%),
@@ -1304,6 +1743,11 @@ body {
     radial-gradient(circle at 75% 80%, oklch(0.25 0.08 145 / 0.4), transparent 50%),
     linear-gradient(180deg, oklch(0.18 0.04 160) 0%, oklch(0.12 0.04 155) 60%, oklch(0.08 0.03 155) 100%);
 }
+
+/* Body backdrop is now driven by the `--bg-ambient` token (defined
+ * above and overridden in `.dark.design-liquid-glass`). The base
+ * `body` rule in `@layer base` consumes it; no preset-specific body
+ * selector is needed. */
 /* @eikon:variant(design=liquid-glass) end */
 
 /* @eikon:variant(design=claymorphism) begin */
@@ -1545,6 +1989,45 @@ body {
   --scrollbar-thumb-hover: oklch(0.6 0.16 25);
   --scrollbar-thumb-radius: 10px;
   --scrollbar-thumb-border: 3px;
+
+  /* Claymorphism sidebar — navy plate, lifted from the demo's
+   * secondary-section background. The page is cream, cards are
+   * coral; the sidebar wants its own identity in the 4-colour
+   * chord, and navy is what the demo footer / install-section
+   * uses. Active items pop because the navy gives them a high-
+   * contrast frame. */
+  --color-sidebar: oklch(0.4 0.05 260);
+  --color-sidebar-foreground: oklch(0.98 0.012 95);
+  --color-sidebar-primary: oklch(0.7 0.16 25);
+  --color-sidebar-primary-foreground: oklch(0.99 0 0);
+  --color-sidebar-accent: oklch(0.5 0.06 260);
+  --color-sidebar-accent-foreground: oklch(0.98 0.012 95);
+  --color-sidebar-border: oklch(0.45 0.06 260);
+
+  /* Claymorphism chart — the demo's 4-colour chord (coral, navy,
+   * sky, peach) plus a sage green so 5 series stay distinguishable.
+   * Each anchor is one of the demo's section colours, kept at
+   * mid-luminosity for "puffy clay" rather than pastel cards. */
+  --chart-1: oklch(0.7 0.16 25);
+  --chart-2: oklch(0.4 0.05 260);
+  --chart-3: oklch(0.81 0.055 235);
+  --chart-4: oklch(0.78 0.105 30);
+  --chart-5: oklch(0.65 0.13 145);
+
+  /* Claymorphism motion — bouncy spring matches puffy-clay
+   * physics. Slightly longer durations so the inflate/squish
+   * has room to read. */
+  --duration-fast: 160ms;
+  --duration-normal: 280ms;
+  --duration-slow: 420ms;
+  --ease-out: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Claymorphism ambient — solid cream tabletop with paper grain.
+   * Moved here from the body selector below so the token system
+   * stays uniform; the noise SVG is encoded as a data: URL. */
+  --bg-ambient:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 }
 .dark.design-claymorphism {
   /* ---- PALETTE (DARK MODE) — demo's navy footer extrapolated -
@@ -1583,6 +2066,14 @@ body {
   --color-destructive-foreground: oklch(0.99 0 0);
   --color-ring: oklch(0.72 0.16 25);
 
+  --color-sidebar: oklch(0.32 0.04 250);
+  --color-sidebar-foreground: oklch(0.96 0.012 95);
+  --color-sidebar-primary: oklch(0.72 0.16 25);
+  --color-sidebar-primary-foreground: oklch(0.99 0 0);
+  --color-sidebar-accent: oklch(0.4 0.05 250);
+  --color-sidebar-accent-foreground: oklch(0.96 0.012 95);
+  --color-sidebar-border: oklch(0.38 0.05 250);
+
   --surface-ring-color: transparent;
 
   /* Dark mode shadows — outer drop deepens to near-black (the
@@ -1614,47 +2105,25 @@ body {
 
   --scrollbar-thumb: oklch(0.5 0.1 25);
   --scrollbar-thumb-hover: oklch(0.65 0.16 25);
-}
 
-/* ---- BODY AMBIENCE — solid cream tabletop ------------------
- *
- * The clay.css demo's hero is a SOLID cream (#F3D88F). No
- * gradient, no orbs, no grain. That's the design intent —
- * Adrian wants the saturated coral cards to do all the work,
- * with the cream acting as a neutral stage. Every gradient or
- * pattern we add steals contrast back from the card.
- *
- * The ONLY ambient layer we ship is a feather-light paper grain
- * (3% in light, 4% in dark). Without it the page reads as "div
- * with bg-color" rather than "paper tabletop"; with it the eye
- * picks up tactile noise without the bg competing with cards. */
-body {
-  background-color: var(--color-background);
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  background-attachment: fixed;
-  background-size: 220px 220px;
-  background-repeat: repeat;
-}
-.dark body {
-  background-image:
+  /* Dark-mode ambient — same paper grain at slightly higher opacity
+   * so the texture reads against the navy bg. */
+  --bg-ambient:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
 }
 
 /* ---- DISPLAY TYPE — Fredoka on headlines -------------------
  *
- * Headlines (h1-h3) auto-promote to the rounded display face.
- * Without this, every Tailwind `text-5xl font-bold` keeps the
- * body sans (Nunito) — fine, but loses the demo's distinctive
- * Fredoka silhouette. Scoping to h1-h3 keeps body copy on
- * Nunito (readable at small sizes; Fredoka gets thick at <24px).
- * Weight 600 on Fredoka is the demo's hero weight; 700 is too
- * heavy and crushes the inner counters. */
-:is(h1, h2, h3) {
-  font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: 0em;
-}
+ * Headlines (h1-h3) auto-promote to the rounded display face via
+ * the base `--font-display` token, which claymorphism rebinds to
+ * Fredoka above. Other presets that opt into a display face follow
+ * the same mechanism — see `:is(h1, h2, h3)` rule near the top of
+ * @layer base / utility section. The rule used to live here, but
+ * now that --font-display is a base token, it's been hoisted out
+ * of the claymorphism block.
+ *
+ * (No body or :is() selector here anymore — both moved.)
+ */
 /* @eikon:variant(design=claymorphism) end */
 
 /* @eikon:variant(design=aurora) begin */
@@ -1691,6 +2160,14 @@ body {
   --radius-md: 0.625rem;
   --radius-sm: 0.375rem;
 
+  /* Aurora font — Space Grotesk. Geometric / slightly futuristic
+   * grotesque with mechanical letterforms; pairs well with the
+   * glow-shadow design language without leaning into ironic
+   * cyberpunk territory. */
+  --font-sans:
+    'Space Grotesk', ui-sans-serif, -apple-system, BlinkMacSystemFont,
+    system-ui, sans-serif;
+
   --surface-border-width: 1px;
   --surface-backdrop: none;
   --surface-inset-shadow: none;
@@ -1708,6 +2185,26 @@ body {
   --scrollbar-thumb-hover: oklch(0.55 0.1 170);
   --scrollbar-thumb-radius: 6px;
   --scrollbar-thumb-border: 2px;
+
+  /* Aurora sidebar — slightly cooler than card with a glow border to
+   * pick up the dual-hue palette. */
+  --color-sidebar: oklch(0.96 0.012 175);
+  --color-sidebar-border: oklch(0.85 0.04 170);
+
+  /* Aurora chart — five hues sweeping from green-cyan through
+   * teal to magenta, mirroring the dual-hue shadow palette of
+   * the design itself. Reads as a "northern lights" sweep. */
+  --chart-1: oklch(0.6 0.22 170);
+  --chart-2: oklch(0.62 0.18 200);
+  --chart-3: oklch(0.65 0.18 240);
+  --chart-4: oklch(0.6 0.2 290);
+  --chart-5: oklch(0.6 0.22 320);
+
+  /* Aurora ring — thicker glow effect because the design's whole
+   * personality is the colored halo. 3px rings + 0px offset keeps
+   * the glow attached to the focused element. */
+  --ring-width: 3px;
+  --ring-offset-width: 0px;
 }
 .dark.design-aurora {
   --color-background: oklch(0.12 0.012 170);
@@ -1735,6 +2232,9 @@ body {
   --shadow-sm: 0 2px 10px -2px oklch(0.5 0.18 170 / 0.35), 0 1px 6px -1px oklch(0.5 0.15 310 / 0.15);
   --shadow-md: 0 4px 20px -4px oklch(0.5 0.18 170 / 0.4), 0 2px 12px -2px oklch(0.5 0.15 310 / 0.2);
   --shadow-lg: 0 8px 36px -6px oklch(0.5 0.18 170 / 0.45), 0 4px 18px -4px oklch(0.5 0.15 310 / 0.25);
+
+  --color-sidebar: oklch(0.14 0.012 175);
+  --color-sidebar-border: oklch(0.32 0.04 170);
 
   --scrollbar-thumb: oklch(0.38 0.03 170);
   --scrollbar-thumb-hover: oklch(0.55 0.08 170);
@@ -1810,6 +2310,42 @@ body {
   --scrollbar-thumb-hover: oklch(0.3 0 0);
   --scrollbar-thumb-radius: 0rem;
   --scrollbar-thumb-border: 3px;
+
+  /* Brutalism sidebar — flat saturated yellow block (the demo's
+   * "Primary" colour as a chrome surface), with hard ink-black
+   * border maintaining the brutalist outline. */
+  --color-sidebar: oklch(0.88 0.2 90);
+  --color-sidebar-foreground: oklch(0.1 0 0);
+  --color-sidebar-primary: oklch(0.1 0 0);
+  --color-sidebar-primary-foreground: oklch(0.88 0.2 90);
+  --color-sidebar-accent: oklch(0.78 0.2 155);
+  --color-sidebar-accent-foreground: oklch(0.1 0 0);
+  --color-sidebar-border: oklch(0.1 0 0);
+
+  /* Brutalism chart — saturated primaries (yellow, green, coral,
+   * magenta, cyan) at high chroma. Reads as zine / risograph
+   * blocks rather than data viz. */
+  --chart-1: oklch(0.88 0.2 90);
+  --chart-2: oklch(0.78 0.2 155);
+  --chart-3: oklch(0.7 0.22 25);
+  --chart-4: oklch(0.65 0.25 320);
+  --chart-5: oklch(0.7 0.18 200);
+
+  /* Brutalism state colours — high-saturation block fills aligned
+   * with the primary palette. No muted "subtle warning" — the
+   * design language demands shouting. */
+  --color-success: oklch(0.7 0.22 145);
+  --color-success-foreground: oklch(0.1 0 0);
+  --color-warning: oklch(0.85 0.22 90);
+  --color-warning-foreground: oklch(0.1 0 0);
+  --color-info: oklch(0.7 0.22 230);
+  --color-info-foreground: oklch(0.1 0 0);
+
+  /* Brutalism ring — ink-black, no offset. 3px thickness matches
+   * `--surface-border-width` so focus reads as "extra-thick border". */
+  --ring-width: 3px;
+  --ring-offset-width: 0px;
+  --ring-offset-color: transparent;
 }
 .dark.design-neo-brutalism {
   --color-background: oklch(0.13 0 0);
@@ -1839,8 +2375,146 @@ body {
 
   --scrollbar-thumb: oklch(0.88 0.2 90);
   --scrollbar-thumb-hover: oklch(0.95 0.12 90);
+
+  --color-sidebar: oklch(0.18 0 0);
+  --color-sidebar-foreground: oklch(0.97 0.03 90);
+  --color-sidebar-primary: oklch(0.97 0.03 90);
+  --color-sidebar-primary-foreground: oklch(0.18 0 0);
+  --color-sidebar-accent: oklch(0.28 0 0);
+  --color-sidebar-accent-foreground: oklch(0.97 0.03 90);
+  --color-sidebar-border: oklch(0.97 0.03 90);
 }
 /* @eikon:variant(design=neo-brutalism) end */
+
+/* @eikon:variant(design=cyberpunk) begin */
+/* Cyberpunk — neon magenta + electric cyan on near-black violet
+ * base. Tight monospace, near-zero radii, hard-cut motion, neon
+ * outer-glow shadows. Palette and shape language follow the
+ * customize-design SKILL example block (kept as the canonical
+ * reference for that doc). */
+:root.design-cyberpunk {
+  --color-background: oklch(0.12 0.04 280);
+  --color-foreground: oklch(0.95 0.18 180);
+  --color-card: oklch(0.16 0.05 280);
+  --color-card-foreground: oklch(0.95 0.18 180);
+  --color-muted: oklch(0.2 0.04 280);
+  --color-muted-foreground: oklch(0.7 0.1 180);
+  --color-border: oklch(0.7 0.27 320 / 0.4);
+  --color-input: oklch(0.18 0.05 280);
+  --color-primary: oklch(0.7 0.27 320);
+  --color-primary-foreground: oklch(0.1 0 0);
+  --color-secondary: oklch(0.18 0.04 280);
+  --color-secondary-foreground: oklch(0.95 0.18 180);
+  --color-accent: oklch(0.85 0.2 180);
+  --color-accent-foreground: oklch(0.1 0 0);
+  --color-ring: oklch(0.7 0.27 320);
+  --color-destructive: oklch(0.65 0.27 25);
+  --color-destructive-foreground: oklch(0.98 0 0);
+
+  --radius-lg: 0.25rem;
+  --radius-md: 0.125rem;
+  --radius-sm: 0rem;
+
+  --font-sans:
+    'JetBrains Mono', 'Fira Code', 'Space Mono', ui-monospace,
+    SFMono-Regular, Menlo, monospace;
+  --font-mono:
+    'JetBrains Mono', 'Fira Code', 'Space Mono', ui-monospace,
+    SFMono-Regular, Menlo, monospace;
+  --font-display:
+    'JetBrains Mono', 'Fira Code', 'Space Mono', ui-monospace,
+    SFMono-Regular, Menlo, monospace;
+
+  --spacing: 0.22rem;
+  --tracking-tight: -0.014em;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 700;
+
+  /* Neon outer-glow shadows — every tier rings the surface with a
+   * coloured halo plus a thin chroma outline. Higher tier => longer
+   * spread, no Y-offset (the glow is symmetric). */
+  --shadow-sm: 0 0 0 1px oklch(0.7 0.27 320 / 0.4);
+  --shadow-md:
+    0 0 12px -2px oklch(0.7 0.27 320 / 0.5),
+    0 0 0 1px oklch(0.7 0.27 320 / 0.6);
+  --shadow-lg:
+    0 0 24px -4px oklch(0.7 0.27 320 / 0.6),
+    0 0 0 1px oklch(0.7 0.27 320 / 0.7);
+  --shadow-xl:
+    0 0 48px -6px oklch(0.7 0.27 320 / 0.7),
+    0 0 0 1px oklch(0.85 0.2 180 / 0.6);
+
+  --surface-border-width: 1px;
+  --surface-hover-shadow:
+    0 0 24px -4px oklch(0.7 0.27 320 / 0.7),
+    0 0 0 1px oklch(0.85 0.2 180 / 0.7);
+  --surface-active-shadow:
+    0 0 8px -2px oklch(0.7 0.27 320 / 0.4),
+    0 0 0 1px oklch(0.7 0.27 320 / 0.8);
+
+  /* Cyberpunk state colours — saturated neon. */
+  --color-success: oklch(0.85 0.22 145);
+  --color-success-foreground: oklch(0.1 0 0);
+  --color-warning: oklch(0.85 0.18 90);
+  --color-warning-foreground: oklch(0.1 0 0);
+  --color-info: oklch(0.85 0.2 180);
+  --color-info-foreground: oklch(0.1 0 0);
+
+  /* Sidebar — deeper purple than card so the chrome reads as
+   * "below the surface". */
+  --color-sidebar: oklch(0.1 0.05 280);
+  --color-sidebar-foreground: oklch(0.95 0.18 180);
+  --color-sidebar-primary: oklch(0.85 0.2 180);
+  --color-sidebar-primary-foreground: oklch(0.1 0 0);
+  --color-sidebar-accent: oklch(0.18 0.06 280);
+  --color-sidebar-accent-foreground: oklch(0.95 0.18 180);
+  --color-sidebar-border: oklch(0.7 0.27 320 / 0.4);
+
+  /* Chart — five-step neon spectrum. */
+  --chart-1: oklch(0.7 0.27 320);
+  --chart-2: oklch(0.85 0.2 180);
+  --chart-3: oklch(0.85 0.22 145);
+  --chart-4: oklch(0.85 0.18 90);
+  --chart-5: oklch(0.7 0.25 30);
+
+  /* Motion — extreme speed, no easing curve overshoot. Cyberpunk
+   * UI flickers; it doesn't ease. */
+  --duration-fast: 80ms;
+  --duration-normal: 140ms;
+  --duration-slow: 240ms;
+  --ease-out: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.6, 1);
+
+  /* Ring — neon halo, no offset. */
+  --ring-width: 3px;
+  --ring-offset-width: 0px;
+  --ring-offset-color: transparent;
+
+  /* Overlay leans purple so dialogs feel embedded in the cyberpunk
+   * environment rather than floating in plain black. */
+  --color-overlay: oklch(0.06 0.05 280 / 0.75);
+
+  --scrollbar-size: 10px;
+  --scrollbar-thumb: oklch(0.7 0.22 320 / 0.4);
+  --scrollbar-thumb-hover: oklch(0.85 0.27 320);
+  --scrollbar-thumb-radius: 0rem;
+  --scrollbar-thumb-border: 2px;
+}
+.dark.design-cyberpunk {
+  /* Cyberpunk is already dark by default — dark-mode block only
+   * deepens the bg / lifts neon a touch so day↔night doesn't
+   * shift the brand. */
+  --color-background: oklch(0.08 0.04 280);
+  --color-card: oklch(0.13 0.05 280);
+  --color-muted: oklch(0.16 0.04 280);
+  --color-primary: oklch(0.78 0.27 320);
+  --color-primary-foreground: oklch(0.08 0.04 280);
+  --color-accent: oklch(0.9 0.2 180);
+  --color-ring: oklch(0.78 0.27 320);
+
+  --color-sidebar: oklch(0.06 0.05 280);
+}
+/* @eikon:variant(design=cyberpunk) end */
 
 /* --- layout axis -----------------------------------------------------------
  * Each layout (stacked / sidebar / topbar-sidebar / centered) is its own

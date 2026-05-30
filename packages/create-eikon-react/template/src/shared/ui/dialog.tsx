@@ -154,14 +154,14 @@ function DialogContent({
           <DialogPrimitive.Overlay asChild forceMount>
             <motion.div
               {...overlayAnim}
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 z-[var(--z-overlay)] bg-[var(--color-overlay)] backdrop-blur-sm"
             />
           </DialogPrimitive.Overlay>
           <DialogPrimitive.Content asChild forceMount {...props}>
             <motion.div
               {...contentAnim}
               className={cn(
-                'fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2',
+                'fixed left-1/2 top-1/2 z-[var(--z-modal)] w-full max-w-lg -translate-x-1/2 -translate-y-1/2',
                 'rounded-lg border-[length:var(--surface-border-width)] border-[var(--color-border)] bg-[var(--color-card)] p-6 shadow-xl ring-[length:var(--surface-ring-width)] ring-[var(--surface-ring-color)] [backdrop-filter:var(--surface-backdrop)]',
                 'text-[var(--color-card-foreground)]',
                 className

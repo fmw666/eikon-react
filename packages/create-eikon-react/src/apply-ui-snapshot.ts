@@ -79,6 +79,25 @@ const REPLACEABLE_UI_FILES: readonly string[] = [
   'command.tsx',
   'card.tsx',
   'toaster.tsx',
+  // Form + display primitives shipped by the design-system audit pass
+  // (Phase 4). Every entry below MUST exist in the same shape across
+  // the template AND every snapshot under template-snapshots/* —
+  // missing the snapshot copy means `--ui shadcn` / `--ui animate-ui`
+  // will delete the project's owned file without putting an
+  // equivalent back.
+  'input.tsx',
+  'textarea.tsx',
+  'label.tsx',
+  'select.tsx',
+  'checkbox.tsx',
+  'radio-group.tsx',
+  'switch.tsx',
+  'badge.tsx',
+  'avatar.tsx',
+  'skeleton.tsx',
+  'tooltip.tsx',
+  'popover.tsx',
+  'alert.tsx',
 ] as const;
 
 const UI_DIR_REL = path.join('src', 'shared', 'ui');
