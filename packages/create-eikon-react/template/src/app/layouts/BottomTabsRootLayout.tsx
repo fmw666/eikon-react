@@ -94,7 +94,7 @@ function BottomTabsRootLayout() {
 
 
   return (
-    <div className="flex min-h-[100dvh] flex-col">
+    <div className="flex min-h-[100dvh] flex-col [--app-topbar-h:3.5rem] [--app-bottombar-h:calc(4rem+env(safe-area-inset-bottom,0px))]">
       <header
         className={cn(
           'sticky top-0 z-30 border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',

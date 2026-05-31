@@ -82,8 +82,21 @@ const KNOWN_PLATFORMS: ReadonlySet<DevicePlatform> = new Set([
 const SCROLLBAR_STYLE_ID = 'eikon-device-scrollbar';
 
 function getDeviceScrollbarCSS(platform: DevicePlatform): string {
+  // `overscroll-behavior: contain` stops the iframe's wheel/touch scrolls
+  // from chaining into the playground page once the inner document hits
+  // a boundary. Without it, scrolling to the bottom of any preview route
+  // (e.g. /examples/*) would silently start scrolling the workbench /
+  // landing page underneath — see the comment thread on this regression.
+  // Browsers consult the scrolling element's value, so we set it on both
+  // `html` and `body` to cover document-vs-body quirks across engines.
+  const overscrollGuard = `
+    html, body {
+      overscroll-behavior: contain;
+    }
+  `;
   if (platform === 'mobile') {
     return `
+      ${overscrollGuard}
       html, body, * {
         scrollbar-width: none !important;
       }
@@ -94,6 +107,7 @@ function getDeviceScrollbarCSS(platform: DevicePlatform): string {
   }
   if (platform === 'desktop') {
     return `
+      ${overscrollGuard}
       * { scrollbar-width: thin; scrollbar-color: rgba(120,120,128,0.3) transparent; }
       ::-webkit-scrollbar { width: 6px; height: 6px; }
       ::-webkit-scrollbar-track { background: transparent; }
@@ -113,6 +127,7 @@ function getDeviceScrollbarCSS(platform: DevicePlatform): string {
   }
   // web — Chrome style
   return `
+    ${overscrollGuard}
     * { scrollbar-width: thin; scrollbar-color: rgba(100,100,110,0.35) rgba(240,240,240,0.4); }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: rgba(240,240,242,0.5); border-radius: 999px; }

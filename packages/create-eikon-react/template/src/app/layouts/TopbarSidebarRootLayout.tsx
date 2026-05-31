@@ -39,7 +39,7 @@ function TopbarSidebarRootLayout() {
 
 
   return (
-    <div className="flex min-h-[100dvh] flex-col">
+    <div className="flex min-h-[100dvh] flex-col [--app-topbar-h:3.5rem]">
       <header
         className={cn(
           'sticky top-0 z-10 border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',

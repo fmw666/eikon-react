@@ -31,6 +31,7 @@ import { AnimationShowcase } from './inline/AnimationShowcase';
 import { BreadcrumbShowcase } from './inline/BreadcrumbShowcase';
 import { ButtonShowcase } from './inline/ButtonShowcase';
 import { CardShowcase } from './inline/CardShowcase';
+import { CheckoutFormShowcase } from './inline/CheckoutFormShowcase';
 import { CodeBlockShowcase } from './inline/CodeBlockShowcase';
 import { CollapseShowcase } from './inline/CollapseShowcase';
 import { CursorShowcase } from './inline/CursorShowcase';
@@ -43,7 +44,9 @@ import { I18nShowcase } from './inline/I18nShowcase';
 import { IconShowcase } from './inline/IconShowcase';
 import { KbdShowcase } from './inline/KbdShowcase';
 import { LoadingShowcase } from './inline/LoadingShowcase';
+import { ProfileFormShowcase } from './inline/ProfileFormShowcase';
 import { ProgressShowcase } from './inline/ProgressShowcase';
+import { SignUpFormShowcase } from './inline/SignUpFormShowcase';
 import { TableShowcase } from './inline/TableShowcase';
 import { TabsShowcase } from './inline/TabsShowcase';
 import { ThemeShowcase } from './inline/ThemeShowcase';
@@ -87,6 +90,9 @@ const exampleSections: ExampleSection[] = [
   { slug: 'breadcrumb', group: 'basics', Component: BreadcrumbShowcase },
   // --- Forms & data ---
   { slug: 'form', group: 'forms', Component: FormShowcase },
+  { slug: 'signup', group: 'forms', Component: SignUpFormShowcase },
+  { slug: 'profile', group: 'forms', Component: ProfileFormShowcase },
+  { slug: 'checkout', group: 'forms', Component: CheckoutFormShowcase },
   { slug: 'data', group: 'forms', Component: DataDisplayShowcase },
   { slug: 'table', group: 'forms', Component: TableShowcase },
   // --- Feedback & status ---

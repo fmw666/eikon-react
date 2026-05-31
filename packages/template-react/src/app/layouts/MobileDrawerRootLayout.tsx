@@ -78,7 +78,7 @@ function MobileDrawerRootLayout() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex min-h-[100dvh] flex-col">
+    <div className="flex min-h-[100dvh] flex-col [--app-topbar-h:3.5rem]">
       {/*
         Sticky topbar. Uses `100dvh` rather than `100vh` so the layout
         accounts for iOS Safari's dynamic toolbar — `100vh` would
