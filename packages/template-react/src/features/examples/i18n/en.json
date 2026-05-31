@@ -14,6 +14,9 @@
   "toc": {
     "label": "Components",
     "overview": "Overview",
+    "filterPlaceholder": "Filter components…",
+    "noResults": "No components match your filter.",
+    "clearFilter": "Clear filter",
     "uiPrimitives": "UI primitives",
     "basics": "Basics",
     "forms": "Forms & data",
@@ -32,6 +35,30 @@
       "sampleLg": "The quick brown fox",
       "sampleMd": "The quick brown fox",
       "sampleSm": "The quick brown fox"
+    },
+    "breadcrumb": {
+      "title": "Breadcrumb",
+      "description": "Composable navigation trail. The current page is marked aria-current; separators are decorative so they stay out of the a11y tree.",
+      "home": "Home",
+      "components": "Components",
+      "current": "Breadcrumb"
+    },
+    "progress": {
+      "title": "Progress",
+      "description": "Determinate progress bar with proper role=progressbar / aria-valuenow wiring and three track sizes.",
+      "uploading": "Uploading assets",
+      "processing": "Processing",
+      "almost": "Almost there",
+      "done": "Complete",
+      "sizesLabel": "Sizes"
+    },
+    "kbd": {
+      "title": "Keyboard",
+      "description": "Semantic <kbd> key-cap chips for documenting shortcuts inline or in command-palette hints.",
+      "commandPalette": "Open command palette",
+      "save": "Save",
+      "search": "Search",
+      "close": "Close / dismiss"
     },
     "collapse": {
       "title": "Collapse",

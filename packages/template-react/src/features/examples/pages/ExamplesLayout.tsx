@@ -29,6 +29,9 @@ import { Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Outlet } from 'react-router-dom';
 
+// --- Third-party Libraries ---
+import { Sparkles } from 'lucide-react';
+
 // --- Absolute Imports ---
 import { Spinner } from '@/shared/ui/spinner';
 
@@ -44,6 +47,24 @@ function ExamplesLayout() {
 
   return (
     <div className="@container/examples">
+      {/*
+        Dev-only notice, rendered ONCE for the whole shell (it used to
+        repeat as a loud banner on every sub-page). Slim pill so it reads
+        as persistent chrome rather than a per-page alert.
+      */}
+      <div
+        role="status"
+        className="mb-6 flex w-fit items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs text-amber-700 dark:text-amber-300"
+      >
+        <Sparkles className="h-3.5 w-3.5 shrink-0" />
+        <span className="font-medium uppercase tracking-wide">
+          {t('meta.devOnlyBadge')}
+        </span>
+        <span className="hidden text-amber-700/80 sm:inline dark:text-amber-300/80">
+          · {t('meta.devOnlyNotice')}
+        </span>
+      </div>
+
       <div className="grid gap-8 @2xl/examples:grid-cols-[220px_minmax(0,1fr)]">
         <aside
           aria-label={t('toc.label')}

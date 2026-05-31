@@ -28,6 +28,7 @@ import type { ComponentType } from 'react';
 
 // --- Relative Imports ---
 import { AnimationShowcase } from './inline/AnimationShowcase';
+import { BreadcrumbShowcase } from './inline/BreadcrumbShowcase';
 import { ButtonShowcase } from './inline/ButtonShowcase';
 import { CardShowcase } from './inline/CardShowcase';
 import { CodeBlockShowcase } from './inline/CodeBlockShowcase';
@@ -40,7 +41,9 @@ import { FooterShowcase } from './inline/FooterShowcase';
 import { FormShowcase } from './inline/FormShowcase';
 import { I18nShowcase } from './inline/I18nShowcase';
 import { IconShowcase } from './inline/IconShowcase';
+import { KbdShowcase } from './inline/KbdShowcase';
 import { LoadingShowcase } from './inline/LoadingShowcase';
+import { ProgressShowcase } from './inline/ProgressShowcase';
 import { TableShowcase } from './inline/TableShowcase';
 import { TabsShowcase } from './inline/TabsShowcase';
 import { ThemeShowcase } from './inline/ThemeShowcase';
@@ -81,6 +84,7 @@ const exampleSections: ExampleSection[] = [
   { slug: 'tabs', group: 'basics', Component: TabsShowcase },
   { slug: 'collapse', group: 'basics', Component: CollapseShowcase },
   { slug: 'divider', group: 'basics', Component: DividerShowcase },
+  { slug: 'breadcrumb', group: 'basics', Component: BreadcrumbShowcase },
   // --- Forms & data ---
   { slug: 'form', group: 'forms', Component: FormShowcase },
   { slug: 'data', group: 'forms', Component: DataDisplayShowcase },
@@ -88,11 +92,13 @@ const exampleSections: ExampleSection[] = [
   // --- Feedback & status ---
   { slug: 'feedback', group: 'feedbackGroup', Component: FeedbackShowcase },
   { slug: 'loading', group: 'feedbackGroup', Component: LoadingShowcase },
+  { slug: 'progress', group: 'feedbackGroup', Component: ProgressShowcase },
   // --- Content & flair ---
   { slug: 'icon', group: 'content', Component: IconShowcase },
   { slug: 'codeblock', group: 'content', Component: CodeBlockShowcase },
   { slug: 'typewriter', group: 'content', Component: TypewriterShowcase },
   { slug: 'cursor', group: 'content', Component: CursorShowcase },
+  { slug: 'kbd', group: 'content', Component: KbdShowcase },
   { slug: 'footer', group: 'content', Component: FooterShowcase },
   // --- Interaction patterns ---
   { slug: 'theme', group: 'patterns', Component: ThemeShowcase },

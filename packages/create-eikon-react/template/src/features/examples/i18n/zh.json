@@ -14,6 +14,9 @@
   "toc": {
     "label": "组件",
     "overview": "概览",
+    "filterPlaceholder": "筛选组件…",
+    "noResults": "没有匹配的组件。",
+    "clearFilter": "清除筛选",
     "uiPrimitives": "UI 基元",
     "basics": "基础组件",
     "forms": "表单与数据",
@@ -32,6 +35,30 @@
       "sampleLg": "敏捷的棕色狐狸",
       "sampleMd": "敏捷的棕色狐狸",
       "sampleSm": "敏捷的棕色狐狸"
+    },
+    "breadcrumb": {
+      "title": "面包屑",
+      "description": "可组合的导航路径。当前页用 aria-current 标记；分隔符为装饰性元素，不进入无障碍树。",
+      "home": "首页",
+      "components": "组件",
+      "current": "面包屑"
+    },
+    "progress": {
+      "title": "进度条",
+      "description": "确定型进度条，带规范的 role=progressbar / aria-valuenow 无障碍属性，提供三种轨道尺寸。",
+      "uploading": "上传素材中",
+      "processing": "处理中",
+      "almost": "即将完成",
+      "done": "已完成",
+      "sizesLabel": "尺寸"
+    },
+    "kbd": {
+      "title": "键位",
+      "description": "语义化 <kbd> 键帽芯片，用于在行内或命令面板提示中标注快捷键。",
+      "commandPalette": "打开命令面板",
+      "save": "保存",
+      "search": "搜索",
+      "close": "关闭 / 取消"
     },
     "collapse": {
       "title": "折叠面板",

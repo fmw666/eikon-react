@@ -39,29 +39,39 @@ function ExamplesIndexPage() {
         {t('overview.pick')}
       </p>
 
-      <div className="flex flex-col gap-8">
-        {GROUP_ORDER.map((group) => (
-          <section key={group} className="flex flex-col gap-3">
-            <h2 className="text-xs font-medium uppercase tracking-wide text-[var(--color-muted-foreground)]">
-              {t(`toc.${group}`)}
-            </h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {sectionsByGroup(group).map((s) => (
-                <Link
-                  key={s.slug}
-                  to={`/examples/${s.slug}`}
-                  className={cn(
-                    'rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-3 text-sm font-medium shadow-sm',
-                    'text-[var(--color-card-foreground)] transition-colors duration-[var(--duration-fast)]',
-                    'hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]'
-                  )}
-                >
-                  {t(`sections.${s.slug}.title`)}
-                </Link>
-              ))}
-            </div>
-          </section>
-        ))}
+      <div className="flex flex-col gap-10">
+        {GROUP_ORDER.map((group) => {
+          const items = sectionsByGroup(group);
+          return (
+            <section key={group} className="flex flex-col gap-3">
+              <h2 className="flex items-baseline gap-2 text-xs font-medium uppercase tracking-wide text-[var(--color-muted-foreground)]">
+                {t(`toc.${group}`)}
+                <span className="rounded-full bg-[var(--color-muted)] px-1.5 text-[10px] font-normal text-[var(--color-muted-foreground)]">
+                  {items.length}
+                </span>
+              </h2>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {items.map((s) => (
+                  <Link
+                    key={s.slug}
+                    to={`/examples/${s.slug}`}
+                    className={cn(
+                      'group flex flex-col gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-sm',
+                      'transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-primary)]'
+                    )}
+                  >
+                    <span className="text-sm font-medium text-[var(--color-card-foreground)] transition-colors group-hover:text-[var(--color-primary)]">
+                      {t(`sections.${s.slug}.title`)}
+                    </span>
+                    <span className="line-clamp-2 text-xs text-[var(--color-muted-foreground)]">
+                      {t(`sections.${s.slug}.description`)}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          );
+        })}
       </div>
     </div>
   );

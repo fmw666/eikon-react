@@ -14,7 +14,7 @@
 // =================================================================================================
 
 // --- Third-party Libraries ---
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { Route, Routes } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 
@@ -30,21 +30,22 @@ import { ExamplesLayout } from '../../pages/ExamplesLayout';
 // =================================================================================================
 
 describe('<ExamplesIndexPage /> (overview)', () => {
-  it('renders the translated meta header and dev-only badge', () => {
+  it('renders the translated meta header', () => {
     renderWithRouter(<ExamplesIndexPage />);
     expect(
       screen.getByRole('heading', { level: 1, name: /component showcase/i })
     ).toBeInTheDocument();
-    expect(screen.getByText(/dev only/i)).toBeInTheDocument();
   });
 
   it('links each component card to its own sub-page', () => {
     renderWithRouter(<ExamplesIndexPage />);
-    expect(screen.getByRole('link', { name: 'Button' })).toHaveAttribute(
+    // The card's accessible name is "<title> <description>", so anchor
+    // the match at the title rather than requiring an exact string.
+    expect(screen.getByRole('link', { name: /^Button\b/ })).toHaveAttribute(
       'href',
       '/examples/button'
     );
-    expect(screen.getByRole('link', { name: 'Table' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: /^Table\b/ })).toHaveAttribute(
       'href',
       '/examples/table'
     );
@@ -63,6 +64,11 @@ describe('<ExamplesLayout /> sidebar', () => {
     );
   }
 
+  it('shows the dev-only notice once in the shell', () => {
+    renderLayout();
+    expect(screen.getByText(/dev only/i)).toBeInTheDocument();
+  });
+
   it('navigates inline components to their route', () => {
     renderLayout();
     expect(screen.getByRole('link', { name: 'Button' })).toHaveAttribute(
@@ -79,5 +85,32 @@ describe('<ExamplesLayout /> sidebar', () => {
     expect(
       screen.getAllByRole('link', { name: /performance/i }).length
     ).toBeGreaterThan(0);
+  });
+
+  it('lists the newly added primitives', () => {
+    renderLayout();
+    expect(screen.getByRole('link', { name: 'Progress' })).toHaveAttribute(
+      'href',
+      '/examples/progress'
+    );
+    expect(screen.getByRole('link', { name: 'Breadcrumb' })).toHaveAttribute(
+      'href',
+      '/examples/breadcrumb'
+    );
+    expect(screen.getByRole('link', { name: 'Keyboard' })).toHaveAttribute(
+      'href',
+      '/examples/kbd'
+    );
+  });
+
+  it('filters the nav list as you type', () => {
+    renderLayout();
+    fireEvent.change(screen.getByRole('searchbox'), {
+      target: { value: 'button' },
+    });
+    expect(screen.getByRole('link', { name: 'Button' })).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Table' })
+    ).not.toBeInTheDocument();
   });
 });
