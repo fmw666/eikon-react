@@ -1,9 +1,12 @@
 /**
  * @file ExamplesIndexPage.test.tsx
- * @description Smoke render test for the examples index page.
+ * @description Tests for the examples shell: the overview landing page
+ * (the index Outlet) and the persistent sidebar in ExamplesLayout.
  *
- * Asserts that the page mounts, surfaces the i18n title + dev-only
- * badge, and renders the three UI-primitive sections inline.
+ * The examples feature moved from one long scroll-spied page to a
+ * route-per-component shell, so these assert the overview surfaces the
+ * dev hero + component links, and the layout sidebar links to both the
+ * inline sub-pages and the standalone showcase routes.
  */
 
 // =================================================================================================
@@ -12,6 +15,7 @@
 
 // --- Third-party Libraries ---
 import { screen } from '@testing-library/react';
+import { Route, Routes } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 
 // --- Absolute Imports ---
@@ -19,13 +23,14 @@ import { renderWithRouter } from '@test/test-utils';
 
 // --- Relative Imports ---
 import { ExamplesIndexPage } from '../../pages/ExamplesIndexPage';
+import { ExamplesLayout } from '../../pages/ExamplesLayout';
 
 // =================================================================================================
 // Tests
 // =================================================================================================
 
-describe('<ExamplesIndexPage />', () => {
-  it('renders the translated meta header', () => {
+describe('<ExamplesIndexPage /> (overview)', () => {
+  it('renders the translated meta header and dev-only badge', () => {
     renderWithRouter(<ExamplesIndexPage />);
     expect(
       screen.getByRole('heading', { level: 1, name: /component showcase/i })
@@ -33,18 +38,46 @@ describe('<ExamplesIndexPage />', () => {
     expect(screen.getByText(/dev only/i)).toBeInTheDocument();
   });
 
-  it('renders all six inline section headings as anchors', () => {
+  it('links each component card to its own sub-page', () => {
     renderWithRouter(<ExamplesIndexPage />);
-    // ShowcaseSection emits headings with id="<anchor>-heading".
-    for (const anchor of ['button', 'card', 'tabs', 'theme', 'i18n', 'animation']) {
-      expect(document.getElementById(`${anchor}-heading`)).not.toBeNull();
-    }
+    expect(screen.getByRole('link', { name: 'Button' })).toHaveAttribute(
+      'href',
+      '/examples/button'
+    );
+    expect(screen.getByRole('link', { name: 'Table' })).toHaveAttribute(
+      'href',
+      '/examples/table'
+    );
+  });
+});
+
+describe('<ExamplesLayout /> sidebar', () => {
+  function renderLayout() {
+    return renderWithRouter(
+      <Routes>
+        <Route path="/examples" element={<ExamplesLayout />}>
+          <Route index element={<div>overview</div>} />
+        </Route>
+      </Routes>,
+      { routerEntries: ['/examples'] }
+    );
+  }
+
+  it('navigates inline components to their route', () => {
+    renderLayout();
+    expect(screen.getByRole('link', { name: 'Button' })).toHaveAttribute(
+      'href',
+      '/examples/button'
+    );
   });
 
-  it('links the TOC to the standalone showcase routes', () => {
-    renderWithRouter(<ExamplesIndexPage />);
-    expect(screen.getAllByRole('link', { name: /toast/i }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole('link', { name: /dialog/i }).length).toBeGreaterThan(0);
-    expect(screen.getAllByRole('link', { name: /performance/i }).length).toBeGreaterThan(0);
+  it('links the standalone showcases too', () => {
+    renderLayout();
+    expect(
+      screen.getAllByRole('link', { name: /toast/i }).length
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getAllByRole('link', { name: /performance/i }).length
+    ).toBeGreaterThan(0);
   });
 });

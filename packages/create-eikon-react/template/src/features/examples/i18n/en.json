@@ -5,16 +5,111 @@
     "devOnlyBadge": "Dev only",
     "devOnlyNotice": "Preview is available in development only — these routes are excluded from production builds.",
     "backToIndex": "Back to showcase",
-    "openInNewTab": "Open in new tab"
+    "openInNewTab": "Open in new tab",
+    "unknownSection": "That component doesn't exist — pick one from the sidebar."
+  },
+  "overview": {
+    "pick": "Pick a component from the sidebar, or jump in from the grid below."
   },
   "toc": {
-    "label": "On this page",
+    "label": "Components",
+    "overview": "Overview",
     "uiPrimitives": "UI primitives",
+    "basics": "Basics",
+    "forms": "Forms & data",
+    "feedbackGroup": "Feedback & status",
+    "content": "Content & flair",
     "patterns": "Interaction patterns",
     "modals": "Modals & overlays",
     "performance": "Performance"
   },
   "sections": {
+    "title": {
+      "title": "Title",
+      "description": "Heading primitive that decouples the semantic level (which h1–h6 tag) from the visual size, so the document outline stays correct no matter how big the text looks.",
+      "sample2xl": "The quick brown fox",
+      "sampleXl": "The quick brown fox",
+      "sampleLg": "The quick brown fox",
+      "sampleMd": "The quick brown fox",
+      "sampleSm": "The quick brown fox"
+    },
+    "collapse": {
+      "title": "Collapse",
+      "description": "Zero-dependency accordion. Single-open by default; panels animate height with the grid-rows 0fr→1fr technique and collapse instantly under prefers-reduced-motion.",
+      "q1": "How long does shipping take?",
+      "a1": "Standard shipping arrives in 3–5 business days; express in 1–2.",
+      "q2": "What is the return policy?",
+      "a2": "Return any item within 30 days for a full refund — no questions asked.",
+      "q3": "How do I contact support?",
+      "a3": "Email support@example.com or open the in-app command palette and search “support”."
+    },
+    "divider": {
+      "title": "Divider",
+      "description": "Separator rule in horizontal and vertical orientations. Thickness tracks the design preset's border width; decorative by default so it stays out of the a11y tree.",
+      "heading": "Account",
+      "body": "Manage your profile, billing and connected services.",
+      "blog": "Blog",
+      "docs": "Docs",
+      "source": "Source"
+    },
+    "footer": {
+      "title": "Footer",
+      "description": "Presentational page footer — a responsive link row that stacks on narrow viewports and splits left/right on wide, with a copyright slot pinned to the end.",
+      "about": "About",
+      "docs": "Docs",
+      "privacy": "Privacy",
+      "contact": "Contact",
+      "copyright": "© {{year}} Eikon. All rights reserved."
+    },
+    "table": {
+      "title": "Table",
+      "description": "Styled native table primitives — header, hoverable rows, a status Badge column and a footer total row. The root scrolls horizontally when content overflows.",
+      "caption": "A list of your recent invoices.",
+      "invoice": "Invoice",
+      "status": "Status",
+      "method": "Method",
+      "amount": "Amount",
+      "total": "Total",
+      "statuses": {
+        "paid": "Paid",
+        "pending": "Pending",
+        "overdue": "Overdue"
+      }
+    },
+    "loading": {
+      "title": "Loading",
+      "description": "The Spinner primitive at three sizes, inline inside a Button, and the Skeleton placeholder for content-shaped loading. All freeze under prefers-reduced-motion.",
+      "spinnerLabel": "Spinner sizes",
+      "inlineLabel": "Inline with text",
+      "buttonLabel": "Saving…",
+      "textLabel": "Loading data…",
+      "skeletonLabel": "Skeleton placeholder"
+    },
+    "icon": {
+      "title": "Icon",
+      "description": "The template uses lucide-react as its icon set — consistent stroke width, sized with h-*/w-* utilities, and tinted via the same colour tokens as everything else.",
+      "galleryLabel": "Gallery",
+      "sizesLabel": "Sizes",
+      "colorsLabel": "Semantic tints"
+    },
+    "codeblock": {
+      "title": "CodeBlock",
+      "description": "Code panel with a language label and a copy-to-clipboard button. Dependency-free chrome that adapts to every design preset (no heavy syntax-highlight engine).",
+      "copyLabel": "Copy code"
+    },
+    "typewriter": {
+      "title": "Typewriter",
+      "description": "Cycles through phrases with a typing + deleting animation and a blinking caret. Falls back to static text under prefers-reduced-motion.",
+      "lead": "Build something",
+      "word1": "delightful.",
+      "word2": "accessible.",
+      "word3": "fast."
+    },
+    "cursor": {
+      "title": "Cursor",
+      "description": "Cursor affordances — hover each tile to swap the pointer to the labelled CSS cursor value. Design presets may additionally theme the global cursor.",
+      "hint": "Hover a tile to preview the cursor"
+    },
     "button": {
       "title": "Button",
       "description": "Variant + size matrix with the motion/react micro-interactions baked into the primitive.",
@@ -48,6 +143,59 @@
       "accountBody": "Profile, billing, and connected services live here.",
       "passwordBody": "Rotate credentials and review active sessions.",
       "preferencesBody": "Notifications, language, theme and accessibility."
+    },
+    "form": {
+      "title": "Form controls",
+      "description": "Input, Textarea, Select, Checkbox, Radio and Switch — the full input vocabulary, every control painted from the same design tokens.",
+      "textLabel": "Text fields",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "noteLabel": "Note",
+      "notePlaceholder": "Type a short note…",
+      "selectLabel": "Select",
+      "selectPlaceholder": "Pick a fruit",
+      "optApple": "Apple",
+      "optBanana": "Banana",
+      "optCherry": "Cherry",
+      "toggleLabel": "Checkbox & switch",
+      "termsLabel": "I agree to the terms",
+      "notifyLabel": "Email notifications",
+      "radioLabel": "Radio group",
+      "shipStandard": "Standard",
+      "shipExpress": "Express",
+      "shipPickup": "Pickup"
+    },
+    "data": {
+      "title": "Data display",
+      "description": "Read-only display primitives: status Badges, Avatars with an initials fallback, and Skeleton loading placeholders.",
+      "badgesLabel": "Badges",
+      "badgeDefault": "Default",
+      "badgeSecondary": "Secondary",
+      "badgeOutline": "Outline",
+      "badgeSuccess": "Success",
+      "badgeWarning": "Warning",
+      "badgeInfo": "Info",
+      "badgeDestructive": "Destructive",
+      "avatarsLabel": "Avatars",
+      "avatarAlt": "Avatar",
+      "skeletonLabel": "Skeleton"
+    },
+    "feedback": {
+      "title": "Feedback & overlays",
+      "description": "Inline Alert banners across the semantic colour set, plus a Tooltip and a Popover for lightweight, anchored overlays.",
+      "alertsLabel": "Alerts",
+      "successTitle": "Saved",
+      "successBody": "Your changes were saved successfully.",
+      "warningTitle": "Heads up",
+      "warningBody": "Your trial ends in three days.",
+      "infoTitle": "New build",
+      "infoBody": "A new version is available — reload to update.",
+      "overlaysLabel": "Tooltip & popover",
+      "tooltipTrigger": "Hover me",
+      "tooltipBody": "Tooltips invert the surface so they read as a callout.",
+      "popoverTrigger": "Open popover",
+      "popoverTitle": "Quick settings",
+      "popoverBody": "Popovers anchor to their trigger and share the command-panel surface."
     },
     "theme": {
       "title": "Theme tokens",

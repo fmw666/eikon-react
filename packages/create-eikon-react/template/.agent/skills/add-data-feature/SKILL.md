@@ -304,7 +304,7 @@ export type { <Thing>, Create<Thing>Input, Update<Thing>Input } from './types';
 
 ### 11. Register the routes + nav link
 
-Add to [src/app/router.tsx](../../../src/app/router.tsx) and (if it should appear in the header) [src/app/layouts/RootLayout.tsx](../../../src/app/layouts/RootLayout.tsx)'s `navLinks` array.
+Add to [src/app/router.tsx](../../../src/app/router.tsx) and (if it should appear in the header) [src/shared/nav/navLinks.ts](../../../src/shared/nav/navLinks.ts) — the single source of truth consumed by every full-nav layout (Stacked / Sidebar / TopbarSidebar / Centered / MobileDrawer). The two BottomTabs layouts use their own curated `tabs[]` arrays inline and don't read from `navLinks` — if the data feature should also appear there, add it explicitly. Then add the `nav.<key>` translation in every locale's `src/shared/i18n/locales/<lng>/common.json`.
 
 ### 12. Add i18n keys
 

@@ -57,11 +57,13 @@ translate them to OKLCH for perceptual-uniform contrast checking.
 | `terminal`        | CRT / phosphor terminal      | phosphor green on near-black            | JetBrains / IBM Plex Mono | Tight (0.22rem)                           | Green-glow shadows, zero radii, mono. |
 | `carbon`          | IBM Carbon Design System     | IBM Blue `#0F62FE` on layered grays     | IBM Plex Sans             | Dense (0.22rem)                           | Square corners, 2px focus, enterprise. |
 | `editorial`       | Broadsheet / magazine print  | black ink `#262626` on white paper      | Playfair Display / Georgia | Editorial (0.27rem) · 17px · 1.85 LH      | Stark B&W serif, hairline rules, flat. |
+| `animal-crossing` | [animal-island-ui]           | mint teal `#19c8b9` + parchment `#f8f8f0`, brown ink `#794f27`, focus yellow `#ffcc00` | Baloo 2 / M PLUS Rounded 1c | Spacious (0.27rem) · chunky 12–24px radii | Cosy island; hard flat-bottom shadow, rounded gothic, bouncy easing. |
 
 [linear.app/brand]: https://linear.app/brand
 [Anthropic brand guidelines]: https://github.com/anthropics/skills/blob/main/skills/brand-guidelines/SKILL.md
 [Vercel Geist]: https://vercel.com/geist/colors
 [clay.css]: https://github.com/adrianbece/claymorphism
+[animal-island-ui]: https://github.com/guokaigdg/animal-island-ui
 
 What "density" means here: each preset overrides `--spacing` (Tailwind
 v4's base step, consumed by EVERY `p-N` / `gap-N` / `m-N` / `size-*`

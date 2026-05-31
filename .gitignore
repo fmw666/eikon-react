@@ -54,5 +54,6 @@ coverage
 *.local
 .git-commit-msg.tmp
 
-# Claude Code — local-machine permission overrides
+# Claude Code — local-machine permission overrides + local-only skills
 .claude/settings.local.json
+.claude/skills/*-local/

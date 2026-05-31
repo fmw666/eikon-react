@@ -5,16 +5,111 @@
     "devOnlyBadge": "仅开发环境",
     "devOnlyNotice": "组件展柜仅在开发环境可预览，相关路由不会进入生产构建。",
     "backToIndex": "返回展柜",
-    "openInNewTab": "在新标签页打开"
+    "openInNewTab": "在新标签页打开",
+    "unknownSection": "该组件不存在 —— 请从左侧选择一个。"
+  },
+  "overview": {
+    "pick": "从左侧选择一个组件，或从下方卡片网格进入。"
   },
   "toc": {
-    "label": "本页目录",
+    "label": "组件",
+    "overview": "概览",
     "uiPrimitives": "UI 基元",
+    "basics": "基础组件",
+    "forms": "表单与数据",
+    "feedbackGroup": "反馈与状态",
+    "content": "内容与特效",
     "patterns": "交互模式",
     "modals": "模态与浮层",
     "performance": "性能"
   },
   "sections": {
+    "title": {
+      "title": "标题",
+      "description": "Heading 组件把语义层级（用哪个 h1–h6 标签）与视觉字号解耦，文字再大也不破坏文档大纲与无障碍结构。",
+      "sample2xl": "敏捷的棕色狐狸",
+      "sampleXl": "敏捷的棕色狐狸",
+      "sampleLg": "敏捷的棕色狐狸",
+      "sampleMd": "敏捷的棕色狐狸",
+      "sampleSm": "敏捷的棕色狐狸"
+    },
+    "collapse": {
+      "title": "折叠面板",
+      "description": "零依赖手风琴。默认单开，面板用 grid-rows 0fr→1fr 技术做高度动画，在 prefers-reduced-motion 下退化为瞬时展开。",
+      "q1": "配送需要多久？",
+      "a1": "标准配送 3–5 个工作日送达，加急 1–2 天。",
+      "q2": "退货政策是怎样的？",
+      "a2": "任意商品 30 天内可全额退款，无需理由。",
+      "q3": "如何联系客服？",
+      "a3": "发送邮件至 support@example.com，或打开命令面板搜索「客服」。"
+    },
+    "divider": {
+      "title": "分割线",
+      "description": "横向与纵向两种分隔线。粗细跟随当前预设的边框宽度；默认装饰性，不进入无障碍树。",
+      "heading": "账户",
+      "body": "管理你的资料、计费与已连接的服务。",
+      "blog": "博客",
+      "docs": "文档",
+      "source": "源码"
+    },
+    "footer": {
+      "title": "页脚",
+      "description": "展示型页脚 —— 响应式链接行，窄屏堆叠、宽屏左右分布，版权信息固定在末尾。",
+      "about": "关于",
+      "docs": "文档",
+      "privacy": "隐私",
+      "contact": "联系",
+      "copyright": "© {{year}} Eikon. 保留所有权利。"
+    },
+    "table": {
+      "title": "表格",
+      "description": "原生表格基元的样式封装 —— 表头、可悬停行、状态 Badge 列与合计页脚行。内容溢出时根容器横向滚动。",
+      "caption": "你最近的账单列表。",
+      "invoice": "账单",
+      "status": "状态",
+      "method": "支付方式",
+      "amount": "金额",
+      "total": "合计",
+      "statuses": {
+        "paid": "已支付",
+        "pending": "待支付",
+        "overdue": "已逾期"
+      }
+    },
+    "loading": {
+      "title": "加载",
+      "description": "Spinner 三种尺寸、按钮内联用法，以及内容占位的 Skeleton 骨架屏。全部在 prefers-reduced-motion 下停止动画。",
+      "spinnerLabel": "Spinner 尺寸",
+      "inlineLabel": "与文字内联",
+      "buttonLabel": "保存中…",
+      "textLabel": "加载数据中…",
+      "skeletonLabel": "骨架屏占位"
+    },
+    "icon": {
+      "title": "图标",
+      "description": "模板使用 lucide-react 图标集 —— 统一描边粗细，用 h-*/w-* 控制尺寸，并用与全站一致的颜色 token 着色。",
+      "galleryLabel": "图标库",
+      "sizesLabel": "尺寸",
+      "colorsLabel": "语义着色"
+    },
+    "codeblock": {
+      "title": "代码块",
+      "description": "带语言标签和一键复制按钮的代码面板。零依赖的外壳样式，自动适配每个设计预设（不引入沉重的语法高亮引擎）。",
+      "copyLabel": "复制代码"
+    },
+    "typewriter": {
+      "title": "打字机",
+      "description": "在多条短语间循环，带打字+删除动画与闪烁光标。在 prefers-reduced-motion 下退化为静态文字。",
+      "lead": "打造",
+      "word1": "愉悦的体验。",
+      "word2": "无障碍的产品。",
+      "word3": "飞快的应用。"
+    },
+    "cursor": {
+      "title": "光标",
+      "description": "光标提示 —— 悬停每个方块即可切换到对应的 CSS cursor 值。设计预设还可全局定制光标外观。",
+      "hint": "悬停方块预览光标"
+    },
     "button": {
       "title": "Button",
       "description": "Variant + Size 矩阵，内嵌 motion/react 的悬浮抬升与按压收缩微交互。",
@@ -48,6 +143,59 @@
       "accountBody": "用户资料、计费信息和已连接的服务集中在这里。",
       "passwordBody": "修改密码并查看活跃会话。",
       "preferencesBody": "通知、语言、主题与无障碍设置。"
+    },
+    "form": {
+      "title": "表单控件",
+      "description": "Input、Textarea、Select、Checkbox、Radio 与 Switch —— 完整的输入控件家族，全部由同一套设计 token 绘制。",
+      "textLabel": "文本输入",
+      "emailLabel": "邮箱",
+      "emailPlaceholder": "you@example.com",
+      "noteLabel": "备注",
+      "notePlaceholder": "写点什么…",
+      "selectLabel": "下拉选择",
+      "selectPlaceholder": "选择一种水果",
+      "optApple": "苹果",
+      "optBanana": "香蕉",
+      "optCherry": "樱桃",
+      "toggleLabel": "多选框与开关",
+      "termsLabel": "我同意服务条款",
+      "notifyLabel": "邮件通知",
+      "radioLabel": "单选组",
+      "shipStandard": "标准",
+      "shipExpress": "加急",
+      "shipPickup": "自提"
+    },
+    "data": {
+      "title": "数据展示",
+      "description": "只读展示型基元：状态 Badge、带首字母兜底的 Avatar，以及 Skeleton 加载占位。",
+      "badgesLabel": "徽标",
+      "badgeDefault": "默认",
+      "badgeSecondary": "次要",
+      "badgeOutline": "描边",
+      "badgeSuccess": "成功",
+      "badgeWarning": "警告",
+      "badgeInfo": "信息",
+      "badgeDestructive": "危险",
+      "avatarsLabel": "头像",
+      "avatarAlt": "头像",
+      "skeletonLabel": "骨架屏"
+    },
+    "feedback": {
+      "title": "反馈与浮层",
+      "description": "覆盖全部语义色的内联 Alert 横幅，外加 Tooltip 与 Popover 两种轻量锚定浮层。",
+      "alertsLabel": "提示横幅",
+      "successTitle": "已保存",
+      "successBody": "你的修改已成功保存。",
+      "warningTitle": "请注意",
+      "warningBody": "你的试用将在三天后到期。",
+      "infoTitle": "新版本",
+      "infoBody": "有新版本可用 —— 刷新即可更新。",
+      "overlaysLabel": "Tooltip 与 Popover",
+      "tooltipTrigger": "悬停我",
+      "tooltipBody": "Tooltip 会反转表面颜色，读起来像一个标注。",
+      "popoverTrigger": "打开 Popover",
+      "popoverTitle": "快捷设置",
+      "popoverBody": "Popover 锚定在触发元素上，与命令面板共用同一套表面样式。"
     },
     "theme": {
       "title": "主题 Token",

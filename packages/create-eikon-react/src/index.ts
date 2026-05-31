@@ -66,6 +66,7 @@ const VARIANT_CHOICES = {
     'terminal',
     'carbon',
     'editorial',
+    'animal-crossing',
   ] as const,
   layout: [
     'stacked',

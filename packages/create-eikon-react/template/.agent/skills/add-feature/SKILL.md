@@ -139,7 +139,7 @@ Examples:
    {<name>Routes}
    ```
 
-   If the feature has a navigation entry, also update the layout (e.g. [src/app/layouts/RootLayout.tsx](../../../src/app/layouts/RootLayout.tsx)'s `navLinks` array).
+   If the feature has a navigation entry, also update [src/shared/nav/navLinks.ts](../../../src/shared/nav/navLinks.ts) — the single `navLinks` array consumed by the five full-nav layouts (Stacked / Sidebar / TopbarSidebar / Centered / MobileDrawer). Append a `{ to, key, fallback, icon }` entry; lucide-react icons; the mobile-drawer layout renders the icon, the other four full-nav layouts ignore it. The two BottomTabs layouts (`BottomTabsRootLayout`, `BottomTabsFabRootLayout`) use their own curated `tabs[]` arrays — edit them explicitly if the feature should appear there too.
 
 8. **Add translation keys.** Create `src/features/<name>/i18n/en.json`
    and `src/features/<name>/i18n/zh.json` — the namespace name IS the

@@ -39,33 +39,9 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 // --- Absolute Imports ---
 import { SignInButton } from '@/features/auth';
 import { cn } from '@/shared/lib/cn';
+import { navLinks } from '@/shared/nav';
 import { LanguageSwitcher } from '@/shared/ui/language-switcher';
 import { ThemeToggle } from '@/shared/ui/theme-toggle';
-
-// =================================================================================================
-// Types
-// =================================================================================================
-
-interface NavLinkSpec {
-  to: string;
-  key: string;
-  fallback: string;
-  end?: boolean;
-}
-
-// =================================================================================================
-// Constants
-// =================================================================================================
-
-const navLinks: NavLinkSpec[] = [
-  { to: '/', key: 'nav.home', fallback: 'Home', end: true },
-  { to: '/counter', key: 'nav.counter', fallback: 'Counter' },
-  { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks' },
-  // Dev-only — see StackedRootLayout for the full rationale.
-  ...(import.meta.env.DEV
-    ? [{ to: '/examples', key: 'nav.examples', fallback: 'Examples' }]
-    : []),
-];
 
 // =================================================================================================
 // Component

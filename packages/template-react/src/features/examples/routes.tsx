@@ -34,12 +34,28 @@ import { loadNamespace } from '@/shared/i18n';
 // Lazy pages
 // =================================================================================================
 
+const ExamplesLayout = lazy(async () => {
+  const [mod] = await Promise.all([
+    import('./pages/ExamplesLayout'),
+    loadNamespace('examples'),
+  ]);
+  return { default: mod.ExamplesLayout };
+});
+
 const ExamplesIndexPage = lazy(async () => {
   const [mod] = await Promise.all([
     import('./pages/ExamplesIndexPage'),
     loadNamespace('examples'),
   ]);
   return { default: mod.ExamplesIndexPage };
+});
+
+const ExamplesSectionPage = lazy(async () => {
+  const [mod] = await Promise.all([
+    import('./pages/ExamplesSectionPage'),
+    loadNamespace('examples'),
+  ]);
+  return { default: mod.ExamplesSectionPage };
 });
 
 const ToasterShowcasePage = lazy(async () => {
@@ -105,22 +121,26 @@ const PerformanceShowcasePage = lazy(async () => {
 // =================================================================================================
 
 export const examplesRoutes = (
-  <>
-    <Route path="/examples" element={<ExamplesIndexPage />} />
-    <Route path="/examples/toaster" element={<ToasterShowcasePage />} />
-    <Route path="/examples/dialog" element={<DialogShowcasePage />} />
+  <Route path="/examples" element={<ExamplesLayout />}>
+    {/* Overview landing shown at the bare /examples path. */}
+    <Route index element={<ExamplesIndexPage />} />
+
+    {/*
+      Standalone showcases keep dedicated routes + page components.
+      These STATIC segments rank above the `:section` dynamic route
+      below, so they always win the match.
+    */}
+    <Route path="toaster" element={<ToasterShowcasePage />} />
+    <Route path="dialog" element={<DialogShowcasePage />} />
     {/* @eikon:variant(layout=mobile-drawer) begin */}
-    <Route path="/examples/sheet" element={<SheetShowcasePage />} />
+    <Route path="sheet" element={<SheetShowcasePage />} />
     {/* @eikon:variant(layout=mobile-drawer) end */}
-    <Route path="/examples/command" element={<CommandShowcasePage />} />
-    <Route
-      path="/examples/sign-in-modal"
-      element={<SignInModalShowcasePage />}
-    />
-    <Route path="/examples/motion" element={<MotionShowcasePage />} />
-    <Route
-      path="/examples/performance"
-      element={<PerformanceShowcasePage />}
-    />
-  </>
+    <Route path="command" element={<CommandShowcasePage />} />
+    <Route path="sign-in-modal" element={<SignInModalShowcasePage />} />
+    <Route path="motion" element={<MotionShowcasePage />} />
+    <Route path="performance" element={<PerformanceShowcasePage />} />
+
+    {/* Every inline component showcase, resolved from the registry. */}
+    <Route path=":section" element={<ExamplesSectionPage />} />
+  </Route>
 );

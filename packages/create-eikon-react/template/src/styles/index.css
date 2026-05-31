@@ -523,7 +523,7 @@
   --color-card: oklch(1 0 0);
   --color-card-foreground: oklch(0.2 0.005 240);
   --color-muted: oklch(0.96 0.002 240);
-  --color-muted-foreground: oklch(0.55 0.01 240);
+  --color-muted-foreground: oklch(0.51 0.01 240);
   --color-border: oklch(0.9 0.005 240);
   --color-input: oklch(0.9 0.005 240);
   --color-primary: oklch(0.6 0.22 256);
@@ -1034,13 +1034,15 @@
   --color-muted-foreground: oklch(0.52 0.008 60);
   --color-border: oklch(0.91 0.005 60);
   --color-input: oklch(0.91 0.005 60);
-  --color-primary: oklch(0.68 0.13 220);
+  /* Primary darkened from L0.68 → L0.54 so white-label buttons clear the
+   * WCAG large-text bar (≥3:1); still unmistakably the Notion blue. */
+  --color-primary: oklch(0.54 0.13 230);
   --color-primary-foreground: oklch(0.98 0 0);
   --color-secondary: oklch(0.96 0.004 80);
   --color-secondary-foreground: oklch(0.27 0.005 60);
   --color-accent: oklch(0.94 0.02 220);
   --color-accent-foreground: oklch(0.27 0.005 60);
-  --color-ring: oklch(0.68 0.13 220);
+  --color-ring: oklch(0.54 0.13 230);
   --radius-lg: 0.375rem;
   --radius-md: 0.25rem;
   --radius-sm: 0.125rem;
@@ -1509,7 +1511,9 @@
   --color-card: oklch(0.28 0.01 250);
   --color-card-foreground: oklch(0.92 0.005 250);
   --color-muted: oklch(0.28 0.01 250);
-  --color-muted-foreground: oklch(0.62 0.01 250);
+  /* Lifted L0.62 → L0.68 so muted/secondary copy clears 4.5:1 on the dark
+   * extruded-plastic surface. */
+  --color-muted-foreground: oklch(0.68 0.01 250);
   --color-border: oklch(0.28 0.01 250);
   --color-input: oklch(0.28 0.01 250);
   --color-primary: oklch(0.68 0.12 250);
@@ -1846,7 +1850,9 @@
    * needing to memorise hex codes. */
   --color-background: oklch(0.92 0.075 95);
   --color-foreground: oklch(0.28 0.04 260);
-  --color-card: oklch(0.7 0.16 25);
+  /* Coral card deepened from L0.7 → L0.52 so the white card text clears
+   * 4.5:1 (body-text AA) while keeping the demo's signature coral hue. */
+  --color-card: oklch(0.52 0.18 25);
   --color-card-foreground: oklch(0.99 0 0);
   --color-muted: oklch(0.95 0.045 95);
   --color-muted-foreground: oklch(0.42 0.05 260);
@@ -2811,6 +2817,303 @@
   --scrollbar-thumb-hover: oklch(0.6 0 0);
 }
 /* @eikon:variant(design=editorial) end */
+
+/* @eikon:variant(design=animal-crossing) begin */
+/* Animal Crossing — cosy island life. Warm parchment + cream paper, soft
+ * earthy-brown ink, a mint-teal brand accent and the game's signature
+ * yellow (not blue) focus highlight. Chunky rounded radii, a rounded
+ * gothic typeface, and a hard flat-bottom drop shadow (no blur) that gives
+ * buttons/cards that pressable "tappable plastic" look. Dark mode is a
+ * cosy night-on-the-island warm brown rather than a cold black.
+ * Inspired by the open-source animal-island-ui design tokens
+ * (https://github.com/guokaigdg/animal-island-ui) — colours re-expressed
+ * in OKLCH; no Nintendo assets used. */
+:root.design-animal-crossing {
+  --color-background: oklch(0.977 0.011 106.6); /* warm parchment #f8f8f0 */
+  --color-foreground: oklch(0.466 0.079 62.4); /* header brown #794f27 */
+  --color-card: oklch(0.962 0.027 97.6); /* cream paper rgb(247,243,223) */
+  --color-card-foreground: oklch(0.492 0.049 73.3); /* body brown #725d42 */
+  --color-muted: oklch(0.933 0.023 84.6); /* sandy #f0e8d8 */
+  --color-muted-foreground: oklch(0.492 0.049 73.3); /* readable body brown */
+  --color-border: oklch(0.666 0.034 79.8); /* #9f927d */
+  --color-input: oklch(0.962 0.027 97.6); /* cream input bg */
+  --color-primary: oklch(0.75 0.129 185.2); /* mint teal #19c8b9 */
+  --color-primary-foreground: oklch(0.28 0.04 60); /* deep brown ink */
+  --color-secondary: oklch(0.933 0.023 84.6); /* sandy #f0e8d8 */
+  --color-secondary-foreground: oklch(0.466 0.079 62.4);
+  --color-accent: oklch(0.967 0.02 185.5); /* mint wash #e6f9f6 */
+  --color-accent-foreground: oklch(0.466 0.079 62.4); /* brown ink on wash */
+  --color-destructive: oklch(0.641 0.168 23.1); /* #e05a5a */
+  --color-destructive-foreground: oklch(1 0 0);
+  --color-ring: oklch(0.865 0.177 90.4); /* game focus yellow #ffcc00 */
+
+  /* State colours — the game's UI status palette. */
+  --color-success: oklch(0.713 0.186 133.9); /* leaf green #6fba2c */
+  --color-success-foreground: oklch(1 0 0);
+  --color-warning: oklch(0.838 0.167 89.3); /* bell yellow #f5c31c */
+  --color-warning-foreground: oklch(0.466 0.079 62.4);
+  --color-info: oklch(0.714 0.124 272.2); /* app blue #889df0 */
+  --color-info-foreground: oklch(1 0 0);
+
+  /* Chunky, friendly radii. --radius-md is tuned so the h-9 (36px)
+   * controls (Button / Input / Select trigger / Tabs) round into full
+   * CAPSULES — the game's signature pill shape — while larger panels
+   * (Popover / Select menu / Textarea) just read as generous rounded
+   * corners. Cards / dialogs use the slightly bigger --radius-lg. */
+  --radius-lg: 1.5rem;
+  --radius-md: 1.25rem;
+  --radius-sm: 0.75rem;
+
+  /* The exact animal-island-ui face stack — Nunito (rounded Latin) with
+   * Noto Sans SC + Zen Maru Gothic (rounded JP) carrying CJK. Loaded in
+   * index.html behind the variant marker; falls back to PingFang /
+   * Hiragino / system on networks that block Google Fonts. */
+  --font-sans:
+    'Nunito', 'Noto Sans SC', 'Zen Maru Gothic', -apple-system, 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', ui-rounded, system-ui, sans-serif;
+  --font-display:
+    'Nunito', 'Zen Maru Gothic', 'Noto Sans SC', -apple-system, 'PingFang SC',
+    'Hiragino Sans GB', ui-rounded, system-ui, sans-serif;
+
+  /* Generous density + heavier weights so the rounded face reads warm. */
+  --spacing: 0.27rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.6rem;
+  --font-weight-medium: 600;
+  --font-weight-semibold: 700;
+  --tracking-tight: 0em;
+
+  /* Signature hard flat-bottom shadow (no blur) — the "pressable plastic"
+   * depth the game uses on every button / switch / card. Warm brown
+   * #bdaea0 so it reads as a cast shadow on parchment, not grey. */
+  --shadow-sm: 0 4px 0 0 oklch(0.76 0.026 65.5);
+  --shadow-md: 0 5px 0 0 oklch(0.76 0.026 65.5);
+  --shadow-lg: 0 7px 0 0 oklch(0.76 0.026 65.5);
+  --shadow-xl: 0 10px 0 0 oklch(0.76 0.026 65.5);
+
+  /* The press interaction. Buttons/cards rest on --shadow-sm (a tall
+   * 4px ledge); on hover the surface lifts and the ledge grows to 6px
+   * (paired with Button's built-in whileHover y:-1); on active it sinks
+   * onto a 1px ledge (paired with whileTap scale) — exactly the game's
+   * "tap a wooden button" feel. */
+  --surface-hover-shadow: 0 6px 0 0 oklch(0.76 0.026 65.5);
+  --surface-active-shadow: 0 1px 0 0 oklch(0.76 0.026 65.5);
+
+  /* Thick, friendly outlines around surfaces. */
+  --surface-border-width: 2px;
+
+  /* Bouncy motion — overshoot easing for that springy hand-held feel. */
+  --ease-out: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --duration-normal: 220ms;
+
+  /* Sidebar — cream chrome with the game's blue menu-selection tint. */
+  --color-sidebar: oklch(0.962 0.027 97.6);
+  --color-sidebar-foreground: oklch(0.466 0.079 62.4);
+  --color-sidebar-primary: oklch(0.75 0.129 185.2);
+  --color-sidebar-primary-foreground: oklch(1 0 0);
+  --color-sidebar-accent: oklch(0.825 0.047 264.9); /* selected #B7C6E5 */
+  --color-sidebar-accent-foreground: oklch(0.466 0.079 62.4);
+  --color-sidebar-border: oklch(0.666 0.034 79.8);
+
+  /* Chart — the NookPhone app icon palette (mint / pink / blue / yellow / green). */
+  --chart-1: oklch(0.75 0.129 185.2);
+  --chart-2: oklch(0.808 0.098 9.9);
+  --chart-3: oklch(0.714 0.124 272.2);
+  --chart-4: oklch(0.865 0.129 87.1);
+  --chart-5: oklch(0.77 0.105 144.5);
+
+  /* Focus halo — chunky yellow ring with a parchment offset gap. */
+  --ring-width: 3px;
+  --ring-offset-width: 2px;
+  --ring-offset-color: oklch(0.977 0.011 106.6);
+
+  /* Leaf island backdrop — a dense tone-on-tone LEAF pattern (veined leaves +
+   * simple leaves + scattered seeds), recreating the reference site's
+   * `home_bg` hero field exactly: pale leaves strewn edge-to-edge over the
+   * grass base. My own SVG art (leaf glyphs + veins drawn from scratch), no
+   * game assets. Kept low-opacity so cream cards and brown ink stay readable
+   * on top. The base body rule paints `var(--bg-ambient)`; the
+   * `.design-animal-crossing body` rule below switches to true tiling + sets
+   * the grass base colour. */
+  --bg-ambient:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Cg fill='%23396b4e' fill-opacity='0.14'%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(40 38) rotate(18) scale(1)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(150 25) rotate(-35) scale(0.7)'/%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(240 50) rotate(60) scale(1.05)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(95 95) rotate(-15) scale(0.85)'/%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(200 120) rotate(130) scale(0.95)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(285 150) rotate(-50) scale(0.7)'/%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(35 150) rotate(95) scale(0.9)'/%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(130 165) rotate(200) scale(1)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(70 235) rotate(-25) scale(0.75)'/%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(175 245) rotate(40) scale(0.9)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(255 235) rotate(160) scale(0.8)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(20 275) rotate(-60) scale(0.7)'/%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(115 290) rotate(20) scale(0.85)'/%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(270 290) rotate(-100) scale(0.95)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(225 195) rotate(-140) scale(0.65)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(10 60) rotate(200) scale(0.6)'/%3E%3C/g%3E%3Cg fill='none' stroke='%23396b4e' stroke-opacity='0.16' stroke-width='1.4' stroke-linecap='round'%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(40 38) rotate(18) scale(1)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(150 25) rotate(-35) scale(0.7)'/%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(240 50) rotate(60) scale(1.05)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(95 95) rotate(-15) scale(0.85)'/%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(200 120) rotate(130) scale(0.95)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(285 150) rotate(-50) scale(0.7)'/%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(35 150) rotate(95) scale(0.9)'/%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(130 165) rotate(200) scale(1)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(70 235) rotate(-25) scale(0.75)'/%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(175 245) rotate(40) scale(0.9)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(255 235) rotate(160) scale(0.8)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(20 275) rotate(-60) scale(0.7)'/%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(115 290) rotate(20) scale(0.85)'/%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(270 290) rotate(-100) scale(0.95)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(225 195) rotate(-140) scale(0.65)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(10 60) rotate(200) scale(0.6)'/%3E%3C/g%3E%3Cg fill='%23396b4e' fill-opacity='0.13'%3E%3Ccircle cx='110' cy='55' r='3.2'/%3E%3Ccircle cx='185' cy='80' r='2.4'/%3E%3Ccircle cx='60' cy='110' r='2.6'/%3E%3Ccircle cx='255' cy='95' r='3'/%3E%3Ccircle cx='150' cy='130' r='2.2'/%3E%3Ccircle cx='40' cy='200' r='3'/%3E%3Ccircle cx='215' cy='165' r='2.4'/%3E%3Ccircle cx='120' cy='215' r='2.6'/%3E%3Ccircle cx='285' cy='215' r='2.2'/%3E%3Ccircle cx='80' cy='280' r='2.8'/%3E%3Ccircle cx='200' cy='285' r='2.4'/%3E%3Ccircle cx='165' cy='40' r='2'/%3E%3C/g%3E%3C/svg%3E");
+
+  --scrollbar-size: 12px;
+  --scrollbar-thumb: oklch(0.786 0.038 86.2); /* #c4b89e */
+  --scrollbar-thumb-hover: oklch(0.666 0.034 79.8); /* #9f927d */
+  --scrollbar-thumb-radius: 1rem;
+  --scrollbar-thumb-border: 3px;
+}
+.dark.design-animal-crossing {
+  /* Night on the island — cosy warm brown, never cold black. */
+  --color-background: oklch(0.26 0.03 70);
+  --color-foreground: oklch(0.93 0.02 95);
+  --color-card: oklch(0.31 0.035 72);
+  --color-card-foreground: oklch(0.93 0.02 95);
+  --color-muted: oklch(0.34 0.03 72);
+  --color-muted-foreground: oklch(0.75 0.025 85);
+  --color-border: oklch(0.42 0.03 72);
+  --color-input: oklch(0.31 0.035 72);
+  --color-primary: oklch(0.78 0.125 185.5);
+  --color-primary-foreground: oklch(0.2 0.03 70);
+  --color-secondary: oklch(0.34 0.03 72);
+  --color-secondary-foreground: oklch(0.93 0.02 95);
+  --color-accent: oklch(0.4 0.05 185);
+  --color-accent-foreground: oklch(0.95 0.03 185);
+  --color-destructive: oklch(0.6 0.19 25);
+  --color-destructive-foreground: oklch(0.98 0 0);
+  --color-ring: oklch(0.865 0.177 90.4); /* keep the yellow focus */
+  --color-sidebar: oklch(0.22 0.03 70);
+  --color-sidebar-foreground: oklch(0.93 0.02 95);
+  --color-sidebar-primary: oklch(0.78 0.125 185.5);
+  --color-sidebar-primary-foreground: oklch(0.2 0.03 70);
+  --color-sidebar-accent: oklch(0.4 0.04 265);
+  --color-sidebar-accent-foreground: oklch(0.95 0.02 95);
+  --color-sidebar-border: oklch(0.42 0.03 72);
+
+  /* Hard bottom shadow goes dark-brown at night. */
+  --shadow-sm: 0 4px 0 0 oklch(0.16 0.02 70);
+  --shadow-md: 0 5px 0 0 oklch(0.16 0.02 70);
+  --shadow-lg: 0 7px 0 0 oklch(0.16 0.02 70);
+  --shadow-xl: 0 10px 0 0 oklch(0.16 0.02 70);
+  --surface-hover-shadow: 0 6px 0 0 oklch(0.16 0.02 70);
+  --surface-active-shadow: 0 1px 0 0 oklch(0.16 0.02 70);
+
+  --ring-offset-color: oklch(0.26 0.03 70);
+  --scrollbar-thumb: oklch(0.45 0.03 72);
+  --scrollbar-thumb-hover: oklch(0.6 0.03 72);
+
+  /* Night island — the same leaf pattern, lighter green + dimmer, over the
+   * warm-green dark base set by `.dark.design-animal-crossing body` below. */
+  --bg-ambient:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Cg fill='%236f9e6a' fill-opacity='0.1'%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(40 38) rotate(18) scale(1)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(150 25) rotate(-35) scale(0.7)'/%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(240 50) rotate(60) scale(1.05)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(95 95) rotate(-15) scale(0.85)'/%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(200 120) rotate(130) scale(0.95)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(285 150) rotate(-50) scale(0.7)'/%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(35 150) rotate(95) scale(0.9)'/%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(130 165) rotate(200) scale(1)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(70 235) rotate(-25) scale(0.75)'/%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(175 245) rotate(40) scale(0.9)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(255 235) rotate(160) scale(0.8)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(20 275) rotate(-60) scale(0.7)'/%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(115 290) rotate(20) scale(0.85)'/%3E%3Cpath d='M0,-30 C14,-24 20,-8 17,6 C14,18 7,25 0,30 C-7,25 -14,18 -17,6 C-20,-8 -14,-24 0,-30 Z' transform='translate(270 290) rotate(-100) scale(0.95)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(225 195) rotate(-140) scale(0.65)'/%3E%3Cpath d='M0,-22 C11,-15 14,-2 9,9 C6,15 3,18 0,22 C-3,18 -6,15 -9,9 C-14,-2 -11,-15 0,-22 Z' transform='translate(10 60) rotate(200) scale(0.6)'/%3E%3C/g%3E%3Cg fill='none' stroke='%236f9e6a' stroke-opacity='0.1' stroke-width='1.4' stroke-linecap='round'%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(40 38) rotate(18) scale(1)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(150 25) rotate(-35) scale(0.7)'/%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(240 50) rotate(60) scale(1.05)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(95 95) rotate(-15) scale(0.85)'/%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(200 120) rotate(130) scale(0.95)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(285 150) rotate(-50) scale(0.7)'/%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(35 150) rotate(95) scale(0.9)'/%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(130 165) rotate(200) scale(1)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(70 235) rotate(-25) scale(0.75)'/%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(175 245) rotate(40) scale(0.9)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(255 235) rotate(160) scale(0.8)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(20 275) rotate(-60) scale(0.7)'/%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(115 290) rotate(20) scale(0.85)'/%3E%3Cpath d='M0,-27 L0,27M0,-16 C5.2,-16 10.4,-11 13,-7M0,-16 C-5.2,-16 -10.4,-11 -13,-7M0,-7 C5.6000000000000005,-7 11.200000000000001,-2 14,2M0,-7 C-5.6000000000000005,-7 -11.200000000000001,-2 -14,2M0,2 C5.2,2 10.4,7 13,11M0,2 C-5.2,2 -10.4,7 -13,11M0,11 C4,11 8,16 10,20M0,11 C-4,11 -8,16 -10,20' transform='translate(270 290) rotate(-100) scale(0.95)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(225 195) rotate(-140) scale(0.65)'/%3E%3Cpath d='M0,-19 L0,19' transform='translate(10 60) rotate(200) scale(0.6)'/%3E%3C/g%3E%3Cg fill='%236f9e6a' fill-opacity='0.09'%3E%3Ccircle cx='110' cy='55' r='3.2'/%3E%3Ccircle cx='185' cy='80' r='2.4'/%3E%3Ccircle cx='60' cy='110' r='2.6'/%3E%3Ccircle cx='255' cy='95' r='3'/%3E%3Ccircle cx='150' cy='130' r='2.2'/%3E%3Ccircle cx='40' cy='200' r='3'/%3E%3Ccircle cx='215' cy='165' r='2.4'/%3E%3Ccircle cx='120' cy='215' r='2.6'/%3E%3Ccircle cx='285' cy='215' r='2.2'/%3E%3Ccircle cx='80' cy='280' r='2.8'/%3E%3Ccircle cx='200' cy='285' r='2.4'/%3E%3Ccircle cx='165' cy='40' r='2'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Grass island page — overrides the shared `body` rule's flat `cover`
+ * fill so the leaf tile actually REPEATS at its natural size, and slowly
+ * SCROLLS the field on an 80s loop, mirroring the reference exactly:
+ *   background: url(home_bg) 0 0 / auto repeat, rgb(125,195,149);
+ *   animation: bgScroll 80s linear infinite;
+ * The base colour is the reference's grass green rgb(125,195,149); cream
+ * cards float on top like paper notes on a lawn. The drift is one tile
+ * (300px) per cycle so it loops seamlessly, and is disabled under
+ * prefers-reduced-motion. Body copy steps up to weight 500. */
+:root.design-animal-crossing body {
+  background-color: oklch(0.758 0.097 154.6);
+  background-size: 300px 300px;
+  background-repeat: repeat;
+  background-attachment: scroll;
+  animation: animal-bg-scroll 80s linear infinite;
+  font-weight: 500;
+}
+.dark.design-animal-crossing body {
+  background-color: oklch(0.3 0.04 150);
+}
+/* The reference's `bgScroll` — a slow diagonal drift of the leaf field. */
+@keyframes animal-bg-scroll {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 300px 300px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root.design-animal-crossing body {
+    animation: none;
+  }
+}
+
+/* Hand-drawn pointer cursor — the reference project ships ONE chunky
+ * hand-drawn pointing-hand cursor (a 49×48 PNG, hotspot 4 0) and applies
+ * it everywhere via its "force" Cursor wrapper. We embed that exact PNG as
+ * a base64 data-URI and use it for both the resting state and over
+ * interactive elements (matching the game's single-cursor feel); text
+ * fields keep the native caret so editing stays obvious. All scoped to the
+ * design class and kept inside the variant marker so strip-features drops
+ * it for every other preset. */
+:root.design-animal-crossing,
+:root.design-animal-crossing button,
+:root.design-animal-crossing a,
+:root.design-animal-crossing [role='button'],
+:root.design-animal-crossing label[for],
+:root.design-animal-crossing summary,
+:root.design-animal-crossing [data-slot='trigger'] {
+  cursor: url("data:image/png;base64,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")
+      4 0,
+    auto;
+}
+:root.design-animal-crossing input,
+:root.design-animal-crossing textarea,
+:root.design-animal-crossing [contenteditable='true'] {
+  cursor: text;
+}
+
+/* --- Component-level fidelity (matches animal-island-ui exactly) ----------
+ * Captured 1:1 from the reference at desktop res with Playwright. These are
+ * design-scoped overrides — they ship ONLY when animal-crossing survives
+ * strip-features, and ride on top of (unlayered, so they beat) the shared
+ * Tailwind utilities the primitives emit. */
+
+/* Bold, friendly button label weight + tight line on every button. */
+:root.design-animal-crossing button {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Signature CREAM "tappable" button. In the reference the Primary/Default
+ * button is a cream pill with brown ink and a hard taupe ledge shadow — NOT
+ * the brand teal (teal is reserved for Link / Loading / active states). The
+ * Button primitive's `default` variant is the only one that carries the
+ * `.shadow-sm` utility, so we retint exactly that variant to cream here and
+ * leave the teal `--color-primary` token untouched for links / focus /
+ * charts. Exact values lifted from the reference: bg #f8f8f0, ink #794f27,
+ * ledge #bdaea0 0 5px 0 0. */
+:root.design-animal-crossing button.shadow-sm,
+:root.design-animal-crossing a.shadow-sm {
+  background-color: oklch(0.977 0.011 106.6);
+  color: oklch(0.466 0.079 62.4);
+  border: 2px solid oklch(0.977 0.011 106.6);
+  box-shadow: 0 5px 0 0 oklch(0.76 0.026 65.5);
+  padding-inline: 1.35rem;
+}
+:root.design-animal-crossing button.shadow-sm:hover,
+:root.design-animal-crossing a.shadow-sm:hover {
+  opacity: 1;
+  background-color: oklch(0.977 0.011 106.6);
+}
+.dark.design-animal-crossing button.shadow-sm,
+.dark.design-animal-crossing a.shadow-sm {
+  background-color: oklch(0.34 0.03 72);
+  color: oklch(0.93 0.02 95);
+  border-color: oklch(0.34 0.03 72);
+  box-shadow: 0 5px 0 0 oklch(0.16 0.02 70);
+}
+
+/* Switch "on" goes grass-GREEN (not teal) — the game uses a leafy green for
+ * the checked track, distinct from the teal brand accent. The Switch
+ * primitive is a Radix root that renders `button[role=switch]` with an
+ * automatic data-state, and a cream thumb (the reference thumb is paper
+ * cream, not the brown ink that --color-primary-foreground would give). */
+:root.design-animal-crossing button[role='switch'][data-state='checked'] {
+  background-color: oklch(0.79 0.17 142) !important;
+}
+:root.design-animal-crossing button[role='switch'] > span {
+  background-color: oklch(0.962 0.027 97.6) !important;
+}
+
+/* Inputs / textareas get the reference's pill + hard bottom ledge so they
+ * read like the game's chunky text fields. */
+:root.design-animal-crossing input:not([type='checkbox']):not([type='radio']):not([type='range']),
+:root.design-animal-crossing textarea {
+  box-shadow: 0 3px 0 0 oklch(0.82 0.03 80);
+}
+.dark.design-animal-crossing input:not([type='checkbox']):not([type='radio']):not([type='range']),
+.dark.design-animal-crossing textarea {
+  box-shadow: 0 3px 0 0 oklch(0.2 0.02 70);
+}
+/* @eikon:variant(design=animal-crossing) end */
 
 /* --- layout axis -----------------------------------------------------------
  * Each layout (stacked / sidebar / topbar-sidebar / centered) is its own

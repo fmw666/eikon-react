@@ -127,6 +127,7 @@ export const PARAMS = [
       'terminal',
       'carbon',
       'editorial',
+      'animal-crossing',
     ],
     default: 'default',
     cliFlag: 'design',
@@ -151,6 +152,7 @@ export const PARAMS = [
       terminal: 'Terminal (green phosphor CRT)',
       carbon: 'IBM Carbon (enterprise blue)',
       editorial: 'Editorial (black-and-white print)',
+      'animal-crossing': 'Animal Crossing (mint teal + parchment)',
     },
   },
   {
