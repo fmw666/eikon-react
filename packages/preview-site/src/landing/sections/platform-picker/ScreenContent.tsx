@@ -507,7 +507,7 @@ function MobileScreenContent({
     >
       {/* Top app bar */}
       <div
-        className="flex items-center justify-between px-5 pt-4 pb-2 sm:px-6 sm:pt-5"
+        className="flex items-center justify-between px-5 pt-4 pb-2.5 sm:px-6 sm:pt-5"
       >
         <div className="flex items-center gap-1.5">
           <div
@@ -530,7 +530,7 @@ function MobileScreenContent({
       </div>
 
       {/* Hero */}
-      <div className="px-5 pt-2 pb-3 sm:px-6">
+      <div className="px-5 pt-2 pb-4 sm:px-6 sm:pb-5">
         <p
           className="text-[13px] font-bold uppercase tracking-[0.18em] sm:text-[14px]"
           style={{ color: BRAND }}
@@ -538,27 +538,29 @@ function MobileScreenContent({
           {eyebrow}
         </p>
         <h3
-          className="mt-1 text-[28px] font-bold leading-[1.15] sm:text-[32px]"
+          className="mt-1.5 text-[28px] font-bold leading-[1.15] sm:text-[32px]"
           style={{ color: TEXT_PRIMARY, letterSpacing: '-0.02em' }}
         >
           {title}
         </h3>
         <p
-          className="mt-1.5 text-[14px] leading-[1.5] sm:text-[15px]"
+          className="mt-2 text-[14px] leading-[1.55] sm:text-[15px]"
           style={{ color: TEXT_SECONDARY }}
         >
           {desc}
         </p>
       </div>
 
-      {/* Feature feed — bullets become cards */}
-      <div className="flex flex-1 flex-col gap-2 px-4 pt-1 sm:px-5">
+      {/* Feature feed — bullets become cards. Centred in the remaining
+          vertical space so the three cards breathe instead of clustering
+          under the hero with a dead gap above the tab bar. */}
+      <div className="flex flex-1 flex-col justify-center gap-3 px-4 py-2 sm:gap-3.5 sm:px-5">
         {bullets.map((b, i) => {
           const isActive = i === 0;
           return (
             <div
               key={b}
-              className="flex items-center gap-3 rounded-2xl border px-3.5 py-2.5 sm:px-4 sm:py-3"
+              className="flex items-center gap-3.5 rounded-2xl border px-3.5 py-3.5 sm:gap-4 sm:px-4 sm:py-4"
               style={{
                 borderColor: isActive ? BRAND_TINT_BORDER : BORDER_HAIRLINE,
                 background: isActive ? BRAND_TINT_BG : SURFACE_RAISED,
