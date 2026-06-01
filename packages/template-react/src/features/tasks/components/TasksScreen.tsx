@@ -64,16 +64,21 @@ function TasksScreen({
         </Button>
       </div>
 
-      <div className="mb-6 rounded-md border border-amber-300/60 bg-amber-50 px-3 py-2 text-amber-900 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-200">
+      {/* Backend-mode notice. Token-driven so every design preset re-tints
+       * the warning band in lock-step with its palette (anthropic warm,
+       * vercel monochrome, neo-brutalism saturated). The translucent
+       * `/8` fill stays legible on both light and dark surfaces because
+       * `--color-warning` already lifts its lightness for `.dark`. */}
+      <div className="mb-6 rounded-md border border-[var(--color-warning)]/40 bg-[var(--color-warning)]/8 px-3 py-2 text-[var(--color-foreground)]">
         <p className="text-sm font-medium">{t('layout.notice')}</p>
-        <div className="mt-1 flex items-center gap-2 text-sm">
+        <div className="mt-1 flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
           <span>{t('layout.mode')}</span>
           <span
             className={cn(
               'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
               isOnline
-                ? 'bg-green-100 text-green-700 ring-green-300 dark:bg-green-500/10 dark:text-green-300 dark:ring-green-500/30'
-                : 'bg-slate-100 text-slate-700 ring-slate-300 dark:bg-slate-500/10 dark:text-slate-300 dark:ring-slate-500/30'
+                ? 'bg-[var(--color-success)]/12 text-[var(--color-success)] ring-[var(--color-success)]/30'
+                : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)] ring-[var(--color-border)]'
             )}
           >
             {modeLabel}

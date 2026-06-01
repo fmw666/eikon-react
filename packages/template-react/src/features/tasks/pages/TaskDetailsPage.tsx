@@ -39,13 +39,19 @@ import type { Task, TaskStatus } from '../types';
 // Constants
 // =================================================================================================
 
+// Mirrors the token-driven palette in TaskCard so the list and details
+// views read as the same language across every design preset and dark
+// mode (`--color-info` / `--color-success` already lift their lightness
+// for `.dark`, so no manual `dark:` pairs are needed). Kept inline
+// rather than extracted because three rows of constants is cheaper than
+// a new module + import.
 const STATUS_CLASS: Record<TaskStatus, string> = {
   pending:
-    'bg-slate-100 text-slate-700 ring-slate-300 dark:bg-slate-500/10 dark:text-slate-300 dark:ring-slate-500/30',
+    'bg-[var(--color-muted)] text-[var(--color-muted-foreground)] ring-[var(--color-border)]',
   in_progress:
-    'bg-sky-100 text-sky-700 ring-sky-300 dark:bg-sky-500/10 dark:text-sky-300 dark:ring-sky-500/30',
+    'bg-[var(--color-info)]/12 text-[var(--color-info)] ring-[var(--color-info)]/30',
   completed:
-    'bg-emerald-100 text-emerald-700 ring-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-500/30',
+    'bg-[var(--color-success)]/12 text-[var(--color-success)] ring-[var(--color-success)]/30',
 };
 
 // =================================================================================================
@@ -120,14 +126,25 @@ function TaskDetailsPage() {
       ) : (
         <Card>
           <CardHeader className="gap-2">
-            <div className="flex items-center justify-between gap-3">
-              <CardTitle className="text-xl">{task.title}</CardTitle>
+            {/* `items-start` so the badge anchors to the top edge when
+             * the title wraps to two lines (long titles aren't truncated
+             * here — this is the focused view). The badge gets `shrink-0`
+             * + `whitespace-nowrap` so it never collapses or wraps when
+             * the title line eats the row's intrinsic width. */}
+            <div className="flex items-start justify-between gap-3">
+              <CardTitle className="min-w-0 flex-1 text-xl leading-snug">
+                {task.title}
+              </CardTitle>
               <span
                 className={cn(
-                  'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
+                  'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset',
                   STATUS_CLASS[task.status]
                 )}
               >
+                <span
+                  aria-hidden="true"
+                  className="h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-80"
+                />
                 {t(`status.${task.status}`)}
               </span>
             </div>
