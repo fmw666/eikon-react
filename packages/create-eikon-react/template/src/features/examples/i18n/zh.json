@@ -6,15 +6,36 @@
     "devOnlyNotice": "组件展柜仅在开发环境可预览，相关路由不会进入生产构建。",
     "backToIndex": "返回展柜",
     "openInNewTab": "在新标签页打开",
+    "breadcrumb": "面包屑",
+    "notFound": "未找到",
+    "notFoundTitle": "组件未找到",
     "unknownSection": "该组件不存在 —— 请从左侧选择一个。"
   },
   "overview": {
-    "pick": "从左侧选择一个组件，或从下方卡片网格进入。"
+    "pick": "从左侧选择一个组件，或从下方卡片网格进入。",
+    "featured": "精选入口",
+    "tryIt": "立即体验",
+    "metrics": {
+      "components": "组件",
+      "categories": "分类",
+      "layouts": "兼容布局"
+    }
+  },
+  "frame": {
+    "previewLabel": "预览",
+    "copyRoute": "复制路由",
+    "copied": "已复制"
+  },
+  "pager": {
+    "label": "组件翻页",
+    "prev": "上一项",
+    "next": "下一项"
   },
   "toc": {
     "label": "组件",
     "overview": "概览",
     "filterPlaceholder": "筛选组件…",
+    "filterCount": "{{visible}} / {{total}}",
     "noResults": "没有匹配的组件。",
     "clearFilter": "清除筛选",
     "uiPrimitives": "UI 基元",

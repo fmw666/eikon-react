@@ -8,15 +8,22 @@
  * independently-scrolling panel so the search box never disappears.
  *
  * Affordances:
- *   - Sticky title + type-to-filter (clearable, no-results line).
- *   - Per-group counts, mirroring the overview grid.
- *   - Active link uses a left indicator strip + raised text weight
- *     (no full-bleed accent fill — too "menu-y" for documentation nav).
+ *   - Sticky title + type-to-filter (clearable, no-results line, with a
+ *     hint chip showing the `/` shortcut when blurred).
+ *   - Per-group counts plus a "X of Y" tally above the list when a
+ *     filter is active.
+ *   - Group headers carry a Lucide icon — same icon used by the index
+ *     page eyebrow, so the visual language is consistent across the
+ *     two surfaces.
+ *   - Active link uses a left indicator strip + raised text weight.
  *   - Each item carries a small visual anchor dot that lights up to the
- *     primary colour on hover / active for fast vertical scanning.
+ *     primary colour on hover / active.
  *   - Active link is scrolled into view on every route change.
  *   - Collapsible on narrow shells: a disclosure toggle replaces the long
  *     list; on wide shells the nav is always shown (container query).
+ *   - Keyboard: `/` from anywhere in the document focuses the filter
+ *     (skipped when the visitor is already typing in another field).
+ *     `Esc` inside the filter clears it, then blurs.
  *   - Visible focus rings on the search box and every link.
  *
  * The inline-component groups are generated from the `exampleSections`
@@ -36,13 +43,14 @@ import { useTranslation } from 'react-i18next';
 import { NavLink, useLocation } from 'react-router-dom';
 
 // --- Third-party Libraries ---
-import { ChevronDown, Search, X } from 'lucide-react';
+import { ChevronDown, type LucideIcon, Search, X } from 'lucide-react';
 
 // --- Absolute Imports ---
 import { cn } from '@/shared/lib/cn';
 
 // --- Relative Imports ---
 import { GROUP_ORDER, sectionsByGroup } from './exampleSections';
+import { getGroupIcon, type SidebarGroupKey } from './sectionMeta';
 
 // =================================================================================================
 // Types
@@ -56,7 +64,9 @@ interface NavLinkItem {
 }
 
 interface NavGroup {
+  key: SidebarGroupKey;
   label: string;
+  icon: LucideIcon;
   items: NavLinkItem[];
 }
 
@@ -70,18 +80,23 @@ function ExamplesSidebar() {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const filterRef = useRef<HTMLInputElement>(null);
 
   const groups: NavGroup[] = useMemo(
     () => [
-      ...GROUP_ORDER.map((key) => ({
+      ...GROUP_ORDER.map<NavGroup>((key) => ({
+        key,
         label: t(`toc.${key}`),
+        icon: getGroupIcon(key),
         items: sectionsByGroup(key).map((s) => ({
           to: `/examples/${s.slug}`,
           label: t(`sections.${s.slug}.title`),
         })),
       })),
       {
+        key: 'modals',
         label: t('toc.modals'),
+        icon: getGroupIcon('modals'),
         items: [
           { to: '/examples/toaster', label: t('pages.toaster.title') },
           { to: '/examples/dialog', label: t('pages.dialog.title') },
@@ -93,7 +108,9 @@ function ExamplesSidebar() {
         ],
       },
       {
+        key: 'performance',
         label: t('toc.performance'),
+        icon: getGroupIcon('performance'),
         items: [
           { to: '/examples/motion', label: t('pages.motion.title') },
           { to: '/examples/performance', label: t('pages.performance.title') },
@@ -101,6 +118,11 @@ function ExamplesSidebar() {
       },
     ],
     [t]
+  );
+
+  const totalItems = useMemo(
+    () => groups.reduce((sum, g) => sum + g.items.length, 0),
+    [groups]
   );
 
   const q = query.trim().toLowerCase();
@@ -117,11 +139,36 @@ function ExamplesSidebar() {
     [groups, q]
   );
 
+  const visibleCount = useMemo(
+    () => filteredGroups.reduce((sum, g) => sum + g.items.length, 0),
+    [filteredGroups]
+  );
+
   // Keep the active link visible inside the panel's own scroll container.
   useEffect(() => {
     const active = containerRef.current?.querySelector('[aria-current="page"]');
     active?.scrollIntoView({ block: 'nearest' });
   }, [pathname]);
+
+  // Document-scope `/` focus shortcut. Skip when the user is already
+  // typing in a form control so we don't hijack normal typing.
+  useEffect(() => {
+    function isTypingInForm(target: EventTarget | null): boolean {
+      if (!(target instanceof HTMLElement)) return false;
+      if (target.isContentEditable) return true;
+      const tag = target.tagName;
+      return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === '/' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        if (isTypingInForm(e.target)) return;
+        e.preventDefault();
+        filterRef.current?.focus();
+      }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   return (
     <div ref={containerRef} className="text-[13px]">
@@ -162,32 +209,58 @@ function ExamplesSidebar() {
             <h2 className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-foreground)]">
               {t('toc.label')}
             </h2>
+            {q && (
+              <span className="text-[10px] font-medium tabular-nums text-[var(--color-muted-foreground)]">
+                {t('toc.filterCount', { visible: visibleCount, total: totalItems })}
+              </span>
+            )}
           </div>
 
           <div className="relative">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--color-muted-foreground)]" />
             <input
+              ref={filterRef}
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  if (query) {
+                    e.preventDefault();
+                    setQuery('');
+                  } else {
+                    e.currentTarget.blur();
+                  }
+                }
+              }}
               placeholder={t('toc.filterPlaceholder')}
               aria-label={t('toc.filterPlaceholder')}
               className={cn(
-                'h-8 w-full rounded-md pl-8 pr-7 text-[13px]',
+                'h-8 w-full rounded-md pl-8 pr-9 text-[13px]',
                 'border border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-foreground)]',
                 'placeholder:text-[var(--color-muted-foreground)]',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]'
               )}
             />
-            {query && (
+            {query ? (
               <button
                 type="button"
-                onClick={() => setQuery('')}
+                onClick={() => {
+                  setQuery('');
+                  filterRef.current?.focus();
+                }}
                 aria-label={t('toc.clearFilter')}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-sm p-0.5 text-[var(--color-muted-foreground)] transition-colors hover:text-[var(--color-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
+            ) : (
+              <kbd
+                aria-hidden="true"
+                className="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 rounded border border-[var(--color-border)] bg-[var(--color-muted)]/60 px-1 text-[10px] font-mono text-[var(--color-muted-foreground)] sm:inline"
+              >
+                /
+              </kbd>
             )}
           </div>
         </div>
@@ -201,23 +274,27 @@ function ExamplesSidebar() {
             </p>
           ) : (
             <ul className="mt-4 flex flex-col gap-4">
-              {filteredGroups.map((group) => (
-                <li key={group.label}>
-                  <p className="mb-1 flex items-center px-2 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[var(--color-muted-foreground)]/80">
-                    <span>{group.label}</span>
-                    <span className="ml-auto text-[10px] font-medium tabular-nums text-[var(--color-muted-foreground)]/70">
-                      {group.items.length}
-                    </span>
-                  </p>
-                  <ul className="flex flex-col">
-                    {group.items.map((item) => (
-                      <li key={item.to}>
-                        <NavItem to={item.to} label={item.label} end={item.end} />
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
+              {filteredGroups.map((group) => {
+                const GroupIcon = group.icon;
+                return (
+                  <li key={group.key}>
+                    <p className="mb-1 flex items-center gap-1.5 px-2 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[var(--color-muted-foreground)]/80">
+                      <GroupIcon aria-hidden="true" className="h-3 w-3" />
+                      <span>{group.label}</span>
+                      <span className="ml-auto text-[10px] font-medium tabular-nums text-[var(--color-muted-foreground)]/70">
+                        {group.items.length}
+                      </span>
+                    </p>
+                    <ul className="flex flex-col">
+                      {group.items.map((item) => (
+                        <li key={item.to}>
+                          <NavItem to={item.to} label={item.label} end={item.end} />
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </nav>

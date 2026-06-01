@@ -16,6 +16,12 @@
  *
  * `min-w-0` on `<main>` re-enables grid-item shrink so a wide demo (e.g.
  * the button matrix or a table) can't blow out the content column.
+ *
+ * Shell-level keyboard shortcuts:
+ *   - `[` and `]` step through the flat registry order (prev / next
+ *     section); skipped when the visitor is typing in a form control,
+ *     so the bracket characters in form inputs work normally.
+ *   - `/` is handled inside `ExamplesSidebar` (focuses the filter).
  */
 
 // =================================================================================================
@@ -23,11 +29,11 @@
 // =================================================================================================
 
 // --- Core Libraries ---
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 
 // --- Core-related Libraries ---
 import { useTranslation } from 'react-i18next';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 // --- Third-party Libraries ---
 import { Sparkles } from 'lucide-react';
@@ -37,6 +43,7 @@ import { Spinner } from '@/shared/ui/spinner';
 
 // --- Relative Imports ---
 import { ExamplesSidebar } from '../components/ExamplesSidebar';
+import { getNeighbours } from '../components/sectionMeta';
 
 // =================================================================================================
 // Component
@@ -44,6 +51,37 @@ import { ExamplesSidebar } from '../components/ExamplesSidebar';
 
 function ExamplesLayout() {
   const { t } = useTranslation('examples');
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  // `[` / `]` step through the flat order. We resolve neighbours from
+  // the current path's last segment so it works for the `:section`
+  // route AND the standalone showcase routes (they all share the same
+  // flat registry). Skip when the visitor is typing — bracket keys in
+  // a `<textarea>` or a code editor must stay literal.
+  useEffect(() => {
+    function isTypingInForm(target: EventTarget | null): boolean {
+      if (!(target instanceof HTMLElement)) return false;
+      if (target.isContentEditable) return true;
+      const tag = target.tagName;
+      return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== '[' && e.key !== ']') return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (isTypingInForm(e.target)) return;
+      const slug = pathname.split('/').filter(Boolean).at(-1);
+      if (!slug || slug === 'examples') return;
+      const { prev, next } = getNeighbours(slug);
+      const target = e.key === '[' ? prev : next;
+      if (target) {
+        e.preventDefault();
+        navigate(`/examples/${target.slug}`);
+      }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [pathname, navigate]);
 
   return (
     <div className="@container/examples">
@@ -51,9 +89,7 @@ function ExamplesLayout() {
         {/*
           Sticky (NOT fixed): the sidebar scrolls with the page normally,
           then pins once the page scrolls far enough that its top would
-          leave the viewport. `top-4` hugs the viewport top — the app
-          topbar in this shell scrolls away rather than docking, so we
-          don't leave a topbar-sized gap above the panel.
+          leave the viewport.
 
           `items-start` on the grid + `self-start` on the aside stop the
           grid row from stretching the aside to match `<main>`'s height
@@ -62,18 +98,14 @@ function ExamplesLayout() {
           scrolls internally, so a long nav never forces the *page* to
           scroll and drag the sidebar along with it. Narrow shells keep
           the natural stacked flow.
-        */}
-        {/*
-          Layout-aware sticky offset. Each root layout declares its fixed
-          chrome via CSS vars on its outermost element:
 
+          Layout-aware sticky offset. Each root layout declares its
+          fixed chrome via CSS vars on its outermost element:
             - `--app-topbar-h`     height of any sticky/fixed top bar
             - `--app-bottombar-h`  height of any fixed bottom bar (tabs)
-
           Both default to `0px` (the `var(--app-…, 0px)` fallback). That
           way the same examples shell behaves correctly regardless of
           which layout hosts it:
-
             - Stacked (static topbar that scrolls away): both 0 — sidebar
               hugs the viewport top once the user scrolls past the topbar.
             - Mobile / Topbar+Sidebar / Bottom-tabs (sticky h-14): the
@@ -117,34 +149,46 @@ function ExamplesLayout() {
         */}
         <main className="flex min-w-0 flex-col">
           {/*
-            Dev-only notice, rendered ONCE for the whole shell. Lives at
-            the top of the CONTENT column (not above the grid) so it adds
-            NO height above the sidebar — that's what keeps the pinned
-            panel flush with the top of the column rather than offset by a
-            badge-shaped gap.
+            Slim utility row at the very top of the content column —
+            renders ONCE for the whole shell. Lives at the top of the
+            content column (not above the grid) so it adds NO height
+            above the sidebar; that's what keeps the pinned panel flush
+            with the top of the column rather than offset by a
+            badge-shaped gap. Smaller now than the original loud banner
+            so it doesn't compete with the page's own H1.
           */}
-          <div
-            role="status"
-            className="mb-6 flex w-fit items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs text-amber-700 dark:text-amber-300"
-          >
-            <Sparkles className="h-3.5 w-3.5 shrink-0" />
-            <span className="font-medium uppercase tracking-wide">
-              {t('meta.devOnlyBadge')}
+          <div className="mb-6 flex items-center gap-2 text-[11px] text-[var(--color-muted-foreground)]">
+            <span
+              role="status"
+              className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-amber-700 dark:text-amber-300"
+            >
+              <Sparkles aria-hidden="true" className="h-3 w-3 shrink-0" />
+              <span className="font-medium uppercase tracking-[0.08em]">
+                {t('meta.devOnlyBadge')}
+              </span>
             </span>
-            <span className="hidden text-amber-700/80 sm:inline dark:text-amber-300/80">
-              · {t('meta.devOnlyNotice')}
+            <span className="hidden truncate sm:inline">
+              {t('meta.devOnlyNotice')}
             </span>
           </div>
 
-          <Suspense
-            fallback={
-              <div className="flex min-h-40 items-center justify-center text-[var(--color-muted-foreground)]">
-                <Spinner size="lg" />
-              </div>
-            }
-          >
-            <Outlet />
-          </Suspense>
+          {/*
+            Cap reading width on ultra-wide shells (sidebar-only / topbar-
+            sidebar can give us 1500+ px). Doesn't fight narrower shells
+            because `w-full` keeps it filling whatever's available, and
+            the `@2xl` cap kicks in only when the host gives us room.
+          */}
+          <div className="w-full max-w-5xl">
+            <Suspense
+              fallback={
+                <div className="flex min-h-40 items-center justify-center text-[var(--color-muted-foreground)]">
+                  <Spinner size="lg" />
+                </div>
+              }
+            >
+              <Outlet />
+            </Suspense>
+          </div>
         </main>
       </div>
     </div>

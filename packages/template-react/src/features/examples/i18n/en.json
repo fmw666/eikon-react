@@ -6,15 +6,36 @@
     "devOnlyNotice": "Preview is available in development only — these routes are excluded from production builds.",
     "backToIndex": "Back to showcase",
     "openInNewTab": "Open in new tab",
+    "breadcrumb": "Breadcrumb",
+    "notFound": "Not found",
+    "notFoundTitle": "Component not found",
     "unknownSection": "That component doesn't exist — pick one from the sidebar."
   },
   "overview": {
-    "pick": "Pick a component from the sidebar, or jump in from the grid below."
+    "pick": "Pick a component from the sidebar, or jump in from the grid below.",
+    "featured": "Featured",
+    "tryIt": "Try it",
+    "metrics": {
+      "components": "Components",
+      "categories": "Categories",
+      "layouts": "Layouts"
+    }
+  },
+  "frame": {
+    "previewLabel": "Preview",
+    "copyRoute": "Copy route",
+    "copied": "Copied"
+  },
+  "pager": {
+    "label": "Section navigation",
+    "prev": "Previous",
+    "next": "Next"
   },
   "toc": {
     "label": "Components",
     "overview": "Overview",
     "filterPlaceholder": "Filter components…",
+    "filterCount": "{{visible}} of {{total}}",
     "noResults": "No components match your filter.",
     "clearFilter": "Clear filter",
     "uiPrimitives": "UI primitives",
