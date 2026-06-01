@@ -494,7 +494,10 @@ main().catch((err) => {
 });
 
 async function main() {
-  const tmp = await mkdtemp(path.join(tmpdir(), 'eikon-e2e-'));
+  // Keep the temp root short on Windows: pnpm's virtual store paths can
+  // exceed legacy MAX_PATH limits and break package imports in Vitest 4.
+  const tmpBase = await resolveE2eTmpBase();
+  const tmp = await mkdtemp(path.join(tmpBase, 'e-'));
   console.log(`[e2e] workspace: ${tmp}`);
   console.log(`[e2e] mode: ${args.quick ? 'quick (no install/build)' : 'full'}`);
   console.log(
@@ -560,6 +563,25 @@ async function main() {
   }
 }
 
+async function resolveE2eTmpBase() {
+  if (process.env.EIKON_E2E_TMPDIR) {
+    await mkdir(process.env.EIKON_E2E_TMPDIR, { recursive: true });
+    return process.env.EIKON_E2E_TMPDIR;
+  }
+
+  if (process.platform === 'win32') {
+    const shortTmp = path.join(path.parse(tmpdir()).root, 'ek');
+    try {
+      await mkdir(shortTmp, { recursive: true });
+      return shortTmp;
+    } catch {
+      // Fall through to the OS temp dir if the drive root is not writable.
+    }
+  }
+
+  return tmpdir();
+}
+
 /**
  * Install the packed CLI tarball into a single shared sandbox once and
  * return the absolute path to its `node_modules/.bin/create-eikon-react`.
@@ -597,7 +619,7 @@ async function installSharedSandbox(tmpRoot, tarballPath) {
 }
 
 async function runScenario(scenario, tmpRoot, cliBin) {
-  const scratch = path.join(tmpRoot, `scratch-${scenario.id}`);
+  const scratch = path.join(tmpRoot, `s-${scenario.id}`);
   await mkdir(scratch, { recursive: true });
 
   step('  invoke CLI');

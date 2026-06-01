@@ -29,7 +29,7 @@
       "@test/*": ["__tests__/*"]
     },
 
-    "types": ["vite/client", "@testing-library/jest-dom"]
+    "types": ["vite/client", "@testing-library/jest-dom", "node"]
   },
   "include": ["src", "__tests__"]
 }
