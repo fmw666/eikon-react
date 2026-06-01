@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 110" role="img" aria-labelledby="title desc">
+  <title id="title">Eikon React handwritten mark</title>
+  <desc id="desc">A transparent animated one-line drawing that writes the letters er.</desc>
+  <defs>
+    <filter id="ink-softness" x="-12%" y="-16%" width="124%" height="132%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.22" result="soft" />
+      <feMerge>
+        <feMergeNode in="soft" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <style>
+      .mark {
+        fill: none;
+        stroke: #111111;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        filter: url(#ink-softness);
+      }
+
+      .main-line {
+        stroke-width: 4.6;
+        stroke-dasharray: 260;
+        stroke-dashoffset: 260;
+        animation: write 1.65s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+          breathe 3.8s ease-in-out 1.65s infinite;
+      }
+
+      @keyframes write {
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+
+      @keyframes breathe {
+        0%,
+        100% {
+          opacity: 0.9;
+          transform: translateY(0);
+        }
+
+        50% {
+          opacity: 1;
+          transform: translateY(-0.7px);
+        }
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .mark {
+          stroke: #f7f2e8;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .main-line {
+          animation: none;
+        }
+
+        .main-line {
+          stroke-dashoffset: 0;
+        }
+      }
+    </style>
+  </defs>
+
+  <g aria-hidden="true">
+    <path
+      class="mark main-line"
+      d="M30 66
+         C36 50 58 43 70 54
+         C82 65 75 82 58 82
+         C43 83 35 73 40 61
+         C45 50 63 51 73 62
+         C80 66 84 71 94 71
+         C101 71 105 64 106 56
+         C107 46 98 44 95 54
+         C92 66 94 84 96 92
+         C100 74 109 56 122 56
+         C134 56 140 66 136 77
+         C133 86 122 86 116 80"
+    />
+  </g>
+</svg>

@@ -80,6 +80,25 @@ export function Hero({
             } as CSSProperties
           }
         />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-6 top-4 -z-10 hidden h-44 w-44 opacity-80 sm:block md:-right-8 md:top-2 md:h-56 md:w-56 lg:-right-10 lg:top-0 lg:h-72 lg:w-72"
+          style={
+            {
+              maskImage:
+                'radial-gradient(circle at 58% 42%, black 0%, black 42%, rgb(0 0 0 / 0.55) 58%, transparent 78%)',
+              WebkitMaskImage:
+                'radial-gradient(circle at 58% 42%, black 0%, black 42%, rgb(0 0 0 / 0.55) 58%, transparent 78%)',
+            } as CSSProperties
+          }
+        >
+          <div className="absolute inset-0 rounded-full bg-black/5 blur-3xl dark:bg-white/10" />
+          <img
+            src="/webicon.svg"
+            alt=""
+            className="relative h-full w-full rotate-[-6deg] drop-shadow-[0_18px_30px_rgb(0_0_0/0.14)] dark:drop-shadow-[0_18px_30px_rgb(255_255_255/0.08)]"
+          />
+        </div>
         {/* Text column */}
         <div className="flex flex-col items-start text-left">
           {/* Badge */}
