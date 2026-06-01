@@ -87,59 +87,66 @@ function ExamplesLayout() {
     <div className="@container/examples">
       <div className="grid gap-8 @2xl/examples:grid-cols-[220px_minmax(0,1fr)] @2xl/examples:items-start">
         {/*
-          Sticky (NOT fixed): the sidebar scrolls with the page normally,
-          then pins once the page scrolls far enough that its top would
-          leave the viewport.
+          Full-height docked sidebar (shadcn / Tailwind / Vercel / Linear
+          docs pattern). The `<aside>` itself is the scroll container, so:
 
-          `items-start` on the grid + `self-start` on the aside stop the
-          grid row from stretching the aside to match `<main>`'s height
-          (which would give `sticky` zero travel and silently break it on
-          long pages). The inner panel is capped to the viewport and
-          scrolls internally, so a long nav never forces the *page* to
-          scroll and drag the sidebar along with it. Narrow shells keep
-          the natural stacked flow.
+            - Its outer box is `sticky` and locks to viewport height the
+              instant any page scroll happens — there's no "drag along
+              with the page for a few pixels before sticking" because
+              the column already fills the available vertical space.
+            - The sidebar's *own* search header (rendered inside
+              `ExamplesSidebar`) is sticky-pinned to the top of THIS
+              scroll container, so it never scrolls away while the
+              visitor scans the long nav list.
+            - The page itself still scrolls normally — only the sidebar
+              row geometry is internalised. The main column and its
+              outlet inherit the host layout's normal page scroll.
 
-          Layout-aware sticky offset. Each root layout declares its
-          fixed chrome via CSS vars on its outermost element:
+          `items-start` on the grid + `self-start` on the aside keep the
+          aside's height pinned to its own `h-[…]` value rather than
+          letting the grid row stretch it to match `<main>`. Narrow
+          shells (CenteredRootLayout's ~448px card, the disclosure-only
+          mobile state) keep the natural stacked flow — none of the
+          @2xl utilities apply below the breakpoint.
+
+          Layout-aware geometry. Each root layout declares its fixed
+          chrome via CSS vars on its outermost element:
             - `--app-topbar-h`     height of any sticky/fixed top bar
             - `--app-bottombar-h`  height of any fixed bottom bar (tabs)
           Both default to `0px` (the `var(--app-…, 0px)` fallback). That
           way the same examples shell behaves correctly regardless of
-          which layout hosts it:
+          which of the seven root layouts hosts it:
             - Stacked (static topbar that scrolls away): both 0 — sidebar
-              hugs the viewport top once the user scrolls past the topbar.
+              docks to viewport top once the topbar has scrolled out.
             - Mobile / Topbar+Sidebar / Bottom-tabs (sticky h-14): the
               sidebar parks BELOW the sticky topbar instead of underneath.
-            - Bottom-tabs (fixed h-16 bottom): the sidebar's max-height
+            - Bottom-tabs (fixed h-16 bottom): the sidebar's height
               shrinks so it doesn't extend under the bottom bar.
         */}
         <aside
           aria-label={t('toc.label')}
           className={[
             'self-start',
+            // Wide shells: the aside IS the scroll container — height is
+            // fixed to the available viewport, so the column visually
+            // fills the full vertical space the moment it pins.
             '@2xl/examples:sticky',
-            '@2xl/examples:top-[calc(var(--app-topbar-h,0px)+1rem)]',
+            '@2xl/examples:top-[var(--app-topbar-h,0px)]',
+            '@2xl/examples:h-[calc(100dvh-var(--app-topbar-h,0px)-var(--app-bottombar-h,0px))]',
+            '@2xl/examples:overflow-y-auto',
+            '@2xl/examples:overscroll-contain',
+            // Bottom breathing room below the last nav row when scrolled
+            // to the end. NO top padding — the sticky search header
+            // inside the sidebar is `top-0` of THIS scroll container
+            // and a top padding here would confuse its pin position
+            // (visible jump as it transitions from in-flow to pinned).
+            '@2xl/examples:pb-6',
+            '@2xl/examples:pr-3',
+            '@2xl/examples:border-r',
+            '@2xl/examples:border-[var(--color-border)]',
           ].join(' ')}
         >
-          {/*
-            Documentation-style nav: NO surrounding card (border/shadow/bg)
-            on wide shells — that "framed panel" look makes the nav read
-            like a dialog. We just cap its height and let it scroll, with
-            a single right-edge divider to mark the column. On narrow
-            shells the surrounding chrome is unnecessary anyway, since the
-            list is shown by an explicit disclosure toggle.
-          */}
-          <div
-            className={[
-              '@2xl/examples:overflow-y-auto',
-              '@2xl/examples:pr-3',
-              '@2xl/examples:border-r',
-              '@2xl/examples:border-[var(--color-border)]',
-              '@2xl/examples:max-h-[calc(100dvh-var(--app-topbar-h,0px)-var(--app-bottombar-h,0px)-2rem)]',
-            ].join(' ')}
-          >
-            <ExamplesSidebar />
-          </div>
+          <ExamplesSidebar />
         </aside>
 
         {/*
