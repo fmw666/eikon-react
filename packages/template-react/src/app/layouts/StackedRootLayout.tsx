@@ -37,7 +37,7 @@ function StackedRootLayout() {
 
 
   return (
-    <div className="flex min-h-[100dvh] flex-col">
+    <div className="flex min-h-[100dvh] flex-col [--app-static-topbar-h:3.5rem]">
       <header className="border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)] bg-[var(--color-sidebar)]/70 text-[var(--color-sidebar-foreground)] backdrop-blur">
         {/*
           3-column grid pattern: brand (left, 1fr) | nav (auto, centered) |
