@@ -20,8 +20,8 @@
 
       .main-line {
         stroke-width: 4.6;
-        stroke-dasharray: 260;
-        stroke-dashoffset: 260;
+        stroke-dasharray: 235;
+        stroke-dashoffset: 235;
         animation: write 1.65s cubic-bezier(0.22, 1, 0.36, 1) forwards,
           breathe 3.8s ease-in-out 1.65s infinite;
       }
@@ -66,18 +66,13 @@
   <g aria-hidden="true">
     <path
       class="mark main-line"
-      d="M30 66
-         C36 50 58 43 70 54
-         C82 65 75 82 58 82
-         C43 83 35 73 40 61
-         C45 50 63 51 73 62
-         C80 66 84 71 94 71
-         C101 71 105 64 106 56
-         C107 46 98 44 95 54
-         C92 66 94 84 96 92
-         C100 74 109 56 122 56
-         C134 56 140 66 136 77
-         C133 86 122 86 116 80"
+      d="M 40 70
+         C 55 60, 65 35, 55 35
+         C 40 35, 40 75, 55 75
+         C 65 75, 75 45, 75 38
+         C 75 32, 70 32, 72 38
+         C 74 50, 85 50, 92 38
+         C 92 75, 105 75, 120 55"
     />
   </g>
 </svg>
