@@ -48,10 +48,135 @@
   animation: eikon-cursor-blink 1.1s ease-in-out infinite;
 }
 
+.eikon-terminal-demo {
+  max-height: 3rem;
+  overflow: hidden;
+  transition:
+    max-height 360ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-radius 240ms ease,
+    border-color 200ms ease,
+    box-shadow 240ms ease;
+}
+
+.eikon-terminal-demo.is-expanded {
+  max-height: 17rem;
+  border-radius: 1rem;
+  box-shadow:
+    0 18px 55px -30px rgb(0 0 0 / 0.75),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+.eikon-terminal-log {
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.eikon-terminal-demo.is-expanded .eikon-terminal-log {
+  opacity: 1;
+  transition-delay: 90ms;
+}
+
+@keyframes eikon-terminal-typewriter {
+  from {
+    max-width: 0;
+  }
+  to {
+    max-width: calc(var(--eikon-terminal-command-chars) * 1ch);
+  }
+}
+
+.eikon-terminal-typewriter {
+  display: inline-block;
+  max-width: 0;
+  overflow: hidden;
+  vertical-align: bottom;
+  white-space: nowrap;
+  animation: eikon-terminal-typewriter 2.2s steps(var(--eikon-terminal-command-chars)) 180ms both;
+}
+
+@keyframes eikon-terminal-log-line {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.eikon-terminal-log-line {
+  opacity: 0;
+  animation: eikon-terminal-log-line 260ms cubic-bezier(0.16, 1, 0.3, 1) var(--eikon-terminal-line-delay) both;
+}
+
+@keyframes eikon-terminal-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes eikon-terminal-spinner-done {
+  0%,
+  82% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.eikon-terminal-spinner {
+  width: 0.72em;
+  height: 0.72em;
+  border: 1.5px solid rgb(98 168 255 / 0.24);
+  border-top-color: #62a8ff;
+  border-radius: 999px;
+  animation:
+    eikon-terminal-spinner 850ms linear infinite,
+    eikon-terminal-spinner-done 4.05s linear 2.55s both;
+}
+
+@keyframes eikon-terminal-install-done {
+  0%,
+  82% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.eikon-terminal-install-done {
+  opacity: 0;
+  animation: eikon-terminal-install-done 4.05s linear 2.55s both;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .eikon-cursor-blink {
+  .eikon-cursor-blink,
+  .eikon-terminal-typewriter,
+  .eikon-terminal-log-line,
+  .eikon-terminal-spinner,
+  .eikon-terminal-install-done {
     animation: none;
     opacity: 1;
+  }
+
+  .eikon-terminal-spinner {
+    display: none;
+  }
+
+  .eikon-terminal-demo {
+    transition: none;
+  }
+
+  .eikon-terminal-log {
+    opacity: 1;
+    transition: none;
+  }
+
+  .eikon-terminal-typewriter {
+    max-width: none;
   }
 }
 
