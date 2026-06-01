@@ -19,6 +19,11 @@ import { Route, Routes } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 
 // --- Absolute Imports ---
+import {
+  LayoutVariantContext,
+  type LayoutVariant,
+} from '@/app/LayoutVariantContext';
+
 import { renderWithRouter } from '@test/test-utils';
 
 // --- Relative Imports ---
@@ -53,13 +58,25 @@ describe('<ExamplesIndexPage /> (overview)', () => {
 });
 
 describe('<ExamplesLayout /> sidebar', () => {
-  function renderLayout() {
-    return renderWithRouter(
+  function renderLayout(layout?: LayoutVariant) {
+    const tree = (
       <Routes>
         <Route path="/examples" element={<ExamplesLayout />}>
           <Route index element={<div>overview</div>} />
+          <Route path="button" element={<div>button page</div>} />
         </Route>
-      </Routes>,
+      </Routes>
+    );
+    return renderWithRouter(
+      layout ? (
+        <LayoutVariantContext.Provider
+          value={{ variant: layout, setVariant: () => undefined }}
+        >
+          {tree}
+        </LayoutVariantContext.Provider>
+      ) : (
+        tree
+      ),
       { routerEntries: ['/examples'] }
     );
   }
@@ -112,5 +129,16 @@ describe('<ExamplesLayout /> sidebar', () => {
     expect(
       screen.queryByRole('link', { name: 'Table' })
     ).not.toBeInTheDocument();
+  });
+
+  it('uses a compact top navigation inside global-sidebar layouts', () => {
+    renderLayout('sidebar');
+
+    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /basics/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Button' })).toHaveAttribute(
+      'href',
+      '/examples/button'
+    );
   });
 });

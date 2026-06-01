@@ -24,12 +24,12 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 
 // --- Third-party Libraries ---
-import { Loader2, Trash2 } from 'lucide-react';
+import { ChevronRight, Loader2, Trash2 } from 'lucide-react';
 
 // --- Absolute Imports ---
 import { cn } from '@/shared/lib/cn';
 import { Button } from '@/shared/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, cardHoverableClass } from '@/shared/ui/card';
+import { Card, cardHoverableClass } from '@/shared/ui/card';
 import {
   Dialog,
   DialogClose,
@@ -67,13 +67,16 @@ interface TaskCardProps {
 // Constants
 // =================================================================================================
 
+// Status palette is fully token-driven so every design preset (vercel,
+// linear, anthropic, …) and dark mode adapt automatically — `--color-info`
+// already lifts its lightness in dark, no manual `dark:` pairs needed.
 const STATUS_CLASS: Record<TaskStatus, string> = {
   pending:
-    'bg-slate-100 text-slate-700 dark:bg-slate-500/15 dark:text-slate-300',
+    'bg-[var(--color-muted)] text-[var(--color-muted-foreground)] ring-[var(--color-border)]',
   in_progress:
-    'bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300',
+    'bg-[var(--color-info)]/12 text-[var(--color-info)] ring-[var(--color-info)]/30',
   completed:
-    'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+    'bg-[var(--color-success)]/12 text-[var(--color-success)] ring-[var(--color-success)]/30',
 };
 
 // =================================================================================================
@@ -115,58 +118,74 @@ function TaskCard({ task, onClick, onDelete, className }: TaskCardProps) {
           }
         }}
         className={cn(
-          cardHoverableClass,
-          'cursor-pointer transition-colors hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)]',
+          // The hover surface is shadow-lift + a subtle border tint, NOT
+          // an `--color-accent` flip. Flipping the card surface fights
+          // the static status-badge palette (suddenly the badge sits on
+          // a tinted bg) and reads as "selected" rather than "hovered".
+          'group relative transition-[border-color,box-shadow] duration-200',
+          onClick &&
+            cn(
+              cardHoverableClass,
+              'cursor-pointer hover:border-[var(--color-foreground)]/15 focus-visible:border-[var(--color-foreground)]/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]'
+            ),
           !onClick && 'cursor-default',
           className
         )}
       >
-        <CardHeader className="gap-2 pb-2">
-          <div className="flex items-center justify-between gap-3">
-            <CardTitle className="min-w-0 flex-1 truncate text-base">
-              {task.title}
-            </CardTitle>
-            <div className="flex shrink-0 items-center gap-2">
+        <div className="flex items-start gap-3 px-5 py-4">
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <div className="flex items-center gap-2">
+              <h3 className="min-w-0 flex-1 truncate text-[0.9375rem] font-semibold leading-snug tracking-tight">
+                {task.title}
+              </h3>
               <span
                 className={cn(
-                  'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[0.6875rem] font-medium tracking-tight',
+                  'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[0.6875rem] font-medium leading-4 ring-1 ring-inset',
                   STATUS_CLASS[task.status]
                 )}
               >
                 <span
                   aria-hidden="true"
-                  className="h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-75"
+                  className="h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-80"
                 />
                 {t(`status.${task.status}`)}
               </span>
-              {onDelete && (
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  aria-label={t('delete.button')}
-                  className="h-7 w-7 text-[var(--color-muted-foreground)] hover:text-[var(--color-destructive)]"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setConfirmOpen(true);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.stopPropagation();
-                    }
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
             </div>
+            {task.description && (
+              <p className="line-clamp-2 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
+                {task.description}
+              </p>
+            )}
           </div>
-        </CardHeader>
-        {task.description && (
-          <CardContent className="pt-0 text-sm text-[var(--color-muted-foreground)]">
-            {task.description}
-          </CardContent>
-        )}
+          <div className="flex shrink-0 items-center gap-0.5 self-start">
+            {onDelete && (
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                aria-label={t('delete.button')}
+                className="h-7 w-7 opacity-60 transition-[opacity,colors] hover:bg-[var(--color-destructive)]/10 hover:text-[var(--color-destructive)] hover:opacity-100 focus-visible:opacity-100 group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setConfirmOpen(true);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.stopPropagation();
+                  }
+                }}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
+            {onClick && (
+              <ChevronRight
+                aria-hidden="true"
+                className="h-4 w-4 shrink-0 -translate-x-1 text-[var(--color-muted-foreground)] opacity-0 transition-[opacity,transform] duration-200 group-hover:translate-x-0 group-hover:opacity-100"
+              />
+            )}
+          </div>
+        </div>
       </Card>
 
       {onDelete && (

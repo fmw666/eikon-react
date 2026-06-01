@@ -29,7 +29,7 @@
 // =================================================================================================
 
 // --- Core Libraries ---
-import { Suspense, useEffect } from 'react';
+import { Suspense, useContext, useEffect } from 'react';
 
 // --- Core-related Libraries ---
 import { useTranslation } from 'react-i18next';
@@ -39,10 +39,12 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 
 // --- Absolute Imports ---
+import { LayoutVariantContext } from '@/app/LayoutVariantContext';
 import { Spinner } from '@/shared/ui/spinner';
 
 // --- Relative Imports ---
 import { ExamplesSidebar } from '../components/ExamplesSidebar';
+import { ExamplesTopNav } from '../components/ExamplesTopNav';
 import { getNeighbours } from '../components/sectionMeta';
 
 // =================================================================================================
@@ -53,6 +55,8 @@ function ExamplesLayout() {
   const { t } = useTranslation('examples');
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const layout = useContext(LayoutVariantContext)?.variant ?? 'stacked';
+  const useCompactNav = layout === 'sidebar' || layout === 'topbar-sidebar';
 
   // `[` / `]` step through the flat order. We resolve neighbours from
   // the current path's last segment so it works for the `:section`
@@ -85,7 +89,15 @@ function ExamplesLayout() {
 
   return (
     <div className="@container/examples">
-      <div className="grid gap-8 @2xl/examples:grid-cols-[220px_minmax(0,1fr)] @2xl/examples:items-start">
+      <div
+        className={[
+          'grid gap-8',
+          !useCompactNav &&
+            '@2xl/examples:grid-cols-[220px_minmax(0,1fr)] @2xl/examples:items-start',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         {/*
           Full-height docked sidebar (shadcn / Tailwind / Vercel / Linear
           docs pattern). The `<aside>` itself is the scroll container, so:
@@ -109,45 +121,50 @@ function ExamplesLayout() {
           mobile state) keep the natural stacked flow — none of the
           @2xl utilities apply below the breakpoint.
 
-          Layout-aware geometry. Each root layout declares its fixed
-          chrome via CSS vars on its outermost element:
-            - `--app-topbar-h`     height of any sticky/fixed top bar
-            - `--app-bottombar-h`  height of any fixed bottom bar (tabs)
+          Layout-aware geometry. Root layouts can declare their visible
+          chrome via CSS vars on their outermost element:
+            - `--app-static-topbar-h` height of a non-sticky header that
+              is still visible when the examples route first paints
+            - `--app-topbar-h`        height of any sticky/fixed top bar
+            - `--app-bottombar-h`     height of any fixed bottom bar (tabs)
           Both default to `0px` (the `var(--app-…, 0px)` fallback). That
           way the same examples shell behaves correctly regardless of
           which of the seven root layouts hosts it:
-            - Stacked (static topbar that scrolls away): both 0 — sidebar
-              docks to viewport top once the topbar has scrolled out.
+            - Stacked: static topbar is accounted for so the examples nav
+              doesn't slide with the page before sticking.
             - Mobile / Topbar+Sidebar / Bottom-tabs (sticky h-14): the
               sidebar parks BELOW the sticky topbar instead of underneath.
             - Bottom-tabs (fixed h-16 bottom): the sidebar's height
               shrinks so it doesn't extend under the bottom bar.
         */}
-        <aside
-          aria-label={t('toc.label')}
-          className={[
-            'self-start',
-            // Wide shells: the aside IS the scroll container — height is
-            // fixed to the available viewport, so the column visually
-            // fills the full vertical space the moment it pins.
-            '@2xl/examples:sticky',
-            '@2xl/examples:top-[var(--app-topbar-h,0px)]',
-            '@2xl/examples:h-[calc(100dvh-var(--app-topbar-h,0px)-var(--app-bottombar-h,0px))]',
-            '@2xl/examples:overflow-y-auto',
-            '@2xl/examples:overscroll-contain',
-            // Bottom breathing room below the last nav row when scrolled
-            // to the end. NO top padding — the sticky search header
-            // inside the sidebar is `top-0` of THIS scroll container
-            // and a top padding here would confuse its pin position
-            // (visible jump as it transitions from in-flow to pinned).
-            '@2xl/examples:pb-6',
-            '@2xl/examples:pr-3',
-            '@2xl/examples:border-r',
-            '@2xl/examples:border-[var(--color-border)]',
-          ].join(' ')}
-        >
-          <ExamplesSidebar />
-        </aside>
+        {!useCompactNav && (
+          <aside
+            aria-label={t('toc.label')}
+            className={[
+              'self-start',
+              // Wide shells: the aside IS the scroll container. Its sticky
+              // inset mirrors the host layout's visible chrome + content
+              // top padding so it starts pinned in place instead of sliding
+              // upward with the main page before it becomes sticky.
+              '@2xl/examples:sticky',
+              '@2xl/examples:top-[calc(var(--app-static-topbar-h,0px)+var(--app-topbar-h,0px)+2rem)]',
+              '@2xl/examples:h-[calc(100dvh-var(--app-static-topbar-h,0px)-var(--app-topbar-h,0px)-var(--app-bottombar-h,0px)-2rem)]',
+              '@2xl/examples:overflow-y-auto',
+              '@2xl/examples:overscroll-contain',
+              // Bottom breathing room below the last nav row when scrolled
+              // to the end. NO top padding — the sticky search header
+              // inside the sidebar is `top-0` of THIS scroll container
+              // and a top padding here would confuse its pin position
+              // (visible jump as it transitions from in-flow to pinned).
+              '@2xl/examples:pb-6',
+              '@2xl/examples:pr-3',
+              '@2xl/examples:border-r',
+              '@2xl/examples:border-[var(--color-border)]',
+            ].join(' ')}
+          >
+            <ExamplesSidebar />
+          </aside>
+        )}
 
         {/*
           Inner Suspense so navigating between sub-pages only swaps the
@@ -155,6 +172,8 @@ function ExamplesLayout() {
           shell flashing the app-level RouteFallback on each route change.
         */}
         <main className="flex min-w-0 flex-col">
+          {useCompactNav && <ExamplesTopNav />}
+
           {/*
             Slim utility row at the very top of the content column —
             renders ONCE for the whole shell. Lives at the top of the
