@@ -21,10 +21,10 @@ const LAPTOP_TOKENS = {
 } as const;
 
 export function LaptopHardwareShell({ children }: { children: ReactNode }) {
-  const lidPadding = 14;
+  const lidPadding = 12;
   const notchWidth = 110;
   const notchHeight = 12;
-  const deckHeight = 220;
+  const deckHeight = 140;
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -101,7 +101,7 @@ export function LaptopHardwareShell({ children }: { children: ReactNode }) {
           height: deckHeight,
           background: `linear-gradient(180deg, ${LAPTOP_TOKENS.deckTopRim} 0%, ${LAPTOP_TOKENS.deckMidUpper} 10%, ${LAPTOP_TOKENS.deckMid} 52%, ${LAPTOP_TOKENS.deckMidLower} 86%, ${LAPTOP_TOKENS.deckBottom} 100%)`,
           borderRadius: '0 0 18px 18px',
-          paddingTop: 22,
+          paddingTop: 14,
           paddingInline: 60,
           boxShadow: [
             'inset 0 1px 0 rgba(255,255,255,0.16)',
@@ -143,10 +143,10 @@ export function LaptopHardwareShell({ children }: { children: ReactNode }) {
           aria-hidden="true"
           style={{
             position: 'absolute',
-            top: 12,
+            top: 8,
             left: 80,
             right: 80,
-            height: 4,
+            height: 3,
             background:
               'repeating-linear-gradient(90deg, rgba(0,0,0,0.5) 0 1.5px, transparent 1.5px 4px)',
             opacity: 0.6,
@@ -158,8 +158,8 @@ export function LaptopHardwareShell({ children }: { children: ReactNode }) {
           aria-hidden="true"
           style={{
             position: 'relative',
-            marginTop: 12,
-            height: 8,
+            marginTop: 6,
+            height: 6,
             background: `linear-gradient(180deg, ${LAPTOP_TOKENS.keyWellTop} 0%, ${LAPTOP_TOKENS.keyWellBottom} 100%)`,
             borderRadius: '4px 4px 1px 1px',
             boxShadow:
@@ -173,27 +173,27 @@ export function LaptopHardwareShell({ children }: { children: ReactNode }) {
           style={{
             position: 'relative',
             marginTop: 1,
-            height: 92,
+            height: 56,
             background: `linear-gradient(180deg, ${LAPTOP_TOKENS.keyWellTop} 0%, ${LAPTOP_TOKENS.keyWellBottom} 100%)`,
             borderRadius: '1px 1px 6px 6px',
             boxShadow: [
               'inset 0 1px 0 rgba(0,0,0,0.55)',
               'inset 0 -1px 0 rgba(255,255,255,0.04)',
             ].join(', '),
-            padding: 7,
+            padding: 5,
             display: 'grid',
-            gridTemplateRows: 'repeat(4, 1fr)',
-            gap: 4,
+            gridTemplateRows: 'repeat(3, 1fr)',
+            gap: 3,
           }}
         >
-          {[14, 14, 13, 9].map((cols, row) => (
+          {[14, 13, 9].map((cols, row) => (
             <div
               key={row}
               style={{
                 display: 'grid',
                 gridTemplateColumns: `repeat(${cols}, 1fr)`,
                 gap: 3,
-                ...(row === 3
+                ...(row === 2
                   ? { paddingInline: '14%' }
                   : null),
               }}
@@ -218,11 +218,11 @@ export function LaptopHardwareShell({ children }: { children: ReactNode }) {
           aria-hidden="true"
           style={{
             position: 'relative',
-            margin: '14px auto 0',
+            margin: '10px auto 0',
             width: '50%',
-            height: 60,
+            height: 36,
             background: `linear-gradient(180deg, ${LAPTOP_TOKENS.trackpadTop} 0%, ${LAPTOP_TOKENS.trackpadMid} 50%, ${LAPTOP_TOKENS.trackpadBottom} 100%)`,
-            borderRadius: 9,
+            borderRadius: 7,
             boxShadow: [
               'inset 0 1px 0 rgba(255,255,255,0.22)',
               'inset 0 -1px 0 rgba(0,0,0,0.45)',
@@ -263,9 +263,9 @@ const IMAC_TOKENS = {
 
 export function IMacHardwareShell({ children }: { children: ReactNode }) {
   const bezelPadding = 14;
-  const chinHeight = 60;
-  const neckHeight = 32;
-  const baseHeight = 16;
+  const chinHeight = 44;
+  const neckHeight = 26;
+  const baseHeight = 12;
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -313,7 +313,7 @@ export function IMacHardwareShell({ children }: { children: ReactNode }) {
           }}
         >
           <AppleLogo
-            style={{ width: 18, height: 22, color: IMAC_TOKENS.appleLogo }}
+            style={{ width: 14, height: 17, color: IMAC_TOKENS.appleLogo }}
           />
         </div>
       </div>
