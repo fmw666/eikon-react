@@ -19,20 +19,27 @@ export interface PlatformOption {
 
 export const SCREEN_DIM_SCRIM_INACTIVE = 'rgba(10, 10, 14, 0.76)';
 
-// Side cards sit at 0.88 of the centre slot's natural size (was 0.82).
+// Side cards sit at 0.84 of the centre slot's natural size. Slightly
+// smaller than the previous 0.88 so the centre card clearly reads as
+// the focal device — the iMac side has a wider natural footprint
+// than the laptop centre, and at 0.88 the right-hand iMac visually
+// dwarfed the centred laptop. 0.84 keeps the side hardware legible
+// without that imbalance.
+//
 // Larger sides means the rotation+scale rasterisation samples less
 // aggressively, so the device frame's 1px bezels + screen-content
 // hairlines + small SVG icons read crisper on the rotated layer. The
 // `filter:blur(0)` AA hint on `.eikon-stack-card` and INNER_BASE_STYLE
 // fixes the *raster path*, but the *geometry* (steep rotation × small
-// scale) still produces visible aliasing on detailed content — this
-// brings the visual impact back into a regime where the AA hint can
-// fully smooth it.
+// scale) still produces visible aliasing on detailed content — 0.84
+// stays inside the regime where the AA hint can fully smooth it.
 export const STACK_SLOT_SCALE: Record<StackSlot, number> = {
   center: 1,
-  left: 0.88,
-  right: 0.88,
+  left: 0.84,
+  right: 0.84,
 };
+
+const MOBILE_SIDE_TRANSLATE = 42;
 
 export const INNER_BASE_STYLE: CSSProperties = {
   transformOrigin: 'center center',
@@ -70,10 +77,10 @@ export function getCardTransform(slot: StackSlot, platform: DevicePlatform, cent
   // composited surface, which produces a smoother edge. Visually
   // identical to a 2D rotate at these angles, just without the
   // stair-step.
-  const rot = platform === 'mobile' ? 5 : 3;
-  let tx = 28;
-  if (centerPlatform === 'desktop') tx = 34;
-  else if (centerPlatform === 'web' && platform === 'mobile') tx = 32;
+  const rot = platform === 'mobile' ? 4 : 3;
+  let tx = 26;
+  if (platform === 'mobile') tx = MOBILE_SIDE_TRANSLATE;
+  else if (centerPlatform === 'desktop') tx = 30;
   if (slot === 'left') {
     return `translate3d(-${tx}%, 5%, 0) rotate3d(0,0,1,-${rot}deg)`;
   }
