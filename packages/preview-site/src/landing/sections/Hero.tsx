@@ -162,7 +162,7 @@ export function Hero({
             gracefully drop below the terminal on extra-narrow
             screens (≤320px) where the two side-by-side would
             otherwise overflow. */}
-        <div className="mt-10 flex flex-wrap items-stretch gap-2.5 sm:mt-12 sm:gap-3 lg:absolute lg:bottom-40 lg:right-6 lg:mt-0 lg:flex-col lg:flex-nowrap lg:items-end">
+        <div className="mt-10 flex flex-wrap items-end gap-2.5 sm:mt-12 sm:gap-3 lg:absolute lg:bottom-40 lg:right-6 lg:mt-0 lg:flex-col lg:flex-nowrap lg:items-end">
           <TerminalCard command="npx create-eikon-react ." />
           {/* "find it" pill — direct deep-link into the GitHub repo.
               The narrative is "want to actually find it? go read the
