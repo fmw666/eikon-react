@@ -3,9 +3,9 @@
   <desc id="desc">A transparent animated one-line drawing that writes the letters er.</desc>
   <defs>
     <linearGradient id="ink-gradient" x1="30" y1="72" x2="148" y2="30" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#d2c9ba" />
-      <stop offset="0.58" stop-color="#c4baab" />
-      <stop offset="1" stop-color="#aaa297" />
+      <stop offset="0" stop-color="#fbe8bf" />
+      <stop offset="0.58" stop-color="#f7cd8d" />
+      <stop offset="1" stop-color="#eda75c" />
     </linearGradient>
     <filter id="ink-softness" x="-18%" y="-24%" width="136%" height="148%" color-interpolation-filters="sRGB">
       <feGaussianBlur in="SourceGraphic" stdDeviation="0.24" result="soft" />
@@ -19,7 +19,7 @@
       <feColorMatrix
         in="glow"
         type="matrix"
-        values="1 0 0 0 0.78  0 1 0 0 0.72  0 0 1 0 0.62  0 0 0 0.14 0"
+        values="1 0 0 0 0.88  0 1 0 0 0.58  0 0 1 0 0.24  0 0 0 0.14 0"
       />
       <feMerge>
         <feMergeNode />
@@ -37,8 +37,11 @@
 
       .mark-glow {
         fill: none;
-        stroke: #cfc5b6;
-        stroke-linecap: round;
+        stroke: #f7cd8d;
+        /* butt caps + the glow path stops short of the "r" terminal
+           (see its `d`): the blurred glow would otherwise bloom into
+           a stray light dot at the isolated stroke end. */
+        stroke-linecap: butt;
         stroke-linejoin: round;
         stroke-width: 8.8;
         opacity: 0.06;
@@ -48,7 +51,7 @@
       .mark-shadow {
         fill: none;
         stroke: #0a0a0a;
-        stroke-linecap: round;
+        stroke-linecap: butt;
         stroke-linejoin: round;
         stroke-width: 6.6;
         opacity: 0.2;
@@ -57,6 +60,11 @@
 
       .main-line {
         stroke-width: 4.9;
+        /* butt caps: a round cap renders a stray dot whenever the
+           dash length hits 0 (animation start / each reset) — butt
+           draws nothing at zero length, killing the artifact. The
+           ink-softness blur keeps the flat ends visually soft. */
+        stroke-linecap: butt;
         stroke-dasharray: 1;
         stroke-dashoffset: 0;
         animation: write-cycle 9.5s linear 1.2s infinite;
@@ -158,7 +166,7 @@
          C 97 45, 91 50, 84 51
          C 92 48, 100 45, 108 46
          C 118 47, 116 57, 105 62
-         C 116 60, 128 52, 138 45"
+         C 114 59, 122 55, 129 51"
     />
     <path
       class="mark-shadow"

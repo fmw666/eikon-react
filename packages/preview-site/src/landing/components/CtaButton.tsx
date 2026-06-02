@@ -1,10 +1,8 @@
 /**
  * @file CtaButton.tsx
- * @description Codex.io-flavoured call-to-action button.
+ * @description Brand-flavoured call-to-action button.
  *
- * Visual language is a faithful reproduction of the buttons at
- * https://www.codex.io — distinctive enough to be instantly
- * recognisable, generic enough to work as a building block:
+ * Visual language is a compact, high-contrast brand button:
  *
  *   ┌─ outer halo ring (same colour, 2-3px gap) ────────────────────────┐
  *   │  ┌─ solid block (lime fill / black text) ─────────────────────┐    │
@@ -17,15 +15,14 @@
  * us animate width and offset together cleanly). The gap between the
  * button and the halo isn't a fill — it's the page background
  * showing through, so the effect works in both light and dark
- * themes without per-mode tuning (codex.io is dark-only; we have to
- * be theme-aware).
+ * themes without per-mode tuning.
  *
  * Hover gives two simultaneous cues:
  *
  *   1. Word-reveal: the label is rendered twice, stacked vertically
  *      inside an `overflow-hidden` viewport. On hover, the top copy
  *      slides up by 110% and the bottom copy slides into place — a
- *      Codex signature. When the label is a plain string, each
+ *      signature motion. When the label is a plain string, each
  *      character animates independently with a small staggered
  *      delay, so the flip cascades from left to right rather than
  *      moving as a single block.
@@ -35,8 +32,8 @@
  *
  * `variant` controls the colour story:
  *
- *   - "primary"   : lime fill + black text + lime halo. The "money"
- *                   button, used for the page's #1 action.
+ *   - "primary"   : cool brand fill + ink text + brand halo. The
+ *                   "money" button, used for the page's #1 action.
  *   - "secondary" : surface fill + white text + border. Sits beside
  *                   a primary as a softer alternative.
  *
@@ -176,26 +173,35 @@ export function CtaButton(props: CtaButtonProps) {
 // =============================================================================
 
 /**
- * Lime-on-black, signature codex.io look.
+ * Solid warm-gold "money" button — the page's signature #1 action.
  *
- * The `outline` carries the halo: solid lime stroke with a 3px gap
+ * Unlike the secondary (which leans on theme tokens), the primary is
+ * a self-contained, theme-independent fill: a solid amber gradient
+ * with dark ink text. Because the fill is light in both light and
+ * dark mode, the dark text reads with strong contrast either way —
+ * no per-mode tuning needed.
+ *
+ * Dimensionality comes from two inset edges: a bright top highlight
+ * and a soft amber-shadowed bottom, so the surface looks gently
+ * convex. On hover the whole gradient brightens a step and the warm
+ * drop-glow roughly doubles, so the button feels like it lifts.
+ *
+ * The `outline` carries the halo: an amber stroke with a 3px gap
  * (`outline-offset`) filled by the page background. On hover the gap
- * tightens by 1px and the stroke thickens by 1px — the button feels
- * like it focuses without leaping forward.
- *
- * The glow shadow is a soft lime bloom; it's a touch dim at rest and
- * doubles on hover.
+ * tightens by 1px and the stroke thickens — the button focuses
+ * without leaping forward.
  */
 const PRIMARY_TOKENS = {
   surface:
-    'bg-gradient-to-br from-[oklch(0.88_0.2_118)] to-[oklch(0.76_0.18_130)] text-[#1a2e05] ' +
-    'shadow-[0_0_28px_-6px_oklch(0.8_0.18_120/0.6),0_2px_6px_rgb(0_0_0/0.18)] ' +
-    'hover:shadow-[0_0_38px_-2px_oklch(0.8_0.18_120/0.85),0_4px_12px_rgb(0_0_0/0.22)]',
+    'bg-[linear-gradient(135deg,hsl(46_96%_78%),hsl(41_92%_68%)_52%,hsl(37_84%_58%)_100%)] text-[#2a1d05] ' +
+    'hover:bg-[linear-gradient(135deg,hsl(47_98%_81%),hsl(42_94%_71%)_52%,hsl(38_88%_61%)_100%)] ' +
+    'shadow-[inset_0_1px_0_rgb(255_255_255/0.5),inset_0_-1px_0_rgb(120_72_8/0.28),0_1px_2px_rgb(80_50_5/0.2),0_8px_22px_-10px_hsl(40_92%_55%/0.55)] ' +
+    'hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.6),inset_0_-1px_0_rgb(120_72_8/0.32),0_2px_4px_rgb(80_50_5/0.22),0_13px_30px_-8px_hsl(40_94%_55%/0.72)]',
   ring:
-    'outline outline-1 outline-[oklch(0.82_0.16_120/0.7)] outline-offset-[3px] ' +
+    'outline outline-1 outline-[hsl(40_92%_60%/0.55)] outline-offset-[3px] ' +
     'hover:outline-2 hover:outline-offset-[2px] ' +
     'focus-visible:outline-2 focus-visible:outline-offset-[2px]',
-  icon: 'inline-flex items-center text-[#1a2e05]/80',
+  icon: 'inline-flex items-center text-[#2a1d05]/75',
 } as const;
 
 /**
