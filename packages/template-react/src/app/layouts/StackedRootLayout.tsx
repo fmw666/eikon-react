@@ -38,7 +38,7 @@ function StackedRootLayout() {
 
   return (
     <div className="flex min-h-[100dvh] flex-col [--app-static-topbar-h:3.5rem]">
-      <header className="border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)] bg-[var(--color-sidebar)]/70 text-[var(--color-sidebar-foreground)] backdrop-blur">
+      <header className="app-nav-shell app-nav-top border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)] bg-[var(--color-sidebar)]/70 text-[var(--color-sidebar-foreground)] backdrop-blur">
         {/*
           3-column grid pattern: brand (left, 1fr) | nav (auto, centered) |
           actions (right, 1fr). The matching 1fr columns on either side force
@@ -59,10 +59,10 @@ function StackedRootLayout() {
                 end={link.end}
                 className={({ isActive }) =>
                   cn(
-                    'rounded-md px-3 py-1.5 text-sm transition-colors',
+                    'app-nav-link rounded-md px-3 py-1.5 text-sm transition-colors',
                     'text-[var(--color-muted-foreground)] hover:bg-[var(--color-sidebar-primary)]/8 hover:text-[var(--color-sidebar-foreground)]',
                     isActive &&
-                      'bg-[var(--color-sidebar-primary)]/12 text-[var(--color-sidebar-primary)]'
+                      'app-nav-link-active bg-[var(--color-sidebar-primary)]/12 text-[var(--color-sidebar-primary)]'
                   )
                 }
               >

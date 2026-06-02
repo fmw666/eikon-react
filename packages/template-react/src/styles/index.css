@@ -1849,55 +1849,52 @@
    * automatically pull from the same palette without anyone
    * needing to memorise hex codes. */
   --color-background: oklch(0.92 0.075 95);
-  --color-foreground: oklch(0.28 0.04 260);
+  --color-foreground: oklch(0.24 0.035 260);
   /* Coral card deepened from L0.7 → L0.52 so the white card text clears
    * 4.5:1 (body-text AA) while keeping the demo's signature coral hue. */
-  --color-card: oklch(0.52 0.18 25);
-  --color-card-foreground: oklch(0.99 0 0);
-  --color-muted: oklch(0.95 0.045 95);
-  --color-muted-foreground: oklch(0.42 0.05 260);
-  --color-border: oklch(0.82 0.05 80);
-  --color-input: oklch(0.985 0.005 95);
-  /* Primary = navy — the demo's CTA / dark-card colour. JUMPS off
-   * the cream bg AND off coral cards, giving the design its
-   * coral-vs-navy chord tension. */
-  --color-primary: oklch(0.4 0.05 260);
-  --color-primary-foreground: oklch(0.98 0.012 95);
+  --color-card: oklch(0.985 0.018 88);
+  --color-card-foreground: var(--color-foreground);
+  --color-muted: oklch(0.94 0.045 88);
+  --color-muted-foreground: oklch(0.5 0.035 260);
+  --color-border: oklch(0.78 0.065 72);
+  --color-input: oklch(0.975 0.012 88);
+  /* Primary button fill and label colour for claymorphism controls. */
+  --clay-background: #f76d6d;
+  --clay-foreground: #f5f5f5;
+  --clay-border-radius: 48px;
+  --clay-shadow-outset: 8px 8px 16px 0 rgba(0, 0, 0, 0.25);
+  --clay-shadow-inset-primary: -8px -8px 16px 0 rgba(0, 0, 0, 0.25);
+  --clay-shadow-inset-secondary: 8px 8px 16px 0 hsla(0, 0%, 100%, 0.2);
+  --clay-shadow:
+    var(--clay-shadow-outset),
+    inset var(--clay-shadow-inset-primary),
+    inset var(--clay-shadow-inset-secondary);
+  --color-primary: var(--clay-background);
+  --color-primary-foreground: var(--clay-foreground);
   /* Secondary = sky-blue from the "Install it" section. Distinct
    * surface identity, not a watered-down card. */
-  --color-secondary: oklch(0.81 0.055 235);
-  --color-secondary-foreground: oklch(0.25 0.05 260);
+  --color-secondary: oklch(0.92 0.04 88);
+  --color-secondary-foreground: var(--color-foreground);
   /* Accent = peach from the "Apply it" section. Used by shadcn
    * convention as the hover/highlighted-row tint — soft, in the
    * coral family but lighter so coral cards still pop against it. */
-  --color-accent: oklch(0.78 0.105 30);
-  --color-accent-foreground: oklch(0.28 0.08 25);
+  --color-accent: oklch(0.88 0.08 28);
+  --color-accent-foreground: var(--color-foreground);
   --color-destructive: oklch(0.58 0.22 22);
   --color-destructive-foreground: oklch(0.99 0 0);
-  --color-ring: oklch(0.4 0.05 260);
+  --color-ring: var(--clay-background);
 
   /* Measured from the demo's hero card at 1x: ~40px corner. We
    * peg --radius-lg to 2.5rem so Card / Button / Sheet ship at
    * the demo's hero proportions. md/sm scale proportionally for
    * nested code-blocks (24px) and inline chips (16px). */
-  --radius-lg: 2.5rem;   /* 40px — clay.css demo card */
-  --radius-md: 1.5rem;   /* 24px — nested code-block */
-  --radius-sm: 1rem;     /* 16px — inline chip / input */
+  --radius-lg: var(--clay-border-radius);
+  --radius-md: var(--clay-border-radius);
+  --radius-sm: calc(var(--clay-border-radius) / 2);
 
-  /* Display font = Fredoka (Adrian uses Fredoka One verbatim, but
-   * Fredoka is the modern variable rewrite that ships weights
-   * 300-700 in a single file — same letterforms, half the bytes).
-   * Body font = Nunito at weight 500-700 for chunky-but-readable
-   * paragraphs. Both loaded via the <link> wrapped in
-   * @eikon:variant(design=claymorphism) in index.html. Fallbacks
-   * are platform-native rounded faces so the design degrades
-   * gracefully when Google Fonts is blocked. */
-  --font-sans:
-    'Nunito', 'SF Pro Rounded', -apple-system, BlinkMacSystemFont,
-    'Quicksand', 'Inter Variable', Inter, system-ui, sans-serif;
-  --font-display:
-    'Fredoka', 'Fredoka One', 'SF Pro Rounded', -apple-system,
-    BlinkMacSystemFont, 'Nunito', system-ui, sans-serif;
+  /* Fredoka One is used across claymorphism body and display text. */
+  --font-sans: 'Fredoka One', sans-serif;
+  --font-display: 'Fredoka One', sans-serif;
 
   /* Chunky everything. Clay text at weight 500 reads as cardboard;
    * weight 700 reads as Play-Doh. Tracking stays at 0 — clay
@@ -1963,18 +1960,9 @@
    *   L1 ($shadow-outset)            outer drop, neutral dark
    *   L2 ($shadow-inset-secondary)   inset top white specular
    *   L3 ($shadow-inset-primary)     inset bottom dark pocket */
-  --shadow-sm:
-    0 6px 18px 0 oklch(0 0 0 / 0.15),
-    inset 0 5px 7px 0 oklch(1 0 0 / 0.25),
-    inset 0 -5px 7px 0 oklch(0 0 0 / 0.06);
-  --shadow-md:
-    0 10px 30px 0 oklch(0 0 0 / 0.2),
-    inset 0 8px 10px 0 oklch(1 0 0 / 0.3),
-    inset 0 -8px 10px 0 oklch(0 0 0 / 0.08);
-  --shadow-lg:
-    0 18px 48px 0 oklch(0 0 0 / 0.25),
-    inset 0 12px 14px 0 oklch(1 0 0 / 0.35),
-    inset 0 -12px 14px 0 oklch(0 0 0 / 0.1);
+  --shadow-sm: var(--clay-shadow);
+  --shadow-md: var(--clay-shadow);
+  --shadow-lg: var(--clay-shadow);
 
   /* Hover = inflated further (drop pushes deeper, highlight
    * brightens). Active = squished (drop collapses, top inset
@@ -1982,13 +1970,13 @@
    * matters most in default; hover/active can carry a 4th
    * layer to read as physical state change. */
   --surface-hover-shadow:
-    0 14px 38px 0 oklch(0 0 0 / 0.24),
-    inset 0 10px 12px 0 oklch(1 0 0 / 0.35),
-    inset 0 -10px 12px 0 oklch(0 0 0 / 0.09);
+    10px 10px 20px 0 rgba(0, 0, 0, 0.28),
+    inset -8px -8px 16px 0 rgba(0, 0, 0, 0.25),
+    inset 8px 8px 16px 0 hsla(0, 0%, 100%, 0.24);
   --surface-active-shadow:
-    0 3px 8px 0 oklch(0 0 0 / 0.14),
-    inset 0 4px 8px 0 oklch(0 0 0 / 0.18),
-    inset 0 -3px 6px 0 oklch(0 0 0 / 0.04);
+    4px 4px 10px 0 rgba(0, 0, 0, 0.18),
+    inset -6px -6px 12px 0 rgba(0, 0, 0, 0.28),
+    inset 6px 6px 12px 0 hsla(0, 0%, 100%, 0.16);
 
   --scrollbar-size: 14px;
   --scrollbar-thumb: oklch(0.7 0.13 25);
@@ -2002,13 +1990,13 @@
    * chord, and navy is what the demo footer / install-section
    * uses. Active items pop because the navy gives them a high-
    * contrast frame. */
-  --color-sidebar: oklch(0.4 0.05 260);
-  --color-sidebar-foreground: oklch(0.98 0.012 95);
-  --color-sidebar-primary: oklch(0.7 0.16 25);
-  --color-sidebar-primary-foreground: oklch(0.99 0 0);
-  --color-sidebar-accent: oklch(0.5 0.06 260);
-  --color-sidebar-accent-foreground: oklch(0.98 0.012 95);
-  --color-sidebar-border: oklch(0.45 0.06 260);
+  --color-sidebar: var(--color-card);
+  --color-sidebar-foreground: var(--color-foreground);
+  --color-sidebar-primary: var(--clay-background);
+  --color-sidebar-primary-foreground: var(--clay-foreground);
+  --color-sidebar-accent: var(--color-muted);
+  --color-sidebar-accent-foreground: var(--color-foreground);
+  --color-sidebar-border: var(--color-border);
 
   /* Claymorphism chart — the demo's 4-colour chord (coral, navy,
    * sky, peach) plus a sage green so 5 series stay distinguishable.
@@ -2059,11 +2047,11 @@
   --color-card: oklch(0.58 0.16 25);
   --color-card-foreground: oklch(0.99 0 0);
   --color-muted: oklch(0.3 0.035 260);
-  --color-muted-foreground: oklch(0.78 0.02 95);
+  --color-muted-foreground: oklch(0.88 0.012 95);
   --color-border: oklch(0.36 0.04 260);
   --color-input: oklch(0.28 0.035 260);
-  --color-primary: oklch(0.72 0.16 25);
-  --color-primary-foreground: oklch(0.22 0.04 260);
+  --color-primary: var(--clay-background);
+  --color-primary-foreground: var(--clay-foreground);
   --color-secondary: oklch(0.34 0.04 250);
   --color-secondary-foreground: oklch(0.96 0.012 95);
   --color-accent: oklch(0.45 0.075 25);
@@ -2087,27 +2075,18 @@
    * stays bright because the card body sits at L=0.58 (still
    * needs a strong rim highlight to read as clay), inner-bottom
    * dark stays subtle. */
-  --shadow-sm:
-    0 6px 18px 0 oklch(0 0 0 / 0.45),
-    inset 0 5px 7px 0 oklch(1 0 0 / 0.22),
-    inset 0 -5px 7px 0 oklch(0 0 0 / 0.18);
-  --shadow-md:
-    0 10px 30px 0 oklch(0 0 0 / 0.55),
-    inset 0 8px 10px 0 oklch(1 0 0 / 0.26),
-    inset 0 -8px 10px 0 oklch(0 0 0 / 0.22);
-  --shadow-lg:
-    0 18px 48px 0 oklch(0 0 0 / 0.65),
-    inset 0 12px 14px 0 oklch(1 0 0 / 0.3),
-    inset 0 -12px 14px 0 oklch(0 0 0 / 0.26);
+  --shadow-sm: var(--clay-shadow);
+  --shadow-md: var(--clay-shadow);
+  --shadow-lg: var(--clay-shadow);
 
   --surface-hover-shadow:
-    0 14px 38px 0 oklch(0 0 0 / 0.6),
-    inset 0 10px 12px 0 oklch(1 0 0 / 0.3),
-    inset 0 -10px 12px 0 oklch(0 0 0 / 0.24);
+    10px 10px 20px 0 rgba(0, 0, 0, 0.32),
+    inset -8px -8px 16px 0 rgba(0, 0, 0, 0.3),
+    inset 8px 8px 16px 0 hsla(0, 0%, 100%, 0.18);
   --surface-active-shadow:
-    0 3px 8px 0 oklch(0 0 0 / 0.4),
-    inset 0 4px 8px 0 oklch(0 0 0 / 0.4),
-    inset 0 -3px 6px 0 oklch(0 0 0 / 0.12);
+    4px 4px 10px 0 rgba(0, 0, 0, 0.22),
+    inset -6px -6px 12px 0 rgba(0, 0, 0, 0.34),
+    inset 6px 6px 12px 0 hsla(0, 0%, 100%, 0.12);
 
   --scrollbar-thumb: oklch(0.5 0.1 25);
   --scrollbar-thumb-hover: oklch(0.65 0.16 25);
@@ -2130,6 +2109,143 @@
  *
  * (No body or :is() selector here anymore — both moved.)
  */
+:root.design-claymorphism .app-nav-shell {
+  border-color: transparent;
+  background: var(--color-card);
+  color: var(--color-foreground);
+  box-shadow: var(--clay-shadow);
+}
+
+:root.design-claymorphism .app-nav-top {
+  border-radius: 0 0 var(--clay-border-radius) var(--clay-border-radius);
+}
+
+:root.design-claymorphism .app-nav-side {
+  border-radius: 0 var(--clay-border-radius) var(--clay-border-radius) 0;
+}
+
+:root.design-claymorphism .app-nav-bottom {
+  border-radius: var(--clay-border-radius) var(--clay-border-radius) 0 0;
+}
+
+:root.design-claymorphism .app-nav-link,
+:root.design-claymorphism .app-nav-action,
+:root.design-claymorphism .app-bottom-nav-link {
+  color: var(--color-foreground);
+  border-radius: calc(var(--clay-border-radius) / 2);
+  transition:
+    background-color var(--duration-normal) var(--ease-spring),
+    box-shadow var(--duration-normal) var(--ease-spring),
+    color var(--duration-normal) var(--ease-spring),
+    transform var(--duration-normal) var(--ease-spring);
+}
+
+:root.design-claymorphism .app-nav-link:hover,
+:root.design-claymorphism .app-nav-action:hover,
+:root.design-claymorphism .app-bottom-nav-link:hover {
+  background: var(--color-muted);
+  color: var(--color-foreground);
+  box-shadow:
+    inset -4px -4px 10px 0 rgba(0, 0, 0, 0.14),
+    inset 4px 4px 10px 0 hsla(0, 0%, 100%, 0.18);
+  transform: translateY(-1px);
+}
+
+:root.design-claymorphism .app-nav-link-active,
+:root.design-claymorphism .app-bottom-nav-link-active {
+  background: var(--clay-background);
+  color: var(--clay-foreground);
+  box-shadow: var(--clay-shadow);
+}
+
+:root.design-claymorphism .app-dropdown-trigger,
+:root.design-claymorphism .app-dropdown-content {
+  border-color: transparent;
+  background: var(--color-card);
+  color: var(--color-foreground);
+  box-shadow: var(--clay-shadow);
+}
+
+:root.design-claymorphism .app-dropdown-trigger {
+  border-radius: calc(var(--clay-border-radius) / 2);
+}
+
+:root.design-claymorphism .app-dropdown-content {
+  border-radius: var(--clay-border-radius);
+}
+
+:root.design-claymorphism .app-dropdown-item {
+  color: var(--color-foreground);
+  border-radius: calc(var(--clay-border-radius) / 2);
+  transition:
+    background-color var(--duration-fast) var(--ease-spring),
+    box-shadow var(--duration-fast) var(--ease-spring),
+    color var(--duration-fast) var(--ease-spring);
+}
+
+:root.design-claymorphism .app-dropdown-item:focus,
+:root.design-claymorphism .app-dropdown-item[data-highlighted] {
+  background: var(--color-muted);
+  color: var(--color-foreground);
+  box-shadow:
+    inset -4px -4px 10px 0 rgba(0, 0, 0, 0.14),
+    inset 4px 4px 10px 0 hsla(0, 0%, 100%, 0.18);
+}
+
+:root.design-claymorphism .app-dropdown-item[data-state='checked'] {
+  background: var(--clay-background);
+  color: var(--clay-foreground);
+}
+
+:root.design-claymorphism input:not([type='checkbox']):not([type='radio']):not([type='range']),
+:root.design-claymorphism textarea {
+  border-color: var(--color-border);
+  background: var(--color-card);
+  color: var(--color-foreground);
+  box-shadow:
+    inset 5px 5px 12px 0 rgba(0, 0, 0, 0.16),
+    inset -5px -5px 12px 0 hsla(0, 0%, 100%, 0.3);
+}
+
+:root.design-claymorphism input::placeholder,
+:root.design-claymorphism textarea::placeholder {
+  color: var(--color-muted-foreground);
+  opacity: 0.9;
+}
+
+:root.design-claymorphism input:not([type='checkbox']):not([type='radio']):not([type='range']):focus-visible,
+:root.design-claymorphism textarea:focus-visible {
+  border-color: var(--clay-background);
+  box-shadow:
+    inset 5px 5px 12px 0 rgba(0, 0, 0, 0.14),
+    inset -5px -5px 12px 0 hsla(0, 0%, 100%, 0.32),
+    0 0 0 var(--ring-offset-width) var(--ring-offset-color),
+    0 0 0 calc(var(--ring-offset-width) + var(--ring-width)) var(--color-ring);
+}
+
+:root.design-claymorphism .app-badge {
+  min-height: 1.35rem;
+  border-color: transparent;
+  border-radius: 999px;
+  padding-inline: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  box-shadow:
+    3px 3px 8px 0 rgba(0, 0, 0, 0.18),
+    inset -3px -3px 7px 0 rgba(0, 0, 0, 0.16),
+    inset 3px 3px 7px 0 hsla(0, 0%, 100%, 0.22);
+}
+
+:root.design-claymorphism .app-badge[data-variant='outline'] {
+  background: var(--clay-foreground);
+  color: var(--clay-background);
+}
+
+:root.design-claymorphism .app-badge-dot {
+  opacity: 1;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
 /* @eikon:variant(design=claymorphism) end */
 
 /* @eikon:variant(design=aurora) begin */

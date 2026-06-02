@@ -140,13 +140,13 @@ function TaskCard({ task, onClick, onDelete, className }: TaskCardProps) {
               </h3>
               <span
                 className={cn(
-                  'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[0.6875rem] font-medium leading-4 ring-1 ring-inset',
+                  'app-badge inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[0.6875rem] font-medium leading-4 ring-1 ring-inset',
                   STATUS_CLASS[task.status]
                 )}
               >
                 <span
                   aria-hidden="true"
-                  className="h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-80"
+                  className="app-badge-dot h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-80"
                 />
                 {t(`status.${task.status}`)}
               </span>

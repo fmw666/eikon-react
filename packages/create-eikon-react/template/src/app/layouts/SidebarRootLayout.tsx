@@ -47,7 +47,7 @@ function SidebarRootLayout() {
       */}
       <aside
         className={cn(
-          'sticky top-0 flex h-[100dvh] w-60 shrink-0 flex-col',
+          'app-nav-shell app-nav-side sticky top-0 flex h-[100dvh] w-60 shrink-0 flex-col',
           'border-r-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)] bg-[var(--color-sidebar)]/70 text-[var(--color-sidebar-foreground)] backdrop-blur'
         )}
       >
@@ -64,10 +64,10 @@ function SidebarRootLayout() {
               end={link.end}
               className={({ isActive }) =>
                 cn(
-                  'rounded-md px-3 py-2 text-sm transition-colors',
+                  'app-nav-link rounded-md px-3 py-2 text-sm transition-colors',
                   'text-[var(--color-muted-foreground)] hover:bg-[var(--color-sidebar-primary)]/8 hover:text-[var(--color-sidebar-foreground)]',
                   isActive &&
-                    'bg-[var(--color-sidebar-primary)]/12 text-[var(--color-sidebar-primary)]'
+                    'app-nav-link-active bg-[var(--color-sidebar-primary)]/12 text-[var(--color-sidebar-primary)]'
                 )
               }
             >

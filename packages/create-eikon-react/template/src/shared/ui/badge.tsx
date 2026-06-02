@@ -26,7 +26,7 @@ import { cn } from '@/shared/lib/cn';
 // =================================================================================================
 
 const badgeVariants = cva(
-  'inline-flex items-center gap-1 rounded-sm px-2 py-0.5 text-xs font-medium ' +
+  'app-badge inline-flex items-center gap-1 rounded-sm px-2 py-0.5 text-xs font-medium ' +
     'border-[length:var(--surface-border-width)] transition-colors duration-[var(--duration-fast)]',
   {
     variants: {
@@ -63,7 +63,11 @@ interface BadgeProps
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (
-    <span className={cn(badgeVariants({ variant }), className)} {...props} />
+    <span
+      data-variant={variant ?? 'default'}
+      className={cn(badgeVariants({ variant }), className)}
+      {...props}
+    />
   );
 }
 

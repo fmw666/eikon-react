@@ -87,7 +87,7 @@ function MobileDrawerRootLayout() {
       */}
       <header
         className={cn(
-          'sticky top-0 z-30 border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',
+          'app-nav-shell app-nav-top sticky top-0 z-30 border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',
           'bg-[var(--color-sidebar)]/85 text-[var(--color-sidebar-foreground)] backdrop-blur',
           'pt-[env(safe-area-inset-top)]'
         )}
@@ -97,7 +97,7 @@ function MobileDrawerRootLayout() {
             <SheetTrigger
               aria-label={t('nav.menu', { defaultValue: 'Open navigation' })}
               className={cn(
-                'inline-flex items-center justify-center rounded-md',
+                'app-nav-action inline-flex items-center justify-center rounded-md',
                 'min-h-[var(--touch-target-min,44px)] min-w-[var(--touch-target-min,44px)]',
                 'text-[var(--color-foreground)] transition-colors',
                 'hover:bg-[var(--color-sidebar-primary)]/8 hover:text-[var(--color-foreground)]'
@@ -145,9 +145,9 @@ function MobileDrawerRootLayout() {
                           end={link.end}
                           className={({ isActive }) =>
                             cn(
-                              'group flex items-center gap-3 rounded-xl px-2 py-2 text-[0.9375rem] transition-colors',
+                              'app-nav-link group flex items-center gap-3 rounded-xl px-2 py-2 text-[0.9375rem] transition-colors',
                               isActive
-                                ? 'bg-[var(--color-sidebar-primary)]/15 text-[var(--color-sidebar-primary)]'
+                                ? 'app-nav-link-active bg-[var(--color-sidebar-primary)]/15 text-[var(--color-sidebar-primary)]'
                                 : 'hover:bg-[var(--color-sidebar-primary)]/8'
                             )
                           }

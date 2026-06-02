@@ -44,6 +44,7 @@ const SelectTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       'flex h-9 w-full items-center justify-between rounded-md bg-[var(--color-input)] px-3 py-2 text-sm',
+      'app-dropdown-trigger',
       'text-[var(--color-foreground)]',
       'border-[length:var(--surface-border-width)] border-[var(--color-border)]',
       'placeholder:text-[var(--color-muted-foreground)]',
@@ -114,6 +115,7 @@ const SelectContent = React.forwardRef<
       position={position}
       className={cn(
         'relative z-[var(--z-popover)] max-h-96 min-w-[8rem] overflow-hidden rounded-md',
+        'app-dropdown-content',
         'bg-[var(--color-popover)] text-[var(--color-popover-foreground)]',
         'border-[length:var(--surface-border-width)] border-[var(--color-border)]',
         '[backdrop-filter:var(--surface-backdrop)]',
@@ -170,6 +172,7 @@ const SelectItem = React.forwardRef<
     ref={ref}
     className={cn(
       'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none',
+      'app-dropdown-item',
       'focus:bg-[var(--color-accent)] focus:text-[var(--color-accent-foreground)]',
       'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className
