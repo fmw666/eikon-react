@@ -16,6 +16,12 @@ export default defineConfig({
   },
   test: {
     globals: true,
+    // Auto-retry flaky specs in CI only (transient integration waitFor
+    // timeouts, platform-sensitive lint-rule probes). Locally retry
+    // stays 0 so genuine failures surface immediately instead of being
+    // masked. Applies here AND in the scaffolded project, since the CLI
+    // template is synced from this config.
+    retry: process.env.CI ? 2 : 0,
     environment: 'happy-dom',
     setupFiles: ['./__tests__/setup.ts'],
     include: [

@@ -12,6 +12,10 @@ export default defineConfig({
   },
   test: {
     globals: true,
+    // Auto-retry flaky specs in CI only (e.g. the fake-timer debounce
+    // hook that intermittently times out under CI scheduling). Locally
+    // retry stays 0 so genuine failures surface immediately.
+    retry: process.env.CI ? 2 : 0,
     environment: 'happy-dom',
     setupFiles: ['./__tests__/setup.ts'],
     include: [
