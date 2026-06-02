@@ -42,7 +42,7 @@ function TopbarSidebarRootLayout() {
     <div className="flex min-h-[100dvh] flex-col [--app-topbar-h:3.5rem]">
       <header
         className={cn(
-          'sticky top-0 z-10 border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',
+          'app-nav-shell app-nav-top sticky top-0 z-10 border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',
           'bg-[var(--color-sidebar)]/70 text-[var(--color-sidebar-foreground)] backdrop-blur'
         )}
       >
@@ -71,7 +71,7 @@ function TopbarSidebarRootLayout() {
         */}
         <aside
           className={cn(
-            'sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-56 shrink-0 md:flex',
+            'app-nav-shell app-nav-side sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-56 shrink-0 md:flex',
             'flex-col border-r-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',
             'bg-[var(--color-sidebar)]/50 text-[var(--color-sidebar-foreground)]'
           )}
@@ -84,10 +84,10 @@ function TopbarSidebarRootLayout() {
                 end={link.end}
                 className={({ isActive }) =>
                   cn(
-                    'rounded-md px-3 py-2 text-sm transition-colors',
+                    'app-nav-link rounded-md px-3 py-2 text-sm transition-colors',
                     'text-[var(--color-muted-foreground)] hover:bg-[var(--color-sidebar-primary)]/8 hover:text-[var(--color-sidebar-foreground)]',
                     isActive &&
-                      'bg-[var(--color-sidebar-primary)]/12 text-[var(--color-sidebar-primary)]'
+                      'app-nav-link-active bg-[var(--color-sidebar-primary)]/12 text-[var(--color-sidebar-primary)]'
                   )
                 }
               >

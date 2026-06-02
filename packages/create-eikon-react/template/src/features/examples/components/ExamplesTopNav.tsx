@@ -96,10 +96,10 @@ function ExamplesTopNav() {
                     setSelectedGroupKey(group.key);
                   }}
                   className={cn(
-                    'inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium',
+                    'app-nav-link inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium',
                     'transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]',
                     active
-                      ? 'bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
+                      ? 'app-nav-link-active bg-[var(--color-primary)] text-[var(--color-primary-foreground)]'
                       : 'text-[var(--color-muted-foreground)] hover:bg-[var(--color-muted)] hover:text-[var(--color-foreground)]',
                     containsCurrent &&
                       !active &&
@@ -234,10 +234,10 @@ function TopNavLink({ to, label, end }: NavLinkItem) {
       end={end}
       className={({ isActive }) =>
         cn(
-          'inline-flex shrink-0 items-center rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+          'app-nav-link inline-flex shrink-0 items-center rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]',
           isActive
-            ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/12 text-[var(--color-foreground)]'
+            ? 'app-nav-link-active border-[var(--color-primary)] bg-[var(--color-primary)]/12 text-[var(--color-foreground)]'
             : 'border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-muted-foreground)] hover:bg-[var(--color-muted)] hover:text-[var(--color-foreground)]'
         )
       }

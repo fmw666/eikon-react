@@ -80,7 +80,7 @@ function LanguageSwitcher() {
       onClick={handleClick}
       aria-label={`${action} (${currentName} → ${upcomingName})`}
       title={`${action} — ${upcomingName}`}
-      className="gap-1.5 px-2"
+      className="app-nav-action gap-1.5 px-2"
     >
       <Languages aria-hidden="true" className="h-4 w-4" />
       <span className="text-xs font-medium">{SHORT_LABEL[current]}</span>

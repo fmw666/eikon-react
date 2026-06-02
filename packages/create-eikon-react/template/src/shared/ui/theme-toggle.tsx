@@ -70,7 +70,7 @@ function ThemeToggle() {
           size="icon"
           aria-label={action}
           title={action}
-          className="h-8 w-8"
+          className="app-nav-action app-dropdown-trigger h-8 w-8"
         >
           <Icon aria-hidden="true" className="h-4 w-4" />
         </Button>
@@ -96,6 +96,7 @@ function ThemeToggle() {
                 }
                 className={cn(
                   'z-50 min-w-[140px] overflow-hidden rounded-lg p-1',
+                  'app-dropdown-content',
                   'border-[length:var(--surface-border-width)] border-[var(--color-border)]',
                   'bg-[var(--color-card)]/95 backdrop-blur-lg',
                   'shadow-lg',
@@ -114,6 +115,7 @@ function ThemeToggle() {
                         value={opt.value}
                         className={cn(
                           'flex cursor-default select-none items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none',
+                          'app-dropdown-item',
                           'text-[var(--color-foreground)]',
                           'transition-colors duration-100',
                           'data-[highlighted]:bg-[var(--color-primary)]/8',

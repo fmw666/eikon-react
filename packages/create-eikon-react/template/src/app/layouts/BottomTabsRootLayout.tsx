@@ -97,7 +97,7 @@ function BottomTabsRootLayout() {
     <div className="flex min-h-[100dvh] flex-col [--app-topbar-h:3.5rem] [--app-bottombar-h:calc(4rem+env(safe-area-inset-bottom,0px))]">
       <header
         className={cn(
-          'sticky top-0 z-30 border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',
+          'app-nav-shell app-nav-top sticky top-0 z-30 border-b-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',
           'bg-[var(--color-sidebar)]/85 text-[var(--color-sidebar-foreground)] backdrop-blur',
           'pt-[env(safe-area-inset-top)]'
         )}
@@ -137,7 +137,7 @@ function BottomTabsRootLayout() {
       <nav
         aria-label={t('nav.primary', { defaultValue: 'Primary navigation' })}
         className={cn(
-          'fixed inset-x-0 bottom-0 z-30 border-t-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',
+          'app-nav-shell app-nav-bottom fixed inset-x-0 bottom-0 z-30 border-t-[length:var(--surface-border-width)] border-[var(--color-sidebar-border)]',
           'bg-[var(--color-sidebar)]/95 text-[var(--color-sidebar-foreground)] backdrop-blur',
           'pb-[env(safe-area-inset-bottom)]'
         )}
@@ -150,12 +150,12 @@ function BottomTabsRootLayout() {
                 end={tab.end}
                 className={({ isActive }) =>
                   cn(
-                    'flex h-full flex-col items-center justify-center gap-0.5',
+                    'app-bottom-nav-link flex h-full flex-col items-center justify-center gap-0.5',
                     'text-[10px] font-medium uppercase tracking-wide',
                     'min-h-[var(--touch-target-min,44px)]',
                     'transition-colors',
                     isActive
-                      ? 'text-[var(--color-sidebar-primary)]'
+                      ? 'app-bottom-nav-link-active text-[var(--color-sidebar-primary)]'
                       : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]'
                   )
                 }

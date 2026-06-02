@@ -109,7 +109,7 @@ function ShowcasePageHeader({
       ) : null}
       <div className="flex flex-col gap-2">
         {chip && (
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-muted)]/50 px-2 py-0.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-[var(--color-muted-foreground)]">
+          <span className="app-badge inline-flex w-fit items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-muted)]/50 px-2 py-0.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-[var(--color-muted-foreground)]">
             {ChipIcon && <ChipIcon aria-hidden="true" className="h-3 w-3" />}
             {chip.label}
           </span>

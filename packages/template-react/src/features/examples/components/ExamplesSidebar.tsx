@@ -179,7 +179,7 @@ function ExamplesSidebar() {
         aria-expanded={open}
         aria-controls="examples-nav"
         className={cn(
-          'mb-3 flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium',
+          'app-nav-link mb-3 flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium',
           'border border-[var(--color-border)] bg-[var(--color-card)]',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]',
           '@2xl/examples:hidden'
@@ -315,7 +315,7 @@ function NavItem({ to, label, end }: NavLinkItem) {
       className={({ isActive }) =>
         cn(
           // Row geometry — tight enough to fit 25+ items in a viewport.
-          'group relative flex items-center gap-2 rounded-md py-1.5 pl-3 pr-2',
+          'app-nav-link group relative flex items-center gap-2 rounded-md py-1.5 pl-3 pr-2',
           'text-[13px] leading-5 transition-colors duration-[var(--duration-fast)]',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]',
           // Default
@@ -323,7 +323,7 @@ function NavItem({ to, label, end }: NavLinkItem) {
           // Active — left indicator strip + raised text weight, no full
           // accent fill. Easier to scan in a tall list.
           isActive &&
-            'font-medium text-[var(--color-foreground)] ' +
+            'app-nav-link-active font-medium text-[var(--color-foreground)] ' +
               'before:absolute before:left-0 before:top-1/2 before:h-4 before:w-[2px] before:-translate-y-1/2 before:rounded-r-full before:bg-[var(--color-primary)]'
         )
       }

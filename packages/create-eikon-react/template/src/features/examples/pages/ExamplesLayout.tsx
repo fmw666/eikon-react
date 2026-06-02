@@ -186,7 +186,7 @@ function ExamplesLayout() {
           <div className="mb-6 flex items-center gap-2 text-[11px] text-[var(--color-muted-foreground)]">
             <span
               role="status"
-              className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-amber-700 dark:text-amber-300"
+              className="app-badge inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-amber-700 dark:text-amber-300"
             >
               <Sparkles aria-hidden="true" className="h-3 w-3 shrink-0" />
               <span className="font-medium uppercase tracking-[0.08em]">

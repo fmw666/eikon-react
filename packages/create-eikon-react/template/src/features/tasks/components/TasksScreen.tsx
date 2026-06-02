@@ -75,7 +75,7 @@ function TasksScreen({
           <span>{t('layout.mode')}</span>
           <span
             className={cn(
-              'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
+              'app-badge inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset',
               isOnline
                 ? 'bg-[var(--color-success)]/12 text-[var(--color-success)] ring-[var(--color-success)]/30'
                 : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)] ring-[var(--color-border)]'

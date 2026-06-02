@@ -42,6 +42,7 @@ const PopoverContent = React.forwardRef<
       sideOffset={sideOffset}
       className={cn(
         'z-[var(--z-popover)] w-72 rounded-md p-4 outline-none',
+        'app-dropdown-content',
         'bg-[var(--color-popover)] text-[var(--color-popover-foreground)]',
         'border-[length:var(--surface-border-width)] border-[var(--color-border)]',
         '[backdrop-filter:var(--surface-backdrop)]',
