@@ -128,6 +128,7 @@ export const PARAMS = [
       'carbon',
       'editorial',
       'animal-crossing',
+      'evomap',
     ],
     default: 'default',
     cliFlag: 'design',
@@ -153,6 +154,7 @@ export const PARAMS = [
       carbon: 'IBM Carbon (enterprise blue)',
       editorial: 'Editorial (black-and-white print)',
       'animal-crossing': 'Animal Crossing (mint teal + parchment)',
+      evomap: 'EvoMap (agent economy cyan)',
     },
   },
   {

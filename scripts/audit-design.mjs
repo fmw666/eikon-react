@@ -747,6 +747,43 @@ const SPECS = {
       ),
     ],
   },
+
+  evomap: {
+    label: 'EvoMap (agent economy cyan)',
+    inspiration: 'EvoMap DESIGN.md',
+    anchors: { primary: '#47C9E7' },
+    voice: [
+      check('font-display', 'Outfit / Inter technical product type', 2, (c) =>
+        bool(
+          /Inter/i.test(c.fontSans) && /Outfit/i.test(c.L['--font-display'] || ''),
+          `font-sans=${short(c.fontSans)} display=${short(c.L['--font-display'])}`
+        )
+      ),
+      check('cyan-primary', 'cyan primary (hue 200-230, C >= 0.10)', 2, (c) => {
+        const p = c.color(c.L['--color-primary']);
+        if (!p) return bool(false, 'primary 无法解析');
+        const ok = p.oklch.H >= 200 && p.oklch.H <= 230 && p.oklch.C >= 0.1;
+        return bool(ok, `primary hue=${p.oklch.H.toFixed(0)}° C=${p.oklch.C.toFixed(2)}`);
+      }),
+      check('dark-first', 'dark-first black base bg L <= 0.05', 2, (c) => {
+        const bg = c.color(c.D['--color-background']);
+        if (!bg) return bool(false, 'dark bg 无法解析');
+        return bool(bg.oklch.L <= 0.05, `dark bg L=${bg.oklch.L.toFixed(2)}`);
+      }),
+      check('compact-radius', 'technical card radius --radius-lg = 0.5rem', 1, (c) =>
+        near(lenRem(c.L['--radius-lg']), 0.5, 0.05, 'rem')
+      ),
+      check('dense-spacing', '4px spacing ramp --spacing = 0.25rem', 1, (c) =>
+        near(lenRem(c.L['--spacing']), 0.25, 0.03, 'rem')
+      ),
+      check('soft-depth', 'soft boundary shadow, no heavy decorative drop', 1, (c) =>
+        bool(
+          /0 0 0 1px|0 8px|0 12px/.test(c.L['--shadow-md'] || ''),
+          `shadow-md=${short(c.L['--shadow-md'])}`
+        )
+      ),
+    ],
+  },
 };
 
 // Small result builders for voice checks → { score: 0..1, detail }.

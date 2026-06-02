@@ -67,6 +67,7 @@ const VARIANT_CHOICES = {
     'carbon',
     'editorial',
     'animal-crossing',
+    'evomap',
   ] as const,
   layout: [
     'stacked',
