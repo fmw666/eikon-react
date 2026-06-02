@@ -1,48 +1,137 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 110" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="24 20 132 72" role="img" aria-labelledby="title desc">
   <title id="title">Eikon React handwritten mark</title>
   <desc id="desc">A transparent animated one-line drawing that writes the letters er.</desc>
   <defs>
-    <filter id="ink-softness" x="-12%" y="-16%" width="124%" height="132%" color-interpolation-filters="sRGB">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="0.22" result="soft" />
+    <linearGradient id="ink-gradient" x1="30" y1="72" x2="148" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#d2c9ba" />
+      <stop offset="0.58" stop-color="#c4baab" />
+      <stop offset="1" stop-color="#aaa297" />
+    </linearGradient>
+    <filter id="ink-softness" x="-18%" y="-24%" width="136%" height="148%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.24" result="soft" />
       <feMerge>
         <feMergeNode in="soft" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="ink-glow" x="-28%" y="-36%" width="156%" height="172%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.2" result="glow" />
+      <feColorMatrix
+        in="glow"
+        type="matrix"
+        values="1 0 0 0 0.78  0 1 0 0 0.72  0 0 1 0 0.62  0 0 0 0.14 0"
+      />
+      <feMerge>
+        <feMergeNode />
         <feMergeNode in="SourceGraphic" />
       </feMerge>
     </filter>
     <style>
       .mark {
         fill: none;
-        stroke: #111111;
+        stroke: url(#ink-gradient);
         stroke-linecap: round;
         stroke-linejoin: round;
         filter: url(#ink-softness);
       }
 
+      .mark-glow {
+        fill: none;
+        stroke: #cfc5b6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 8.8;
+        opacity: 0.06;
+        filter: url(#ink-glow);
+      }
+
+      .mark-shadow {
+        fill: none;
+        stroke: #0a0a0a;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 6.6;
+        opacity: 0.2;
+        transform: translate(1.8px, 2.2px);
+      }
+
       .main-line {
-        stroke-width: 4.6;
+        stroke-width: 4.9;
         stroke-dasharray: 1;
         stroke-dashoffset: 0;
-        animation: write-cycle 6.65s cubic-bezier(0.22, 1, 0.36, 1) 5s infinite;
+        animation: write-cycle 9.5s linear 1.2s infinite;
+      }
+
+      .paper-grain {
+        opacity: 0.34;
+        mix-blend-mode: screen;
       }
 
       @keyframes write-cycle {
         0% {
-          opacity: 0.9;
+          opacity: 0;
           stroke-dashoffset: 1;
-          transform: translateY(0);
+          transform: translateY(0.8px);
         }
 
-        24.8%,
+        3% {
+          opacity: 0.66;
+          stroke-dashoffset: 1;
+          transform: translateY(0.8px);
+        }
+
+        7% {
+          opacity: 0.72;
+          stroke-dashoffset: 0.72;
+          transform: translateY(0.25px);
+        }
+
+        11% {
+          stroke-dashoffset: 0.64;
+          transform: translateY(0.2px);
+        }
+
+        18% {
+          stroke-dashoffset: 0.35;
+          transform: translateY(-0.2px);
+        }
+
+        22% {
+          stroke-dashoffset: 0.3;
+          transform: translateY(-0.25px);
+        }
+
+        29% {
+          stroke-dashoffset: 0.08;
+          transform: translateY(-0.6px);
+        }
+
+        34%,
         100% {
-          opacity: 1;
+          opacity: 0.74;
           stroke-dashoffset: 0;
           transform: translateY(-0.7px);
         }
       }
 
       @media (prefers-color-scheme: dark) {
+        .mark-shadow {
+          opacity: 0.22;
+        }
+      }
+
+      @media (prefers-color-scheme: light) {
         .mark {
-          stroke: #f7f2e8;
+          stroke: #111111;
+        }
+
+        .mark-glow {
+          stroke: #111111;
+          opacity: 0.05;
+        }
+
+        .mark-shadow {
+          opacity: 0.08;
         }
       }
 
@@ -60,17 +149,41 @@
 
   <g aria-hidden="true">
     <path
+      class="mark-glow"
+      d="M 38 70
+         C 52 60, 64 35, 54 34
+         C 38 33, 38 76, 55 75
+         C 65 74, 73 62, 80 43
+         C 83 36, 91 35, 94 40
+         C 97 45, 91 50, 84 51
+         C 92 48, 100 45, 108 46
+         C 118 47, 116 57, 105 62
+         C 116 60, 128 52, 138 45"
+    />
+    <path
+      class="mark-shadow"
+      d="M 38 70
+         C 52 60, 64 35, 54 34
+         C 38 33, 38 76, 55 75
+         C 65 74, 73 62, 80 43
+         C 83 36, 91 35, 94 40
+         C 97 45, 91 50, 84 51
+         C 92 48, 100 45, 108 46
+         C 118 47, 116 57, 105 62
+         C 116 60, 128 52, 138 45"
+    />
+    <path
       class="mark main-line"
       pathLength="1"
-      d="M 40 70
-         C 55 60, 65 35, 55 35
-         C 40 35, 40 75, 55 75
-         C 64 74, 73 61, 80 43
-         C 83 37, 90 36, 93 40
-         C 96 44, 91 49, 84 51
-         C 91 48, 98 45, 105 46
-         C 114 47, 112 56, 103 61
-         C 112 59, 122 53, 130 46"
+      d="M 38 70
+         C 52 60, 64 35, 54 34
+         C 38 33, 38 76, 55 75
+         C 65 74, 73 62, 80 43
+         C 83 36, 91 35, 94 40
+         C 97 45, 91 50, 84 51
+         C 92 48, 100 45, 108 46
+         C 118 47, 116 57, 105 62
+         C 116 60, 128 52, 138 45"
     />
   </g>
 </svg>
