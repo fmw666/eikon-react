@@ -82,7 +82,7 @@ export function Hero({
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute right-0 top-16 -z-10 hidden h-28 w-60 opacity-50 sm:block md:right-4 md:top-20 md:h-32 md:w-64 lg:right-[4.5rem] lg:top-24 lg:h-36 lg:w-72 xl:right-[6.5rem] xl:top-24 xl:h-40 xl:w-80"
+          className="pointer-events-none absolute right-0 top-16 -z-10 hidden h-28 w-60 opacity-70 sm:block md:right-4 md:top-20 md:h-32 md:w-64 lg:right-[4.5rem] lg:top-24 lg:h-36 lg:w-72 xl:right-[6.5rem] xl:top-24 xl:h-40 xl:w-80"
           style={
             {
               maskImage:
@@ -92,14 +92,13 @@ export function Hero({
             } as CSSProperties
           }
         >
-          <div className="absolute inset-x-6 inset-y-3 rounded-[999px] bg-[radial-gradient(ellipse_at_center,rgb(255_255_255/0.1),transparent_68%)] blur-2xl dark:bg-[radial-gradient(ellipse_at_center,rgb(255_255_255/0.08),transparent_70%)]" />
-          <div className="absolute inset-x-10 top-1/2 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent dark:via-white/8" />
+          <div className="absolute inset-x-4 inset-y-1 rounded-[999px] bg-[radial-gradient(ellipse_at_center,rgb(247_205_141/0.15),transparent_72%)] blur-2xl dark:bg-[radial-gradient(ellipse_at_center,rgb(247_205_141/0.12),transparent_72%)]" />
           <img
             src="/webicon.svg"
             alt=""
-            className="relative h-full w-full rotate-[-7deg] object-contain drop-shadow-[0_20px_34px_rgb(0_0_0/0.16)] dark:drop-shadow-[0_20px_34px_rgb(255_244_218/0.08)]"
+            className="relative h-full w-full rotate-[-7deg] object-contain opacity-85 mix-blend-screen drop-shadow-[0_20px_34px_rgb(247_205_141/0.14)] dark:drop-shadow-[0_20px_34px_rgb(247_205_141/0.1)]"
           />
-          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent via-black/30 to-black/70" />
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent via-[var(--surface-0)]/45 to-[var(--surface-0)]" />
         </div>
         {/* Text column */}
         <div className="flex flex-col items-start text-left">
@@ -127,7 +126,7 @@ export function Hero({
             <span className="block">{t('hero.title.line1')}</span>
             <span className="mt-2 block">
               {t('hero.title.line2Prefix')}
-              <span className="bg-gradient-to-br from-brand-400 to-brand-700 bg-clip-text text-transparent dark:from-brand-300 dark:to-brand-500">
+              <span className="bg-gradient-to-br from-[hsl(45_90%_76%)] via-[hsl(42_88%_71%)] to-[hsl(38_72%_60%)] bg-clip-text text-transparent drop-shadow-[0_0_12px_rgb(247_205_141/0.08)]">
                 {t('hero.title.highlight')}
               </span>
               {t('hero.title.line2Suffix')}
@@ -205,7 +204,7 @@ export function Hero({
               className="
                 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full
                 bg-[var(--surface-0)] text-[var(--fg-2)]
-                shadow-[inset_0_1px_0_rgb(255_255_255/0.04),inset_0_-1px_0_rgb(0_0_0/0.35)]
+                shadow-[inset_0_1px_0_rgb(255_255_255/0.06),inset_0_-1px_0_rgb(0_0_0/0.28)]
                 transition-transform duration-200 ease-out
                 group-hover:translate-x-0.5 group-hover:text-[var(--fg-1)]
               "
