@@ -7,7 +7,13 @@ import {
 
 describe('scheduleInvalidateTemplateRev', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    // Only fake the timer APIs the debounce actually uses. Faking the
+    // full default set (which includes queueMicrotask / nextTick) lets
+    // vitest's own async hook-teardown promise hang under CI's
+    // scheduling, surfacing as a 10s "afterEach hook timed out" — even
+    // though every assertion here passes. Restricting `toFake` keeps
+    // the microtask queue real so teardown resolves normally.
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     invalidateTemplateRev();
   });
 
