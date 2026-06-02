@@ -1,27 +1,19 @@
-// Full-chain verification for the eikon-react monorepo.
+// Profiled verification for the eikon-react monorepo.
 //
-// Runs the same gauntlet a release candidate has to pass, in this order:
+// The old `pnpm verify` path ran release-grade checks on every local push and
+// every PR. That made tiny changes wait on full generated-project e2e, package
+// manager installs, network audit, and Windows cleanup. Profiles keep the same
+// safety net, but put each check at the right feedback layer:
 //
-//   1. typecheck   — three packages, parallel via pnpm -r
-//   2. test        — three packages, includes strip-drift parity (6 combos)
-//   3. lint        — three packages
-//   4. audit       — pnpm audit (high+) against the public npm registry
-//   5. lockfile    — every pnpm-lock.yaml package entry has integrity
-//   6. build       — three packages
-//   7. e2e         — build CLI → npm pack → all configured scenarios, each:
-//                    scaffold + install + typecheck + test + lint + build
-//                    inside the generated project. Slowest step (~3-5 min).
-//
-// Behaviour:
-//   - Fail-fast: the first non-zero step stops the chain. typecheck failing
-//     means test results would be misleading, so there's no point running on.
-//   - Each step prints a banner, pnpm output streams through, then a per-step
-//     elapsed time. On success the script ends with a green summary table; on
-//     failure the failing step's exit code propagates.
+//   fast  -> local pre-push: no network, no generated-project installs
+//   pr    -> pull requests: build + scaffold smoke without full e2e
+//   full  -> main/release/manual/nightly: the release-grade gauntlet
 //
 // Usage:
-//   pnpm verify        # full chain (~5-7 min)
-//   node scripts/verify.mjs
+//   pnpm verify:fast
+//   pnpm verify:pr
+//   pnpm verify:full
+//   node scripts/verify.mjs --profile pr
 
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -30,23 +22,42 @@ import path from 'node:path';
 const __filename = fileURLToPath(import.meta.url);
 const REPO_ROOT = path.resolve(path.dirname(__filename), '..');
 
-const STEPS = [
-  { name: 'typecheck', cmd: 'pnpm', args: ['typecheck'] },
-  { name: 'test',      cmd: 'pnpm', args: ['test'] },
-  { name: 'lint',      cmd: 'pnpm', args: ['lint'] },
-  { name: 'audit',     cmd: 'pnpm', args: ['audit', '--audit-level=high', '--registry=https://registry.npmjs.org/'] },
-  { name: 'lockfile',  cmd: 'node', args: ['scripts/check-lockfile.mjs'] },
-  { name: 'build',     cmd: 'pnpm', args: ['build'] },
-  { name: 'e2e',       cmd: 'pnpm', args: ['e2e'] },
-];
+const STEP_DEFS = {
+  typecheck: { cmd: 'pnpm', args: ['typecheck'] },
+  lint: { cmd: 'pnpm', args: ['lint'] },
+  test: { cmd: 'pnpm', args: ['test'] },
+  audit: {
+    cmd: 'pnpm',
+    args: [
+      'audit',
+      '--audit-level=high',
+      '--registry=https://registry.npmjs.org/',
+    ],
+  },
+  lockfile: { cmd: 'node', args: ['scripts/check-lockfile.mjs'] },
+  build: { cmd: 'pnpm', args: ['build'] },
+  'e2e:pr': { cmd: 'pnpm', args: ['e2e:pr'] },
+  e2e: { cmd: 'pnpm', args: ['e2e'] },
+};
 
-const results = STEPS.map((s) => ({ name: s.name, status: 'skipped', ms: 0 }));
+const PROFILES = {
+  fast: ['typecheck', 'lint', 'test', 'lockfile'],
+  pr: ['typecheck', 'lint', 'test', 'lockfile', 'build', 'e2e:pr'],
+  full: ['typecheck', 'test', 'lint', 'audit', 'lockfile', 'build', 'e2e'],
+};
+
+const profile = parseProfile(process.argv.slice(2));
+const stepNames = PROFILES[profile];
+const results = stepNames.map((name) => ({ name, status: 'skipped', ms: 0 }));
 const totalStart = Date.now();
 let failedAt = -1;
 
-for (let i = 0; i < STEPS.length; i++) {
-  const step = STEPS[i];
-  banner(`step ${i + 1}/${STEPS.length}: ${step.name}`);
+console.log(`[verify] profile: ${profile}`);
+
+for (let i = 0; i < stepNames.length; i++) {
+  const name = stepNames[i];
+  const step = STEP_DEFS[name];
+  banner(`step ${i + 1}/${stepNames.length}: ${name}`);
   const t0 = Date.now();
   let code;
   try {
@@ -59,12 +70,16 @@ for (let i = 0; i < STEPS.length; i++) {
   results[i].ms = ms;
   if (code === 0) {
     results[i].status = 'passed';
-    console.log(`[verify] step ${i + 1}/${STEPS.length}: ${step.name} — PASSED in ${formatMs(ms)}\n`);
+    console.log(
+      `[verify] step ${i + 1}/${stepNames.length}: ${name} - PASSED in ${formatMs(ms)}\n`
+    );
   } else {
     results[i].status = 'failed';
     results[i].exit = code;
     failedAt = i;
-    console.error(`[verify] step ${i + 1}/${STEPS.length}: ${step.name} — FAILED (exit ${code}) after ${formatMs(ms)}\n`);
+    console.error(
+      `[verify] step ${i + 1}/${stepNames.length}: ${name} - FAILED (exit ${code}) after ${formatMs(ms)}\n`
+    );
     break;
   }
 }
@@ -73,13 +88,47 @@ const totalMs = Date.now() - totalStart;
 printSummary(results, totalMs, failedAt);
 process.exit(failedAt === -1 ? 0 : results[failedAt].exit ?? 1);
 
+function parseProfile(argv) {
+  let requested = 'full';
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === '--profile') {
+      requested = argv[++i] || '';
+    } else if (arg.startsWith('--profile=')) {
+      requested = arg.slice('--profile='.length);
+    } else if (arg === '--fast' || arg === '--pr' || arg === '--full') {
+      requested = arg.slice(2);
+    } else if (arg === '--help' || arg === '-h') {
+      printUsage();
+      process.exit(0);
+    }
+  }
+  if (!PROFILES[requested]) {
+    console.error(
+      `[verify] unknown profile "${requested}". Expected one of: ${Object.keys(PROFILES).join(', ')}`
+    );
+    printUsage();
+    process.exit(1);
+  }
+  return requested;
+}
+
+function printUsage() {
+  console.log(`Usage: node scripts/verify.mjs --profile <fast|pr|full>
+
+Profiles:
+  fast  ${PROFILES.fast.join(' -> ')}
+  pr    ${PROFILES.pr.join(' -> ')}
+  full  ${PROFILES.full.join(' -> ')}`);
+}
+
 function run(cmd, args, cwd) {
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, args, {
       cwd,
       stdio: 'inherit',
       shell: process.platform === 'win32',
-      env: { ...process.env, CI: '1' },
+      env: { ...process.env },
     });
     child.on('error', reject);
     child.on('close', (code) => resolve(code));
@@ -87,24 +136,26 @@ function run(cmd, args, cwd) {
 }
 
 function banner(label) {
-  const line = '─'.repeat(60);
+  const line = '-'.repeat(60);
   console.log(`\n${line}\n[verify] ${label}\n${line}`);
 }
 
 function printSummary(results, totalMs, failedAt) {
-  console.log('\n' + '─'.repeat(60));
+  console.log('\n' + '-'.repeat(60));
   if (failedAt === -1) {
     console.log('[verify] ALL PASSED\n');
   } else {
-    console.log(`[verify] FAILED at step ${failedAt + 1}/${results.length}: ${results[failedAt].name}\n`);
+    console.log(
+      `[verify] FAILED at step ${failedAt + 1}/${results.length}: ${results[failedAt].name}\n`
+    );
   }
   const widest = Math.max(...results.map((r) => r.name.length));
   for (const r of results) {
-    const sym = r.status === 'passed' ? '✓' : r.status === 'failed' ? '✗' : '-';
+    const sym = r.status === 'passed' ? '+' : r.status === 'failed' ? 'x' : '-';
     const time = r.status === 'skipped' ? 'skipped' : formatMs(r.ms);
     console.log(`  ${sym} ${r.name.padEnd(widest)}   ${time}`);
   }
-  console.log(`  ${' '.repeat(widest + 2)}   ─────`);
+  console.log(`  ${' '.repeat(widest + 2)}   -----`);
   console.log(`    ${'total'.padEnd(widest)}   ${formatMs(totalMs)}\n`);
 }
 

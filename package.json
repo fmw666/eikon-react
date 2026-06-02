@@ -22,8 +22,12 @@
     "typecheck": "pnpm -r --filter=./packages/* --if-present typecheck",
     "e2e": "pnpm --filter create-eikon-react e2e",
     "e2e:quick": "pnpm --filter create-eikon-react e2e:quick",
+    "e2e:pr": "pnpm --filter create-eikon-react e2e:pr",
     "lint": "pnpm -r --filter=./packages/* lint",
-    "verify": "node scripts/verify.mjs",
+    "verify": "pnpm verify:full",
+    "verify:fast": "node scripts/verify.mjs --profile fast",
+    "verify:pr": "node scripts/verify.mjs --profile pr",
+    "verify:full": "node scripts/verify.mjs --profile full",
     "audit:design": "node packages/template-react/scripts/audit-design.mjs",
     "format": "prettier --write \"packages/*/{src,__tests__}/**/*.{ts,tsx,js,jsx,json,md}\"",
     "cli": "pnpm --filter create-eikon-react start",
@@ -32,7 +36,7 @@
   },
   "simple-git-hooks": {
     "pre-commit": "node scripts/check-no-preview-cache.mjs",
-    "pre-push": "pnpm verify"
+    "pre-push": "pnpm verify:fast"
   },
   "pnpm": {
     "overrides": {
