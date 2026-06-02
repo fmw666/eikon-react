@@ -488,10 +488,14 @@ if (selected.length === 0) {
   process.exit(1);
 }
 
-main().catch((err) => {
-  console.error('[e2e] FAILED:', err);
-  process.exit(1);
-});
+main()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error('[e2e] FAILED:', err);
+    process.exit(1);
+  });
 
 async function main() {
   // Keep the temp root short on Windows: pnpm's virtual store paths can
