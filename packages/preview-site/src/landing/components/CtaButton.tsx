@@ -115,7 +115,7 @@ export function CtaButton(props: CtaButtonProps) {
   const blockClasses = [
     'eikon-shimmer-hover group/cta relative inline-flex items-center gap-2',
     'rounded-[6px] px-5 py-2.5',
-    'text-[11px] font-bold uppercase leading-none tracking-[0.14em]',
+    'text-[11px] font-extrabold uppercase leading-none tracking-[0.14em]',
     'no-underline cursor-pointer select-none',
     'transition-[box-shadow,outline-offset,outline-width,background-color,color] duration-300 ease-out',
     tokens.surface,
@@ -173,35 +173,47 @@ export function CtaButton(props: CtaButtonProps) {
 // =============================================================================
 
 /**
- * Solid warm-gold "money" button — the page's signature #1 action.
+ * Metallic brand "money" button — the page's signature #1 action.
  *
- * Unlike the secondary (which leans on theme tokens), the primary is
- * a self-contained, theme-independent fill: a solid amber gradient
- * with dark ink text. Because the fill is light in both light and
- * dark mode, the dark text reads with strong contrast either way —
- * no per-mode tuning needed.
+ * Brushed-metal look built off the single brand colour
+ * (`--color-brand-500`), driven via `color-mix` so it tracks the
+ * page's brand colour if it ever changes. The "metal" comes from a
+ * strong vertical light→dark ramp plus a crisp specular band, not
+ * from a flat fill:
  *
- * Dimensionality comes from two inset edges: a bright top highlight
- * and a soft amber-shadowed bottom, so the surface looks gently
- * convex. On hover the whole gradient brightens a step and the warm
- * drop-glow roughly doubles, so the button feels like it lifts.
+ *   1. Specular   — a bright white sheen across the top ~third, the
+ *                   highlight you'd see on a curved metal face.
+ *   2. Metal ramp — brand-500 lifted toward white at the very top,
+ *                   true brand through the upper third, then mixed
+ *                   toward black down to the base (the darker foot
+ *                   is what gives it weight — "a bit blacker").
+ *   3. Bevel      — a bright 1px inner top edge + a 1px inner ring +
+ *                   a soft dark bottom inner shadow, so the rim looks
+ *                   machined.
+ *   4. Lift glow  — a brand-500 bloom that grows on hover while the
+ *                   metal brightens a step, so the button lifts.
  *
- * The `outline` carries the halo: an amber stroke with a 3px gap
- * (`outline-offset`) filled by the page background. On hover the gap
- * tightens by 1px and the stroke thickens — the button focuses
- * without leaping forward.
+ * The label is engraved (letterpress): a semi-transparent dark ink
+ * lets the metal show faintly through each glyph, and a 1px light
+ * highlight below + dark line above the letters make them read as
+ * stamped into the surface rather than printed on top — a knocked-
+ * out, hollowed feel that lifts the whole button.
+ * This composes with the three motion cues already on the block —
+ * the `eikon-shimmer-hover` light sweep (which now reads as a
+ * reflection sliding across the metal), the WordReveal label flip,
+ * and the halo tightening — each hitting a different layer.
  */
 const PRIMARY_TOKENS = {
   surface:
-    'bg-[linear-gradient(135deg,hsl(46_96%_78%),hsl(41_92%_68%)_52%,hsl(37_84%_58%)_100%)] text-[#2a1d05] ' +
-    'hover:bg-[linear-gradient(135deg,hsl(47_98%_81%),hsl(42_94%_71%)_52%,hsl(38_88%_61%)_100%)] ' +
-    'shadow-[inset_0_1px_0_rgb(255_255_255/0.5),inset_0_-1px_0_rgb(120_72_8/0.28),0_1px_2px_rgb(80_50_5/0.2),0_8px_22px_-10px_hsl(40_92%_55%/0.55)] ' +
-    'hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.6),inset_0_-1px_0_rgb(120_72_8/0.32),0_2px_4px_rgb(80_50_5/0.22),0_13px_30px_-8px_hsl(40_94%_55%/0.72)]',
+    'bg-[linear-gradient(180deg,rgb(255_255_255/0.28),rgb(255_255_255/0.06)_36%,transparent_58%),linear-gradient(180deg,color-mix(in_oklch,var(--color-brand-500)_80%,white),var(--color-brand-500)_20%,color-mix(in_oklch,var(--color-brand-500)_82%,black)_62%,color-mix(in_oklch,var(--color-brand-500)_66%,black)_100%)] text-[#0a1426]/80 [text-shadow:0_1px_0_rgb(255_255_255/0.34),0_-1px_0_rgb(0_0_0/0.22)] ' +
+    'hover:bg-[linear-gradient(180deg,rgb(255_255_255/0.36),rgb(255_255_255/0.08)_36%,transparent_58%),linear-gradient(180deg,color-mix(in_oklch,var(--color-brand-500)_72%,white),color-mix(in_oklch,var(--color-brand-500)_96%,white)_20%,color-mix(in_oklch,var(--color-brand-500)_86%,black)_62%,color-mix(in_oklch,var(--color-brand-500)_70%,black)_100%)] ' +
+    'shadow-[inset_0_1px_0_rgb(255_255_255/0.45),inset_0_0_0_1px_rgb(255_255_255/0.1),inset_0_-2px_4px_rgb(0_0_0/0.45),0_2px_5px_rgb(0_0_0/0.3),0_0_24px_-14px_oklch(0.65_0.06_235/0.55)] ' +
+    'hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.55),inset_0_0_0_1px_rgb(255_255_255/0.16),inset_0_-2px_5px_rgb(0_0_0/0.5),0_4px_10px_rgb(0_0_0/0.34),0_0_30px_-11px_oklch(0.65_0.06_235/0.72)]',
   ring:
-    'outline outline-1 outline-[hsl(40_92%_60%/0.55)] outline-offset-[3px] ' +
+    'outline outline-1 outline-[color-mix(in_oklch,var(--color-brand-500)_55%,transparent)] outline-offset-[3px] ' +
     'hover:outline-2 hover:outline-offset-[2px] ' +
     'focus-visible:outline-2 focus-visible:outline-offset-[2px]',
-  icon: 'inline-flex items-center text-[#2a1d05]/75',
+  icon: 'inline-flex items-center text-[#0a1426]/70',
 } as const;
 
 /**
