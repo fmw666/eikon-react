@@ -30,6 +30,13 @@ jobs:
           node-version: '20.10'
           cache: 'pnpm'
 
+      # The e2e step exercises the `--pm bun` rewrite end-to-end and, in CI,
+      # hard-fails if bun is missing (scripts/e2e.mjs) rather than silently
+      # skipping it — so bun must be on PATH on every runner.
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.1.30'
+
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm verify
