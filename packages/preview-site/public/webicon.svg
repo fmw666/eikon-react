@@ -20,27 +20,22 @@
 
       .main-line {
         stroke-width: 4.6;
-        stroke-dasharray: 235;
-        stroke-dashoffset: 235;
-        animation: write 1.65s cubic-bezier(0.22, 1, 0.36, 1) forwards,
-          breathe 3.8s ease-in-out 1.65s infinite;
+        stroke-dasharray: 1;
+        stroke-dashoffset: 0;
+        animation: write-cycle 6.65s cubic-bezier(0.22, 1, 0.36, 1) 5s infinite;
       }
 
-      @keyframes write {
-        to {
-          stroke-dashoffset: 0;
-        }
-      }
-
-      @keyframes breathe {
-        0%,
-        100% {
+      @keyframes write-cycle {
+        0% {
           opacity: 0.9;
+          stroke-dashoffset: 1;
           transform: translateY(0);
         }
 
-        50% {
+        24.8%,
+        100% {
           opacity: 1;
+          stroke-dashoffset: 0;
           transform: translateY(-0.7px);
         }
       }
@@ -66,13 +61,16 @@
   <g aria-hidden="true">
     <path
       class="mark main-line"
+      pathLength="1"
       d="M 40 70
          C 55 60, 65 35, 55 35
          C 40 35, 40 75, 55 75
-         C 65 75, 75 45, 75 38
-         C 75 32, 70 32, 72 38
-         C 74 50, 85 50, 92 38
-         C 92 75, 105 75, 120 55"
+         C 64 74, 73 61, 80 43
+         C 83 37, 90 36, 93 40
+         C 96 44, 91 49, 84 51
+         C 91 48, 98 45, 105 46
+         C 114 47, 112 56, 103 61
+         C 112 59, 122 53, 130 46"
     />
   </g>
 </svg>

@@ -82,7 +82,7 @@ export function Hero({
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-6 top-4 -z-10 hidden h-44 w-44 opacity-80 sm:block md:-right-8 md:top-2 md:h-56 md:w-56 lg:-right-10 lg:top-0 lg:h-72 lg:w-72"
+          className="pointer-events-none absolute -right-6 top-6 -z-10 hidden h-44 w-44 opacity-80 sm:block md:-right-8 md:top-4 md:h-56 md:w-56 lg:-right-10 lg:top-2 lg:h-72 lg:w-72"
           style={
             {
               maskImage:
