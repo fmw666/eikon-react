@@ -82,22 +82,24 @@ export function Hero({
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-6 top-4 -z-10 hidden h-44 w-44 opacity-80 sm:block md:-right-8 md:top-2 md:h-56 md:w-56 lg:-right-10 lg:top-0 lg:h-72 lg:w-72"
+          className="pointer-events-none absolute right-0 top-16 -z-10 hidden h-28 w-60 opacity-50 sm:block md:right-4 md:top-20 md:h-32 md:w-64 lg:right-[4.5rem] lg:top-24 lg:h-36 lg:w-72 xl:right-[6.5rem] xl:top-24 xl:h-40 xl:w-80"
           style={
             {
               maskImage:
-                'radial-gradient(circle at 58% 42%, black 0%, black 42%, rgb(0 0 0 / 0.55) 58%, transparent 78%)',
+                'linear-gradient(to bottom, black 0%, black 44%, rgb(0 0 0 / 0.48) 62%, transparent 82%), radial-gradient(ellipse at 55% 50%, black 0%, black 58%, rgb(0 0 0 / 0.58) 74%, transparent 90%)',
               WebkitMaskImage:
-                'radial-gradient(circle at 58% 42%, black 0%, black 42%, rgb(0 0 0 / 0.55) 58%, transparent 78%)',
+                'linear-gradient(to bottom, black 0%, black 44%, rgb(0 0 0 / 0.48) 62%, transparent 82%), radial-gradient(ellipse at 55% 50%, black 0%, black 58%, rgb(0 0 0 / 0.58) 74%, transparent 90%)',
             } as CSSProperties
           }
         >
-          <div className="absolute inset-0 rounded-full bg-black/5 blur-3xl dark:bg-white/10" />
+          <div className="absolute inset-x-6 inset-y-3 rounded-[999px] bg-[radial-gradient(ellipse_at_center,rgb(255_255_255/0.1),transparent_68%)] blur-2xl dark:bg-[radial-gradient(ellipse_at_center,rgb(255_255_255/0.08),transparent_70%)]" />
+          <div className="absolute inset-x-10 top-1/2 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent dark:via-white/8" />
           <img
             src="/webicon.svg"
             alt=""
-            className="relative h-full w-full rotate-[-6deg] drop-shadow-[0_18px_30px_rgb(0_0_0/0.14)] dark:drop-shadow-[0_18px_30px_rgb(255_255_255/0.08)]"
+            className="relative h-full w-full rotate-[-7deg] object-contain drop-shadow-[0_20px_34px_rgb(0_0_0/0.16)] dark:drop-shadow-[0_20px_34px_rgb(255_244_218/0.08)]"
           />
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent via-black/30 to-black/70" />
         </div>
         {/* Text column */}
         <div className="flex flex-col items-start text-left">
