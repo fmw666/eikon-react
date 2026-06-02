@@ -89,7 +89,13 @@ function renderApp(initialPath = '/tasks') {
 // be slow on cold-cache CI machines. Local runs typically finish in well
 // under a second; we leave headroom for the e2e harness, which exercises
 // this same test inside a freshly-scaffolded sandbox directory.
-const SLOW_TIMEOUT = 10_000;
+//
+// 20s (not 10s): at 10s this intermittently timed out in CI's e2e step
+// under parallel load — the lazy chunk + first render occasionally
+// crossed the line. Doubling the budget removes the flake while still
+// failing fast enough if the route genuinely never renders. The
+// per-test timeout below is derived as SLOW_TIMEOUT * 3.
+const SLOW_TIMEOUT = 20_000;
 
 describe('Tasks feature — end-to-end flow', () => {
   beforeEach(() => {

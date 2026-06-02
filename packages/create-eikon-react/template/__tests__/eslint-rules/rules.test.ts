@@ -28,17 +28,29 @@ import plugin from '../../eslint-rules/index.js';
 
 const linter = new Linter({ configType: 'flat' });
 
+function isInsideCwd(filename: string): boolean {
+  const relative = path.relative(process.cwd(), filename);
+  return (
+    relative === '' ||
+    (!relative.startsWith(`..${path.sep}`) &&
+      relative !== '..' &&
+      !path.isAbsolute(relative))
+  );
+}
+
 /**
  * Resolve a fixture filename to a path under cwd so flat-config `files`
  * globs (which match cwd-relative) catch it. Tests pass plain basenames
  * or "src/..." style paths; we anchor them inside cwd.
  */
 function makeFilename(name: string): string {
-  const stripped = name.replace(/^\/tmp\//, '');
-  if (path.isAbsolute(stripped) && stripped.includes(process.cwd())) {
-    return stripped;
+  if (path.isAbsolute(name)) {
+    if (isInsideCwd(name)) {
+      return name;
+    }
+    return path.join(process.cwd(), 'src', name.replace(/^[/\\]tmp[/\\]/, ''));
   }
-  return path.join(process.cwd(), 'src', stripped);
+  return path.join(process.cwd(), 'src', name);
 }
 
 function lint(
@@ -65,7 +77,7 @@ function lint(
 }
 
 // =================================================================================================
-// Tests — file-header-banner
+// Tests ? file-header-banner
 // =================================================================================================
 
 describe('eikon/file-header-banner', () => {
@@ -119,7 +131,7 @@ export const x = 1;
 });
 
 // =================================================================================================
-// Tests — filename-matches-export
+// Tests ? filename-matches-export
 // =================================================================================================
 
 describe('eikon/filename-matches-export', () => {
@@ -178,7 +190,7 @@ describe('eikon/filename-matches-export', () => {
 });
 
 // =================================================================================================
-// Tests — filename-case-by-path
+// Tests ? filename-case-by-path
 // =================================================================================================
 
 describe('eikon/filename-case-by-path', () => {

@@ -1,23 +1,28 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 18 * * *'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  verify:
+  verify-pr:
+    if: github.event_name == 'pull_request'
+    name: verify (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -32,6 +37,35 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm verify
-        env:
-          CI: '1'
+      - run: pnpm verify:pr
+
+  verify-full:
+    if: github.event_name != 'pull_request'
+    name: verify (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.10'
+          cache: 'pnpm'
+
+      # Full e2e exercises the `--pm bun` rewrite end-to-end and hard-fails
+      # in CI if bun is missing, so full verification installs it explicitly.
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.1.30'
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm verify:full

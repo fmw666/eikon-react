@@ -1,10 +1,8 @@
 /**
  * @file CtaButton.tsx
- * @description Codex.io-flavoured call-to-action button.
+ * @description Brand-flavoured call-to-action button.
  *
- * Visual language is a faithful reproduction of the buttons at
- * https://www.codex.io — distinctive enough to be instantly
- * recognisable, generic enough to work as a building block:
+ * Visual language is a compact, high-contrast brand button:
  *
  *   ┌─ outer halo ring (same colour, 2-3px gap) ────────────────────────┐
  *   │  ┌─ solid block (lime fill / black text) ─────────────────────┐    │
@@ -17,15 +15,14 @@
  * us animate width and offset together cleanly). The gap between the
  * button and the halo isn't a fill — it's the page background
  * showing through, so the effect works in both light and dark
- * themes without per-mode tuning (codex.io is dark-only; we have to
- * be theme-aware).
+ * themes without per-mode tuning.
  *
  * Hover gives two simultaneous cues:
  *
  *   1. Word-reveal: the label is rendered twice, stacked vertically
  *      inside an `overflow-hidden` viewport. On hover, the top copy
  *      slides up by 110% and the bottom copy slides into place — a
- *      Codex signature. When the label is a plain string, each
+ *      signature motion. When the label is a plain string, each
  *      character animates independently with a small staggered
  *      delay, so the flip cascades from left to right rather than
  *      moving as a single block.
@@ -35,8 +32,8 @@
  *
  * `variant` controls the colour story:
  *
- *   - "primary"   : lime fill + black text + lime halo. The "money"
- *                   button, used for the page's #1 action.
+ *   - "primary"   : cool brand fill + ink text + brand halo. The
+ *                   "money" button, used for the page's #1 action.
  *   - "secondary" : surface fill + white text + border. Sits beside
  *                   a primary as a softer alternative.
  *
@@ -118,7 +115,7 @@ export function CtaButton(props: CtaButtonProps) {
   const blockClasses = [
     'eikon-shimmer-hover group/cta relative inline-flex items-center gap-2',
     'rounded-[6px] px-5 py-2.5',
-    'text-[11px] font-bold uppercase leading-none tracking-[0.14em]',
+    'text-[11px] font-extrabold uppercase leading-none tracking-[0.14em]',
     'no-underline cursor-pointer select-none',
     'transition-[box-shadow,outline-offset,outline-width,background-color,color] duration-300 ease-out',
     tokens.surface,
@@ -176,26 +173,47 @@ export function CtaButton(props: CtaButtonProps) {
 // =============================================================================
 
 /**
- * Lime-on-black, signature codex.io look.
+ * Metallic brand "money" button — the page's signature #1 action.
  *
- * The `outline` carries the halo: solid lime stroke with a 3px gap
- * (`outline-offset`) filled by the page background. On hover the gap
- * tightens by 1px and the stroke thickens by 1px — the button feels
- * like it focuses without leaping forward.
+ * Brushed-metal look built off the single brand colour
+ * (`--color-brand-500`), driven via `color-mix` so it tracks the
+ * page's brand colour if it ever changes. The "metal" comes from a
+ * strong vertical light→dark ramp plus a crisp specular band, not
+ * from a flat fill:
  *
- * The glow shadow is a soft lime bloom; it's a touch dim at rest and
- * doubles on hover.
+ *   1. Specular   — a bright white sheen across the top ~third, the
+ *                   highlight you'd see on a curved metal face.
+ *   2. Metal ramp — brand-500 lifted toward white at the very top,
+ *                   true brand through the upper third, then mixed
+ *                   toward black down to the base (the darker foot
+ *                   is what gives it weight — "a bit blacker").
+ *   3. Bevel      — a bright 1px inner top edge + a 1px inner ring +
+ *                   a soft dark bottom inner shadow, so the rim looks
+ *                   machined.
+ *   4. Lift glow  — a brand-500 bloom that grows on hover while the
+ *                   metal brightens a step, so the button lifts.
+ *
+ * The label is engraved (letterpress): a semi-transparent dark ink
+ * lets the metal show faintly through each glyph, and a 1px light
+ * highlight below + dark line above the letters make them read as
+ * stamped into the surface rather than printed on top — a knocked-
+ * out, hollowed feel that lifts the whole button.
+ * This composes with the three motion cues already on the block —
+ * the `eikon-shimmer-hover` light sweep (which now reads as a
+ * reflection sliding across the metal), the WordReveal label flip,
+ * and the halo tightening — each hitting a different layer.
  */
 const PRIMARY_TOKENS = {
   surface:
-    'bg-gradient-to-br from-[oklch(0.88_0.2_118)] to-[oklch(0.76_0.18_130)] text-[#1a2e05] ' +
-    'shadow-[0_0_28px_-6px_oklch(0.8_0.18_120/0.6),0_2px_6px_rgb(0_0_0/0.18)] ' +
-    'hover:shadow-[0_0_38px_-2px_oklch(0.8_0.18_120/0.85),0_4px_12px_rgb(0_0_0/0.22)]',
+    'bg-[linear-gradient(180deg,rgb(255_255_255/0.28),rgb(255_255_255/0.06)_36%,transparent_58%),linear-gradient(180deg,color-mix(in_oklch,var(--color-brand-500)_80%,white),var(--color-brand-500)_20%,color-mix(in_oklch,var(--color-brand-500)_82%,black)_62%,color-mix(in_oklch,var(--color-brand-500)_66%,black)_100%)] text-[#0a1426]/80 [text-shadow:0_1px_0_rgb(255_255_255/0.34),0_-1px_0_rgb(0_0_0/0.22)] ' +
+    'hover:bg-[linear-gradient(180deg,rgb(255_255_255/0.36),rgb(255_255_255/0.08)_36%,transparent_58%),linear-gradient(180deg,color-mix(in_oklch,var(--color-brand-500)_72%,white),color-mix(in_oklch,var(--color-brand-500)_96%,white)_20%,color-mix(in_oklch,var(--color-brand-500)_86%,black)_62%,color-mix(in_oklch,var(--color-brand-500)_70%,black)_100%)] ' +
+    'shadow-[inset_0_1px_0_rgb(255_255_255/0.45),inset_0_0_0_1px_rgb(255_255_255/0.1),inset_0_-2px_4px_rgb(0_0_0/0.45),0_2px_5px_rgb(0_0_0/0.3),0_0_24px_-14px_oklch(0.65_0.06_235/0.55)] ' +
+    'hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.55),inset_0_0_0_1px_rgb(255_255_255/0.16),inset_0_-2px_5px_rgb(0_0_0/0.5),0_4px_10px_rgb(0_0_0/0.34),0_0_30px_-11px_oklch(0.65_0.06_235/0.72)]',
   ring:
-    'outline outline-1 outline-[oklch(0.82_0.16_120/0.7)] outline-offset-[3px] ' +
+    'outline outline-1 outline-[color-mix(in_oklch,var(--color-brand-500)_55%,transparent)] outline-offset-[3px] ' +
     'hover:outline-2 hover:outline-offset-[2px] ' +
     'focus-visible:outline-2 focus-visible:outline-offset-[2px]',
-  icon: 'inline-flex items-center text-[#1a2e05]/80',
+  icon: 'inline-flex items-center text-[#0a1426]/70',
 } as const;
 
 /**
