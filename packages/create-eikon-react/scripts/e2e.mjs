@@ -619,8 +619,12 @@ async function installSharedSandbox(tmpRoot, tarballPath) {
 }
 
 async function runScenario(scenario, tmpRoot, cliBin) {
-  const scratch = path.join(tmpRoot, `s-${scenario.id}`);
-  await mkdir(scratch, { recursive: true });
+  // Scaffold straight into `tmpRoot` rather than a per-scenario `s-<id>`
+  // wrapper: the project name (`eikon-e2e-<id>`) is already unique per
+  // scenario, so the wrapper only duplicated the scenario id in the path and
+  // cost ~20 chars of Windows MAX_PATH headroom (see PM_INSTALL_ARGS for why
+  // every char counts on the animate-ui dependency graph).
+  const scratch = tmpRoot;
 
   step('  invoke CLI');
   // Default to pnpm so the existing scenarios stay green; pm-* scenarios
@@ -720,7 +724,25 @@ async function runScenario(scenario, tmpRoot, cliBin) {
 // errors against legitimately-published deps. bun has no equivalent
 // flag (it owns its global cache).
 const PM_INSTALL_ARGS = {
-  pnpm: ['install', '--prefer-offline'],
+  pnpm: [
+    'install',
+    '--prefer-offline',
+    // Windows MAX_PATH (260) guard, win32 only. The animate-ui scenario's
+    // dependency graph produces pnpm virtual-store dir names
+    // (`.pnpm/<pkg>@<ver>_<peer-hashes…>`) ~115 chars long; the deepest files
+    // beneath them (@typescript-eslint dist, react-i18next) then cross 260 on
+    // runners without long-path support. pnpm can't fully materialise the
+    // tree there, so e.g. react-i18next's `html-parse-stringify` link goes
+    // missing and the generated project's vitest fails to resolve it at
+    // collection time. Truncating the virtual-store dir names (hash-suffixed,
+    // collision-safe) keeps every path well under 260 regardless of the
+    // runner's LongPathsEnabled. It only renames on-disk dirs — the resolved
+    // graph is identical — and is harmless on POSIX, so we scope it to win32
+    // to leave the Linux e2e at full default fidelity.
+    ...(process.platform === 'win32'
+      ? ['--config.virtual-store-dir-max-length=50']
+      : []),
+  ],
   npm: ['install'],
   bun: ['install'],
 };
