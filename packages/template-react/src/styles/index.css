@@ -3304,19 +3304,10 @@
 }
 .dark.design-animal-crossing body {
   background-color: var(--color-background);
-  background-image:
-    radial-gradient(circle at 78% 10%, oklch(0.86 0.05 92 / 0.18), transparent 14rem),
-    radial-gradient(circle at 50% -15%, oklch(0.58 0.08 230 / 0.16), transparent 34rem),
-    var(--bg-ambient);
-  background-size:
-    34rem 24rem,
-    80rem 36rem,
-    auto;
-  background-position:
-    calc(100% - 4rem) 1rem,
-    50% 0,
-    0 0;
-  background-repeat: no-repeat, no-repeat, repeat;
+  background-image: var(--bg-ambient);
+  background-size: auto;
+  background-position: 0 0;
+  background-repeat: repeat;
 }
 .dark.design-animal-crossing .app-nav-shell {
   background: color-mix(in oklab, var(--color-sidebar) 88%, transparent);
