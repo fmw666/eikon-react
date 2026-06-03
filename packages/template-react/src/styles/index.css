@@ -3426,6 +3426,12 @@
   border-color: oklch(0.36 0.034 78);
   box-shadow: 0 5px 0 0 oklch(0.14 0.026 82);
 }
+.dark.design-animal-crossing button.shadow-sm:hover,
+.dark.design-animal-crossing a.shadow-sm:hover {
+  background-color: oklch(0.39 0.036 78);
+  color: oklch(0.95 0.026 92);
+  border-color: oklch(0.39 0.036 78);
+}
 
 /* Switch "on" goes grass-GREEN (not teal) — the game uses a leafy green for
  * the checked track, distinct from the teal brand accent. The Switch
