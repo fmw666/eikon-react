@@ -170,15 +170,34 @@
  * Changelog mobile-specific adjustments
  *
  * The diff workspace is the heaviest visual surface on /changelog. On
- * phones the file tree + diff split goes vertical (via md: breakpoint
- * in the JSX), but the diff code lines can still overflow horizontally.
- * Ensure the diff container has horizontal scroll without breaking the
- * layout.
+ * narrow screens the file tree + diff split goes vertical (via the
+ * `md:` breakpoint in the JSX). At that point a fixed-height diff
+ * pane becomes a nested-scroll trap: the file tree is a short strip,
+ * while the selected patch below is long. Let the page own vertical
+ * scrolling on mobile, but preserve horizontal scrolling for long
+ * diff lines.
  * =========================================================================== */
-@media (max-width: 639.98px) {
-  /* Prevent the workspace card from pushing the page width */
+@media (max-width: 767.98px) {
   [aria-label="Diff workspace"] {
-    min-height: 220px;
+    min-height: 0;
+  }
+
+  .eikon-changelog-diff-body {
+    height: auto !important;
+    max-height: none !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .eikon-changelog-file-pane,
+  .eikon-changelog-file-pane * {
+    scrollbar-width: none;
+  }
+
+  .eikon-changelog-file-pane::-webkit-scrollbar,
+  .eikon-changelog-file-pane *::-webkit-scrollbar {
+    display: none;
   }
 
   /* Tighten diff gutter columns so more code is visible on phones.

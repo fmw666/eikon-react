@@ -457,12 +457,11 @@ function Workspace({
   return (
     // RESPONSIVE LAYOUT CONTRACT
     //
-    //   `<md` (mobile/tablet) : VERTICAL stack — file tree on top
-    //                            with a capped height so it doesn't
-    //                            push the diff off-screen, diff
-    //                            below. Tap a file to select; the
-    //                            DiffView's internal scroll handles
-    //                            long patches.
+    //   `<md` (mobile/tablet) : VERTICAL stack — file tree on top,
+    //                            diff below. The page owns vertical
+    //                            scrolling here so a long patch reads
+    //                            naturally instead of being trapped
+    //                            inside a short nested pane.
     //   `md+` (tablet/desktop): horizontal split — tree column on
     //                            the left (288px → 320px), diff
     //                            fills the rest. This is the
@@ -475,20 +474,16 @@ function Workspace({
     // workspace.
     <div className="flex w-full min-w-0 flex-col md:flex-row">
       {/* File tree.
-            <md : full-width, capped at ~30dvh so the diff is always
-                  visible without the visitor having to scroll past
-                  a long flat list of changed files. The tree scrolls
-                  internally above that cap.
+            <md : full-width and content-height so the page, not the
+                  file pane, owns vertical scrolling.
             md+ : 288px column, 320px on lg, fills row height. */}
       <div
-        // Cap the mobile tree height so a multi-file diff doesn't
-        // hide the patch below the fold. `overflow-y-auto` lets
-        // the outer wrapper scroll when the tree's content-driven
-        // height exceeds the cap (the inner virtualised list takes
-        // over once it itself hits its own 720px ceiling). On
-        // `md+` we drop the cap so the tree fills its column
-        // naturally.
-        className="max-h-[min(30dvh,320px)] w-full min-w-0 shrink-0 overflow-y-auto border-b border-[var(--border-1)] md:max-h-none md:w-72 md:overflow-visible md:border-b-0 md:border-r lg:w-80"
+        // On mobile this must not become a nested scroll area: the
+        // directory sits above the selected patch, so a visible
+        // scrollbar here makes the top half feel fixed while the
+        // diff below keeps growing. Desktop keeps the natural
+        // split-pane behaviour.
+        className="eikon-changelog-file-pane w-full min-w-0 shrink-0 overflow-visible border-b border-[var(--border-1)] md:w-72 md:border-b-0 md:border-r lg:w-80"
       >
         <ChangedFilesTree
           files={compare.files}
@@ -496,7 +491,7 @@ function Workspace({
           onSelectFile={onSelectFile}
         />
       </div>
-      <div className="min-w-0 flex-1">
+      <div className="eikon-changelog-diff-pane min-w-0 flex-1">
         <DiffView
           file={file}
           baseLabel={baseTag}

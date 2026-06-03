@@ -196,7 +196,7 @@ export function DiffView({
 
       {/* Body */}
       <div
-        className="eikon-scroll-panel"
+        className="eikon-changelog-diff-body eikon-scroll-panel"
         style={{
           // Fixed height — short diffs no longer leave whitespace
           // below the hunks, long diffs scroll internally past the
@@ -273,9 +273,10 @@ function DiffBody({
         <table
           key={hi}
           style={{
-            width: '100%',
+            width: 'max-content',
+            minWidth: '100%',
             borderCollapse: 'collapse',
-            tableLayout: 'fixed',
+            tableLayout: 'auto',
           }}
         >
           <colgroup>
