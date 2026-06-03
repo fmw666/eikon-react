@@ -3292,7 +3292,7 @@
   background-size: var(--animal-bg-width) auto;
   background-repeat: repeat;
   background-attachment: scroll;
-  animation: animal-bg-scroll 70s linear infinite;
+  animation: animal-bg-scroll 90s linear infinite;
   font-weight: 500;
 }
 .dark.design-animal-crossing body {
@@ -3302,7 +3302,7 @@
   background-size: var(--animal-bg-width) auto;
   background-repeat: repeat;
   background-attachment: scroll;
-  animation: animal-bg-scroll 70s linear infinite;
+  animation: animal-bg-scroll 90s linear infinite;
 }
 .dark.design-animal-crossing .app-nav-shell {
   background: color-mix(in oklab, var(--color-sidebar) 88%, transparent);
@@ -3314,7 +3314,7 @@
     background-position: 0 0;
   }
   to {
-    background-position: var(--animal-bg-width) var(--animal-bg-scroll-y);
+    background-position: calc(var(--animal-bg-width) * -1) calc(var(--animal-bg-scroll-y) * -1);
   }
 }
 @media (prefers-reduced-motion: reduce) {
