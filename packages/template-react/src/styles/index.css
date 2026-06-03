@@ -631,23 +631,62 @@
 }
 :root.design-apple body {
   background:
-    radial-gradient(circle at 50% -10%, oklch(0.92 0.035 250 / 0.55), transparent 34rem),
-    linear-gradient(180deg, oklch(1 0 0) 0%, var(--color-background) 100%);
+    linear-gradient(180deg, oklch(0.995 0.002 250) 0%, oklch(0.972 0.006 250) 44%, var(--color-background) 100%);
+}
+.dark.design-apple body {
+  background:
+    linear-gradient(180deg, oklch(0.18 0.006 250) 0%, oklch(0.145 0.006 250) 46%, var(--color-background) 100%);
 }
 :root.design-apple .app-nav-shell {
-  background: color-mix(in oklab, var(--color-card) 82%, transparent);
+  background: color-mix(in oklab, var(--color-card) 90%, transparent);
   backdrop-filter: blur(24px) saturate(180%);
-  box-shadow: inset 0 -0.5px 0 oklch(1 0 0 / 0.42);
+  border-color: color-mix(in oklab, var(--color-border) 68%, transparent);
+  box-shadow:
+    0 0.5px 0 color-mix(in oklab, var(--color-border) 70%, transparent),
+    inset 0 1px 0 oklch(1 0 0 / 0.48);
 }
 :root.design-apple .app-nav-link,
 :root.design-apple .app-nav-action,
-:root.design-apple .app-bottom-nav-link {
+:root.design-apple .app-bottom-nav-link,
+:root.design-apple button.bg-transparent,
+:root.design-apple a.bg-transparent {
   border-radius: 9999px;
+}
+:root.design-apple .app-nav-link:hover,
+:root.design-apple .app-nav-action:hover,
+:root.design-apple .app-bottom-nav-link:hover,
+:root.design-apple button.bg-transparent:hover,
+:root.design-apple a.bg-transparent:hover {
+  opacity: 1;
+  background: color-mix(in oklab, var(--color-muted) 86%, var(--color-card));
+  color: var(--color-foreground);
+  box-shadow: inset 0 0 0 0.5px color-mix(in oklab, var(--color-border) 72%, transparent);
 }
 :root.design-apple .app-nav-link-active,
 :root.design-apple .app-bottom-nav-link-active {
   background: oklch(0.6 0.22 256 / 0.14);
   color: var(--color-primary);
+}
+:root.design-apple button.shadow-sm,
+:root.design-apple a.shadow-sm {
+  border-radius: 0.875rem;
+  box-shadow:
+    0 8px 22px -18px oklch(0 0 0 / 0.18),
+    inset 0 1px 0 oklch(1 0 0 / 0.24);
+}
+:root.design-apple input:not([type='checkbox']):not([type='radio']):not([type='range']),
+:root.design-apple textarea,
+:root.design-apple select,
+:root.design-apple .app-dropdown-trigger,
+:root.design-apple .app-dropdown-content {
+  background: color-mix(in oklab, var(--color-card) 86%, transparent);
+  border-color: color-mix(in oklab, var(--color-border) 80%, transparent);
+  backdrop-filter: var(--surface-backdrop);
+}
+:root.design-apple .app-badge {
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--color-muted) 82%, var(--color-card));
+  color: var(--color-muted-foreground);
 }
 /* @eikon:variant(design=apple) end */
 
@@ -939,22 +978,22 @@
 }
 :root.design-anthropic body {
   background-image:
-    radial-gradient(circle at 12% 10%, color-mix(in oklab, var(--color-primary) 10%, transparent), transparent 26rem),
-    linear-gradient(180deg, color-mix(in oklab, var(--color-muted) 42%, transparent), transparent 18rem);
+    linear-gradient(180deg, color-mix(in oklab, var(--color-muted) 34%, transparent) 0%, transparent 18rem),
+    linear-gradient(90deg, color-mix(in oklab, var(--color-primary) 3%, transparent), transparent 22rem);
 }
 :root.design-anthropic .app-nav-shell,
 :root.design-anthropic .app-dropdown-trigger,
 :root.design-anthropic .app-dropdown-content {
-  background: color-mix(in oklab, var(--color-sidebar) 94%, transparent);
+  background: color-mix(in oklab, var(--color-sidebar) 96%, transparent);
   border-color: var(--color-sidebar-border);
-  box-shadow: 0 1px 0 color-mix(in oklab, var(--color-border) 74%, transparent);
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--color-border) 64%, transparent);
 }
 :root.design-anthropic .app-nav-link,
 :root.design-anthropic .app-nav-action,
 :root.design-anthropic .app-bottom-nav-link,
 :root.design-anthropic button.bg-transparent,
 :root.design-anthropic a.bg-transparent {
-  border-radius: 9999px;
+  border-radius: var(--radius-md);
 }
 :root.design-anthropic .app-nav-link:hover,
 :root.design-anthropic .app-nav-action:hover,
@@ -962,27 +1001,30 @@
 :root.design-anthropic button.bg-transparent:hover,
 :root.design-anthropic a.bg-transparent:hover {
   opacity: 1;
-  background: color-mix(in oklab, var(--color-primary) 10%, var(--color-muted));
+  background: color-mix(in oklab, var(--color-muted) 86%, var(--color-primary));
   color: var(--color-foreground);
 }
 :root.design-anthropic .app-nav-link-active,
 :root.design-anthropic .app-bottom-nav-link-active {
-  background: color-mix(in oklab, var(--color-primary) 14%, var(--color-card));
+  background: color-mix(in oklab, var(--color-primary) 9%, var(--color-card));
   color: var(--color-primary);
+  box-shadow: inset 0 -1px 0 color-mix(in oklab, var(--color-primary) 38%, transparent);
 }
 :root.design-anthropic button.shadow-sm,
 :root.design-anthropic a.shadow-sm {
-  border-radius: 9999px;
-  box-shadow: 0 1px 0 color-mix(in oklab, var(--color-primary) 24%, transparent), var(--shadow-sm);
+  border-radius: var(--radius-md);
+  box-shadow:
+    0 1px 0 color-mix(in oklab, var(--color-primary) 16%, transparent),
+    var(--shadow-sm);
 }
 :root.design-anthropic .app-badge {
-  border-radius: 9999px;
+  border-radius: var(--radius-sm);
   background: color-mix(in oklab, var(--color-muted) 72%, var(--color-card));
 }
 :root.design-anthropic input:not([type='checkbox']):not([type='radio']):not([type='range']),
 :root.design-anthropic textarea,
 :root.design-anthropic select {
-  background: color-mix(in oklab, var(--color-card) 86%, var(--color-muted));
+  background: color-mix(in oklab, var(--color-card) 92%, var(--color-muted));
   border-color: var(--color-sidebar-border);
 }
 /* @eikon:variant(design=anthropic) end */
