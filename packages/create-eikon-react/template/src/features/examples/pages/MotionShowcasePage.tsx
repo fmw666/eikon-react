@@ -187,7 +187,7 @@ function LayoutCard({ layoutId, color, order }: LayoutCardProps) {
       layoutId={reduceMotion ? undefined : layoutId}
       style={{ order }}
       transition={{ type: 'spring', stiffness: 320, damping: 28 }}
-      className="flex h-16 w-16 items-center justify-center rounded-md text-xs font-mono text-white shadow-sm"
+      className="flex h-16 w-16 items-center justify-center rounded-md text-xs font-mono shadow-sm"
       // CSS custom property + opacity gradient keeps both cards visible
       // when stacked on the same row but distinguishes them by hue.
       data-color={color}

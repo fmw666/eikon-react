@@ -80,11 +80,11 @@ function formatNumber(value: number | undefined, unit: string): string {
 function ratingClass(rating: Metric['rating'] | undefined): string {
   switch (rating) {
     case 'good':
-      return 'text-emerald-500';
+      return 'text-[var(--color-success)]';
     case 'needs-improvement':
-      return 'text-amber-500';
+      return 'text-[var(--color-warning)]';
     case 'poor':
-      return 'text-red-500';
+      return 'text-[var(--color-destructive)]';
     default:
       return 'text-[var(--color-muted-foreground)]';
   }

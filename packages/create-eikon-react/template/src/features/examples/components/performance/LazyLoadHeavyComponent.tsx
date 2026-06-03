@@ -34,8 +34,8 @@ function LazyLoadHeavyComponent({ onMount }: { onMount?: () => void }) {
   }, [onMount]);
 
   return (
-    <div className="flex items-start gap-3 rounded-md border border-emerald-500/30 bg-emerald-500/5 p-4">
-      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" />
+    <div className="flex items-start gap-3 rounded-md border border-[var(--color-success)]/30 bg-[var(--color-success)]/8 p-4">
+      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-success)]" />
       <div>
         <p className="text-sm font-medium text-[var(--color-card-foreground)]">
           {t('pages.performance.lazyLoad.loadedTitle')}

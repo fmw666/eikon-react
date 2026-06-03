@@ -30,6 +30,9 @@ import { Route } from 'react-router-dom';
 // --- Absolute Imports ---
 import { loadNamespace } from '@/shared/i18n';
 
+// --- Relative Imports ---
+import { ExamplesRouteFallback } from './components/ExamplesRouteFallback';
+
 // =================================================================================================
 // Lazy pages
 // =================================================================================================
@@ -151,14 +154,3 @@ export const examplesRoutes = (
     <Route path=":section" element={<ExamplesSectionPage />} />
   </Route>
 );
-
-function ExamplesRouteFallback() {
-  return (
-    <div
-      aria-hidden="true"
-      className="min-h-[100dvh] bg-[var(--color-background)] p-6"
-    >
-      <div className="mx-auto h-32 max-w-5xl animate-pulse rounded-md bg-[var(--color-muted)]/40" />
-    </div>
-  );
-}
