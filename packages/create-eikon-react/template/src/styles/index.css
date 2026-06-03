@@ -3278,31 +3278,31 @@
 :root.design-animal-crossing,
 .dark.design-animal-crossing {
   --bg-ambient: url('/animal-island-home-bg.webp');
+  --animal-bg-width: clamp(460px, 58vw, 820px);
+  --animal-bg-scroll-y: clamp(980px, 123.6vw, 1747px);
 }
 
-/* Grass island page — overrides the shared `body` rule's flat `cover`
- * fill so the leaf tile actually REPEATS at its natural size, and slowly
- * SCROLLS the field on an 80s loop, mirroring the reference exactly:
- *   background: url(home_bg) 0 0 / auto repeat, rgb(125,195,149);
- *   animation: bgScroll 80s linear infinite;
- * The base colour is the reference's grass green rgb(125,195,149); cream
- * cards float on top like paper notes on a lawn. The drift is one tile
- * (300px) per cycle so it loops seamlessly, and is disabled under
- * prefers-reduced-motion. Body copy steps up to weight 500. */
+/* Grass island page: the supplied 1012x2156 home_bg tile repeats, keeps
+ * its aspect ratio, and drifts one rendered tile per cycle. The responsive
+ * width keeps the leaves readable on desktop without becoming oversized on
+ * mobile. Motion is disabled under prefers-reduced-motion. */
 :root.design-animal-crossing body {
   background-color: oklch(0.758 0.097 154.6);
-  background-size: auto;
+  background-position: 0 0;
+  background-size: var(--animal-bg-width) auto;
   background-repeat: repeat;
   background-attachment: scroll;
-  animation: animal-bg-scroll 80s linear infinite;
+  animation: animal-bg-scroll 70s linear infinite;
   font-weight: 500;
 }
 .dark.design-animal-crossing body {
   background-color: var(--color-background);
   background-image: var(--bg-ambient);
-  background-size: auto;
   background-position: 0 0;
+  background-size: var(--animal-bg-width) auto;
   background-repeat: repeat;
+  background-attachment: scroll;
+  animation: animal-bg-scroll 70s linear infinite;
 }
 .dark.design-animal-crossing .app-nav-shell {
   background: color-mix(in oklab, var(--color-sidebar) 88%, transparent);
@@ -3314,11 +3314,12 @@
     background-position: 0 0;
   }
   to {
-    background-position: 300px 300px;
+    background-position: var(--animal-bg-width) var(--animal-bg-scroll-y);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  :root.design-animal-crossing body {
+  :root.design-animal-crossing body,
+  .dark.design-animal-crossing body {
     animation: none;
   }
 }
