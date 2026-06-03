@@ -1335,23 +1335,23 @@
  * Generous 1rem radii per M3 "container" shape language. Roboto font.
  * Hover raises elevation (md→lg), active presses to sm. */
 :root.design-material {
-  --color-background: oklch(0.99 0.005 270);
-  --color-foreground: oklch(0.18 0.015 270);
-  --color-card: oklch(0.98 0.005 270);
-  --color-card-foreground: oklch(0.18 0.015 270);
-  --color-muted: oklch(0.94 0.01 270);
-  --color-muted-foreground: oklch(0.45 0.02 270);
-  --color-border: oklch(0.9 0.01 270);
-  --color-input: oklch(0.9 0.01 270);
-  --color-primary: oklch(0.5 0.22 270);
-  --color-primary-foreground: oklch(1 0 0);
-  --color-secondary: oklch(0.93 0.015 270);
-  --color-secondary-foreground: oklch(0.18 0.015 270);
-  --color-accent: oklch(0.92 0.04 330);
-  --color-accent-foreground: oklch(0.18 0.015 270);
+  --color-background: #fffbfe;
+  --color-foreground: #1d1b20;
+  --color-card: #f7f2fa;
+  --color-card-foreground: #1d1b20;
+  --color-muted: #f3edf7;
+  --color-muted-foreground: #49454f;
+  --color-border: #cac4d0;
+  --color-input: #f3edf7;
+  --color-primary: #6750a4;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #e8def8;
+  --color-secondary-foreground: #1d192b;
+  --color-accent: #eaddff;
+  --color-accent-foreground: #21005d;
   --color-destructive: oklch(0.55 0.22 25);
   --color-destructive-foreground: oklch(1 0 0);
-  --color-ring: oklch(0.5 0.22 270);
+  --color-ring: #6750a4;
   --radius-lg: 1.25rem;
   --radius-md: 0.875rem;
   --radius-sm: 0.5rem;
@@ -1363,8 +1363,8 @@
   --surface-inset-shadow: none;
   --surface-ring-width: 0px;
   --surface-ring-color: transparent;
-  --surface-hover-shadow: 0 2px 4px 0 oklch(0 0 0 / 0.12), 0 4px 12px 3px oklch(0 0 0 / 0.1), 0 8px 20px 6px oklch(0 0 0 / 0.06);
-  --surface-active-shadow: 0 1px 2px 0 oklch(0 0 0 / 0.12), 0 1px 3px 1px oklch(0 0 0 / 0.06);
+  --surface-hover-shadow: 0 2px 4px 0 oklch(0 0 0 / 0.12), 0 4px 12px 3px oklch(0 0 0 / 0.1), 0 0 0 999px color-mix(in oklab, var(--color-primary) 8%, transparent) inset;
+  --surface-active-shadow: 0 1px 2px 0 oklch(0 0 0 / 0.12), 0 0 0 999px color-mix(in oklab, var(--color-primary) 12%, transparent) inset;
 
   --shadow-sm: 0 1px 2px 0 oklch(0 0 0 / 0.15), 0 1px 3px 1px oklch(0 0 0 / 0.08);
   --shadow-md: 0 1px 2px 0 oklch(0 0 0 / 0.15), 0 2px 6px 2px oklch(0 0 0 / 0.1);
@@ -1378,11 +1378,11 @@
 
   /* Material chart — M3 tonal palette: brand violet anchor, then four
    * supporting hues at the same chroma so series compare cleanly. */
-  --chart-1: oklch(0.5 0.22 270);
-  --chart-2: oklch(0.62 0.18 200);
-  --chart-3: oklch(0.65 0.18 145);
-  --chart-4: oklch(0.7 0.16 75);
-  --chart-5: oklch(0.62 0.18 330);
+  --chart-1: #6750a4;
+  --chart-2: #625b71;
+  --chart-3: #7d5260;
+  --chart-4: #006a6a;
+  --chart-5: #7d5700;
 
   /* Material motion — M3 emphasized easing. The "emphasized" curve
    * (cubic-bezier(0.2, 0, 0, 1)) is M3's hallmark; pairs with M3
@@ -1394,23 +1394,23 @@
   --ease-in-out: cubic-bezier(0.2, 0, 0, 1);
 }
 .dark.design-material {
-  --color-background: oklch(0.15 0.01 270);
-  --color-foreground: oklch(0.95 0.005 270);
-  --color-card: oklch(0.2 0.01 270);
-  --color-card-foreground: oklch(0.95 0.005 270);
-  --color-muted: oklch(0.25 0.01 270);
-  --color-muted-foreground: oklch(0.72 0.01 270);
-  --color-border: oklch(0.3 0.01 270);
-  --color-input: oklch(0.3 0.01 270);
-  --color-primary: oklch(0.72 0.2 270);
-  --color-primary-foreground: oklch(0.15 0.01 270);
-  --color-secondary: oklch(0.25 0.01 270);
-  --color-secondary-foreground: oklch(0.95 0.005 270);
-  --color-accent: oklch(0.28 0.045 330);
-  --color-accent-foreground: oklch(0.95 0.005 270);
+  --color-background: #141218;
+  --color-foreground: #e6e0e9;
+  --color-card: #211f26;
+  --color-card-foreground: #e6e0e9;
+  --color-muted: #2b2930;
+  --color-muted-foreground: #cac4d0;
+  --color-border: #49454f;
+  --color-input: #2b2930;
+  --color-primary: #d0bcff;
+  --color-primary-foreground: #381e72;
+  --color-secondary: #4a4458;
+  --color-secondary-foreground: #e8def8;
+  --color-accent: #4f378b;
+  --color-accent-foreground: #eaddff;
   --color-destructive: oklch(0.65 0.2 25);
   --color-destructive-foreground: oklch(1 0 0);
-  --color-ring: oklch(0.72 0.2 270);
+  --color-ring: #d0bcff;
 
   --surface-hover-shadow: 0 2px 4px 0 oklch(0 0 0 / 0.3), 0 4px 12px 3px oklch(0 0 0 / 0.2), 0 8px 20px 6px oklch(0 0 0 / 0.12);
   --surface-active-shadow: 0 1px 2px oklch(0 0 0 / 0.3), 0 1px 3px 1px oklch(0 0 0 / 0.15);
@@ -1421,6 +1421,31 @@
 
   --scrollbar-thumb: oklch(0.38 0.008 270);
   --scrollbar-thumb-hover: oklch(0.55 0.01 270);
+}
+:root.design-material body {
+  background-image:
+    radial-gradient(circle at 16% 8%, color-mix(in oklab, var(--color-primary) 10%, transparent), transparent 28rem),
+    radial-gradient(circle at 88% 12%, color-mix(in oklab, var(--color-accent) 42%, transparent), transparent 24rem);
+}
+:root.design-material .app-nav-shell {
+  background: color-mix(in oklab, var(--color-card) 92%, transparent);
+  box-shadow: var(--shadow-sm);
+}
+:root.design-material .app-nav-link:hover,
+:root.design-material .app-nav-action:hover,
+:root.design-material .app-bottom-nav-link:hover,
+:root.design-material button.bg-transparent:hover,
+:root.design-material a.bg-transparent:hover {
+  opacity: 1;
+  background: color-mix(in oklab, var(--color-primary) 8%, transparent);
+  color: var(--color-foreground);
+}
+:root.design-material .app-nav-link-active,
+:root.design-material .app-bottom-nav-link-active,
+:root.design-material button.bg-transparent,
+:root.design-material a.bg-transparent {
+  background: var(--color-secondary);
+  color: var(--color-secondary-foreground);
 }
 /* @eikon:variant(design=material) end */
 
@@ -1527,6 +1552,69 @@
   --scrollbar-thumb: oklch(0.4 0.015 50);
   --scrollbar-thumb-hover: oklch(0.58 0.02 55);
 }
+:root.design-skeuomorphism body {
+  background-image:
+    linear-gradient(135deg, oklch(1 0 0 / 0.42), transparent 38%),
+    radial-gradient(circle at 18% 12%, oklch(0.82 0.04 68 / 0.34), transparent 26rem),
+    radial-gradient(circle at 82% 16%, oklch(0.7 0.05 34 / 0.18), transparent 24rem);
+}
+:root.design-skeuomorphism .app-nav-shell,
+:root.design-skeuomorphism .app-dropdown-trigger,
+:root.design-skeuomorphism .app-dropdown-content {
+  background:
+    linear-gradient(180deg, oklch(0.96 0.018 58), oklch(0.84 0.03 56)),
+    var(--color-sidebar);
+  border-color: var(--color-sidebar-border);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.55),
+    inset 0 -1px 0 oklch(0.35 0.02 50 / 0.18),
+    var(--shadow-sm);
+}
+:root.design-skeuomorphism button.shadow-sm,
+:root.design-skeuomorphism a.shadow-sm {
+  background:
+    linear-gradient(180deg, oklch(0.63 0.13 56), oklch(0.42 0.11 48)),
+    var(--color-primary);
+  border-color: oklch(0.34 0.08 46);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.35),
+    inset 0 -2px 0 oklch(0.2 0.02 46 / 0.24),
+    var(--shadow-md);
+}
+:root.design-skeuomorphism button.bg-transparent,
+:root.design-skeuomorphism a.bg-transparent {
+  background:
+    linear-gradient(180deg, oklch(0.99 0.006 58), oklch(0.9 0.02 56)),
+    var(--color-card);
+  border-color: var(--color-border);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.6),
+    inset 0 -1px 0 oklch(0.35 0.02 50 / 0.12),
+    var(--shadow-sm);
+}
+.dark.design-skeuomorphism body {
+  background-image:
+    linear-gradient(135deg, oklch(0.35 0.02 48 / 0.28), transparent 42%),
+    radial-gradient(circle at 16% 10%, oklch(0.34 0.045 40 / 0.28), transparent 26rem),
+    radial-gradient(circle at 82% 18%, oklch(0.24 0.035 72 / 0.24), transparent 24rem);
+}
+.dark.design-skeuomorphism .app-nav-shell,
+.dark.design-skeuomorphism .app-dropdown-trigger,
+.dark.design-skeuomorphism .app-dropdown-content {
+  background:
+    linear-gradient(180deg, oklch(0.3 0.016 50), oklch(0.22 0.012 50)),
+    var(--color-sidebar);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.08),
+    inset 0 -1px 0 oklch(0 0 0 / 0.38),
+    var(--shadow-sm);
+}
+.dark.design-skeuomorphism button.bg-transparent,
+.dark.design-skeuomorphism a.bg-transparent {
+  background:
+    linear-gradient(180deg, oklch(0.27 0.012 50), oklch(0.2 0.01 50)),
+    var(--color-card);
+}
 /* @eikon:variant(design=skeuomorphism) end */
 
 /* @eikon:variant(design=neumorphism) begin */
@@ -1571,12 +1659,12 @@
   --surface-inset-shadow: inset 3px 3px 6px oklch(0.72 0.005 250 / 0.45), inset -3px -3px 6px oklch(1 0 0 / 0.7);
   --surface-ring-width: 0px;
   --surface-ring-color: transparent;
-  --surface-hover-shadow: 8px 8px 16px oklch(0.72 0.005 250 / 0.55), -8px -8px 16px oklch(1 0 0 / 0.8);
-  --surface-active-shadow: inset 4px 4px 8px oklch(0.72 0.005 250 / 0.5), inset -4px -4px 8px oklch(1 0 0 / 0.7);
+  --surface-hover-shadow: 10px 10px 20px oklch(0.72 0.005 250 / 0.55), -10px -10px 20px oklch(1 0 0 / 0.82);
+  --surface-active-shadow: inset 5px 5px 10px oklch(0.72 0.005 250 / 0.52), inset -5px -5px 10px oklch(1 0 0 / 0.72);
 
-  --shadow-sm: 4px 4px 8px oklch(0.72 0.005 250 / 0.5), -4px -4px 8px oklch(1 0 0 / 0.75);
-  --shadow-md: 6px 6px 12px oklch(0.72 0.005 250 / 0.5), -6px -6px 12px oklch(1 0 0 / 0.75);
-  --shadow-lg: 10px 10px 20px oklch(0.72 0.005 250 / 0.5), -10px -10px 20px oklch(1 0 0 / 0.75);
+  --shadow-sm: 5px 5px 10px oklch(0.72 0.005 250 / 0.5), -5px -5px 10px oklch(1 0 0 / 0.78);
+  --shadow-md: 8px 8px 16px oklch(0.72 0.005 250 / 0.5), -8px -8px 16px oklch(1 0 0 / 0.78);
+  --shadow-lg: 12px 12px 24px oklch(0.72 0.005 250 / 0.52), -12px -12px 24px oklch(1 0 0 / 0.78);
 
   --scrollbar-size: 12px;
   --scrollbar-thumb: oklch(0.82 0.008 250);
@@ -1638,12 +1726,41 @@
    * shadows above still use the classic dual-light/dark pair because
    * the brief motion-triggered halo reads as intentional feedback
    * rather than visual noise. */
-  --shadow-sm: 3px 4px 10px 1px oklch(0.08 0.008 250 / 0.7);
-  --shadow-md: 5px 6px 14px 1px oklch(0.08 0.008 250 / 0.72);
-  --shadow-lg: 9px 10px 24px 2px oklch(0.08 0.008 250 / 0.72);
+  --shadow-sm: 4px 5px 12px 1px oklch(0.08 0.008 250 / 0.7), -3px -3px 10px oklch(0.42 0.008 250 / 0.08);
+  --shadow-md: 7px 8px 18px 1px oklch(0.08 0.008 250 / 0.72), -4px -4px 12px oklch(0.42 0.008 250 / 0.09);
+  --shadow-lg: 11px 12px 28px 2px oklch(0.08 0.008 250 / 0.72), -6px -6px 18px oklch(0.42 0.008 250 / 0.1);
 
   --scrollbar-thumb: oklch(0.38 0.01 250);
   --scrollbar-thumb-hover: oklch(0.52 0.012 250);
+}
+:root.design-neumorphism body {
+  background-image:
+    radial-gradient(circle at 18% 12%, oklch(1 0 0 / 0.55), transparent 24rem),
+    radial-gradient(circle at 82% 18%, oklch(0.76 0.012 250 / 0.42), transparent 28rem);
+}
+:root.design-neumorphism .app-nav-shell,
+:root.design-neumorphism .app-dropdown-trigger,
+:root.design-neumorphism .app-dropdown-content,
+:root.design-neumorphism button.bg-transparent,
+:root.design-neumorphism a.bg-transparent {
+  background: var(--color-background);
+  border-color: transparent;
+  box-shadow: var(--shadow-sm);
+}
+:root.design-neumorphism input:not([type='checkbox']):not([type='radio']):not([type='range']),
+:root.design-neumorphism textarea {
+  background: var(--color-background);
+  border-color: transparent;
+  box-shadow: var(--surface-inset-shadow);
+}
+:root.design-neumorphism .app-nav-link-active,
+:root.design-neumorphism .app-bottom-nav-link-active {
+  box-shadow: var(--surface-active-shadow);
+}
+.dark.design-neumorphism body {
+  background-image:
+    radial-gradient(circle at 18% 12%, oklch(0.42 0.01 250 / 0.18), transparent 24rem),
+    radial-gradient(circle at 82% 18%, oklch(0.12 0.008 250 / 0.38), transparent 28rem);
 }
 /* @eikon:variant(design=neumorphism) end */
 
@@ -2909,23 +3026,23 @@
  * Fills the "enterprise / data-dense" niche between vercel (minimal) and
  * notion (document). Source: https://carbondesignsystem.com (White + Gray100). */
 :root.design-carbon {
-  --color-background: oklch(0.96 0 0);
-  --color-foreground: oklch(0.2 0 0);
-  --color-card: oklch(1 0 0);
-  --color-card-foreground: oklch(0.2 0 0);
-  --color-muted: oklch(0.93 0 0);
-  --color-muted-foreground: oklch(0.42 0 0);
-  --color-border: oklch(0.84 0 0);
-  --color-input: oklch(0.99 0 0);
-  --color-primary: oklch(0.5 0.2 262);
-  --color-primary-foreground: oklch(1 0 0);
-  --color-secondary: oklch(0.93 0 0);
-  --color-secondary-foreground: oklch(0.2 0 0);
-  --color-accent: oklch(0.92 0.04 262);
-  --color-accent-foreground: oklch(0.2 0 0);
-  --color-destructive: oklch(0.52 0.22 27);
-  --color-destructive-foreground: oklch(1 0 0);
-  --color-ring: oklch(0.5 0.2 262);
+  --color-background: #f4f4f4;
+  --color-foreground: #161616;
+  --color-card: #ffffff;
+  --color-card-foreground: #161616;
+  --color-muted: #e0e0e0;
+  --color-muted-foreground: #525252;
+  --color-border: #c6c6c6;
+  --color-input: #f4f4f4;
+  --color-primary: oklch(0.5565 0.243 262);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #e0e0e0;
+  --color-secondary-foreground: #161616;
+  --color-accent: #edf5ff;
+  --color-accent-foreground: #0043ce;
+  --color-destructive: #da1e28;
+  --color-destructive-foreground: #ffffff;
+  --color-ring: oklch(0.5565 0.243 262);
 
   --radius-lg: 0rem;
   --radius-md: 0rem;
@@ -2947,24 +3064,24 @@
   --tracking-tight: 0em;
 
   /* Carbon depth — mostly flat; a faint productivity drop on raised tiers. */
-  --shadow-sm: 0 1px 0 0 oklch(0 0 0 / 0.06);
-  --shadow-md: 0 2px 6px -1px oklch(0 0 0 / 0.16);
-  --shadow-lg: 0 8px 16px -4px oklch(0 0 0 / 0.2);
+  --shadow-sm: 0 1px 0 0 rgb(22 22 22 / 0.08);
+  --shadow-md: 0 2px 6px -1px rgb(22 22 22 / 0.16);
+  --shadow-lg: 0 8px 16px -4px rgb(22 22 22 / 0.22);
 
   --surface-border-width: 1px;
 
-  --color-sidebar: oklch(0.99 0 0);
-  --color-sidebar-border: oklch(0.86 0 0);
+  --color-sidebar: #ffffff;
+  --color-sidebar-border: #e0e0e0;
 
-  --chart-1: oklch(0.5 0.2 262);
-  --chart-2: oklch(0.6 0.16 200);
-  --chart-3: oklch(0.55 0.18 320);
-  --chart-4: oklch(0.65 0.15 145);
-  --chart-5: oklch(0.6 0.16 40);
+  --chart-1: #0f62fe;
+  --chart-2: #1192e8;
+  --chart-3: #8a3ffc;
+  --chart-4: #24a148;
+  --chart-5: #f1c21b;
 
-  --color-success: oklch(0.55 0.15 150);
-  --color-warning: oklch(0.7 0.16 75);
-  --color-info: oklch(0.5 0.2 262);
+  --color-success: #24a148;
+  --color-warning: #f1c21b;
+  --color-info: oklch(0.5565 0.243 262);
 
   --duration-fast: 110ms;
   --duration-normal: 170ms;
@@ -2974,31 +3091,76 @@
   --ring-offset-width: 1px;
 
   --scrollbar-size: 12px;
-  --scrollbar-thumb: oklch(0.7 0 0);
-  --scrollbar-thumb-hover: oklch(0.5 0 0);
+  --scrollbar-thumb: #8d8d8d;
+  --scrollbar-thumb-hover: #525252;
   --scrollbar-thumb-radius: 0rem;
   --scrollbar-thumb-border: 3px;
 }
 .dark.design-carbon {
-  --color-background: oklch(0.18 0 0);
-  --color-foreground: oklch(0.95 0 0);
-  --color-card: oklch(0.24 0 0);
-  --color-card-foreground: oklch(0.95 0 0);
-  --color-muted: oklch(0.28 0 0);
-  --color-muted-foreground: oklch(0.72 0 0);
-  --color-border: oklch(0.34 0 0);
-  --color-input: oklch(0.26 0 0);
-  --color-primary: oklch(0.62 0.18 258);
-  --color-primary-foreground: oklch(0.14 0 0);
-  --color-secondary: oklch(0.28 0 0);
-  --color-secondary-foreground: oklch(0.95 0 0);
-  --color-accent: oklch(0.32 0.05 262);
-  --color-accent-foreground: oklch(0.95 0 0);
-  --color-ring: oklch(0.62 0.18 258);
-  --color-sidebar: oklch(0.14 0 0);
-  --color-sidebar-border: oklch(0.3 0 0);
-  --scrollbar-thumb: oklch(0.4 0 0);
-  --scrollbar-thumb-hover: oklch(0.6 0 0);
+  --color-background: #161616;
+  --color-foreground: #f4f4f4;
+  --color-card: #262626;
+  --color-card-foreground: #f4f4f4;
+  --color-muted: #393939;
+  --color-muted-foreground: #c6c6c6;
+  --color-border: #525252;
+  --color-input: #393939;
+  --color-primary: #78a9ff;
+  --color-primary-foreground: #001d6c;
+  --color-secondary: #393939;
+  --color-secondary-foreground: #f4f4f4;
+  --color-accent: #001d6c;
+  --color-accent-foreground: #d0e2ff;
+  --color-ring: #78a9ff;
+  --color-sidebar: #262626;
+  --color-sidebar-border: #393939;
+  --scrollbar-thumb: #6f6f6f;
+  --scrollbar-thumb-hover: #a8a8a8;
+}
+:root.design-carbon .app-nav-shell {
+  background: var(--color-sidebar);
+  border-color: var(--color-sidebar-border);
+  box-shadow: none;
+}
+:root.design-carbon .app-nav-link,
+:root.design-carbon .app-nav-action,
+:root.design-carbon .app-bottom-nav-link,
+:root.design-carbon button,
+:root.design-carbon a[role='button'],
+:root.design-carbon [role='button'] {
+  border-radius: 0;
+}
+:root.design-carbon .app-nav-link:hover,
+:root.design-carbon .app-nav-action:hover,
+:root.design-carbon .app-bottom-nav-link:hover,
+:root.design-carbon button.bg-transparent:hover,
+:root.design-carbon a.bg-transparent:hover {
+  opacity: 1;
+  background: var(--color-muted);
+  color: var(--color-foreground);
+  box-shadow: none;
+}
+:root.design-carbon .app-nav-link-active,
+:root.design-carbon .app-bottom-nav-link-active {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  box-shadow: none;
+}
+:root.design-carbon input:not([type='checkbox']):not([type='radio']):not([type='range']),
+:root.design-carbon textarea,
+:root.design-carbon select {
+  border-color: var(--color-border);
+  background: var(--color-input);
+  border-radius: 0;
+  box-shadow: inset 0 -1px 0 var(--color-foreground);
+}
+:root.design-carbon input:not([type='checkbox']):not([type='radio']):not([type='range']):focus-visible,
+:root.design-carbon textarea:focus-visible,
+:root.design-carbon select:focus-visible {
+  box-shadow:
+    inset 0 -2px 0 var(--color-primary),
+    0 0 0 var(--ring-offset-width) var(--ring-offset-color),
+    0 0 0 calc(var(--ring-offset-width) + var(--ring-width)) var(--color-ring);
 }
 /* @eikon:variant(design=carbon) end */
 
@@ -3280,6 +3442,7 @@
   --bg-ambient: url('/animal-island-home-bg.webp');
   --animal-bg-width: clamp(460px, 58vw, 820px);
   --animal-bg-scroll-y: clamp(980px, 123.6vw, 1747px);
+  --animal-bg-drift-duration: 180s;
 }
 
 /* Grass island page: the supplied 1012x2156 home_bg tile repeats, keeps
@@ -3292,7 +3455,7 @@
   background-size: var(--animal-bg-width) auto;
   background-repeat: repeat;
   background-attachment: scroll;
-  animation: animal-bg-scroll 90s linear infinite;
+  animation: animal-bg-scroll var(--animal-bg-drift-duration) linear infinite;
   font-weight: 500;
 }
 .dark.design-animal-crossing body {
@@ -3302,13 +3465,13 @@
   background-size: var(--animal-bg-width) auto;
   background-repeat: repeat;
   background-attachment: scroll;
-  animation: animal-bg-scroll 90s linear infinite;
+  animation: animal-bg-scroll var(--animal-bg-drift-duration) linear infinite;
 }
 .dark.design-animal-crossing .app-nav-shell {
   background: color-mix(in oklab, var(--color-sidebar) 88%, transparent);
   box-shadow: 0 2px 0 oklch(0.14 0.026 82 / 0.72);
 }
-/* The reference's `bgScroll` — a slow diagonal drift of the leaf field. */
+/* Slow leaf drift: negative x/y background positions move the field up-left. */
 @keyframes animal-bg-scroll {
   from {
     background-position: 0 0;
