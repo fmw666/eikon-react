@@ -1928,58 +1928,39 @@
  *   - Multi-section page backgrounds (could be added as marketing
  *     opt-in via class names, but base preset stays single-colour) */
 :root.design-claymorphism {
-  /* ---- PALETTE — the clay.css demo site's 4-colour chord -----
+  /* ---- PALETTE: modern soft clay -----------------------------
    *
-   * Lifted hex from codeadrian.github.io/clay.css → converted to
-   * OKLCH for perceptual consistency. Token-to-demo mapping:
-   *
-   *   --color-background      = #F3D88F cream    (hero section bg)
-   *   --color-card            = #EF7B7B coral    (primary demo card)
-   *   --color-card-foreground = #FFFFFF white    (white-on-coral)
-   *   --color-primary         = #3D4F6D navy     (secondary card & CTA)
-   *   --color-secondary       = #A8C5DD sky-blue (install-section bg)
-   *   --color-accent          = #F09D8B peach    (apply-section bg)
-   *   --color-input           = #FAFAFA off-white(nested code-blocks)
-   *
-   * The 4-colour chord (cream / coral / navy / sky) is the same
-   * one Adrian rotates through his section dividers. We bake it
-   * into the design tokens so bg-secondary / bg-accent buttons
-   * automatically pull from the same palette without anyone
-   * needing to memorise hex codes. */
-  --color-background: oklch(0.9 0.045 72);
-  --color-foreground: oklch(0.3 0.04 54);
-  /* Coral card deepened from L0.7 → L0.52 so the white card text clears
-   * 4.5:1 (body-text AA) while keeping the demo's signature coral hue. */
-  --color-card: oklch(0.84 0.055 66);
+   * Warm cream base, peach-terracotta cards, sage chrome, and a
+   * soft lilac accent create a tactile clay chord without turning
+   * the whole UI into one flat brown surface. */
+  --color-background: oklch(0.94 0.035 82);
+  --color-foreground: oklch(0.27 0.04 48);
+  /* Card clay is peachy and warm, while text stays dark for contrast. */
+  --color-card: oklch(0.88 0.07 48);
   --color-card-foreground: var(--color-foreground);
-  --color-muted: oklch(0.8 0.04 68);
-  --color-muted-foreground: oklch(0.39 0.035 54);
-  --color-border: oklch(0.62 0.055 56);
-  --color-input: oklch(0.88 0.035 72);
+  --color-muted: oklch(0.84 0.045 134);
+  --color-muted-foreground: oklch(0.39 0.035 58);
+  --color-border: oklch(0.68 0.052 56);
+  --color-input: oklch(0.91 0.028 82);
   /* Primary button fill and label colour for claymorphism controls. */
-  /* Primary = navy — the demo's CTA / dark-card colour. JUMPS off
-   * the cream bg AND off coral cards, giving the design its
-   * coral-vs-navy chord tension. */
-  --clay-background: #b86f4b;
-  --clay-foreground: #fff2dc;
+  /* Terracotta CTA clay, tuned dark enough for cream labels. */
+  --clay-background: #a85f4a;
+  --clay-foreground: #fff7e8;
   --clay-border-radius: 48px;
-  --clay-shadow-outset: 10px 12px 24px 0 rgba(108, 74, 45, 0.24);
-  --clay-shadow-inset-primary: -9px -10px 18px 0 rgba(101, 65, 39, 0.18);
-  --clay-shadow-inset-secondary: 9px 10px 18px 0 rgba(255, 237, 205, 0.36);
+  --clay-shadow-outset: 14px 18px 34px 0 rgba(126, 76, 52, 0.22);
+  --clay-shadow-inset-primary: -12px -13px 22px 0 rgba(115, 67, 48, 0.16);
+  --clay-shadow-inset-secondary: 12px 13px 22px 0 rgba(255, 246, 226, 0.48);
   --clay-shadow:
     var(--clay-shadow-outset),
     inset var(--clay-shadow-inset-primary),
     inset var(--clay-shadow-inset-secondary);
   --color-primary: var(--clay-background);
   --color-primary-foreground: var(--clay-foreground);
-  /* Secondary = sky-blue from the "Install it" section. Distinct
-   * surface identity, not a watered-down card. */
-  --color-secondary: oklch(0.79 0.05 88);
+  /* Secondary = sage clay, used where the UI needs a second material. */
+  --color-secondary: oklch(0.8 0.055 142);
   --color-secondary-foreground: var(--color-foreground);
-  /* Accent = peach from the "Apply it" section. Used by shadcn
-   * convention as the hover/highlighted-row tint — soft, in the
-   * coral family but lighter so coral cards still pop against it. */
-  --color-accent: oklch(0.72 0.08 45);
+  /* Accent = soft lilac, a quiet counter-hue for selected rows. */
+  --color-accent: oklch(0.84 0.06 318);
   --color-accent-foreground: var(--color-foreground);
   --color-destructive: oklch(0.58 0.22 22);
   --color-destructive-foreground: oklch(0.99 0 0);
@@ -2079,27 +2060,23 @@
    * matters most in default; hover/active can carry a 4th
    * layer to read as physical state change. */
   --surface-hover-shadow:
-    12px 14px 28px 0 rgba(108, 74, 45, 0.28),
-    inset -9px -10px 18px 0 rgba(101, 65, 39, 0.2),
-    inset 9px 10px 18px 0 rgba(255, 237, 205, 0.42);
+    18px 22px 42px 0 rgba(126, 76, 52, 0.26),
+    inset -13px -14px 24px 0 rgba(115, 67, 48, 0.18),
+    inset 13px 14px 24px 0 rgba(255, 248, 232, 0.56);
   --surface-active-shadow:
-    4px 5px 10px 0 rgba(108, 74, 45, 0.18),
-    inset -6px -7px 12px 0 rgba(101, 65, 39, 0.28),
-    inset 6px 7px 12px 0 rgba(255, 237, 205, 0.18);
+    5px 6px 12px 0 rgba(126, 76, 52, 0.16),
+    inset -7px -8px 14px 0 rgba(115, 67, 48, 0.26),
+    inset 7px 8px 14px 0 rgba(255, 248, 232, 0.24);
 
   --scrollbar-size: 14px;
-  --scrollbar-thumb: oklch(0.58 0.08 45);
-  --scrollbar-thumb-hover: oklch(0.48 0.09 42);
+  --scrollbar-thumb: oklch(0.62 0.08 42);
+  --scrollbar-thumb-hover: oklch(0.52 0.09 40);
   --scrollbar-thumb-radius: 10px;
   --scrollbar-thumb-border: 3px;
 
-  /* Claymorphism sidebar — navy plate, lifted from the demo's
-   * secondary-section background. The page is cream, cards are
-   * coral; the sidebar wants its own identity in the 4-colour
-   * chord, and navy is what the demo footer / install-section
-   * uses. Active items pop because the navy gives them a high-
-   * contrast frame. */
-  --color-sidebar: var(--color-card);
+  /* Navigation uses sage clay so the chrome is not another peach card.
+   * Active items pop as terracotta pills. */
+  --color-sidebar: var(--color-secondary);
   --color-sidebar-foreground: var(--color-foreground);
   --color-sidebar-primary: var(--clay-background);
   --color-sidebar-primary-foreground: var(--clay-foreground);
@@ -2107,15 +2084,13 @@
   --color-sidebar-accent-foreground: var(--color-foreground);
   --color-sidebar-border: var(--color-border);
 
-  /* Claymorphism chart — the demo's 4-colour chord (coral, navy,
-   * sky, peach) plus a sage green so 5 series stay distinguishable.
-   * Each anchor is one of the demo's section colours, kept at
-   * mid-luminosity for "puffy clay" rather than pastel cards. */
-  --chart-1: oklch(0.58 0.08 45);
-  --chart-2: oklch(0.48 0.055 80);
-  --chart-3: oklch(0.66 0.07 105);
-  --chart-4: oklch(0.62 0.075 28);
-  --chart-5: oklch(0.52 0.06 145);
+  /* Chart colours follow the material chord: terracotta, sage, lilac,
+   * ochre, and muted blue. */
+  --chart-1: oklch(0.62 0.085 42);
+  --chart-2: oklch(0.67 0.075 140);
+  --chart-3: oklch(0.72 0.06 318);
+  --chart-4: oklch(0.7 0.08 82);
+  --chart-5: oklch(0.58 0.065 210);
 
   /* Claymorphism motion — bouncy spring matches puffy-clay
    * physics. Slightly longer durations so the inflate/squish
@@ -2133,56 +2108,43 @@
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.055'/%3E%3Cg fill='%23825c3a' fill-opacity='0.09'%3E%3Ccircle cx='38' cy='44' r='1.3'/%3E%3Ccircle cx='142' cy='88' r='1.1'/%3E%3Ccircle cx='190' cy='166' r='1.5'/%3E%3Ccircle cx='82' cy='176' r='1'/%3E%3C/g%3E%3C/svg%3E");
 }
 .dark.design-claymorphism {
-  /* ---- PALETTE (DARK MODE) — demo's navy footer extrapolated -
+  /* ---- PALETTE (DARK MODE): kiln-fired clay ------------------
    *
-   * The clay.css demo doesn't ship a dark mode, but its footer
-   * uses navy `#3D4F6D` as a full-bleed bg with coral cards on
-   * top — that's the natural starting point for "dark clay":
-   *
-   *   background  → deep navy        (the demo's footer bg)
-   *   card        → richer coral     (lifted from primary so it
-   *                                   pops harder on dark navy)
-   *   primary     → BRIGHT coral     (CTAs flip from navy → coral
-   *                                   because we just made the bg
-   *                                   navy; coral becomes the
-   *                                   high-energy accent)
-   *   accent      → soft peach
-   *   secondary   → mid-navy plate
-   *
-   * Result: a cohesive after-dark version of the same chord, no
-   * mode-shift in personality. */
-  --color-background: oklch(0.23 0.035 55);
-  --color-foreground: oklch(0.92 0.025 78);
-  --color-card: oklch(0.36 0.055 48);
-  --color-card-foreground: oklch(0.94 0.024 78);
-  --color-muted: oklch(0.29 0.035 54);
-  --color-muted-foreground: oklch(0.76 0.026 74);
-  --color-border: oklch(0.42 0.04 48);
-  --color-input: oklch(0.3 0.038 50);
-  --clay-background: #d68b5f;
-  --clay-foreground: #26170f;
+   * Dark mode keeps the same material identities, but moves the
+   * tabletop into a deep plum clay so brown cards, sage chrome, and
+   * apricot CTAs stay separated instead of collapsing into espresso. */
+  --color-background: oklch(0.19 0.032 325);
+  --color-foreground: oklch(0.92 0.028 80);
+  --color-card: oklch(0.37 0.058 42);
+  --color-card-foreground: oklch(0.94 0.026 82);
+  --color-muted: oklch(0.31 0.036 118);
+  --color-muted-foreground: oklch(0.78 0.03 82);
+  --color-border: oklch(0.46 0.045 48);
+  --color-input: oklch(0.29 0.038 48);
+  --clay-background: #e59a6f;
+  --clay-foreground: #27160f;
   --color-primary: var(--clay-background);
   --color-primary-foreground: var(--clay-foreground);
-  --color-secondary: oklch(0.34 0.04 68);
+  --color-secondary: oklch(0.38 0.05 132);
   --color-secondary-foreground: oklch(0.92 0.025 78);
-  --color-accent: oklch(0.43 0.07 38);
+  --color-accent: oklch(0.44 0.064 318);
   --color-accent-foreground: oklch(0.94 0.024 78);
   --color-destructive: oklch(0.66 0.22 22);
   --color-destructive-foreground: oklch(0.99 0 0);
   --color-ring: oklch(0.72 0.12 50);
 
-  --color-sidebar: oklch(0.32 0.045 48);
+  --color-sidebar: oklch(0.33 0.045 132);
   --color-sidebar-foreground: oklch(0.92 0.025 78);
   --color-sidebar-primary: var(--clay-background);
   --color-sidebar-primary-foreground: var(--clay-foreground);
-  --color-sidebar-accent: oklch(0.4 0.05 48);
+  --color-sidebar-accent: oklch(0.41 0.05 132);
   --color-sidebar-accent-foreground: oklch(0.94 0.024 78);
   --color-sidebar-border: oklch(0.44 0.045 48);
 
   --surface-ring-color: transparent;
-  --clay-shadow-outset: 10px 12px 24px 0 rgba(0, 0, 0, 0.42);
-  --clay-shadow-inset-primary: -9px -10px 18px 0 rgba(0, 0, 0, 0.3);
-  --clay-shadow-inset-secondary: 9px 10px 18px 0 rgba(255, 212, 160, 0.1);
+  --clay-shadow-outset: 14px 18px 34px 0 rgba(0, 0, 0, 0.48);
+  --clay-shadow-inset-primary: -12px -13px 22px 0 rgba(0, 0, 0, 0.32);
+  --clay-shadow-inset-secondary: 12px 13px 22px 0 rgba(255, 210, 154, 0.14);
 
   /* Dark mode shadows — outer drop deepens to near-black (the
    * navy page can't absorb a coloured drop), inner-top white
@@ -2194,16 +2156,16 @@
   --shadow-lg: var(--clay-shadow);
 
   --surface-hover-shadow:
-    12px 14px 28px 0 rgba(0, 0, 0, 0.48),
-    inset -9px -10px 18px 0 rgba(0, 0, 0, 0.34),
-    inset 9px 10px 18px 0 rgba(255, 212, 160, 0.14);
+    18px 22px 42px 0 rgba(0, 0, 0, 0.56),
+    inset -13px -14px 24px 0 rgba(0, 0, 0, 0.36),
+    inset 13px 14px 24px 0 rgba(255, 218, 166, 0.18);
   --surface-active-shadow:
-    4px 5px 10px 0 rgba(0, 0, 0, 0.32),
-    inset -6px -7px 12px 0 rgba(0, 0, 0, 0.38),
-    inset 6px 7px 12px 0 rgba(255, 212, 160, 0.08);
+    5px 6px 12px 0 rgba(0, 0, 0, 0.38),
+    inset -7px -8px 14px 0 rgba(0, 0, 0, 0.42),
+    inset 7px 8px 14px 0 rgba(255, 218, 166, 0.1);
 
-  --scrollbar-thumb: oklch(0.47 0.07 42);
-  --scrollbar-thumb-hover: oklch(0.6 0.09 48);
+  --scrollbar-thumb: oklch(0.5 0.075 42);
+  --scrollbar-thumb-hover: oklch(0.65 0.09 48);
 
   /* Dark-mode ambient — same paper grain at slightly higher opacity
    * so the texture reads against the navy bg. */
@@ -2226,9 +2188,9 @@
 :root.design-claymorphism body {
   background-color: var(--color-background);
   background-image:
-    radial-gradient(circle at 18% 12%, oklch(0.96 0.05 78 / 0.72), transparent 28rem),
-    radial-gradient(circle at 82% 18%, oklch(0.76 0.075 42 / 0.28), transparent 24rem),
-    radial-gradient(circle at 50% 105%, oklch(0.58 0.06 42 / 0.2), transparent 34rem),
+    radial-gradient(circle at 16% 10%, oklch(0.98 0.045 84 / 0.78), transparent 26rem),
+    radial-gradient(circle at 84% 16%, oklch(0.82 0.07 144 / 0.34), transparent 24rem),
+    radial-gradient(circle at 50% 108%, oklch(0.78 0.06 318 / 0.24), transparent 34rem),
     var(--bg-ambient);
   background-size:
     56rem 36rem,
@@ -2243,16 +2205,17 @@
   background-repeat: no-repeat, no-repeat, no-repeat, repeat;
 }
 .dark.design-claymorphism body {
+  background-color: var(--color-background);
   background-image:
-    radial-gradient(circle at 20% 8%, oklch(0.5 0.075 42 / 0.34), transparent 24rem),
-    radial-gradient(circle at 88% 18%, oklch(0.34 0.055 70 / 0.42), transparent 26rem),
-    radial-gradient(circle at 50% 110%, oklch(0.12 0.025 48 / 0.62), transparent 38rem),
+    radial-gradient(circle at 18% 8%, oklch(0.58 0.08 42 / 0.28), transparent 24rem),
+    radial-gradient(circle at 88% 18%, oklch(0.42 0.06 138 / 0.36), transparent 26rem),
+    radial-gradient(circle at 50% 112%, oklch(0.38 0.07 318 / 0.32), transparent 38rem),
     var(--bg-ambient);
 }
 
 :root.design-claymorphism .app-nav-shell {
   border-color: transparent;
-  background: var(--color-card);
+  background: var(--color-sidebar);
   color: var(--color-foreground);
   box-shadow: var(--clay-shadow);
 }
@@ -2287,8 +2250,8 @@
   background: var(--color-muted);
   color: var(--color-foreground);
   box-shadow:
-    inset -4px -4px 10px 0 rgba(101, 65, 39, 0.18),
-    inset 4px 4px 10px 0 rgba(255, 237, 205, 0.26);
+    inset -5px -5px 12px 0 rgba(115, 67, 48, 0.16),
+    inset 5px 5px 12px 0 rgba(255, 248, 232, 0.34);
   transform: translateY(-1px);
 }
 
@@ -2329,13 +2292,30 @@
   background: var(--color-muted);
   color: var(--color-foreground);
   box-shadow:
-    inset -4px -4px 10px 0 rgba(101, 65, 39, 0.18),
-    inset 4px 4px 10px 0 rgba(255, 237, 205, 0.26);
+    inset -5px -5px 12px 0 rgba(115, 67, 48, 0.16),
+    inset 5px 5px 12px 0 rgba(255, 248, 232, 0.34);
 }
 
 :root.design-claymorphism .app-dropdown-item[data-state='checked'] {
   background: var(--clay-background);
   color: var(--clay-foreground);
+}
+
+:root.design-claymorphism button.bg-transparent,
+:root.design-claymorphism a.bg-transparent {
+  background: color-mix(in oklab, var(--color-background) 42%, transparent);
+  color: var(--color-foreground);
+  box-shadow:
+    5px 7px 14px 0 rgba(126, 76, 52, 0.14),
+    inset -4px -4px 9px 0 rgba(115, 67, 48, 0.12),
+    inset 4px 4px 9px 0 rgba(255, 248, 232, 0.3);
+}
+
+:root.design-claymorphism button.bg-transparent:hover,
+:root.design-claymorphism a.bg-transparent:hover {
+  opacity: 1;
+  background: var(--color-secondary);
+  box-shadow: var(--surface-hover-shadow);
 }
 
 :root.design-claymorphism input:not([type='checkbox']):not([type='radio']):not([type='range']),
@@ -2344,8 +2324,8 @@
   background: var(--color-card);
   color: var(--color-foreground);
   box-shadow:
-    inset 5px 5px 12px 0 rgba(101, 65, 39, 0.2),
-    inset -5px -5px 12px 0 rgba(255, 237, 205, 0.32);
+    inset 7px 8px 16px 0 rgba(115, 67, 48, 0.18),
+    inset -7px -8px 16px 0 rgba(255, 248, 232, 0.42);
 }
 
 :root.design-claymorphism input::placeholder,
@@ -2358,8 +2338,8 @@
 :root.design-claymorphism textarea:focus-visible {
   border-color: var(--clay-background);
   box-shadow:
-    inset 5px 5px 12px 0 rgba(101, 65, 39, 0.18),
-    inset -5px -5px 12px 0 rgba(255, 237, 205, 0.34),
+    inset 7px 8px 16px 0 rgba(115, 67, 48, 0.16),
+    inset -7px -8px 16px 0 rgba(255, 248, 232, 0.46),
     0 0 0 var(--ring-offset-width) var(--ring-offset-color),
     0 0 0 calc(var(--ring-offset-width) + var(--ring-width)) var(--color-ring);
 }
@@ -2372,9 +2352,9 @@
   font-weight: 700;
   letter-spacing: 0;
   box-shadow:
-    3px 4px 8px 0 rgba(108, 74, 45, 0.2),
-    inset -3px -3px 7px 0 rgba(101, 65, 39, 0.16),
-    inset 3px 3px 7px 0 rgba(255, 237, 205, 0.26);
+    4px 5px 10px 0 rgba(126, 76, 52, 0.2),
+    inset -4px -4px 8px 0 rgba(115, 67, 48, 0.14),
+    inset 4px 4px 8px 0 rgba(255, 248, 232, 0.34);
 }
 
 :root.design-claymorphism .app-badge[data-variant='outline'] {
@@ -2393,28 +2373,43 @@
 .dark.design-claymorphism .app-dropdown-item:focus,
 .dark.design-claymorphism .app-dropdown-item[data-highlighted] {
   box-shadow:
-    inset -4px -4px 10px 0 rgba(0, 0, 0, 0.28),
-    inset 4px 4px 10px 0 rgba(255, 212, 160, 0.1);
+    inset -5px -5px 12px 0 rgba(0, 0, 0, 0.32),
+    inset 5px 5px 12px 0 rgba(255, 218, 166, 0.14);
+}
+.dark.design-claymorphism button.bg-transparent,
+.dark.design-claymorphism a.bg-transparent {
+  background: color-mix(in oklab, var(--color-card) 38%, transparent);
+  color: var(--color-foreground);
+  box-shadow:
+    5px 7px 14px 0 rgba(0, 0, 0, 0.3),
+    inset -4px -4px 9px 0 rgba(0, 0, 0, 0.24),
+    inset 4px 4px 9px 0 rgba(255, 218, 166, 0.1);
+}
+
+.dark.design-claymorphism button.bg-transparent:hover,
+.dark.design-claymorphism a.bg-transparent:hover {
+  background: var(--color-secondary);
+  box-shadow: var(--surface-hover-shadow);
 }
 .dark.design-claymorphism input:not([type='checkbox']):not([type='radio']):not([type='range']),
 .dark.design-claymorphism textarea {
   box-shadow:
-    inset 5px 5px 12px 0 rgba(0, 0, 0, 0.34),
-    inset -5px -5px 12px 0 rgba(255, 212, 160, 0.1);
+    inset 7px 8px 16px 0 rgba(0, 0, 0, 0.38),
+    inset -7px -8px 16px 0 rgba(255, 218, 166, 0.12);
 }
 .dark.design-claymorphism input:not([type='checkbox']):not([type='radio']):not([type='range']):focus-visible,
 .dark.design-claymorphism textarea:focus-visible {
   box-shadow:
-    inset 5px 5px 12px 0 rgba(0, 0, 0, 0.32),
-    inset -5px -5px 12px 0 rgba(255, 212, 160, 0.12),
+    inset 7px 8px 16px 0 rgba(0, 0, 0, 0.36),
+    inset -7px -8px 16px 0 rgba(255, 218, 166, 0.16),
     0 0 0 var(--ring-offset-width) var(--ring-offset-color),
     0 0 0 calc(var(--ring-offset-width) + var(--ring-width)) var(--color-ring);
 }
 .dark.design-claymorphism .app-badge {
   box-shadow:
-    3px 4px 8px 0 rgba(0, 0, 0, 0.32),
-    inset -3px -3px 7px 0 rgba(0, 0, 0, 0.24),
-    inset 3px 3px 7px 0 rgba(255, 212, 160, 0.1);
+    4px 5px 10px 0 rgba(0, 0, 0, 0.36),
+    inset -4px -4px 8px 0 rgba(0, 0, 0, 0.28),
+    inset 4px 4px 8px 0 rgba(255, 218, 166, 0.14);
 }
 
 /* @eikon:variant(design=claymorphism) end */
