@@ -1946,26 +1946,26 @@
    * into the design tokens so bg-secondary / bg-accent buttons
    * automatically pull from the same palette without anyone
    * needing to memorise hex codes. */
-  --color-background: oklch(0.92 0.075 95);
-  --color-foreground: oklch(0.24 0.035 260);
+  --color-background: oklch(0.9 0.045 72);
+  --color-foreground: oklch(0.3 0.04 54);
   /* Coral card deepened from L0.7 → L0.52 so the white card text clears
    * 4.5:1 (body-text AA) while keeping the demo's signature coral hue. */
-  --color-card: oklch(0.985 0.018 88);
+  --color-card: oklch(0.84 0.055 66);
   --color-card-foreground: var(--color-foreground);
-  --color-muted: oklch(0.94 0.045 88);
-  --color-muted-foreground: oklch(0.5 0.035 260);
-  --color-border: oklch(0.78 0.065 72);
-  --color-input: oklch(0.975 0.012 88);
+  --color-muted: oklch(0.8 0.04 68);
+  --color-muted-foreground: oklch(0.39 0.035 54);
+  --color-border: oklch(0.62 0.055 56);
+  --color-input: oklch(0.88 0.035 72);
   /* Primary button fill and label colour for claymorphism controls. */
   /* Primary = navy — the demo's CTA / dark-card colour. JUMPS off
    * the cream bg AND off coral cards, giving the design its
    * coral-vs-navy chord tension. */
-  --clay-background: #f76d6d;
-  --clay-foreground: #f5f5f5;
+  --clay-background: #b86f4b;
+  --clay-foreground: #fff2dc;
   --clay-border-radius: 48px;
-  --clay-shadow-outset: 8px 8px 16px 0 rgba(0, 0, 0, 0.25);
-  --clay-shadow-inset-primary: -8px -8px 16px 0 rgba(0, 0, 0, 0.25);
-  --clay-shadow-inset-secondary: 8px 8px 16px 0 hsla(0, 0%, 100%, 0.2);
+  --clay-shadow-outset: 10px 12px 24px 0 rgba(108, 74, 45, 0.24);
+  --clay-shadow-inset-primary: -9px -10px 18px 0 rgba(101, 65, 39, 0.18);
+  --clay-shadow-inset-secondary: 9px 10px 18px 0 rgba(255, 237, 205, 0.36);
   --clay-shadow:
     var(--clay-shadow-outset),
     inset var(--clay-shadow-inset-primary),
@@ -1974,12 +1974,12 @@
   --color-primary-foreground: var(--clay-foreground);
   /* Secondary = sky-blue from the "Install it" section. Distinct
    * surface identity, not a watered-down card. */
-  --color-secondary: oklch(0.92 0.04 88);
+  --color-secondary: oklch(0.79 0.05 88);
   --color-secondary-foreground: var(--color-foreground);
   /* Accent = peach from the "Apply it" section. Used by shadcn
    * convention as the hover/highlighted-row tint — soft, in the
    * coral family but lighter so coral cards still pop against it. */
-  --color-accent: oklch(0.88 0.08 28);
+  --color-accent: oklch(0.72 0.08 45);
   --color-accent-foreground: var(--color-foreground);
   --color-destructive: oklch(0.58 0.22 22);
   --color-destructive-foreground: oklch(0.99 0 0);
@@ -2079,17 +2079,17 @@
    * matters most in default; hover/active can carry a 4th
    * layer to read as physical state change. */
   --surface-hover-shadow:
-    10px 10px 20px 0 rgba(0, 0, 0, 0.28),
-    inset -8px -8px 16px 0 rgba(0, 0, 0, 0.25),
-    inset 8px 8px 16px 0 hsla(0, 0%, 100%, 0.24);
+    12px 14px 28px 0 rgba(108, 74, 45, 0.28),
+    inset -9px -10px 18px 0 rgba(101, 65, 39, 0.2),
+    inset 9px 10px 18px 0 rgba(255, 237, 205, 0.42);
   --surface-active-shadow:
-    4px 4px 10px 0 rgba(0, 0, 0, 0.18),
-    inset -6px -6px 12px 0 rgba(0, 0, 0, 0.28),
-    inset 6px 6px 12px 0 hsla(0, 0%, 100%, 0.16);
+    4px 5px 10px 0 rgba(108, 74, 45, 0.18),
+    inset -6px -7px 12px 0 rgba(101, 65, 39, 0.28),
+    inset 6px 7px 12px 0 rgba(255, 237, 205, 0.18);
 
   --scrollbar-size: 14px;
-  --scrollbar-thumb: oklch(0.7 0.13 25);
-  --scrollbar-thumb-hover: oklch(0.6 0.16 25);
+  --scrollbar-thumb: oklch(0.58 0.08 45);
+  --scrollbar-thumb-hover: oklch(0.48 0.09 42);
   --scrollbar-thumb-radius: 10px;
   --scrollbar-thumb-border: 3px;
 
@@ -2111,11 +2111,11 @@
    * sky, peach) plus a sage green so 5 series stay distinguishable.
    * Each anchor is one of the demo's section colours, kept at
    * mid-luminosity for "puffy clay" rather than pastel cards. */
-  --chart-1: oklch(0.7 0.16 25);
-  --chart-2: oklch(0.4 0.05 260);
-  --chart-3: oklch(0.81 0.055 235);
-  --chart-4: oklch(0.78 0.105 30);
-  --chart-5: oklch(0.65 0.13 145);
+  --chart-1: oklch(0.58 0.08 45);
+  --chart-2: oklch(0.48 0.055 80);
+  --chart-3: oklch(0.66 0.07 105);
+  --chart-4: oklch(0.62 0.075 28);
+  --chart-5: oklch(0.52 0.06 145);
 
   /* Claymorphism motion — bouncy spring matches puffy-clay
    * physics. Slightly longer durations so the inflate/squish
@@ -2130,7 +2130,7 @@
    * Moved here from the body selector below so the token system
    * stays uniform; the noise SVG is encoded as a data: URL. */
   --bg-ambient:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.055'/%3E%3Cg fill='%23825c3a' fill-opacity='0.09'%3E%3Ccircle cx='38' cy='44' r='1.3'/%3E%3Ccircle cx='142' cy='88' r='1.1'/%3E%3Ccircle cx='190' cy='166' r='1.5'/%3E%3Ccircle cx='82' cy='176' r='1'/%3E%3C/g%3E%3C/svg%3E");
 }
 .dark.design-claymorphism {
   /* ---- PALETTE (DARK MODE) — demo's navy footer extrapolated -
@@ -2151,33 +2151,38 @@
    *
    * Result: a cohesive after-dark version of the same chord, no
    * mode-shift in personality. */
-  --color-background: oklch(0.22 0.04 260);
-  --color-foreground: oklch(0.96 0.012 95);
-  --color-card: oklch(0.58 0.16 25);
-  --color-card-foreground: oklch(0.99 0 0);
-  --color-muted: oklch(0.3 0.035 260);
-  --color-muted-foreground: oklch(0.88 0.012 95);
-  --color-border: oklch(0.36 0.04 260);
-  --color-input: oklch(0.28 0.035 260);
+  --color-background: oklch(0.23 0.035 55);
+  --color-foreground: oklch(0.92 0.025 78);
+  --color-card: oklch(0.36 0.055 48);
+  --color-card-foreground: oklch(0.94 0.024 78);
+  --color-muted: oklch(0.29 0.035 54);
+  --color-muted-foreground: oklch(0.76 0.026 74);
+  --color-border: oklch(0.42 0.04 48);
+  --color-input: oklch(0.3 0.038 50);
+  --clay-background: #d68b5f;
+  --clay-foreground: #26170f;
   --color-primary: var(--clay-background);
   --color-primary-foreground: var(--clay-foreground);
-  --color-secondary: oklch(0.34 0.04 250);
-  --color-secondary-foreground: oklch(0.96 0.012 95);
-  --color-accent: oklch(0.45 0.075 25);
-  --color-accent-foreground: oklch(0.96 0.012 95);
+  --color-secondary: oklch(0.34 0.04 68);
+  --color-secondary-foreground: oklch(0.92 0.025 78);
+  --color-accent: oklch(0.43 0.07 38);
+  --color-accent-foreground: oklch(0.94 0.024 78);
   --color-destructive: oklch(0.66 0.22 22);
   --color-destructive-foreground: oklch(0.99 0 0);
-  --color-ring: oklch(0.72 0.16 25);
+  --color-ring: oklch(0.72 0.12 50);
 
-  --color-sidebar: oklch(0.32 0.04 250);
-  --color-sidebar-foreground: oklch(0.96 0.012 95);
-  --color-sidebar-primary: oklch(0.72 0.16 25);
-  --color-sidebar-primary-foreground: oklch(0.99 0 0);
-  --color-sidebar-accent: oklch(0.4 0.05 250);
-  --color-sidebar-accent-foreground: oklch(0.96 0.012 95);
-  --color-sidebar-border: oklch(0.38 0.05 250);
+  --color-sidebar: oklch(0.32 0.045 48);
+  --color-sidebar-foreground: oklch(0.92 0.025 78);
+  --color-sidebar-primary: var(--clay-background);
+  --color-sidebar-primary-foreground: var(--clay-foreground);
+  --color-sidebar-accent: oklch(0.4 0.05 48);
+  --color-sidebar-accent-foreground: oklch(0.94 0.024 78);
+  --color-sidebar-border: oklch(0.44 0.045 48);
 
   --surface-ring-color: transparent;
+  --clay-shadow-outset: 10px 12px 24px 0 rgba(0, 0, 0, 0.42);
+  --clay-shadow-inset-primary: -9px -10px 18px 0 rgba(0, 0, 0, 0.3);
+  --clay-shadow-inset-secondary: 9px 10px 18px 0 rgba(255, 212, 160, 0.1);
 
   /* Dark mode shadows — outer drop deepens to near-black (the
    * navy page can't absorb a coloured drop), inner-top white
@@ -2189,21 +2194,21 @@
   --shadow-lg: var(--clay-shadow);
 
   --surface-hover-shadow:
-    10px 10px 20px 0 rgba(0, 0, 0, 0.32),
-    inset -8px -8px 16px 0 rgba(0, 0, 0, 0.3),
-    inset 8px 8px 16px 0 hsla(0, 0%, 100%, 0.18);
+    12px 14px 28px 0 rgba(0, 0, 0, 0.48),
+    inset -9px -10px 18px 0 rgba(0, 0, 0, 0.34),
+    inset 9px 10px 18px 0 rgba(255, 212, 160, 0.14);
   --surface-active-shadow:
-    4px 4px 10px 0 rgba(0, 0, 0, 0.22),
-    inset -6px -6px 12px 0 rgba(0, 0, 0, 0.34),
-    inset 6px 6px 12px 0 hsla(0, 0%, 100%, 0.12);
+    4px 5px 10px 0 rgba(0, 0, 0, 0.32),
+    inset -6px -7px 12px 0 rgba(0, 0, 0, 0.38),
+    inset 6px 7px 12px 0 rgba(255, 212, 160, 0.08);
 
-  --scrollbar-thumb: oklch(0.5 0.1 25);
-  --scrollbar-thumb-hover: oklch(0.65 0.16 25);
+  --scrollbar-thumb: oklch(0.47 0.07 42);
+  --scrollbar-thumb-hover: oklch(0.6 0.09 48);
 
   /* Dark-mode ambient — same paper grain at slightly higher opacity
    * so the texture reads against the navy bg. */
   --bg-ambient:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.08'/%3E%3Cg fill='%23d79b68' fill-opacity='0.08'%3E%3Ccircle cx='38' cy='44' r='1.3'/%3E%3Ccircle cx='142' cy='88' r='1.1'/%3E%3Ccircle cx='190' cy='166' r='1.5'/%3E%3Ccircle cx='82' cy='176' r='1'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* ---- DISPLAY TYPE — Fredoka on headlines -------------------
@@ -2218,6 +2223,33 @@
  *
  * (No body or :is() selector here anymore — both moved.)
  */
+:root.design-claymorphism body {
+  background-color: var(--color-background);
+  background-image:
+    radial-gradient(circle at 18% 12%, oklch(0.96 0.05 78 / 0.72), transparent 28rem),
+    radial-gradient(circle at 82% 18%, oklch(0.76 0.075 42 / 0.28), transparent 24rem),
+    radial-gradient(circle at 50% 105%, oklch(0.58 0.06 42 / 0.2), transparent 34rem),
+    var(--bg-ambient);
+  background-size:
+    56rem 36rem,
+    48rem 32rem,
+    64rem 36rem,
+    220px 220px;
+  background-position:
+    -12rem -8rem,
+    calc(100% + 8rem) -10rem,
+    50% 100%,
+    0 0;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+}
+.dark.design-claymorphism body {
+  background-image:
+    radial-gradient(circle at 20% 8%, oklch(0.5 0.075 42 / 0.34), transparent 24rem),
+    radial-gradient(circle at 88% 18%, oklch(0.34 0.055 70 / 0.42), transparent 26rem),
+    radial-gradient(circle at 50% 110%, oklch(0.12 0.025 48 / 0.62), transparent 38rem),
+    var(--bg-ambient);
+}
+
 :root.design-claymorphism .app-nav-shell {
   border-color: transparent;
   background: var(--color-card);
@@ -2255,8 +2287,8 @@
   background: var(--color-muted);
   color: var(--color-foreground);
   box-shadow:
-    inset -4px -4px 10px 0 rgba(0, 0, 0, 0.14),
-    inset 4px 4px 10px 0 hsla(0, 0%, 100%, 0.18);
+    inset -4px -4px 10px 0 rgba(101, 65, 39, 0.18),
+    inset 4px 4px 10px 0 rgba(255, 237, 205, 0.26);
   transform: translateY(-1px);
 }
 
@@ -2297,8 +2329,8 @@
   background: var(--color-muted);
   color: var(--color-foreground);
   box-shadow:
-    inset -4px -4px 10px 0 rgba(0, 0, 0, 0.14),
-    inset 4px 4px 10px 0 hsla(0, 0%, 100%, 0.18);
+    inset -4px -4px 10px 0 rgba(101, 65, 39, 0.18),
+    inset 4px 4px 10px 0 rgba(255, 237, 205, 0.26);
 }
 
 :root.design-claymorphism .app-dropdown-item[data-state='checked'] {
@@ -2312,8 +2344,8 @@
   background: var(--color-card);
   color: var(--color-foreground);
   box-shadow:
-    inset 5px 5px 12px 0 rgba(0, 0, 0, 0.16),
-    inset -5px -5px 12px 0 hsla(0, 0%, 100%, 0.3);
+    inset 5px 5px 12px 0 rgba(101, 65, 39, 0.2),
+    inset -5px -5px 12px 0 rgba(255, 237, 205, 0.32);
 }
 
 :root.design-claymorphism input::placeholder,
@@ -2326,8 +2358,8 @@
 :root.design-claymorphism textarea:focus-visible {
   border-color: var(--clay-background);
   box-shadow:
-    inset 5px 5px 12px 0 rgba(0, 0, 0, 0.14),
-    inset -5px -5px 12px 0 hsla(0, 0%, 100%, 0.32),
+    inset 5px 5px 12px 0 rgba(101, 65, 39, 0.18),
+    inset -5px -5px 12px 0 rgba(255, 237, 205, 0.34),
     0 0 0 var(--ring-offset-width) var(--ring-offset-color),
     0 0 0 calc(var(--ring-offset-width) + var(--ring-width)) var(--color-ring);
 }
@@ -2340,9 +2372,9 @@
   font-weight: 700;
   letter-spacing: 0;
   box-shadow:
-    3px 3px 8px 0 rgba(0, 0, 0, 0.18),
-    inset -3px -3px 7px 0 rgba(0, 0, 0, 0.16),
-    inset 3px 3px 7px 0 hsla(0, 0%, 100%, 0.22);
+    3px 4px 8px 0 rgba(108, 74, 45, 0.2),
+    inset -3px -3px 7px 0 rgba(101, 65, 39, 0.16),
+    inset 3px 3px 7px 0 rgba(255, 237, 205, 0.26);
 }
 
 :root.design-claymorphism .app-badge[data-variant='outline'] {
@@ -2353,6 +2385,36 @@
 :root.design-claymorphism .app-badge-dot {
   opacity: 1;
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+}
+
+.dark.design-claymorphism .app-nav-link:hover,
+.dark.design-claymorphism .app-nav-action:hover,
+.dark.design-claymorphism .app-bottom-nav-link:hover,
+.dark.design-claymorphism .app-dropdown-item:focus,
+.dark.design-claymorphism .app-dropdown-item[data-highlighted] {
+  box-shadow:
+    inset -4px -4px 10px 0 rgba(0, 0, 0, 0.28),
+    inset 4px 4px 10px 0 rgba(255, 212, 160, 0.1);
+}
+.dark.design-claymorphism input:not([type='checkbox']):not([type='radio']):not([type='range']),
+.dark.design-claymorphism textarea {
+  box-shadow:
+    inset 5px 5px 12px 0 rgba(0, 0, 0, 0.34),
+    inset -5px -5px 12px 0 rgba(255, 212, 160, 0.1);
+}
+.dark.design-claymorphism input:not([type='checkbox']):not([type='radio']):not([type='range']):focus-visible,
+.dark.design-claymorphism textarea:focus-visible {
+  box-shadow:
+    inset 5px 5px 12px 0 rgba(0, 0, 0, 0.32),
+    inset -5px -5px 12px 0 rgba(255, 212, 160, 0.12),
+    0 0 0 var(--ring-offset-width) var(--ring-offset-color),
+    0 0 0 calc(var(--ring-offset-width) + var(--ring-width)) var(--color-ring);
+}
+.dark.design-claymorphism .app-badge {
+  box-shadow:
+    3px 4px 8px 0 rgba(0, 0, 0, 0.32),
+    inset -3px -3px 7px 0 rgba(0, 0, 0, 0.24),
+    inset 3px 3px 7px 0 rgba(255, 212, 160, 0.1);
 }
 
 /* @eikon:variant(design=claymorphism) end */
@@ -3175,42 +3237,42 @@
 }
 .dark.design-animal-crossing {
   /* Night on the island — cosy warm brown, never cold black. */
-  --color-background: oklch(0.26 0.03 70);
-  --color-foreground: oklch(0.93 0.02 95);
-  --color-card: oklch(0.31 0.035 72);
-  --color-card-foreground: oklch(0.93 0.02 95);
-  --color-muted: oklch(0.34 0.03 72);
-  --color-muted-foreground: oklch(0.75 0.025 85);
-  --color-border: oklch(0.42 0.03 72);
-  --color-input: oklch(0.31 0.035 72);
-  --color-primary: oklch(0.78 0.125 185.5);
-  --color-primary-foreground: oklch(0.2 0.03 70);
-  --color-secondary: oklch(0.34 0.03 72);
-  --color-secondary-foreground: oklch(0.93 0.02 95);
-  --color-accent: oklch(0.4 0.05 185);
-  --color-accent-foreground: oklch(0.95 0.03 185);
+  --color-background: oklch(0.21 0.043 155);
+  --color-foreground: oklch(0.92 0.026 92);
+  --color-card: oklch(0.32 0.038 74);
+  --color-card-foreground: oklch(0.93 0.025 92);
+  --color-muted: oklch(0.37 0.033 78);
+  --color-muted-foreground: oklch(0.78 0.025 88);
+  --color-border: oklch(0.5 0.035 78);
+  --color-input: oklch(0.29 0.035 74);
+  --color-primary: oklch(0.78 0.12 185.5);
+  --color-primary-foreground: oklch(0.16 0.035 150);
+  --color-secondary: oklch(0.35 0.034 78);
+  --color-secondary-foreground: oklch(0.93 0.025 92);
+  --color-accent: oklch(0.39 0.055 190);
+  --color-accent-foreground: oklch(0.94 0.032 185);
   --color-destructive: oklch(0.6 0.19 25);
   --color-destructive-foreground: oklch(0.98 0 0);
   --color-ring: oklch(0.865 0.177 90.4); /* keep the yellow focus */
-  --color-sidebar: oklch(0.22 0.03 70);
-  --color-sidebar-foreground: oklch(0.93 0.02 95);
-  --color-sidebar-primary: oklch(0.78 0.125 185.5);
-  --color-sidebar-primary-foreground: oklch(0.2 0.03 70);
-  --color-sidebar-accent: oklch(0.4 0.04 265);
-  --color-sidebar-accent-foreground: oklch(0.95 0.02 95);
-  --color-sidebar-border: oklch(0.42 0.03 72);
+  --color-sidebar: oklch(0.25 0.04 148);
+  --color-sidebar-foreground: oklch(0.93 0.025 92);
+  --color-sidebar-primary: oklch(0.78 0.12 185.5);
+  --color-sidebar-primary-foreground: oklch(0.16 0.035 150);
+  --color-sidebar-accent: oklch(0.38 0.045 260);
+  --color-sidebar-accent-foreground: oklch(0.94 0.024 96);
+  --color-sidebar-border: oklch(0.45 0.035 142);
 
   /* Hard bottom shadow goes dark-brown at night. */
-  --shadow-sm: 0 4px 0 0 oklch(0.16 0.02 70);
-  --shadow-md: 0 5px 0 0 oklch(0.16 0.02 70);
-  --shadow-lg: 0 7px 0 0 oklch(0.16 0.02 70);
-  --shadow-xl: 0 10px 0 0 oklch(0.16 0.02 70);
-  --surface-hover-shadow: 0 6px 0 0 oklch(0.16 0.02 70);
-  --surface-active-shadow: 0 1px 0 0 oklch(0.16 0.02 70);
+  --shadow-sm: 0 4px 0 0 oklch(0.14 0.026 82);
+  --shadow-md: 0 5px 0 0 oklch(0.14 0.026 82);
+  --shadow-lg: 0 7px 0 0 oklch(0.14 0.026 82);
+  --shadow-xl: 0 10px 0 0 oklch(0.14 0.026 82);
+  --surface-hover-shadow: 0 6px 0 0 oklch(0.14 0.026 82);
+  --surface-active-shadow: 0 1px 0 0 oklch(0.14 0.026 82);
 
-  --ring-offset-color: oklch(0.26 0.03 70);
-  --scrollbar-thumb: oklch(0.45 0.03 72);
-  --scrollbar-thumb-hover: oklch(0.6 0.03 72);
+  --ring-offset-color: oklch(0.21 0.043 155);
+  --scrollbar-thumb: oklch(0.45 0.034 82);
+  --scrollbar-thumb-hover: oklch(0.62 0.036 82);
 
   /* Night island — the same leaf pattern, lighter green + dimmer, over the
    * warm-green dark base set by `.dark.design-animal-crossing body` below. */
@@ -3236,7 +3298,24 @@
   font-weight: 500;
 }
 .dark.design-animal-crossing body {
-  background-color: oklch(0.3 0.04 150);
+  background-color: var(--color-background);
+  background-image:
+    radial-gradient(circle at 78% 10%, oklch(0.86 0.05 92 / 0.18), transparent 14rem),
+    radial-gradient(circle at 50% -15%, oklch(0.58 0.08 230 / 0.16), transparent 34rem),
+    var(--bg-ambient);
+  background-size:
+    34rem 24rem,
+    80rem 36rem,
+    300px 300px;
+  background-position:
+    calc(100% - 4rem) 1rem,
+    50% 0,
+    0 0;
+  background-repeat: no-repeat, no-repeat, repeat;
+}
+.dark.design-animal-crossing .app-nav-shell {
+  background: color-mix(in oklab, var(--color-sidebar) 88%, transparent);
+  box-shadow: 0 2px 0 oklch(0.14 0.026 82 / 0.72);
 }
 /* The reference's `bgScroll` — a slow diagonal drift of the leaf field. */
 @keyframes animal-bg-scroll {
@@ -3337,10 +3416,10 @@
 }
 .dark.design-animal-crossing button.shadow-sm,
 .dark.design-animal-crossing a.shadow-sm {
-  background-color: oklch(0.34 0.03 72);
-  color: oklch(0.93 0.02 95);
-  border-color: oklch(0.34 0.03 72);
-  box-shadow: 0 5px 0 0 oklch(0.16 0.02 70);
+  background-color: oklch(0.36 0.034 78);
+  color: oklch(0.93 0.025 92);
+  border-color: oklch(0.36 0.034 78);
+  box-shadow: 0 5px 0 0 oklch(0.14 0.026 82);
 }
 
 /* Switch "on" goes grass-GREEN (not teal) — the game uses a leafy green for
@@ -3363,7 +3442,8 @@
 }
 .dark.design-animal-crossing input:not([type='checkbox']):not([type='radio']):not([type='range']),
 .dark.design-animal-crossing textarea {
-  box-shadow: 0 3px 0 0 oklch(0.2 0.02 70);
+  background-color: oklch(0.29 0.035 74);
+  box-shadow: 0 3px 0 0 oklch(0.14 0.026 82);
 }
 /* @eikon:variant(design=animal-crossing) end */
 
