@@ -113,7 +113,7 @@ function ExamplesTopNav() {
                     className={cn(
                       'rounded-full px-1.5 text-[10px]',
                       active
-                        ? 'bg-black/10 text-current dark:bg-white/15'
+                        ? 'bg-[var(--color-primary-foreground)]/15 text-current'
                         : 'bg-[var(--color-muted)] text-[var(--color-muted-foreground)]'
                     )}
                   >

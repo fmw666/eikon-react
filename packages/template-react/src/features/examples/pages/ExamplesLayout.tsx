@@ -80,7 +80,7 @@ function ExamplesLayout() {
             <div className="hidden min-w-0 items-center gap-2 border-l border-[var(--color-border)] pl-3 sm:flex">
               <Sparkles
                 aria-hidden="true"
-                className="h-4 w-4 shrink-0 text-amber-500"
+                className="h-4 w-4 shrink-0 text-[var(--color-warning)]"
               />
               <span className="truncate text-sm font-semibold">
                 {t('meta.title')}
@@ -89,7 +89,7 @@ function ExamplesLayout() {
           </div>
           <span
             role="status"
-            className="app-badge inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.08em] text-amber-700 dark:text-amber-300"
+            className="app-badge inline-flex items-center gap-1 rounded-full border border-[var(--color-warning)]/30 bg-[var(--color-warning)]/10 px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--color-warning)]"
           >
             <Sparkles aria-hidden="true" className="h-3 w-3 shrink-0" />
             {t('meta.devOnlyBadge')}
