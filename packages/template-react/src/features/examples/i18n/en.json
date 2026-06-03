@@ -5,6 +5,7 @@
     "devOnlyBadge": "Dev only",
     "devOnlyNotice": "Preview is available in development only — these routes are excluded from production builds.",
     "backToIndex": "Back to showcase",
+    "backToApp": "Back to app",
     "openInNewTab": "Open in new tab",
     "breadcrumb": "Breadcrumb",
     "notFound": "Not found",

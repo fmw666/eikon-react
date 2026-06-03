@@ -14,16 +14,11 @@
 // =================================================================================================
 
 // --- Third-party Libraries ---
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { Route, Routes } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 
 // --- Absolute Imports ---
-import {
-  LayoutVariantContext,
-  type LayoutVariant,
-} from '@/app/LayoutVariantContext';
-
 import { renderWithRouter } from '@test/test-utils';
 
 // --- Relative Imports ---
@@ -43,14 +38,12 @@ describe('<ExamplesIndexPage /> (overview)', () => {
   });
 
   it('links each component card to its own sub-page', () => {
-    renderWithRouter(<ExamplesIndexPage />);
-    // The card's accessible name is "<title> <description>", so anchor
-    // the match at the title rather than requiring an exact string.
-    expect(screen.getByRole('link', { name: /^Button\b/ })).toHaveAttribute(
+    const { container } = renderWithRouter(<ExamplesIndexPage />);
+    expect(container.querySelector('a[href="/examples/button"]')).toHaveAttribute(
       'href',
       '/examples/button'
     );
-    expect(screen.getByRole('link', { name: /^Table\b/ })).toHaveAttribute(
+    expect(container.querySelector('a[href="/examples/table"]')).toHaveAttribute(
       'href',
       '/examples/table'
     );
@@ -58,27 +51,20 @@ describe('<ExamplesIndexPage /> (overview)', () => {
 });
 
 describe('<ExamplesLayout /> sidebar', () => {
-  function renderLayout(layout?: LayoutVariant) {
-    const tree = (
+  function renderLayout() {
+    return renderWithRouter(
       <Routes>
         <Route path="/examples" element={<ExamplesLayout />}>
           <Route index element={<div>overview</div>} />
           <Route path="button" element={<div>button page</div>} />
         </Route>
-      </Routes>
-    );
-    return renderWithRouter(
-      layout ? (
-        <LayoutVariantContext.Provider
-          value={{ variant: layout, setVariant: () => undefined }}
-        >
-          {tree}
-        </LayoutVariantContext.Provider>
-      ) : (
-        tree
-      ),
+      </Routes>,
       { routerEntries: ['/examples'] }
     );
+  }
+
+  function sidebarQueries() {
+    return within(screen.getByRole('complementary', { name: /components/i }));
   }
 
   it('shows the dev-only notice once in the shell', () => {
@@ -88,7 +74,7 @@ describe('<ExamplesLayout /> sidebar', () => {
 
   it('navigates inline components to their route', () => {
     renderLayout();
-    expect(screen.getByRole('link', { name: 'Button' })).toHaveAttribute(
+    expect(sidebarQueries().getByRole('link', { name: 'Button' })).toHaveAttribute(
       'href',
       '/examples/button'
     );
@@ -106,15 +92,16 @@ describe('<ExamplesLayout /> sidebar', () => {
 
   it('lists the newly added primitives', () => {
     renderLayout();
-    expect(screen.getByRole('link', { name: 'Progress' })).toHaveAttribute(
+    const sidebar = sidebarQueries();
+    expect(sidebar.getByRole('link', { name: 'Progress' })).toHaveAttribute(
       'href',
       '/examples/progress'
     );
-    expect(screen.getByRole('link', { name: 'Breadcrumb' })).toHaveAttribute(
+    expect(sidebar.getByRole('link', { name: 'Breadcrumb' })).toHaveAttribute(
       'href',
       '/examples/breadcrumb'
     );
-    expect(screen.getByRole('link', { name: 'Keyboard' })).toHaveAttribute(
+    expect(sidebar.getByRole('link', { name: 'Keyboard' })).toHaveAttribute(
       'href',
       '/examples/kbd'
     );
@@ -122,21 +109,24 @@ describe('<ExamplesLayout /> sidebar', () => {
 
   it('filters the nav list as you type', () => {
     renderLayout();
-    fireEvent.change(screen.getByRole('searchbox'), {
+    const sidebar = sidebarQueries();
+    fireEvent.change(sidebar.getByRole('searchbox'), {
       target: { value: 'button' },
     });
-    expect(screen.getByRole('link', { name: 'Button' })).toBeInTheDocument();
+    expect(sidebar.getByRole('link', { name: 'Button' })).toBeInTheDocument();
     expect(
-      screen.queryByRole('link', { name: 'Table' })
+      sidebar.queryByRole('link', { name: 'Table' })
     ).not.toBeInTheDocument();
   });
 
-  it('uses a compact top navigation inside global-sidebar layouts', () => {
-    renderLayout('sidebar');
+  it('renders standalone chrome and compact top navigation', () => {
+    renderLayout();
 
-    expect(screen.queryByRole('complementary')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /back to app/i })
+    ).toHaveAttribute('href', '/');
     expect(screen.getByRole('button', { name: /basics/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Button' })).toHaveAttribute(
+    expect(screen.getAllByRole('link', { name: 'Button' })[0]).toHaveAttribute(
       'href',
       '/examples/button'
     );

@@ -53,13 +53,6 @@ function HomePage() {
             <ArrowRight className="h-4 w-4" />
           </Link>
         </Button>
-        {import.meta.env.DEV && (
-          <Button asChild size="lg" variant="secondary">
-            <Link to="/examples">
-              {t('ctaExamples')}
-            </Link>
-          </Button>
-        )}
         <Button asChild size="lg" variant="outline">
           <a href="https://github.com/fmw666/eikon-react" target="_blank" rel="noreferrer noopener">
             GitHub
@@ -93,6 +86,28 @@ function HomePage() {
           </CardHeader>
         </Card>
       </div>
+
+      {import.meta.env.DEV && (
+        <Card className={`${cardHoverableClass} mt-6 w-full text-left`}>
+          <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted-foreground)]">
+                {t('examplesBadge')}
+              </p>
+              <CardTitle className="mt-2">{t('examplesTitle')}</CardTitle>
+              <CardDescription className="mt-2 max-w-2xl">
+                {t('examplesDescription')}
+              </CardDescription>
+            </div>
+            <Button asChild variant="secondary">
+              <Link to="/examples">
+                {t('ctaExamples')}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </CardHeader>
+        </Card>
+      )}
     </section>
   );
 }

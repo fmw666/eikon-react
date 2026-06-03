@@ -78,6 +78,10 @@ describe('<BottomTabsRootLayout />', () => {
     // them by their visible icon-paired label.
     expect(screen.getByRole('link', { name: /home/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /counter/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /examples/i })).toHaveAttribute(
+      'href',
+      '/examples'
+    );
     expect(screen.getByRole('link', { name: /tasks/i })).toBeInTheDocument();
   });
 

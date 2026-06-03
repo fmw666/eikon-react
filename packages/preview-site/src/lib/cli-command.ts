@@ -80,7 +80,9 @@ export const AGENT_NOTE =
   ' name (e.g. `my-app`) to create a fresh directory. After the CLI finishes,' +
   ' copy the generated `.agent/rules/` and `.agent/skills/` into the location' +
   " your real coding agent reads (e.g. `.cursor/rules/`, `.claude/skills/`," +
-  " or the equivalent) so the agent picks up this project's conventions.";
+  " or the equivalent) so the agent picks up this project's conventions. Once" +
+  ' setup and dependency installation are complete, ask the user whether they' +
+  ' want you to open the local preview/dev server before launching it.';
 
 /**
  * Render the full clipboard payload for the playground's "Copy" button:

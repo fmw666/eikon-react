@@ -68,9 +68,9 @@ function renderShell(initialPath = '/') {
       <MemoryRouter initialEntries={[initialPath]}>
         <Routes>
           <Route element={<RootLayout />}>
-            <Route path="/" element={<p>home page</p>} />
-            <Route path="/counter" element={<p>counter page</p>} />
-            <Route path="/tasks" element={<p>tasks page</p>} />
+          <Route path="/" element={<p>home page</p>} />
+          <Route path="/counter" element={<p>counter page</p>} />
+          <Route path="/tasks" element={<p>tasks page</p>} />
           </Route>
         </Routes>
       </MemoryRouter>
@@ -103,6 +103,8 @@ describe('<RootLayout />', () => {
     // visibility here because nav is layout-specific.
     renderShell('/');
     expect(screen.getByText('home page')).toBeInTheDocument();
+    renderShell('/counter');
+    expect(screen.getByText('counter page')).toBeInTheDocument();
     renderShell('/tasks');
     expect(screen.getByText('tasks page')).toBeInTheDocument();
   });

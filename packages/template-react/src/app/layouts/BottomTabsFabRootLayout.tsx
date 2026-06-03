@@ -37,11 +37,10 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 // --- Third-party Libraries ---
 import {
   CheckSquare,
+  Component,
   Home,
   type LucideIcon,
   Plus,
-  Sparkles,
-  User,
 } from 'lucide-react';
 
 // --- Absolute Imports ---
@@ -79,26 +78,16 @@ const leftTabs: TabSpec[] = [
 
 const rightTabs: TabSpec[] = [
   { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks', icon: CheckSquare },
-  // Examples is a DEV-ONLY showcase route; in production builds the
-  // ternary falls through to `/profile`, leaving a single tab on the
-  // right side instead of two.
   ...(import.meta.env.DEV
     ? [
         {
           to: '/examples',
           key: 'nav.examples',
           fallback: 'Examples',
-          icon: Sparkles,
+          icon: Component,
         },
       ]
-    : [
-        {
-          to: '/profile',
-          key: 'nav.profile',
-          fallback: 'Profile',
-          icon: User,
-        },
-      ]),
+    : []),
 ];
 
 // =================================================================================================

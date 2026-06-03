@@ -2,10 +2,9 @@
  * @file router.tsx
  * @description Top-level <Routes> tree.
  *
- * Wires every feature's `*Routes` element under the shared
- * `<RootLayout />`. Adding a new feature is two lines: import its
- * `*Routes` from the feature barrel, drop it inside the layout
- * route.
+ * Production app routes mount under `<RootLayout />`. The dev-only
+ * component showcase mounts beside it so preview surfaces do not
+ * inherit the main application navigation shell.
  */
 
 // =================================================================================================
@@ -31,22 +30,12 @@ import { tasksRoutes } from '@/features/tasks';
 function AppRouter() {
   return (
     <Routes>
+      {import.meta.env.DEV && examplesRoutes}
       <Route element={<RootLayout />}>
         {homeRoutes}
         {counterRoutes}
         {tasksRoutes}
         {authRoutes}
-        {/*
-          The examples feature is a DEV-ONLY component showcase. It
-          ships unconditionally in the scaffold so users can browse it
-          locally with `npm run dev`; production bundles stay clean
-          via the `import.meta.env.DEV` gate below — `pnpm build`
-          (`vite build`) inlines DEV as `false`, tree-shaking the
-          routes out. The preview playground builds the template with
-          `mode: 'development'` so the gate stays open inside its
-          iframe and the showcase routes render for in-browser preview.
-        */}
-        {import.meta.env.DEV && examplesRoutes}
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

@@ -46,4 +46,12 @@ describe('<HomePage />', () => {
     expect(screen.getByText(/\.agent protocol/i)).toBeInTheDocument();
     expect(screen.getByText(/modern tooling/i)).toBeInTheDocument();
   });
+
+  it('renders the dev-only examples entry area', () => {
+    renderWithRouter(<HomePage />);
+    expect(screen.getByText(/development preview/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /browse component showcase/i })
+    ).toHaveAttribute('href', '/examples');
+  });
 });

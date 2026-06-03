@@ -94,6 +94,10 @@ describe('<StackedRootLayout />', () => {
     );
     expect(screen.getByRole('link', { name: /home/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /counter/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /examples/i })).toHaveAttribute(
+      'href',
+      '/examples'
+    );
     expect(screen.getByRole('link', { name: /tasks/i })).toBeInTheDocument();
     expect(screen.getByText(/built with eikon/i)).toBeInTheDocument();
   });

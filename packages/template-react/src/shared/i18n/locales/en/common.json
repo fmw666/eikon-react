@@ -2,8 +2,8 @@
   "nav": {
     "home": "Home",
     "counter": "Counter",
-    "tasks": "Tasks",
     "examples": "Examples",
+    "tasks": "Tasks",
     "menu": "Open navigation",
     "menuDescription": "Primary navigation for the application",
     "primary": "Primary navigation",

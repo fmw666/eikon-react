@@ -126,4 +126,9 @@ describe('buildAgentInstructions', () => {
     expect(AGENT_NOTE).toContain('.agent/rules/');
     expect(AGENT_NOTE).toContain('.agent/skills/');
   });
+
+  it('asks the agent to confirm before opening the local preview', () => {
+    expect(AGENT_NOTE).toContain('ask the user');
+    expect(AGENT_NOTE).toContain('local preview/dev server');
+  });
 });

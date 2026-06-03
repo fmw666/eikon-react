@@ -76,6 +76,10 @@ describe('<BottomTabsFabRootLayout />', () => {
     );
     expect(screen.getByRole('link', { name: /home/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /counter/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /examples/i })).toHaveAttribute(
+      'href',
+      '/examples'
+    );
   });
 
   it('renders the central FAB pointing at the tasks compose entry', () => {

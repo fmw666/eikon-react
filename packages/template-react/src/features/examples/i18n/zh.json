@@ -5,6 +5,7 @@
     "devOnlyBadge": "仅开发环境",
     "devOnlyNotice": "组件展柜仅在开发环境可预览，相关路由不会进入生产构建。",
     "backToIndex": "返回展柜",
+    "backToApp": "返回应用",
     "openInNewTab": "在新标签页打开",
     "breadcrumb": "面包屑",
     "notFound": "未找到",

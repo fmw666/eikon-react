@@ -2,8 +2,8 @@
   "nav": {
     "home": "首页",
     "counter": "计数器",
+    "examples": "示例",
     "tasks": "任务",
-    "examples": "组件展柜",
     "menu": "打开导航",
     "menuDescription": "应用的主导航",
     "primary": "主导航",
@@ -26,7 +26,7 @@
   "notFound": {
     "code": "404",
     "title": "页面未找到",
-    "description": "您访问的页面不存在或已被移动。",
+    "description": "你访问的页面不存在或已被移动。",
     "back": "返回首页"
   }
 }

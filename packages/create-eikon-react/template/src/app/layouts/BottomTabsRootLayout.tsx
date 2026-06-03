@@ -37,10 +37,10 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 // --- Third-party Libraries ---
 import {
   CheckSquare,
+  Component,
   Home,
   type LucideIcon,
   Plus,
-  Sparkles,
 } from 'lucide-react';
 
 // --- Absolute Imports ---
@@ -70,16 +70,13 @@ const tabs: TabSpec[] = [
   { to: '/', key: 'nav.home', fallback: 'Home', icon: Home, end: true },
   { to: '/counter', key: 'nav.counter', fallback: 'Counter', icon: Plus },
   { to: '/tasks', key: 'nav.tasks', fallback: 'Tasks', icon: CheckSquare },
-  // Examples is a DEV-ONLY showcase. The route only registers when
-  // `import.meta.env.DEV` is true (see `app/router.tsx`); production
-  // bundles drop the entry.
   ...(import.meta.env.DEV
     ? [
         {
           to: '/examples',
           key: 'nav.examples',
           fallback: 'Examples',
-          icon: Sparkles,
+          icon: Component,
         },
       ]
     : []),

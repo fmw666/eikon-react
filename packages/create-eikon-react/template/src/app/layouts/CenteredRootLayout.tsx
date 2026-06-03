@@ -1,28 +1,8 @@
 // @eikon:variant(layout=centered) file
 /**
  * @file CenteredRootLayout.tsx
- * @description Single-card centered layout: no header chrome, no sidebar,
- * no footer — just a vertically/horizontally centered card that hosts the
- * matched route via <Outlet />. Best for auth shells (login / signup /
- * onboarding), focused single-purpose tools, and "kiosk" apps where the
- * entire experience fits one card at a time. The brand and theme/locale
- * toggles still live in the top corners so they're reachable without
- * crowding the card itself.
- *
- * Cross-platform: this is the ONE non-mobile layout the playground / CLI
- * also offers under `--platform mobile` (auth shell shape works equally
- * well on phones), which is why this file does the mobile-shaped polish
- * the other three desktop layouts skip:
- *   - `min-h-[100dvh]` instead of `min-h-screen` — iOS Safari's dynamic
- *     toolbar would otherwise push content under the URL bar.
- *   - `safe-px` / `safe-py` env() padding so notches and home-indicator
- *     bars never clip the corners or the card.
- *   - Nav links use `min-h-[var(--touch-target-min,44px)]` so the
- *     tappable area meets HIG / Material recommendations on phones
- *     while still rendering as a slim text bar on desktops.
- *
- * One of the layout variants selected via `--layout` at scaffold time;
- * the dispatcher at `./RootLayout.tsx` re-exports whichever variant won.
+ * @description Minimal centered layout. Routes render in a focused card with
+ * a lightweight top chrome for navigation and global actions.
  */
 
 // =================================================================================================
@@ -50,89 +30,116 @@ import { ThemeToggle } from '@/shared/ui/theme-toggle';
 function CenteredRootLayout() {
   const { t } = useTranslation();
 
-
   return (
     <div
       className={cn(
-        'relative grid min-h-[100dvh] place-items-center',
-        'bg-[var(--color-muted)]/30 px-4 py-12',
-        // Safe-area on mobile: keep the card and the corner toggles
-        // clear of notches / home-indicator. No-op on desktop because
-        // env(safe-area-inset-*) resolves to 0 there.
-        'pt-[max(3rem,calc(2rem+env(safe-area-inset-top)))]',
-        'pb-[max(3rem,calc(2rem+env(safe-area-inset-bottom)))]',
-        'pl-[max(1rem,env(safe-area-inset-left))]',
-        'pr-[max(1rem,env(safe-area-inset-right))]'
+        'flex min-h-[100dvh] flex-col [--app-static-topbar-h:4rem]',
+        'bg-[var(--color-muted)]/25'
       )}
     >
-      {/*
-        Brand in the top-left corner. Kept absolutely positioned so it does
-        NOT consume vertical space — the card stays perfectly vertically
-        centered even on tall viewports. Hidden on very narrow screens to
-        avoid colliding with the card. The `top` offset already accounts
-        for the safe-area inset via the parent's padding.
-      */}
-      <Link
-        to="/"
-        className="absolute top-4 left-4 hidden text-sm font-semibold tracking-tight sm:block"
+      <header
+        className={cn(
+          'sticky top-0 z-20 border-b-[length:var(--surface-border-width)] border-[var(--color-border)]',
+          'bg-[var(--color-background)]/88 backdrop-blur supports-[backdrop-filter]:bg-[var(--color-background)]/72'
+        )}
       >
-        Eikon App
-      </Link>
-      {/* Theme & locale toggles, mirrored in the top-right corner. */}
-      <div className="absolute top-4 right-4 flex items-center gap-1">
-        <LanguageSwitcher />
-        <ThemeToggle />
-        <SignInButton />
-      </div>
-      {/*
-        The card itself + a minimal text-link nav directly under it, stacked
-        in a flex column. The nav is intentionally chrome-free (no buttons,
-        no borders) so it stays out of the way for auth-style flows but
-        still gives demo / dev a reachable jump between routes.
-      */}
-      <div className="flex w-full max-w-md flex-col items-center gap-4">
-        <main
+        <div
           className={cn(
-            'w-full rounded-lg border-[length:var(--surface-border-width)] border-[var(--color-border)]',
-            'bg-[var(--color-card)] p-6 shadow-sm'
+            'mx-auto flex min-h-16 w-full max-w-6xl items-center gap-3',
+            'pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]'
           )}
         >
-          {/*
-            Shared Suspense boundary for every lazy-loaded page in the app.
-            The fallback intentionally matches the card's footprint so route
-            swaps don't reflow the centered cell.
-          */}
-          <Suspense fallback={<RouteFallback />}>
-            <Outlet />
-          </Suspense>
-        </main>
+          <Link
+            to="/"
+            className="shrink-0 text-sm font-semibold tracking-tight"
+          >
+            Eikon App
+          </Link>
+
+          <nav
+            aria-label="Primary"
+            className="hidden min-w-0 flex-1 items-center justify-center gap-1 text-xs text-[var(--color-muted-foreground)] sm:flex"
+          >
+            {navLinks.map((link) => (
+              <CenteredNavLink
+                key={link.to}
+                to={link.to}
+                end={link.end}
+                label={t(link.key, { defaultValue: link.fallback })}
+              />
+            ))}
+          </nav>
+
+          <div className="ml-auto flex shrink-0 items-center gap-1">
+            <LanguageSwitcher />
+            <ThemeToggle />
+            <SignInButton />
+          </div>
+        </div>
+
         <nav
           aria-label="Primary"
-          className="flex items-center gap-2 text-xs text-[var(--color-muted-foreground)]"
+          className="flex overflow-x-auto border-t-[length:var(--surface-border-width)] border-[var(--color-border)] px-3 text-xs text-[var(--color-muted-foreground)] sm:hidden"
         >
           {navLinks.map((link) => (
-            <NavLink
+            <CenteredNavLink
               key={link.to}
               to={link.to}
               end={link.end}
-              className={({ isActive }) =>
-                cn(
-                  // 44px tap target for mobile (Apple HIG); on desktop
-                  // it just adds vertical padding around the text link,
-                  // so the visual rhythm is unchanged.
-                  'inline-flex items-center rounded-md px-3 transition-colors',
-                  'min-h-[var(--touch-target-min,44px)]',
-                  'hover:text-[var(--color-foreground)]',
-                  isActive && 'text-[var(--color-foreground)] underline'
-                )
-              }
-            >
-              {t(link.key, { defaultValue: link.fallback })}
-            </NavLink>
+              label={t(link.key, { defaultValue: link.fallback })}
+            />
           ))}
         </nav>
-      </div>
+      </header>
+
+      <main
+        className={cn(
+          'flex min-h-0 w-full flex-1',
+          'pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]',
+          'items-center justify-center py-10'
+        )}
+      >
+        <div
+          className={cn(
+            'w-full',
+            'max-w-lg rounded-lg border-[length:var(--surface-border-width)] border-[var(--color-border)]',
+            'bg-[var(--color-card)] p-6 shadow-sm'
+          )}
+        >
+          <Suspense fallback={<RouteFallback />}>
+            <Outlet />
+          </Suspense>
+        </div>
+      </main>
     </div>
+  );
+}
+
+function CenteredNavLink({
+  to,
+  end,
+  label,
+}: {
+  to: string;
+  end?: boolean;
+  label: string;
+}) {
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) =>
+        cn(
+          'inline-flex min-h-[var(--touch-target-min,44px)] shrink-0 items-center rounded-md px-3 transition-colors',
+          'hover:text-[var(--color-foreground)]',
+          isActive
+            ? 'bg-[var(--color-muted)] text-[var(--color-foreground)]'
+            : 'text-[var(--color-muted-foreground)]'
+        )
+      }
+    >
+      {label}
+    </NavLink>
   );
 }
 
