@@ -767,6 +767,49 @@
   --scrollbar-thumb: oklch(0.36 0.005 264);
   --scrollbar-thumb-hover: oklch(0.55 0.012 264);
 }
+:root.design-linear body {
+  background-image:
+    radial-gradient(circle at 12% 8%, color-mix(in oklab, var(--color-primary) 8%, transparent), transparent 24rem),
+    linear-gradient(180deg, color-mix(in oklab, var(--color-card) 72%, transparent), transparent 16rem);
+}
+:root.design-linear .app-nav-shell {
+  background: color-mix(in oklab, var(--color-sidebar) 94%, transparent);
+  border-color: var(--color-sidebar-border);
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--color-border) 72%, transparent);
+}
+:root.design-linear .app-nav-link,
+:root.design-linear .app-nav-action,
+:root.design-linear .app-bottom-nav-link,
+:root.design-linear button.bg-transparent,
+:root.design-linear a.bg-transparent {
+  border-radius: var(--radius-md);
+}
+:root.design-linear .app-nav-link:hover,
+:root.design-linear .app-nav-action:hover,
+:root.design-linear .app-bottom-nav-link:hover,
+:root.design-linear button.bg-transparent:hover,
+:root.design-linear a.bg-transparent:hover {
+  opacity: 1;
+  background: color-mix(in oklab, var(--color-primary) 8%, var(--color-muted));
+  color: var(--color-foreground);
+}
+:root.design-linear .app-nav-link-active,
+:root.design-linear .app-bottom-nav-link-active {
+  background: color-mix(in oklab, var(--color-primary) 12%, var(--color-card));
+  color: var(--color-primary);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-primary) 18%, transparent);
+}
+:root.design-linear .app-badge {
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--color-primary) 10%, var(--color-card));
+  color: var(--color-primary);
+}
+:root.design-linear input:not([type='checkbox']):not([type='radio']):not([type='range']),
+:root.design-linear textarea,
+:root.design-linear select {
+  background: color-mix(in oklab, var(--color-card) 86%, var(--color-muted));
+  border-color: color-mix(in oklab, var(--color-border) 86%, var(--color-primary));
+}
 /* @eikon:variant(design=linear) end */
 
 /* @eikon:variant(design=anthropic) begin */
@@ -893,6 +936,54 @@
 
   --scrollbar-thumb: oklch(0.4 0.01 90);
   --scrollbar-thumb-hover: oklch(0.6 0.02 60);
+}
+:root.design-anthropic body {
+  background-image:
+    radial-gradient(circle at 12% 10%, color-mix(in oklab, var(--color-primary) 10%, transparent), transparent 26rem),
+    linear-gradient(180deg, color-mix(in oklab, var(--color-muted) 42%, transparent), transparent 18rem);
+}
+:root.design-anthropic .app-nav-shell,
+:root.design-anthropic .app-dropdown-trigger,
+:root.design-anthropic .app-dropdown-content {
+  background: color-mix(in oklab, var(--color-sidebar) 94%, transparent);
+  border-color: var(--color-sidebar-border);
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--color-border) 74%, transparent);
+}
+:root.design-anthropic .app-nav-link,
+:root.design-anthropic .app-nav-action,
+:root.design-anthropic .app-bottom-nav-link,
+:root.design-anthropic button.bg-transparent,
+:root.design-anthropic a.bg-transparent {
+  border-radius: 9999px;
+}
+:root.design-anthropic .app-nav-link:hover,
+:root.design-anthropic .app-nav-action:hover,
+:root.design-anthropic .app-bottom-nav-link:hover,
+:root.design-anthropic button.bg-transparent:hover,
+:root.design-anthropic a.bg-transparent:hover {
+  opacity: 1;
+  background: color-mix(in oklab, var(--color-primary) 10%, var(--color-muted));
+  color: var(--color-foreground);
+}
+:root.design-anthropic .app-nav-link-active,
+:root.design-anthropic .app-bottom-nav-link-active {
+  background: color-mix(in oklab, var(--color-primary) 14%, var(--color-card));
+  color: var(--color-primary);
+}
+:root.design-anthropic button.shadow-sm,
+:root.design-anthropic a.shadow-sm {
+  border-radius: 9999px;
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--color-primary) 24%, transparent), var(--shadow-sm);
+}
+:root.design-anthropic .app-badge {
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--color-muted) 72%, var(--color-card));
+}
+:root.design-anthropic input:not([type='checkbox']):not([type='radio']):not([type='range']),
+:root.design-anthropic textarea,
+:root.design-anthropic select {
+  background: color-mix(in oklab, var(--color-card) 86%, var(--color-muted));
+  border-color: var(--color-sidebar-border);
 }
 /* @eikon:variant(design=anthropic) end */
 
@@ -1326,6 +1417,48 @@
 
   --scrollbar-thumb: oklch(0.35 0.005 220);
   --scrollbar-thumb-hover: oklch(0.55 0.01 220);
+}
+:root.design-flat body {
+  background-image:
+    linear-gradient(90deg, color-mix(in oklab, var(--color-primary) 12%, transparent) 0 18px, transparent 18px),
+    linear-gradient(180deg, transparent 0 92px, color-mix(in oklab, var(--color-border) 42%, transparent) 92px 94px, transparent 94px);
+}
+:root.design-flat .app-nav-shell {
+  background: var(--color-sidebar);
+  border-color: var(--color-sidebar-border);
+  color: var(--color-sidebar-foreground);
+  box-shadow: none;
+}
+:root.design-flat .app-nav-link,
+:root.design-flat .app-nav-action,
+:root.design-flat .app-bottom-nav-link,
+:root.design-flat button,
+:root.design-flat a[role='button'],
+:root.design-flat [role='button'] {
+  border-radius: 0;
+  box-shadow: none;
+}
+:root.design-flat .app-nav-link:hover,
+:root.design-flat .app-nav-action:hover,
+:root.design-flat .app-bottom-nav-link:hover,
+:root.design-flat button.bg-transparent:hover,
+:root.design-flat a.bg-transparent:hover {
+  opacity: 1;
+  background: var(--color-sidebar-accent);
+  color: var(--color-sidebar-accent-foreground);
+}
+:root.design-flat .app-nav-link-active,
+:root.design-flat .app-bottom-nav-link-active {
+  background: var(--color-sidebar-primary);
+  color: var(--color-sidebar-primary-foreground);
+}
+:root.design-flat input:not([type='checkbox']):not([type='radio']):not([type='range']),
+:root.design-flat textarea,
+:root.design-flat select,
+:root.design-flat .app-badge {
+  border-width: 2px;
+  border-radius: 0;
+  box-shadow: none;
 }
 /* @eikon:variant(design=flat) end */
 
@@ -1961,6 +2094,59 @@
     radial-gradient(circle at 30% 70%, oklch(0.28 0.08 160 / 0.4), transparent 55%),
     radial-gradient(circle at 75% 80%, oklch(0.25 0.08 145 / 0.4), transparent 50%),
     linear-gradient(180deg, oklch(0.18 0.04 160) 0%, oklch(0.12 0.04 155) 60%, oklch(0.08 0.03 155) 100%);
+}
+
+:root.design-liquid-glass .app-nav-shell,
+:root.design-liquid-glass .app-dropdown-trigger,
+:root.design-liquid-glass .app-dropdown-content,
+:root.design-liquid-glass button.bg-transparent,
+:root.design-liquid-glass a.bg-transparent {
+  background: color-mix(in oklab, var(--color-card) 88%, transparent);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: var(--surface-backdrop);
+}
+:root.design-liquid-glass .app-nav-link,
+:root.design-liquid-glass .app-nav-action,
+:root.design-liquid-glass .app-bottom-nav-link,
+:root.design-liquid-glass button,
+:root.design-liquid-glass a[role='button'],
+:root.design-liquid-glass [role='button'] {
+  border-radius: 9999px;
+}
+:root.design-liquid-glass .app-nav-link:hover,
+:root.design-liquid-glass .app-nav-action:hover,
+:root.design-liquid-glass .app-bottom-nav-link:hover,
+:root.design-liquid-glass button.bg-transparent:hover,
+:root.design-liquid-glass a.bg-transparent:hover {
+  opacity: 1;
+  background: color-mix(in oklab, var(--color-card) 72%, var(--color-primary));
+  color: var(--color-foreground);
+  box-shadow: var(--surface-hover-shadow);
+}
+:root.design-liquid-glass .app-nav-link-active,
+:root.design-liquid-glass .app-bottom-nav-link-active {
+  background: color-mix(in oklab, var(--color-primary) 42%, var(--color-card));
+  color: var(--color-primary-foreground);
+  box-shadow: var(--surface-hover-shadow);
+}
+:root.design-liquid-glass button.shadow-sm,
+:root.design-liquid-glass a.shadow-sm {
+  box-shadow: var(--shadow-md);
+}
+:root.design-liquid-glass input:not([type='checkbox']):not([type='radio']):not([type='range']),
+:root.design-liquid-glass textarea,
+:root.design-liquid-glass select {
+  background: color-mix(in oklab, var(--color-input) 86%, transparent);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: var(--surface-backdrop);
+}
+:root.design-liquid-glass .app-badge {
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--color-card) 74%, transparent);
+  color: var(--color-foreground);
+  backdrop-filter: var(--surface-backdrop);
 }
 
 /* Body backdrop is now driven by the `--bg-ambient` token (defined
@@ -2644,6 +2830,47 @@
   --scrollbar-thumb: oklch(0.38 0.03 170);
   --scrollbar-thumb-hover: oklch(0.55 0.08 170);
 }
+:root.design-aurora body {
+  background-image:
+    radial-gradient(ellipse at 18% 4%, oklch(0.72 0.18 170 / 0.26), transparent 28rem),
+    radial-gradient(ellipse at 82% 10%, oklch(0.66 0.18 310 / 0.18), transparent 30rem),
+    linear-gradient(135deg, oklch(0.6 0.16 170 / 0.08), transparent 34%, oklch(0.62 0.14 310 / 0.08));
+}
+:root.design-aurora .app-nav-shell,
+:root.design-aurora .app-dropdown-trigger,
+:root.design-aurora .app-dropdown-content {
+  background: color-mix(in oklab, var(--color-card) 78%, transparent);
+  border-color: color-mix(in oklab, var(--color-primary) 28%, var(--color-border));
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(18px) saturate(1.18);
+}
+:root.design-aurora .app-nav-link:hover,
+:root.design-aurora .app-nav-action:hover,
+:root.design-aurora .app-bottom-nav-link:hover,
+:root.design-aurora button.bg-transparent:hover,
+:root.design-aurora a.bg-transparent:hover {
+  opacity: 1;
+  background: color-mix(in oklab, var(--color-primary) 12%, var(--color-accent));
+  color: var(--color-foreground);
+  box-shadow: 0 0 18px -8px color-mix(in oklab, var(--color-primary) 70%, transparent);
+}
+:root.design-aurora .app-nav-link-active,
+:root.design-aurora .app-bottom-nav-link-active {
+  background: linear-gradient(135deg, color-mix(in oklab, var(--color-primary) 22%, var(--color-card)), color-mix(in oklab, var(--color-accent) 78%, var(--color-card)));
+  color: var(--color-foreground);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-primary) 24%, transparent), var(--shadow-sm);
+}
+:root.design-aurora button.shadow-sm,
+:root.design-aurora a.shadow-sm {
+  box-shadow: var(--shadow-md);
+}
+:root.design-aurora input:not([type='checkbox']):not([type='radio']):not([type='range']),
+:root.design-aurora textarea,
+:root.design-aurora select {
+  background: color-mix(in oklab, var(--color-card) 74%, transparent);
+  border-color: color-mix(in oklab, var(--color-primary) 28%, var(--color-border));
+  backdrop-filter: blur(14px);
+}
 /* @eikon:variant(design=aurora) end */
 
 /* @eikon:variant(design=neo-brutalism) begin */
@@ -2789,6 +3016,53 @@
   --color-sidebar-accent-foreground: oklch(0.97 0.03 90);
   --color-sidebar-border: oklch(0.97 0.03 90);
 }
+:root.design-neo-brutalism body {
+  background-image:
+    linear-gradient(90deg, color-mix(in oklab, var(--color-border) 10%, transparent) 2px, transparent 2px),
+    linear-gradient(180deg, color-mix(in oklab, var(--color-border) 10%, transparent) 2px, transparent 2px);
+  background-size: 34px 34px;
+}
+:root.design-neo-brutalism .app-nav-shell,
+:root.design-neo-brutalism .app-dropdown-trigger,
+:root.design-neo-brutalism .app-dropdown-content {
+  background: var(--color-sidebar);
+  border-width: 3px;
+  border-color: var(--color-sidebar-border);
+  box-shadow: var(--shadow-md);
+}
+:root.design-neo-brutalism .app-nav-link,
+:root.design-neo-brutalism .app-nav-action,
+:root.design-neo-brutalism .app-bottom-nav-link,
+:root.design-neo-brutalism button,
+:root.design-neo-brutalism a[role='button'],
+:root.design-neo-brutalism [role='button'],
+:root.design-neo-brutalism input:not([type='checkbox']):not([type='radio']):not([type='range']),
+:root.design-neo-brutalism textarea,
+:root.design-neo-brutalism select,
+:root.design-neo-brutalism .app-badge {
+  border-width: 3px;
+  border-radius: 0;
+}
+:root.design-neo-brutalism .app-nav-link:hover,
+:root.design-neo-brutalism .app-nav-action:hover,
+:root.design-neo-brutalism .app-bottom-nav-link:hover,
+:root.design-neo-brutalism button.shadow-sm:hover,
+:root.design-neo-brutalism a.shadow-sm:hover {
+  opacity: 1;
+  transform: translate(-2px, -2px);
+  box-shadow: var(--surface-hover-shadow);
+}
+:root.design-neo-brutalism .app-nav-link-active,
+:root.design-neo-brutalism .app-bottom-nav-link-active {
+  background: var(--color-sidebar-primary);
+  color: var(--color-sidebar-primary-foreground);
+  box-shadow: var(--shadow-sm);
+}
+:root.design-neo-brutalism button:active,
+:root.design-neo-brutalism a[role='button']:active {
+  transform: translate(2px, 2px);
+  box-shadow: var(--surface-active-shadow);
+}
 /* @eikon:variant(design=neo-brutalism) end */
 
 /* @eikon:variant(design=cyberpunk) begin */
@@ -2919,6 +3193,54 @@
 
   --color-sidebar: oklch(0.06 0.05 280);
 }
+:root.design-cyberpunk body {
+  background-image:
+    linear-gradient(90deg, oklch(0.85 0.2 180 / 0.09) 1px, transparent 1px),
+    linear-gradient(180deg, oklch(0.7 0.27 320 / 0.08) 1px, transparent 1px),
+    repeating-linear-gradient(180deg, transparent 0 7px, oklch(0.85 0.2 180 / 0.035) 7px 8px),
+    radial-gradient(circle at 18% 8%, oklch(0.7 0.27 320 / 0.2), transparent 28rem);
+  background-size: 56px 56px, 56px 56px, auto, auto;
+}
+:root.design-cyberpunk .app-nav-shell,
+:root.design-cyberpunk .app-dropdown-trigger,
+:root.design-cyberpunk .app-dropdown-content {
+  background: color-mix(in oklab, var(--color-sidebar) 86%, transparent);
+  border-color: var(--color-sidebar-border);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(10px) saturate(1.25);
+}
+:root.design-cyberpunk .app-nav-link,
+:root.design-cyberpunk .app-nav-action,
+:root.design-cyberpunk .app-bottom-nav-link,
+:root.design-cyberpunk button,
+:root.design-cyberpunk a[role='button'],
+:root.design-cyberpunk [role='button'] {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+:root.design-cyberpunk .app-nav-link:hover,
+:root.design-cyberpunk .app-nav-action:hover,
+:root.design-cyberpunk .app-bottom-nav-link:hover,
+:root.design-cyberpunk button.bg-transparent:hover,
+:root.design-cyberpunk a.bg-transparent:hover {
+  opacity: 1;
+  background: color-mix(in oklab, var(--color-accent) 16%, transparent);
+  color: var(--color-accent);
+  box-shadow: var(--surface-hover-shadow);
+}
+:root.design-cyberpunk .app-nav-link-active,
+:root.design-cyberpunk .app-bottom-nav-link-active {
+  background: color-mix(in oklab, var(--color-primary) 22%, var(--color-sidebar));
+  color: var(--color-accent);
+  box-shadow: var(--shadow-md);
+}
+:root.design-cyberpunk input:not([type='checkbox']):not([type='radio']):not([type='range']),
+:root.design-cyberpunk textarea,
+:root.design-cyberpunk select,
+:root.design-cyberpunk .app-badge {
+  background: color-mix(in oklab, var(--color-card) 82%, transparent);
+  border-color: var(--color-border);
+}
 /* @eikon:variant(design=cyberpunk) end */
 
 /* @eikon:variant(design=terminal) begin */
@@ -3017,6 +3339,53 @@
   --color-sidebar: oklch(0.08 0.02 150);
   --scrollbar-thumb: oklch(0.35 0.1 150);
   --scrollbar-thumb-hover: oklch(0.7 0.16 150);
+}
+:root.design-terminal body {
+  background-image:
+    repeating-linear-gradient(180deg, transparent 0 9px, oklch(0.82 0.2 150 / 0.055) 9px 10px),
+    radial-gradient(circle at 50% -10%, oklch(0.82 0.2 150 / 0.16), transparent 34rem);
+  text-shadow: 0 0 8px oklch(0.82 0.2 150 / 0.22);
+}
+:root.design-terminal .app-nav-shell,
+:root.design-terminal .app-dropdown-trigger,
+:root.design-terminal .app-dropdown-content {
+  background: color-mix(in oklab, var(--color-sidebar) 90%, transparent);
+  border-color: var(--color-sidebar-border);
+  box-shadow: var(--shadow-sm);
+}
+:root.design-terminal .app-nav-link,
+:root.design-terminal .app-nav-action,
+:root.design-terminal .app-bottom-nav-link,
+:root.design-terminal button,
+:root.design-terminal a[role='button'],
+:root.design-terminal [role='button'],
+:root.design-terminal input:not([type='checkbox']):not([type='radio']):not([type='range']),
+:root.design-terminal textarea,
+:root.design-terminal select {
+  border-radius: 0;
+}
+:root.design-terminal .app-nav-link:hover,
+:root.design-terminal .app-nav-action:hover,
+:root.design-terminal .app-bottom-nav-link:hover,
+:root.design-terminal button.bg-transparent:hover,
+:root.design-terminal a.bg-transparent:hover {
+  opacity: 1;
+  background: color-mix(in oklab, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+  box-shadow: var(--surface-hover-shadow);
+}
+:root.design-terminal .app-nav-link-active,
+:root.design-terminal .app-bottom-nav-link-active {
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  text-shadow: none;
+}
+:root.design-terminal input:not([type='checkbox']):not([type='radio']):not([type='range']),
+:root.design-terminal textarea,
+:root.design-terminal select {
+  background: color-mix(in oklab, var(--color-card) 72%, transparent);
+  border-color: var(--color-border);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-primary) 20%, transparent);
 }
 /* @eikon:variant(design=terminal) end */
 
@@ -3259,6 +3628,52 @@
   --color-sidebar-border: oklch(0.3 0 0);
   --scrollbar-thumb: oklch(0.4 0 0);
   --scrollbar-thumb-hover: oklch(0.6 0 0);
+}
+:root.design-editorial body {
+  background-image:
+    linear-gradient(180deg, transparent 0 31px, color-mix(in oklab, var(--color-border) 26%, transparent) 31px 32px);
+  background-size: 100% 32px;
+}
+:root.design-editorial .app-nav-shell,
+:root.design-editorial .app-dropdown-trigger,
+:root.design-editorial .app-dropdown-content {
+  background: var(--color-sidebar);
+  border-color: var(--color-sidebar-border);
+  box-shadow: 0 1px 0 var(--color-border);
+}
+:root.design-editorial .app-nav-link,
+:root.design-editorial .app-nav-action,
+:root.design-editorial .app-bottom-nav-link,
+:root.design-editorial button,
+:root.design-editorial a[role='button'],
+:root.design-editorial [role='button'] {
+  border-radius: var(--radius-sm);
+}
+:root.design-editorial .app-nav-link:hover,
+:root.design-editorial .app-nav-action:hover,
+:root.design-editorial .app-bottom-nav-link:hover,
+:root.design-editorial button.bg-transparent:hover,
+:root.design-editorial a.bg-transparent:hover {
+  opacity: 1;
+  background: var(--color-accent);
+  color: var(--color-foreground);
+}
+:root.design-editorial .app-nav-link-active,
+:root.design-editorial .app-bottom-nav-link-active {
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+:root.design-editorial .app-badge {
+  border-radius: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+:root.design-editorial input:not([type='checkbox']):not([type='radio']):not([type='range']),
+:root.design-editorial textarea,
+:root.design-editorial select {
+  border-radius: 0;
+  border-color: var(--color-border);
+  box-shadow: inset 0 -1px 0 var(--color-foreground);
 }
 /* @eikon:variant(design=editorial) end */
 
