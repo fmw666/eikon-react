@@ -1,0 +1,45 @@
+{
+  "schema_version": 2,
+  "scans": [
+    {
+      "date": "2026-06-04T00:00:00Z",
+      "mode": "full",
+      "skill_version": "3.0.0",
+      "total": 86,
+      "level": "EXCELLENT",
+      "total_loc": 56369,
+      "total_files": 359,
+      "project_scale": "LARGE",
+      "monorepo_packages": ["template-react", "preview-site", "create-eikon-react"],
+      "refactoring_risk": 17,
+      "refactoring_risk_level": "LOW",
+      "ai_extension_risk": 13,
+      "ai_extension_risk_level": "MINIMAL",
+      "perf_debt_signals": 12,
+      "prohibition_count": 0,
+      "context_artifact_score": 9,
+      "dimensions": {
+        "module_srp": 6,
+        "pattern_consistency": 13,
+        "type_safety_contracts": 11,
+        "test_coverage_invariants": 12,
+        "ai_context_artifacts": 9,
+        "architecture": 8,
+        "dependency_health": 7,
+        "prohibition_density": 4,
+        "naming": 6,
+        "duplication": 4,
+        "determinism": 3,
+        "security_tooling": 3
+      },
+      "top_issues": [
+        "preview-site god files (PreviewFrame 938L, Footer 895L, builder 840L)",
+        "19 non-test files >4000 tokens",
+        "no grep-verifiable prohibition catalog (0 PR-NNN / backticked-pattern rules)",
+        "no root-level AGENTS.md for monorepo contributors",
+        "no coverage report emitted in CI"
+      ],
+      "notes": "First scan. madge/knip/jscpd could not execute (npx broken under nvm4w on Windows; pnpm audit endpoint is a China mirror without audit support). Circular-dep and dead-code scores rest on the 12 structural scan tests + eslint import/no-restricted-paths evidence. .preview-cache/ (5 full template copies, gitignored build artifact) excluded from all counts."
+    }
+  ]
+}
