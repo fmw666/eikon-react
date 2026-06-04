@@ -652,3 +652,275 @@
   );
   opacity: 0.25;
 }
+
+/* ==================================================================
+ * Playground chrome — unified toolbar control language
+ *
+ * The strip above the device mirror (Files toggle · device Size ·
+ * route quick-jumps · Reload) was previously a pile of ad-hoc inline
+ * styles with *no* hover / active / focus feedback. We unify it here
+ * into one "control" vocabulary so every affordance shares the same
+ * pill geometry, silk hover-lift, brand-accent pressed state, and
+ * keyboard focus ring — the same physical-depth language used by the
+ * params-sentence slots and the rest of the slate/ink system.
+ *
+ *   --eikon-silk : local alias so this block reads cleanly. Falls
+ *                  back to the Material emphasised curve if sidebar.css
+ *                  (which declares --ease-silk on :root) ever changes.
+ * ================================================================== */
+
+.eikon-tb {
+  --eikon-silk: var(--ease-silk, cubic-bezier(0.16, 1, 0.3, 1));
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  row-gap: 6px;
+  padding: 7px 12px;
+  background: color-mix(in srgb, var(--surface-2) 72%, transparent);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  color: var(--fg-2);
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(to right, transparent, var(--border-2), transparent) 1;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 12px;
+}
+
+/* Eyebrow labels ("SIZE", "GO TO"). */
+.eikon-tb-label {
+  color: var(--fg-4);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* Thin vertical divider between control clusters. */
+.eikon-tb-div {
+  width: 1px;
+  height: 16px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--border-2) 25%,
+    var(--border-2) 75%,
+    transparent
+  );
+  margin: 0 3px;
+}
+
+/* ── Base pill control (Files, Reload) ──────────────────────────── */
+.eikon-tb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 7px;
+  border: 1px solid var(--border-1);
+  background: color-mix(in srgb, var(--surface-1) 55%, transparent);
+  color: var(--fg-2);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05);
+  transition:
+    background-color 240ms var(--eikon-silk),
+    border-color 240ms var(--eikon-silk),
+    color 240ms var(--eikon-silk),
+    box-shadow 240ms var(--eikon-silk),
+    transform 240ms var(--eikon-silk);
+}
+
+@media (hover: hover) {
+  .eikon-tb-btn:hover {
+    color: var(--fg-1);
+    border-color: var(--border-2);
+    background: var(--surface-2);
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.08),
+      0 4px 12px -5px var(--accent-glow);
+  }
+}
+
+.eikon-tb-btn:active {
+  transform: translateY(0);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.12);
+}
+
+.eikon-tb-btn:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--color-brand-400, oklch(0.75 0.05 235)) 60%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-brand-400, oklch(0.75 0.05 235)) 35%, transparent);
+}
+
+/* Pressed / on (Files panel open). */
+.eikon-tb-btn[data-active] {
+  color: var(--color-brand-300, #cbd5e1);
+  border-color: color-mix(in srgb, var(--color-brand-400, oklch(0.75 0.05 235)) 42%, var(--border-1));
+  background: color-mix(in srgb, var(--color-brand-400, oklch(0.75 0.05 235)) 12%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 2px 10px -4px var(--accent-glow);
+}
+
+/* Icon-only square variant (Reload on the desktop strip stays a
+   labelled pill; this is here for the compact toolbar's 28px square). */
+.eikon-tb-icon-btn {
+  width: 28px;
+  padding: 0;
+  justify-content: center;
+}
+
+/* ── Segmented control (device Size) ────────────────────────────── */
+.eikon-tb-seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  border: 1px solid var(--border-1);
+  background: color-mix(in srgb, var(--surface-0) 45%, transparent);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.06);
+}
+
+.eikon-tb-seg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 23px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg-3);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 220ms var(--eikon-silk),
+    color 220ms var(--eikon-silk),
+    box-shadow 220ms var(--eikon-silk);
+}
+
+@media (hover: hover) {
+  .eikon-tb-seg-btn:hover {
+    color: var(--fg-1);
+  }
+}
+
+.eikon-tb-seg-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-brand-400, oklch(0.75 0.05 235)) 40%, transparent);
+}
+
+.eikon-tb-seg-btn[data-active] {
+  color: var(--color-brand-300, #cbd5e1);
+  font-weight: 600;
+  background: var(--surface-3);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    0 1px 3px rgb(0 0 0 / 0.18),
+    0 0 10px -3px var(--accent-glow);
+}
+
+/* ── Route quick-jump cluster ───────────────────────────────────── */
+/* Wrapped in one bordered "navigator" tray so the six jumps read as a
+   single grouped control rather than a loose row of buttons. */
+.eikon-tb-routes {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 9px;
+  border: 1px solid var(--border-1);
+  background: color-mix(in srgb, var(--surface-0) 40%, transparent);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.05);
+}
+
+.eikon-tb-route {
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg-3);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 200ms var(--eikon-silk),
+    color 200ms var(--eikon-silk),
+    border-color 200ms var(--eikon-silk),
+    transform 200ms var(--eikon-silk);
+}
+
+@media (hover: hover) {
+  .eikon-tb-route:hover {
+    color: var(--fg-1);
+    background: var(--surface-2);
+    transform: translateY(-1px);
+  }
+}
+
+.eikon-tb-route:active {
+  transform: translateY(0);
+}
+
+.eikon-tb-route:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--color-brand-400, oklch(0.75 0.05 235)) 55%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-brand-400, oklch(0.75 0.05 235)) 30%, transparent);
+}
+
+/* Showcase routes (Examples / Performance) — amber accent preserves
+   the existing "dev-only value-add route" semantic. */
+.eikon-tb-route[data-accent='amber'] {
+  color: #f59e0b;
+}
+
+@media (hover: hover) {
+  .eikon-tb-route[data-accent='amber']:hover {
+    color: #fbbf24;
+    background: rgb(245 158 11 / 0.1);
+  }
+}
+
+/* ── Reload spin-on-click ───────────────────────────────────────── */
+@keyframes eikon-tb-reload-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.eikon-tb-reload-glyph {
+  display: inline-flex;
+  transform-origin: center;
+}
+
+.eikon-tb-reload-glyph[data-spinning='true'] {
+  animation: eikon-tb-reload-spin 600ms var(--eikon-silk, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-tb-btn,
+  .eikon-tb-seg-btn,
+  .eikon-tb-route {
+    transition: none;
+  }
+  .eikon-tb-btn:hover,
+  .eikon-tb-route:hover {
+    transform: none;
+  }
+  .eikon-tb-reload-glyph[data-spinning='true'] {
+    animation: none;
+  }
+}

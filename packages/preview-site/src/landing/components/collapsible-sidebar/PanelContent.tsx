@@ -1,7 +1,7 @@
 import { useI18n } from '../../theme/i18n';
 import type { SidebarController } from '../../hooks/useSidebarMode';
 import type { SidebarSectionSpec } from './types';
-import { SlidersIcon, PinIcon, ChevronLeftIcon, CloseIcon } from './icons';
+import { PinIcon, ChevronLeftIcon, CloseIcon } from './icons';
 import { SidebarSection } from './MobileSidebar';
 
 /* ============================================================
@@ -25,10 +25,9 @@ export function PanelContent({ controller, sections, floating }: PanelContentPro
 
   return (
     <>
-      <div className="relative flex items-center justify-between gap-2 px-4 py-3 lg:px-5">
+      <div className="relative flex items-center justify-between gap-2 bg-gradient-to-b from-[var(--surface-1)]/40 to-transparent px-4 py-3 lg:px-5">
         <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--fg-3)]">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-400/60 shadow-[0_0_6px_var(--accent-glow)]" />
-          <SlidersIcon className="h-3.5 w-3.5" />
+          <span className="eikon-pulse-glow inline-block h-1.5 w-1.5 rounded-full bg-brand-400/70 shadow-[0_0_8px_var(--accent-glow)]" />
           <span>{t('sidebar.controlsLabel')}</span>
         </div>
         <div className="flex items-center gap-1">

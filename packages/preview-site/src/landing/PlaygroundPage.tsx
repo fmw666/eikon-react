@@ -93,6 +93,9 @@ export default function PlaygroundPage() {
             id: 'playground-target',
             title: t('playgroundPage.targetTitle'),
             icon: <TargetIcon className="h-5 w-5" />,
+            // Suppress the title-row icon (matches the params/prompt
+            // sections) — keeps the section heading clean text-only.
+            hideFromRail: true,
             children: <PlatformPicker compact />,
             // Open on mobile — the platform picker is the lightest
             // of the three sections (3 stacked rows) and orients
