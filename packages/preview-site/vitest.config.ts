@@ -24,5 +24,16 @@ export default defineConfig({
       '__tests__/**/*.{test,spec}.{ts,tsx}',
     ],
     css: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      include: ['src/**/*.{ts,tsx}', 'server/**/*.ts'],
+      exclude: [
+        'src/**/*.d.ts',
+        'src/**/__tests__/**',
+        'server/**/__tests__/**',
+        'src/main.tsx',
+      ],
+    },
   },
 });

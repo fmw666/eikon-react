@@ -1,139 +1,57 @@
-import { readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+/**
+ * @file strip-features.ts
+ * @description Orchestrates the template strip: walk the project tree, delete
+ * feature-/variant-owned files and directories, and run the marker engine over
+ * every text file. The supporting pieces were split into focused modules so
+ * this file reads as the pipeline:
+ *   - marker grammar + block strip → `markers.ts`
+ *   - binary detection            → `binary-detect.ts`
+ *   - dependency/script/dir prune → `prune.ts`
+ *   - shared types                → `variant-types.ts`
+ * Every public name those modules expose is re-exported here so existing
+ * `from './strip-features'` imports (CLI, preview server, tests) are unchanged.
+ */
+
+import { readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import {
+  DEFAULT_VARIANTS,
+  type StripOptions,
+  type VariantSelections,
+} from './variant-types';
+import {
+  BLOCK_RE,
+  FILE_MARKER_RE,
+  VARIANT_FILE_MARKER_RE,
+  stripBlocksForFeature,
+  stripBlocksForVariant,
+} from './markers';
+import { isBinary } from './binary-detect';
+import {
+  PACKAGE_DEPS_BY_FEATURE,
+  PLATFORM_ONLY_ROOT_FILES,
+  PLATFORM_SCRIPTS,
+  pruneDependencies,
+  pruneEmptyAppsDir,
+  prunePackageScripts,
+  prunePlatformOnlyRootFiles,
+} from './prune';
+
+// Re-export the shared types/values so `from './strip-features'` keeps working.
+export { DEFAULT_VARIANTS };
+export type { StripOptions, VariantSelections };
+
+/**
+ * Feature flags the scaffolder knows about. Kept defined here (rather than in
+ * `variant-types.ts`) as the single source of truth: the `feature-parity`
+ * drift test reads this interface from this file's source, and only this
+ * module consumes it. Adding a field requires a matching
+ * `PACKAGE_DEPS_BY_FEATURE` entry (if it strips deps) and a `resolveFeatures`
+ * assignment in `index.ts` — both enforced by `feature-parity.test.ts`.
+ */
 export interface FeatureFlags {
   supabase: boolean;
-}
-
-/**
- * Variant selections — one value per axis (design / layout / ui). The schema
- * is intentionally open (`Record<string, string>`) so new axes can be added
- * here without touching strip-features beyond the marker grammar.
- */
-export type VariantSelections = Record<string, string>;
-
-export const DEFAULT_VARIANTS: VariantSelections = {
-  platform: 'web',
-  design: 'default',
-  layout: 'stacked',
-  ui: 'animate-ui',
-  toastPosition: 'top-right',
-};
-
-/**
- * Comment markers used inside template source files to delimit optional code.
- *
- *   // @eikon:feature(name) begin
- *   …code…
- *   // @eikon:feature(name) end
- *
- * Or for whole-file ownership (MUST be the very first line of the file — see
- * FILE_MARKER_RE below):
- *
- *   // @eikon:feature(name) file
- *
- * The leading slashes may be preceded by `{/*`, JSX `{/*` style, or `<!--` for
- * env files; we treat them all as line-level markers and just match the token.
- */
-// IMPORTANT — the `\\*\\/\\}?` shape (no whitespace between `*/` and the
-// optional `}`) is load-bearing. Earlier iterations used `\\*\\/\\s*\\}?`
-// which made the closing-brace optional even across newlines. That
-// silently swallowed the `@theme {…}` close brace whenever a marker block
-// sat next to it (e.g. when stripping `--touch-target-min` from
-// `src/styles/index.css`), turning the next `}` into part of the marker
-// match. JSX-style `{/* … */}` keeps `*/}` adjacent, so requiring
-// adjacency is also semantically correct — never reintroduce `\\s*` here.
-const BLOCK_RE =
-  /[ \t]*(?:\/\/|\/\*|\{\/\*|#|<!--)\s*@eikon:feature\(([^)]+)\)\s*begin\s*(?:\*\/\}?|-->)?[ \t]*\r?\n?/g;
-const BLOCK_END_RE_SRC =
-  '[ \\t]*(?:\\/\\/|\\/\\*|\\{\\/\\*|#|<!--)\\s*@eikon:feature\\(NAME\\)\\s*end\\s*(?:\\*\\/\\}?|-->)?[ \\t]*\\r?\\n?';
-// File-level markers are only honoured on the FIRST LINE of the file. This is
-// the convention used by every real consumer in the template (see
-// `src/shared/supabase/client.ts:1`, …) and the
-// constraint is load-bearing: without it, any documentation file that quotes
-// the marker as a literal — like `.agent/skills/enable-supabase/SKILL.md` —
-// gets silently deleted whenever the corresponding feature is stripped.
-// The regex is intentionally NOT multiline (`m` flag) so `^` anchors to
-// string start, not line start.
-const FILE_MARKER_RE =
-  /^[ \t]*(?:\/\/|\/\*|\{\/\*|#|<!--)\s*@eikon:feature\(([^)]+)\)\s*file[^\n]*/;
-
-/**
- * Variant grammar — same comment shapes as features but with an `axis=value`
- * payload. Examples (axis/value names below are illustrative; this module
- * is unaware of which axis/value pairs are valid — that knowledge lives in
- * `VARIANT_CHOICES` in `index.ts`):
- *
- *   // @eikon:variant(design=<value>) begin
- *   …kept only when design === '<value>'…
- *   // @eikon:variant(design=<value>) end
- *
- *   // @eikon:variant(layout=sidebar) file
- *   …whole file kept only when layout === 'sidebar'…
- *
- * Same first-line constraint as FILE_MARKER_RE — see comment above for why.
- */
-const VARIANT_FILE_MARKER_RE =
-  /^[ \t]*(?:\/\/|\/\*|\{\/\*|#|<!--)\s*@eikon:variant\(([^=)]+)=([^)]+)\)\s*file[^\n]*/;
-
-const PACKAGE_DEPS_BY_FEATURE: Record<string, string[]> = {
-  supabase: ['@supabase/supabase-js'],
-  // TanStack Query (`@tanstack/react-query`) is treated as baseline
-  // infrastructure alongside React / React Router / i18next — every
-  // scaffold ships with it. If a future template strips it, its deps
-  // would go here.
-  //
-  // `examples` used to live here (pruning `web-vitals` /
-  // `@tanstack/react-virtual` / `cmdk`), but the showcase is now shipped
-  // unconditionally — the runtime `import.meta.env.DEV` gate in
-  // `app/router.tsx` keeps the routes out of production bundles, so end
-  // users carry the source but pay nothing in their built app.
-};
-
-/**
- * Optional knobs that bypass the default strip behaviour.
- *
- * All of these knobs exist for the in-repo preview playground; every other
- * caller (the CLI, the e2e suite) leaves them at their defaults so
- * end-user projects get the fully-stripped tree.
- *
- *   - `keepAllVariantFiles`: skip the `@eikon:variant(<axis>=<value>) file`
- *     first-line strip so every variant sibling stays on disk (all 4
- *     `*RootLayout.tsx`, …). Block-level variant markers still apply,
- *     so dispatchers like `app/layouts/RootLayout.tsx` continue to
- *     narrow to the user's chosen value — variant selection in the
- *     playground still drives the rendered global UI.
- *
- *   - `keepShells`: keep the `apps/desktop/` (Tauri) and `apps/mobile/`
- *     (Capacitor) directories regardless of the chosen platform, and
- *     skip the `prunePackageScripts` pass that drops the `tauri:*` /
- *     `cap:*` scripts from `package.json`. The preview playground never
- *     runs Tauri/Capacitor itself (it only does a Vite web build), so
- *     the shell directories are inert — we keep them so the same cache
- *     entry can serve every platform without rebuilding the directory
- *     tree, and so the playground's "View source" panel can show users
- *     what the shells look like.
- *
- *   - `keepAllVariants`: a list of axis names whose block-level AND
- *     file-level variant markers should be skipped. Used by the preview
- *     playground for axes the template handles at *runtime* —
- *     `design` / `ui` (CSS class), `layout` (React Context),
- *     `toastPosition` (component state). For those axes the playground
- *     wants every value's source to coexist in the build so the iframe
- *     can switch with no rebuild; the template's own runtime dispatch
- *     picks one. CLI users pass nothing → every axis is stripped to
- *     the chosen value, exactly as before.
- *
- *     `platform` is intentionally NOT runtime-switchable — its blocks
- *     gate things like the `apple-mobile-web-app-capable` meta tag
- *     and `--touch-target-min` token that aren't safe to coexist —
- *     so callers pass `['design','ui','layout','toastPosition']`
- *     rather than a blanket boolean.
- */
-export interface StripOptions {
-  keepAllVariantFiles?: boolean;
-  keepShells?: boolean;
-  keepAllVariants?: ReadonlyArray<string>;
 }
 
 /**
@@ -182,26 +100,6 @@ export async function stripFeatures(
     // and `pnpm-workspace.yaml` is dropped on web — so an orphan empty
     // `apps/` would be both ugly and a structural-test failure.
     await pruneEmptyAppsDir(root);
-  }
-}
-
-/**
- * Remove the `apps/` parent directory if (and only if) it's empty
- * after the shell-level deletes. We don't recurse on purpose: any
- * surviving entry inside `apps/` means the user opted into a
- * platform that needs the directory, and removing it would break
- * their build.
- */
-async function pruneEmptyAppsDir(root: string): Promise<void> {
-  const apps = path.join(root, 'apps');
-  let entries: string[];
-  try {
-    entries = await readdir(apps);
-  } catch {
-    return; // apps/ doesn't exist — nothing to do.
-  }
-  if (entries.length === 0) {
-    await rm(apps, { recursive: true, force: true });
   }
 }
 
@@ -397,348 +295,21 @@ async function stripFile(
   }
 }
 
-/**
- * Cache compiled regexes by feature name. The cost of `new RegExp(...)` is
- * small in absolute terms, but `stripFeatures` calls this once per
- * `(file × disabled-feature)` — without caching, a ~60 file template with
- * one disabled feature recompiles the same regex 60 times. Module-level
- * cache means one compile per feature per CLI run.
- */
-const featureRegexCache = new Map<string, RegExp>();
-
-function regexForFeature(feature: string): RegExp {
-  let re = featureRegexCache.get(feature);
-  if (re) return re;
-  const escaped = feature.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  // See header comment on BLOCK_RE — `\\*\\/\\}?` (no whitespace) is
-  // load-bearing; do not reintroduce `\\s*` between `*/` and `\\}?`.
-  const beginPart =
-    '[ \\t]*(?:\\/\\/|\\/\\*|\\{\\/\\*|#|<!--)\\s*@eikon:feature\\(' +
-    escaped +
-    '\\)\\s*begin\\s*(?:\\*\\/\\}?|-->)?[ \\t]*\\r?\\n?';
-  const endPart = BLOCK_END_RE_SRC.replace('NAME', escaped);
-  re = new RegExp(beginPart + '[\\s\\S]*?' + endPart, 'g');
-  featureRegexCache.set(feature, re);
-  return re;
-}
-
-function stripBlocksForFeature(input: string, feature: string): string {
-  // Stateful flag (`g`) means we must reset lastIndex between calls; using
-  // `String.prototype.replace` with a global regex already does the right
-  // thing (it ignores lastIndex), so caching the compiled regex is safe.
-  return input.replace(regexForFeature(feature), '');
-}
-
-/**
- * Cache regex by axis name. The regex captures the value via a group, so
- * a single compiled regex per axis serves every keepValue selection.
- */
-const variantRegexCache = new Map<string, RegExp>();
-
-function regexForVariantAxis(axis: string): RegExp {
-  let re = variantRegexCache.get(axis);
-  if (re) return re;
-  const escAxis = axis.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  // See header comment on BLOCK_RE — `\\*\\/\\}?` (no whitespace) is
-  // load-bearing; do not reintroduce `\\s*` between `*/` and `\\}?`.
-  // The CSS regression that motivated this: a `/* @eikon:variant(...)
-  // end */` line inside `@theme { ... }` would, with `\\s*\\}?`,
-  // greedy-eat the next-line `}` along with the marker, breaking
-  // brace balance for the Tailwind v4 parser.
-  const beginPart =
-    '[ \\t]*(?:\\/\\/|\\/\\*|\\{\\/\\*|#|<!--)\\s*@eikon:variant\\(' +
-    escAxis +
-    '=([^)]+)\\)\\s*begin\\s*(?:\\*\\/\\}?|-->)?[ \\t]*\\r?\\n?';
-  const endPart =
-    '[ \\t]*(?:\\/\\/|\\/\\*|\\{\\/\\*|#|<!--)\\s*@eikon:variant\\(' +
-    escAxis +
-    '=\\1\\)\\s*end\\s*(?:\\*\\/\\}?|-->)?[ \\t]*\\r?\\n?';
-  re = new RegExp(beginPart + '[\\s\\S]*?' + endPart, 'g');
-  variantRegexCache.set(axis, re);
-  return re;
-}
-
-/**
- * Drop every `@eikon:variant(<axis>=<other-value>)` block where the value
- * does NOT match `keepValue`. Blocks for `keepValue` are left as-is (marker
- * comments included), mirroring how stripBlocksForFeature treats kept
- * features.
- */
-function stripBlocksForVariant(
-  input: string,
-  axis: string,
-  keepValue: string
-): string {
-  // The closing-marker pattern uses a `\1` back-reference so a single
-  // regex pass correctly pairs `begin` with the matching `end` for the
-  // SAME variant value. Capture group 1 is `([^)]+)` — the variant
-  // value (e.g. `mobile-drawer`). Adding any capture group BEFORE this
-  // point will shift `\1` to a different group and silently mis-pair
-  // markers, leaving dead text behind. If you must add a group, use a
-  // non-capturing group `(?:...)` or update `\1` to the new index.
-  return input.replace(regexForVariantAxis(axis), (match, value: string) =>
-    value === keepValue ? match : ''
-  );
-}
-
-async function isBinary(file: string): Promise<boolean> {
-  try {
-    const st = await stat(file);
-    if (st.size > 5 * 1024 * 1024) return true;
-  } catch {
-    return true;
-  }
-  const ext = path.extname(file).toLowerCase();
-  if (BINARY_EXTENSIONS.has(ext)) return true;
-  if (TEXT_EXTENSIONS.has(ext)) return false;
-  // Unknown extension — fall back to magic-byte sniffing so a `.bin`
-  // checked in by mistake doesn't get treated as text and a
-  // text-disguised-as-other-extension still gets stripped. Reading 512
-  // bytes is cheap and only happens for the long-tail of unknown
-  // extensions, not the bulk of `.ts/.tsx/.css/.md` files.
-  return await magicByteIsBinary(file);
-}
-
-const BINARY_EXTENSIONS: ReadonlySet<string> = new Set([
-  '.png',
-  '.jpg',
-  '.jpeg',
-  '.gif',
-  '.webp',
-  '.avif',
-  '.ico',
-  '.icns',
-  '.bmp',
-  '.woff',
-  '.woff2',
-  '.ttf',
-  '.otf',
-  '.eot',
-  '.zip',
-  '.tar',
-  '.gz',
-  '.7z',
-  '.mp3',
-  '.mp4',
-  '.mov',
-  '.webm',
-  '.pdf',
-  '.wasm',
-]);
-
-const TEXT_EXTENSIONS: ReadonlySet<string> = new Set([
-  '.ts',
-  '.tsx',
-  '.js',
-  '.jsx',
-  '.mjs',
-  '.cjs',
-  '.json',
-  '.md',
-  '.mdx',
-  '.css',
-  '.scss',
-  '.html',
-  '.svg',
-  '.toml',
-  '.yaml',
-  '.yml',
-  '.txt',
-  '.rs',
-  '.sh',
-  '.gitignore',
-]);
-
-async function magicByteIsBinary(file: string): Promise<boolean> {
-  const { open } = await import('node:fs/promises');
-  let fh: Awaited<ReturnType<typeof open>> | null = null;
-  try {
-    fh = await open(file, 'r');
-    const buf = Buffer.alloc(512);
-    const { bytesRead } = await fh.read(buf, 0, 512, 0);
-    if (bytesRead === 0) return false; // empty file is text
-    let nonPrintable = 0;
-    for (let i = 0; i < bytesRead; i++) {
-      const b = buf[i]!;
-      if (b === 0) return true; // any null byte → definitely binary
-      // Printable ASCII range + common whitespace (\t \n \r).
-      const printable = (b >= 0x20 && b < 0x7f) || b === 0x09 || b === 0x0a || b === 0x0d;
-      if (!printable) nonPrintable++;
-    }
-    return nonPrintable / bytesRead > 0.3;
-  } catch {
-    return true;
-  } finally {
-    await fh?.close();
-  }
-}
-
-async function pruneDependencies(
-  root: string,
-  disabled: ReadonlySet<string>
-): Promise<void> {
-  const pkgPath = path.join(root, 'package.json');
-  const raw = await readFile(pkgPath, 'utf8');
-  const pkg = JSON.parse(raw) as {
-    dependencies?: Record<string, string>;
-    devDependencies?: Record<string, string>;
-  };
-
-  const toRemove = new Set<string>();
-  for (const feature of disabled) {
-    for (const dep of PACKAGE_DEPS_BY_FEATURE[feature] ?? []) {
-      toRemove.add(dep);
-    }
-  }
-
-  if (toRemove.size === 0) return;
-
-  for (const section of ['dependencies', 'devDependencies'] as const) {
-    const map = pkg[section];
-    if (!map) continue;
-    for (const dep of toRemove) delete map[dep];
-  }
-
-  await writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
-}
-
-/**
- * Platform-keyed script tags. The root `package.json` ships every
- * scaffold-time script in one block (so the unstripped template tree
- * passes lint / typecheck / `pnpm install` on its own); on strip we drop
- * the scripts whose tag doesn't match the chosen platform. Maintained
- * here rather than as JSON5 comments inside `package.json` because
- * standard JSON doesn't accept comments and we don't want to fork to
- * JSON5 just for one axis.
- *
- * The map is hard-coded; new platforms just add a key. The CLI's
- * `VARIANT_CHOICES.platform` and the playground schema's
- * `platform.values` must stay in sync with this map's keys (verified by
- * the platform e2e scenarios).
- */
-const PLATFORM_SCRIPTS: Record<string, readonly string[]> = {
-  desktop: ['tauri', 'tauri:dev', 'tauri:build'],
-  mobile: [
-    'cap',
-    'cap:sync',
-    'cap:add:ios',
-    'cap:add:android',
-    'cap:open:ios',
-    'cap:open:android',
-    'cap:run:ios',
-    'cap:run:android',
-  ],
-  web: [],
-};
-
-/**
- * Drop platform-specific scripts from the root `package.json` whose tag
- * doesn't match the chosen platform. Runs as a final pass after the
- * file-tree walk; safe to call when no platform is set (no-op).
- *
- * Exported so unit tests can run it on a fixture `package.json`
- * directly without spinning up the whole strip pipeline.
- */
-export async function prunePackageScripts(
-  root: string,
-  variants: VariantSelections
-): Promise<void> {
-  const platform = variants['platform'];
-  if (!platform) return;
-  const pkgPath = path.join(root, 'package.json');
-  let raw: string;
-  try {
-    raw = await readFile(pkgPath, 'utf8');
-  } catch {
-    return; // No package.json at root — nothing to do (e.g. apps/* sub-roots).
-  }
-  const pkg = JSON.parse(raw) as { scripts?: Record<string, string> };
-  if (!pkg.scripts) return;
-
-  const toDrop = new Set<string>();
-  for (const [tag, scripts] of Object.entries(PLATFORM_SCRIPTS)) {
-    if (tag === platform) continue;
-    for (const s of scripts) toDrop.add(s);
-  }
-  if (toDrop.size === 0) return;
-
-  let changed = false;
-  for (const key of toDrop) {
-    if (key in pkg.scripts) {
-      delete pkg.scripts[key];
-      changed = true;
-    }
-  }
-  if (!changed) return;
-  await writeFile(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
-}
-
-/**
- * Root-level files that are tied to a specific platform and have no
- * comment syntax, so they can't carry an inline marker. Each entry is
- * pruned when the chosen platform is NOT in the entry's keep-set.
- *
- * `pnpm-workspace.yaml`: declares `apps/*` as workspace packages so the
- *   root `tauri:*` / `cap:*` scripts can do `pnpm --filter ./apps/...`.
- *   On `--platform web` the entire `apps/` directory is removed by the
- *   directory walk above and the workspace filters are dropped by
- *   `prunePackageScripts`, so the workspace declaration becomes inert.
- *   Removing the file keeps the scaffold strictly single-package and
- *   leaves the user free to opt into a workspace later (recreate the
- *   file, add a `packages/` glob, etc.).
- *
- * Maintained as a small inline table rather than a comment-marker
- * approach because YAML accepts `#` comments but the file is small
- * enough that a whole-file delete is simpler than block stripping.
- */
-const PLATFORM_ONLY_ROOT_FILES: ReadonlyArray<{
-  readonly path: string;
-  readonly keepFor: ReadonlyArray<string>;
-}> = [
-  {
-    path: 'pnpm-workspace.yaml',
-    keepFor: ['desktop', 'mobile'],
-  },
-];
-
-/**
- * Delete platform-only root files when the chosen platform isn't in the
- * file's keep-set. No-op when `variants.platform` is missing (preserves
- * backward compat with feature-only callers).
- *
- * Exported for unit tests; CLI / e2e callers reach it via `stripFeatures`.
- */
-export async function prunePlatformOnlyRootFiles(
-  root: string,
-  variants: VariantSelections
-): Promise<void> {
-  const platform = variants['platform'];
-  if (!platform) return;
-  for (const entry of PLATFORM_ONLY_ROOT_FILES) {
-    if (entry.keepFor.includes(platform)) continue;
-    const target = path.join(root, entry.path);
-    await rm(target, { force: true });
-  }
-}
+// ---------------------------------------------------------------------------
+// Backward-compatible re-exports
+// ---------------------------------------------------------------------------
 
 // Re-export for potential reuse in tests.
 export { stripBlocksForFeature, stripBlocksForVariant, runWithConcurrency };
 // Reference exported helpers so unused-export lints don't trigger.
 export const __BLOCK_RE_FOR_TESTS = BLOCK_RE;
 
-// ---------------------------------------------------------------------------
-// Pure helpers exposed for the preview server's `simulate-strip.ts`.
-//
-// `simulateStrip()` (in preview-site) needs to produce, *per request and
-// without writing to disk*, the file tree + per-file content the CLI
-// would generate for a given (flags, variants) tuple. Re-implementing the
-// rules over there would drift; instead the pure pieces of the rule set
-// live here and the simulator composes them.
-//
-// Importantly: these are also load-bearing for CLI users (the regexes
-// power `stripFile`), so any breaking edit here is caught by CLI strip
-// tests and the playground drift test (Phase J) in lock-step.
-// ---------------------------------------------------------------------------
+// Marker regexes + prune passes, re-exposed for the preview server's
+// `simulate-strip.ts` and for unit tests. Importantly: these are
+// load-bearing for CLI users too (the regexes power `stripFile`), so any
+// breaking edit is caught by CLI strip tests and the playground drift test
+// (Phase J) in lock-step.
+export { prunePackageScripts, prunePlatformOnlyRootFiles };
 
 export const FEATURE_FILE_MARKER_RE = FILE_MARKER_RE;
 export const VARIANT_FILE_MARKER = VARIANT_FILE_MARKER_RE;

@@ -1,409 +1,22 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
-import { type ParamsStore } from '@/lib/params-store';
-
-import { DeviceShell, type DevicePlatform } from './device-shell';
-import { MOBILE_SCREEN, DESKTOP_SCREEN, PHONE_GEOMETRY } from './device-shell/types';
-import { TITLE_BAR_HEIGHT } from './device-shell/DesktopShell';
-import { CHROME_TAB_BAR_HEIGHT, CHROME_TOOLBAR_HEIGHT } from './device-shell/WebShell';
+import { DeviceShell } from './device-shell';
 import { useShellStore, useUiStore } from './store';
-import type { FrameSize } from './store';
 
-type BuildStatus = 'ready' | 'building' | 'error';
-
-interface BuildState {
-  hash: string;
-  status: BuildStatus;
-  error?: string;
-}
-
-interface BuildInputs {
-  platform: string;
-  supabase: boolean;
-  pm: string;
-  design: string;
-  layout: string;
-  ui: string;
-  toastPosition: string;
-}
-
-/**
- * Runtime playground snapshot. Holds the axes the running iframe actually
- * consumes via postMessage — `design` / `ui` (CSS class on `<html>`),
- * `layout` (LayoutVariantContext), `toastPosition` (Toaster).
- *
- * `platform` doesn't live here either: platform-specific behaviour is
- * gated at scaffold time by `@eikon:variant(platform=…)` strip markers
- * (see `90-platform-targets.md`). For the playground we keep all
- * platform variants alive in a single max-capability shell via
- * `keepAllVariants`, and the device chrome (web / desktop / mobile) is
- * driven by a separate shell-side store selector — there's no class /
- * data attribute to push into the iframe.
- *
- * `pm` and `supabase` similarly don't ride this channel — they only
- * drive the file-tree / package.json simulator endpoints, which
- * subscribe to the store directly from CodeView / FileExplorer.
- */
-interface RuntimeVariantInputs {
-  design: string;
-  ui: string;
-  layout: string;
-  toastPosition: string;
-}
-
-/**
- * Static portion of the build inputs. Every axis here is either runtime
- * (design / layout / toastPosition flow through postMessage on the
- * already-built bundle) or shell-only (platform / supabase / pm don't
- * affect the iframe bundle — they drive simulator endpoints / chrome).
- *
- * `ui` is the exception: post-Phase J it bakes different `src/shared/ui/*`
- * snapshots into the bundle, so cycling it MUST trigger a fresh
- * `/api/build`. We keep it out of this constant and pull it from the
- * store inside the component.
- */
-const PREVIEW_BUILD_INPUTS_BASE = {
-  platform: 'web',
-  supabase: true,
-  pm: 'pnpm',
-  design: 'default',
-  layout: 'stacked',
-  toastPosition: 'top-right',
-} as const;
-
-const KNOWN_PLATFORMS: ReadonlySet<DevicePlatform> = new Set([
-  'web',
-  'desktop',
-  'mobile',
-]);
-
-const SCROLLBAR_STYLE_ID = 'eikon-device-scrollbar';
-
-function getDeviceScrollbarCSS(platform: DevicePlatform): string {
-  // `overscroll-behavior: contain` stops the iframe's wheel/touch scrolls
-  // from chaining into the playground page once the inner document hits
-  // a boundary. Without it, scrolling to the bottom of any preview route
-  // (e.g. /examples/*) would silently start scrolling the workbench /
-  // landing page underneath — see the comment thread on this regression.
-  // Browsers consult the scrolling element's value, so we set it on both
-  // `html` and `body` to cover document-vs-body quirks across engines.
-  const overscrollGuard = `
-    html, body {
-      overscroll-behavior: contain;
-    }
-  `;
-  if (platform === 'mobile') {
-    return `
-      ${overscrollGuard}
-      html, body, * {
-        scrollbar-width: none !important;
-      }
-      ::-webkit-scrollbar {
-        display: none !important;
-      }
-    `;
-  }
-  if (platform === 'desktop') {
-    return `
-      ${overscrollGuard}
-      * { scrollbar-width: thin; scrollbar-color: rgba(120,120,128,0.3) transparent; }
-      ::-webkit-scrollbar { width: 6px; height: 6px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb {
-        background: rgba(120,120,128,0.25);
-        border-radius: 999px;
-        border: 1.5px solid transparent;
-        background-clip: padding-box;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: rgba(120,120,128,0.5);
-        border: 1.5px solid transparent;
-        background-clip: padding-box;
-      }
-      ::-webkit-scrollbar-corner { background: transparent; }
-    `;
-  }
-  // web — Chrome style
-  return `
-    ${overscrollGuard}
-    * { scrollbar-width: thin; scrollbar-color: rgba(100,100,110,0.35) rgba(240,240,240,0.4); }
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: rgba(240,240,242,0.5); border-radius: 999px; }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(100,100,110,0.3);
-      border-radius: 999px;
-      border: 2px solid transparent;
-      background-clip: padding-box;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(100,100,110,0.55);
-      border: 2px solid transparent;
-      background-clip: padding-box;
-    }
-    ::-webkit-scrollbar-corner { background: transparent; }
-  `;
-}
-
-function injectScrollbarStyle(iframe: HTMLIFrameElement, platform: DevicePlatform): void {
-  try {
-    const doc = iframe.contentDocument;
-    if (!doc) return;
-    let style = doc.getElementById(SCROLLBAR_STYLE_ID) as HTMLStyleElement | null;
-    if (!style) {
-      style = doc.createElement('style');
-      style.id = SCROLLBAR_STYLE_ID;
-      doc.head.appendChild(style);
-    }
-    style.textContent = getDeviceScrollbarCSS(platform);
-  } catch {
-    // Cross-origin or iframe not ready — silently skip
-  }
-}
-
-/**
- * Coerce the param-store's free-form `platform` string into the union
- * `DeviceShell` expects. Anything unknown falls back to `web` so the
- * shell still renders something sensible — the schema's coercion guard
- * already filters bad values out of the URL, but we double-check here
- * because the playground sometimes hot-loads a stored state from a
- * previous session that pre-dates today's enum.
- */
-function coercePlatform(raw: string): DevicePlatform {
-  return KNOWN_PLATFORMS.has(raw as DevicePlatform)
-    ? (raw as DevicePlatform)
-    : 'web';
-}
-
-/**
- * Outer padding around the device shell so it doesn't sit flush against
- * the pane edges. iPhone-style chrome casts the most prominent shadow
- * and benefits from a touch more breathing room.
- *
- * Mobile viewports (≤ 640px) get tighter padding because every pixel
- * the chrome eats is a pixel the simulated device screen loses — at
- * 360px viewport width, a 24px gutter on each side leaves only 312px
- * for the iPhone mockup that itself wants to render at 375px. We
- * scale down to a 6-8px margin so the device is the dominant
- * citizen and the user actually sees the rendered template.
- */
-function pickShellPadding(platform: DevicePlatform, isMobileViewport: boolean): number {
-  if (isMobileViewport) {
-    return platform === 'mobile' ? 8 : 6;
-  }
-  return platform === 'mobile' ? 24 : 16;
-}
-
-/**
- * React hook wrapping `pickShellPadding` so the padding adapts in
- * real time when the user rotates a phone (portrait ↔ landscape) or
- * resizes the desktop window across the 640px breakpoint.
- *
- * SSR-safe: initialises from `matchMedia` synchronously when `window`
- * exists (this is a Vite SPA, no SSR), otherwise defaults to the
- * desktop padding.
- */
-function useShellOuterPadding(platform: DevicePlatform): number {
-  const [isMobileViewport, setIsMobileViewport] = useState<boolean>(() => {
-    if (
-      typeof window === 'undefined' ||
-      typeof window.matchMedia !== 'function'
-    ) {
-      return false;
-    }
-    return window.matchMedia('(max-width: 640px)').matches;
-  });
-  useEffect(() => {
-    if (
-      typeof window === 'undefined' ||
-      typeof window.matchMedia !== 'function'
-    ) {
-      return;
-    }
-    const mq = window.matchMedia('(max-width: 640px)');
-    const handler = (e: MediaQueryListEvent) => setIsMobileViewport(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-  return pickShellPadding(platform, isMobileViewport);
-}
-
-function getShellNaturalSize(platform: DevicePlatform, size: FrameSize): { width: number; height: number } {
-  if (platform === 'mobile') {
-    const screen = MOBILE_SCREEN[size];
-    const geo = PHONE_GEOMETRY[size];
-    // MobileShell uses content-box with padding:bezel, so rendered size
-    // = (screen + bezel*2) [content] + bezel*2 [padding]
-    return {
-      width: screen.width + geo.bezel * 4,
-      height: screen.height + geo.bezel * 4,
-    };
-  }
-  const screen = DESKTOP_SCREEN[size];
-  if (platform === 'desktop') {
-    return { width: screen.width, height: screen.height + TITLE_BAR_HEIGHT };
-  }
-  return { width: screen.width, height: screen.height + CHROME_TAB_BAR_HEIGHT + CHROME_TOOLBAR_HEIGHT };
-}
-
-function ScaledShellWrapper({ platform, size, children }: { platform: DevicePlatform; size: FrameSize; children: ReactNode }) {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
-  const [enableTransition, setEnableTransition] = useState(false);
-  const prevPlatformRef = useRef(platform);
-  const natural = getShellNaturalSize(platform, size);
-
-  // Disable transition on platform change so scale snaps instantly
-  useLayoutEffect(() => {
-    if (prevPlatformRef.current !== platform) {
-      prevPlatformRef.current = platform;
-      setEnableTransition(false);
-    }
-  }, [platform]);
-
-  useLayoutEffect(() => {
-    const wrapper = wrapperRef.current;
-    if (!wrapper) return;
-    let raf = 0;
-    const recalc = (): void => {
-      // Use offsetWidth/offsetHeight instead of getBoundingClientRect()
-      // because the workbench card has a scroll-driven scale animation
-      // and BCR reflects ancestor transforms, giving wrong values.
-      const w = wrapper.offsetWidth;
-      const h = wrapper.offsetHeight;
-      if (!w || !h) return;
-      const s = Math.min(1, w / natural.width, h / natural.height);
-      setScale(s);
-    };
-    // P4.16: rAF-throttle the ResizeObserver callback. A drag-resize
-    // can fire ResizeObserver dozens of times per frame; without
-    // coalescing, each one schedules its own setState → setScale →
-    // synchronous transform recalculation in React. Batching to a
-    // single rAF gives the browser one chance to paint between bursts
-    // and removes the visible scale-stutter on slow machines.
-    const onResize = (): void => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = 0;
-        recalc();
-      });
-    };
-    recalc();
-    const ro = new ResizeObserver(onResize);
-    ro.observe(wrapper);
-    return () => {
-      ro.disconnect();
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [natural.width, natural.height]);
-
-  // Enable transition after layout settles
-  useEffect(() => {
-    if (!enableTransition) {
-      const timer = setTimeout(() => setEnableTransition(true), 400);
-      return () => clearTimeout(timer);
-    }
-  }, [enableTransition]);
-
-  return (
-    <div ref={wrapperRef} style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-      <div style={{ flexShrink: 0, transform: `scale(${scale})`, transformOrigin: 'center center', transition: enableTransition ? 'transform 420ms cubic-bezier(0.16, 1, 0.3, 1)' : 'none' }}>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-/**
- * Snapshot the iframe's current location relative to `/preview/<hash>/` so we
- * can preserve the user's in-template route when swapping to a new hash.
- *
- * Returns '' if the iframe hasn't loaded, has a cross-origin document (it
- * shouldn't — we serve same-origin), or the URL doesn't look like a preview
- * URL. Falling back to '' just sends the new iframe to the variant's root.
- */
-function readIframeSubUrl(iframe: HTMLIFrameElement | null): string {
-  if (!iframe?.contentWindow) return '';
-  try {
-    const loc = iframe.contentWindow.location;
-    // P4.17: tighten the prefix match to the actual hash shape
-    // (lower-case hex, 6–64 chars — must match `PREVIEW_PATH_RE` in
-    // server/handlers.ts). The previous `[^/]+` matched ANY path
-    // segment, so a navigation that landed on a non-/preview/ URL
-    // (e.g. an OAuth redirect that escaped the iframe sandbox in
-    // some adversarial scenario) would still slip through and get
-    // appended to the next iframe's `src`. Strict regex returns ''
-    // for any non-preview path so the new src lands cleanly at root.
-    if (!/^\/preview\/[0-9a-f]{6,64}\/?/.test(loc.pathname)) return '';
-    const sub = loc.pathname.replace(/^\/preview\/[0-9a-f]{6,64}\/?/, '');
-    return sub + loc.search + loc.hash;
-  } catch {
-    return '';
-  }
-}
-
-/**
- * P4.11: poll cadence is 2s in dev (so editing template-react/* feels
- * HMR-like), 30s in prod (so the deployed Fly machine isn't slammed
- * with 1800/h fetches per open tab). Production rev only changes on
- * deploy — the bake is immutable for the life of the container — so
- * the longer cadence loses nothing.
- */
-const REV_POLL_INTERVAL_MS = import.meta.env.DEV ? 2000 : 30_000;
-const BUILD_POLL_INITIAL_MS = 200;
-const BUILD_POLL_MIN_MS = 500;
-const BUILD_POLL_MAX_MS = 4000;
-// Fallback window for the iframe-ready postMessage. The template
-// normally posts within ~50ms of root.render; 6s is generous enough
-// to cover slow CI machines and still bound the user-visible "stuck
-// overlay" experience if the template crashes during boot.
-const READY_FALLBACK_MS = 6000;
-
-function isDocumentVisible(): boolean {
-  return (
-    typeof document === 'undefined' || document.visibilityState !== 'hidden'
-  );
-}
-
-/**
- * Resolve when the tab becomes visible again. Used to gate background
- * polling so a backgrounded preview tab stops hammering the dev server
- * (we observed ~18k /api/template-rev fetches over a 10h dev session).
- *
- * P4.18: accepts an optional AbortSignal so a cancelled effect can
- * tear down the visibilitychange listener without waiting for the
- * tab to come back. Without this, an unmounted component left behind
- * a permanent listener every time it called waitForVisible() while
- * hidden — a slow leak that compounded across React strict-mode
- * double-mounts and route changes.
- */
-function waitForVisible(signal?: AbortSignal): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (signal?.aborted) {
-      reject(new DOMException('aborted', 'AbortError'));
-      return;
-    }
-    if (isDocumentVisible()) {
-      resolve();
-      return;
-    }
-    const onChange = (): void => {
-      if (isDocumentVisible()) {
-        document.removeEventListener('visibilitychange', onChange);
-        signal?.removeEventListener('abort', onAbort);
-        resolve();
-      }
-    };
-    const onAbort = (): void => {
-      document.removeEventListener('visibilitychange', onChange);
-      signal?.removeEventListener('abort', onAbort);
-      reject(new DOMException('aborted', 'AbortError'));
-    };
-    document.addEventListener('visibilitychange', onChange);
-    signal?.addEventListener('abort', onAbort);
-  });
-}
+import { ScaledShellWrapper } from './preview-frame/ScaledShellWrapper';
+import { coercePlatform } from './preview-frame/geometry';
+import { injectScrollbarStyle } from './preview-frame/scrollbar';
+import {
+  PREVIEW_BUILD_INPUTS_BASE,
+  selectRuntimeVariants,
+  type BuildInputs,
+} from './preview-frame/build-inputs';
+import { useShellOuterPadding } from './hooks/useShellOuterPadding';
+import { useTemplateRev } from './hooks/useTemplateRev';
+import { useTemplateBuild } from './hooks/useTemplateBuild';
+import { usePreviewMessaging } from './hooks/usePreviewMessaging';
+import { useQuickJumpNav } from './hooks/useQuickJumpNav';
 
 /**
  * Centre stage iframe with on-demand template builds.
@@ -419,22 +32,12 @@ function waitForVisible(signal?: AbortSignal): Promise<void> {
  *   - A background poll of /api/template-rev gives HMR-like behaviour:
  *     editing template-react/src bumps the rev, which forces a rebuild and
  *     re-mounts the iframe with the same params + same sub-route.
+ *
+ * This component is the thin orchestrator; the iframe lifecycle, the
+ * postMessage bridge and the build/loading state each live in a dedicated
+ * hook under `./hooks/`, and the pure device-geometry / scrollbar / URL
+ * helpers live under `./preview-frame/`.
  */
-/**
- * Project a `ParamsStore` snapshot down to the runtime-switchable axes.
- * Identity-stable for the same reason as the old build-input selector:
- * `useShallow` compares the returned shape, so a fresh closure here
- * would re-render on every store change.
- */
-function selectRuntimeVariants(s: ParamsStore): RuntimeVariantInputs {
-  return {
-    design: String(s.state.design),
-    ui: String(s.state.ui),
-    layout: String(s.state.layout),
-    toastPosition: String(s.state.toastPosition),
-  };
-}
-
 export function PreviewFrame() {
   // Subscribe to `ui` separately as a primitive: it's the only build-axis
   // that flows into `/api/build`, and we want a string change (not an
@@ -451,346 +54,32 @@ export function PreviewFrame() {
   // platform variant alive). Subscribe to `platform` separately so that
   // toggling the chrome doesn't push a no-op message into the iframe.
   const shellPlatformRaw = useShellStore((s) => String(s.state.platform));
-  const setCurrentHash = useUiStore((s) => s.setCurrentHash);
-  const setBuildStatus = useUiStore((s) => s.setBuildStatus);
-  const setIframeReadyHash = useUiStore((s) => s.setIframeReadyHash);
   const reloadKey = useUiStore((s) => s.reloadKey);
-  const navRequest = useUiStore((s) => s.navRequest);
-  const clearNavRequest = useUiStore((s) => s.clearNavRequest);
-  const [lastReadyHash, setLastReadyHash] = useState<string | null>(null);
-  const [subUrl, setSubUrl] = useState<string>('');
-  const [templateRev, setTemplateRev] = useState<string | null>(null);
-  const requestSeq = useRef(0);
+  const frameSize = useUiStore((s) => s.frameSize);
+
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  // Mirror lastReadyHash into a ref so the postMessage listener can
-  // read the freshest hash without re-subscribing on every change —
-  // the listener is registered once at mount.
-  const lastReadyHashRef = useRef<string | null>(null);
-  useEffect(() => {
-    lastReadyHashRef.current = lastReadyHash;
-  }, [lastReadyHash]);
-  // Mirror the runtime variant snapshot so the `eikon:preview-ready`
-  // handler can push the current values into a freshly-mounted iframe
-  // without re-subscribing the listener on every variant change.
+
+  // Mirror the runtime variant snapshot so the `iframeSrc` memo (below)
+  // can read the *latest* values when it recomputes on a hash/sub-route
+  // change, without taking `runtimeVariants` as a dep (which would change
+  // `iframe.src` on every axis flip and reload the iframe).
   const runtimeVariantsRef = useRef(runtimeVariants);
   useEffect(() => {
     runtimeVariantsRef.current = runtimeVariants;
   }, [runtimeVariants]);
 
-  // ---- iframe-ready signal -----------------------------------------------
-  //
-  // The template's `LayoutVariantProvider` posts
-  // `{type:'eikon:preview-ready'}` to its parent inside its mount-time
-  // `useEffect`, AFTER its `eikon:set-variant` listener has been
-  // installed (see that file's header for the listener-then-post race
-  // it avoids). We treat that as the "real" ready signal for the
-  // shell-level overlay — `iframe.onLoad` is too early, since it fires
-  // when the HTML is parsed but the dark `<body>` hasn't been
-  // overwritten by any React-rendered content yet, producing a 1-3s
-  // black flash on every variant switch.
-  //
-  // Belt-and-suspenders timeout: if the template fails to mount (build
-  // crash, runtime error in App), the postMessage never arrives and the
-  // overlay would be stuck. Fall back to clearing on `lastReadyHash`
-  // change after `READY_FALLBACK_MS` so the user at least sees whatever
-  // the iframe DID paint (the build error overlay, the partial page).
-  useEffect(() => {
-    function onMessage(event: MessageEvent): void {
-      // P4.15: belt-and-braces origin check. The iframe is same-origin
-      // (`/preview/<hash>/` is served by the same host), so any message
-      // from a different origin is by definition NOT from our iframe
-      // and should be ignored. The `event.source` check below catches
-      // postMessages from unrelated windows (extensions, opener), but
-      // origin verification is the standard guard cited in MDN and CSP
-      // guidance — pinning both is cheap insurance.
-      if (event.origin !== window.location.origin) return;
-      if (event.source !== iframeRef.current?.contentWindow) return;
-      const data = event.data as { type?: unknown } | null;
-      if (!data || data.type !== 'eikon:preview-ready') return;
-      const h = lastReadyHashRef.current;
-      if (h) setIframeReadyHash(h);
-      // Push the playground's current runtime-axis snapshot into the
-      // newly-mounted iframe. Unlike a CLI-scaffolded project — whose
-      // `inject-html-variants.ts` stamps the chosen axes onto
-      // `<html data-…>` at scaffold time — the playground builder
-      // serves an unstamped `index.html` (a single max-capability
-      // bundle is shared by every parameter combo). So the iframe
-      // boots with schema defaults and relies entirely on this
-      // response to learn the user's current selection. The reply
-      // also accounts for any axis the user changed between build
-      // start and iframe boot.
-      const win = iframeRef.current?.contentWindow;
-      if (!win) return;
-      const v = runtimeVariantsRef.current;
-      win.postMessage(
-        {
-          type: 'eikon:set-variant',
-          design: v.design,
-          ui: v.ui,
-          layout: v.layout,
-          toastPosition: v.toastPosition,
-        },
-        '*'
-      );
-    }
-    window.addEventListener('message', onMessage);
-    return () => window.removeEventListener('message', onMessage);
-    // setIframeReadyHash is stable; deliberately empty deps so the
-    // listener mounts once and survives every iframe remount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Fallback: if the postMessage never arrives within READY_FALLBACK_MS
-  // of `lastReadyHash` becoming a new value, mark the iframe ready
-  // anyway so the overlay clears and any error UI inside the iframe
-  // becomes visible.
-  useEffect(() => {
-    if (!lastReadyHash) return;
-    const timer = setTimeout(() => {
-      setIframeReadyHash(lastReadyHash);
-    }, READY_FALLBACK_MS);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastReadyHash]);
-
-  // ---- Runtime variant push ---------------------------------------------
-  //
-  // The 4 visual axes (`design`, `ui`, `layout`, `toastPosition`) are
-  // switched at runtime inside the iframe. Whenever the user flips any
-  // control, we postMessage the new values into the live iframe so it
-  // updates in place — no rebuild, no remount, no flash. Three listeners
-  // inside the template share this single message type, each gated to
-  // dev + same-origin iframes:
-  //   - `main.tsx` applies `design` / `ui` as a class on `<html>`
-  //   - `LayoutVariantProvider` dispatches `layout` via React Context
-  //   - `Toaster` updates `toastPosition` in its own state
-  //
-  // `platform` doesn't ride this channel — see RuntimeVariantInputs:
-  // the iframe already mounts a max-capability bundle, and the device
-  // chrome that the user sees flip is purely shell-side. `pm` and
-  // `supabase` similarly don't ride here — they only affect the
-  // file-tree / package.json simulator outputs.
-  //
-  // We don't gate on `lastReadyHash` here: when the iframe hasn't booted
-  // yet, `contentWindow` simply isn't there to receive the message and
-  // the postMessage no-ops. The `eikon:preview-ready` handler above
-  // re-pushes the current snapshot once boot completes, so the iframe
-  // catches up regardless of the relative ordering of "user flipped a
-  // toggle" vs "iframe finished mounting".
-  useEffect(() => {
-    const win = iframeRef.current?.contentWindow;
-    if (!win) return;
-    win.postMessage(
-      {
-        type: 'eikon:set-variant',
-        design: runtimeVariants.design,
-        ui: runtimeVariants.ui,
-        layout: runtimeVariants.layout,
-        toastPosition: runtimeVariants.toastPosition,
-      },
-      '*'
-    );
-  }, [runtimeVariants]);
-
-  // ---- /api/template-rev polling (HMR-like) ------------------------------
-  useEffect(() => {
-    let cancelled = false;
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    let ctrl: AbortController | null = null;
-    // P4.18: an AbortController dedicated to waitForVisible so the
-    // visibilitychange listener tears down on unmount, even if the
-    // tab never comes back into the foreground.
-    const visAbort = new AbortController();
-
-    async function poll(): Promise<void> {
-      // Hidden tabs don't need to know about template changes — pause
-      // until the user comes back.
-      try {
-        await waitForVisible(visAbort.signal);
-      } catch {
-        return; // unmounted while hidden
-      }
-      if (cancelled) return;
-      ctrl = new AbortController();
-      try {
-        const r = await fetch('/api/template-rev', { signal: ctrl.signal });
-        if (cancelled) return;
-        const j = (await r.json()) as { rev?: string };
-        if (j.rev) {
-          setTemplateRev((prev) => (prev === j.rev ? prev : j.rev!));
-        }
-      } catch {
-        // Server might be restarting; just wait and retry.
-      } finally {
-        if (!cancelled) {
-          timer = setTimeout(() => void poll(), REV_POLL_INTERVAL_MS);
-        }
-      }
-    }
-
-    void poll();
-    return () => {
-      cancelled = true;
-      if (timer) clearTimeout(timer);
-      ctrl?.abort();
-      visAbort.abort();
-    };
-  }, []);
-
-  // ---- Build orchestration ----------------------------------------------
-  //
-  // Re-run on `templateRev` (the watcher's "source changed, rebuild"
-  // signal) AND on `buildUi` — `ui` is the one playground param that
-  // bakes different files into the bundle (Phase J snapshots), so a
-  // cycle MUST trigger a fresh `/api/build`. The other axes
-  // (design / layout / toastPosition) stay runtime-postMessage and
-  // deliberately don't drive this effect; they update the existing
-  // bundle in-place via `eikon:set-variant`.
-  useEffect(() => {
-    const seq = ++requestSeq.current;
-    let cancelled = false;
-    let pollTimer: ReturnType<typeof setTimeout> | null = null;
-    let pollDelay = BUILD_POLL_MIN_MS;
-    const ctrl = new AbortController();
-    // P4.18: shared visibility-abort so pollUntilDone's waitForVisible
-    // tears down its listener if the effect cleans up while hidden.
-    const visAbort = new AbortController();
-
-    function adopt(next: BuildState): void {
-      // Mirror the build lifecycle into the shared store so the App-level
-      // overlay covers the whole `<main>` (Files + Editor + Preview)
-      // instead of just the iframe panel. We surface 'building' / 'error'
-      // immediately, but only flip to 'ready' AFTER `currentHash` is
-      // updated below — sibling panels gate themselves on `currentHash`,
-      // so updating the two atomically (status before hash for failure,
-      // hash before status for success) keeps the overlay tight.
-      if (next.status === 'building') {
-        setBuildStatus('building');
-        return;
-      }
-      if (next.status === 'error') {
-        setBuildStatus('error', next.error ?? null);
-        return;
-      }
-      // Capture wherever the user has navigated inside the previous
-      // preview shell so template-source rebuilds preserve the route.
-      const sub = readIframeSubUrl(iframeRef.current);
-      setSubUrl(sub);
-      setLastReadyHash(next.hash);
-      // Broadcast the current ready hash so sibling panels can coordinate
-      // loading overlays. File/code content itself is input-driven via
-      // simulator endpoints.
-      setCurrentHash(next.hash);
-      // Build dist exists; pixel-level "ready" is signalled by the iframe
-      // and tree onLoad reporters. The unified overlay reads those.
-      setBuildStatus('ready');
-    }
-
-    async function pollUntilDone(hash: string): Promise<void> {
-      try {
-        await waitForVisible(visAbort.signal);
-      } catch {
-        return; // unmounted while hidden
-      }
-      if (cancelled || seq !== requestSeq.current) return;
-      const r = await fetch(
-        `/api/build-status?hash=${encodeURIComponent(hash)}`,
-        { signal: ctrl.signal }
-      );
-      if (cancelled || seq !== requestSeq.current) return;
-      const next = (await r.json()) as BuildState;
-      adopt(next);
-      if (next.status === 'building') {
-        // Exponential backoff capped at BUILD_POLL_MAX_MS — most cold
-        // builds finish well before the cap; the cap exists so a stuck
-        // build doesn't burn a constant 500ms interval forever.
-        pollTimer = setTimeout(() => void pollUntilDone(hash), pollDelay);
-        pollDelay = Math.min(Math.round(pollDelay * 1.5), BUILD_POLL_MAX_MS);
-      }
-    }
-
-    async function go(): Promise<void> {
-      const r = await fetch('/api/build', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(buildInputs),
-        signal: ctrl.signal,
-      });
-      if (cancelled || seq !== requestSeq.current) return;
-      const initial = (await r.json()) as BuildState;
-      adopt(initial);
-      if (initial.status === 'building') {
-        pollTimer = setTimeout(
-          () => void pollUntilDone(initial.hash),
-          BUILD_POLL_INITIAL_MS
-        );
-      }
-    }
-
-    void go().catch((e: unknown) => {
-      if (cancelled || seq !== requestSeq.current) return;
-      if ((e as { name?: string })?.name === 'AbortError') return;
-      const msg = e instanceof Error ? e.message : String(e);
-      setBuildStatus('error', msg);
-    });
-
-    return () => {
-      cancelled = true;
-      if (pollTimer) clearTimeout(pollTimer);
-      ctrl.abort();
-      visAbort.abort();
-    };
-    // The zustand setters (`setCurrentHash`, `setBuildStatus`,
-    // `setIframeReadyHash`) are stable across renders; omitting them
-    // intentionally so the build effect doesn't re-run on store init.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [templateRev, buildUi]);
-
-  // ---- Quick-jump navigation requested from the Toolbar -----------------
-  //
-  // The Toolbar surfaces a few common in-template routes (Home, Counter,
-  // Tasks, Examples, Performance). Many of those routes don't have a
-  // discoverable entry point inside the rendered iframe itself — Examples
-  // and Performance especially live below the fold of the marketing
-  // landing page — so the Toolbar acts as a fast lane.
-  //
-  // We use `history.pushState` + a synthetic `popstate` rather than
-  // `iframe.contentWindow.location.assign` because react-router 6
-  // listens for `popstate` and treats it as a real navigation, so the
-  // SPA stays mounted (no chunk re-download, no app-bootstrap flash).
-  //
-  // CRITICAL: we do NOT call `setSubUrl(cleanTarget)` here. That would
-  // mutate the React state that backs the iframe's `key` and force a
-  // full iframe remount — defeating the whole point of pushState. The
-  // next build adopt() reads the iframe's actual location via
-  // `readIframeSubUrl` (which sees /preview/<hash>/<new sub-route>),
-  // so position is preserved across rebuilds without parent-side state.
-  //
-  // If we ever lose same-origin access (we shouldn't — both parent and
-  // iframe are served by the same Vite dev server), the catch falls back
-  // to `location.assign` which always works at the cost of a SPA reboot.
-  useEffect(() => {
-    if (!navRequest) return;
-    if (!lastReadyHash) return;
-    const win = iframeRef.current?.contentWindow;
-    if (!win) return;
-    const cleanTarget = navRequest.target.replace(/^\//, '');
-    const fullPath = `/preview/${lastReadyHash}/${cleanTarget}`;
-    try {
-      win.history.pushState({}, '', fullPath);
-      win.dispatchEvent(new PopStateEvent('popstate'));
-    } catch {
-      try {
-        win.location.assign(fullPath);
-      } catch {
-        // Both navigation strategies failed (extremely unlikely on
-        // same-origin). The navRequest is still cleared below so the
-        // user can retry.
-      }
-    }
-    clearNavRequest();
-  }, [navRequest, lastReadyHash, clearNavRequest]);
-
+  // iframe lifecycle / build orchestration / postMessage bridge / nav,
+  // each owned by a dedicated hook. Data flows one way:
+  //   templateRev → build (owns lastReadyHash + subUrl) → messaging + nav.
+  const templateRev = useTemplateRev();
+  const { lastReadyHash, subUrl } = useTemplateBuild({
+    buildInputs,
+    buildUi,
+    templateRev,
+    iframeRef,
+  });
+  usePreviewMessaging({ iframeRef, lastReadyHash, runtimeVariants });
+  useQuickJumpNav({ iframeRef, lastReadyHash });
 
   // The iframe's src is snapshotted once per `iframeKey` change via this
   // useMemo. We append the current `runtimeVariants` as `__eikon*` query
@@ -816,7 +105,7 @@ export function PreviewFrame() {
   // iframe's `eikon:preview-ready` postMessage, the user can flip a
   // runtime axis. The resulting `<html data-…>` attributes will be
   // STALE for that brief window. The `eikon:preview-ready` handler
-  // (see effect above) re-pushes the *live* `runtimeVariantsRef.current`
+  // (see usePreviewMessaging) re-pushes the *live* `runtimeVariantsRef.current`
   // snapshot the moment the iframe announces it's listening, which
   // corrects the drift before any user-visible paint can land. If a
   // future change introduces a paint between iframe-boot and the
@@ -843,7 +132,6 @@ export function PreviewFrame() {
   // (Toolbar segmented control), and so sits on `useUiStore` rather
   // than `useShellStore` — changing the size never invalidates the
   // build cache.
-  const frameSize = useUiStore((s) => s.frameSize);
   const platform = useMemo(
     () => coercePlatform(shellPlatformRaw),
     [shellPlatformRaw]
@@ -912,7 +200,7 @@ export function PreviewFrame() {
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-pointer-lock"
               // Pixel-level "ready" for the App-level overlay is now
               // signalled by a `postMessage` from the template's
-              // `main.tsx` — see the dedicated effect above. We keep
+              // `main.tsx` — see usePreviewMessaging. We keep
               // `onLoad` for the scrollbar-CSS injection only, which
               // genuinely is a DOM-parse-time concern (the styles need
               // to land in the iframe's <head> before its first paint).
