@@ -84,6 +84,7 @@ import { useI18n } from '../theme/i18n';
 
 import { LangSwitcher } from './LangSwitcher';
 import { LoadingBar } from './LoadingBar';
+import { NAV_REGION_HEIGHT_REM } from './nav-metrics';
 import { navigate, type AppRoute } from './route';
 import { ROUTE_PREFETCH } from './route-loaders';
 
@@ -92,16 +93,13 @@ const CHANGELOG_PATH = '/changelog';
 const PLAYGROUND_PATH = '/playground';
 
 /**
- * Approximate total visual height of the nav region (top padding +
- * pill island + bottom padding). Exported so layout-critical pages
- * can compute `100vh - NAV_REGION_HEIGHT_REM` without duplicating
- * the magic number.
- *
- * Measured: pt-6 (1.5rem) + pill (~2.5rem) + pb-4 (1rem) ≈ 5rem.
- * Pages that subtract this from `100vh` should round to whole `rem`
- * to avoid sub-pixel rounding triggering a spurious 1px scrollbar.
+ * Re-exported from the leaf `nav-metrics` module so the Nav's public
+ * surface is unchanged for callers that already import it here. The
+ * canonical definition lives in `nav-metrics.ts` — layout-critical
+ * pages should import it from there to avoid pulling in the Nav
+ * component (and the route-loaders → page dynamic-import back-edge).
  */
-export const NAV_REGION_HEIGHT_REM = 5;
+export { NAV_REGION_HEIGHT_REM };
 
 /** Modifier-aware "is this a plain left-click I should intercept" guard. */
 function isPlainLeftClick(e: ReactMouseEvent): boolean {

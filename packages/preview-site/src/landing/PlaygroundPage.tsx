@@ -45,7 +45,7 @@ import { useEffect } from 'react';
 import { PlaygroundShell } from '@/shell/App';
 import { ParamsPanel } from '@/shell/ParamsPanel';
 
-import { NAV_REGION_HEIGHT_REM } from './nav/Nav';
+import { NAV_REGION_HEIGHT_REM } from './nav/nav-metrics';
 import {
   CollapsibleSidebar,
   SlidersIcon,
