@@ -134,36 +134,24 @@ export function Toolbar({
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: 6,
-        rowGap: 6,
-        padding: '6px 12px',
-        background: 'color-mix(in srgb, var(--surface-2) 72%, transparent)',
-        backdropFilter: 'blur(12px) saturate(140%)',
-        WebkitBackdropFilter: 'blur(12px) saturate(140%)',
-        color: 'var(--fg-2)',
-        borderBottom: '1px solid transparent',
-        borderImage: 'linear-gradient(to right, transparent, var(--border-2), transparent) 1',
-        fontFamily: 'var(--font-sans, system-ui, sans-serif)',
-        fontSize: 12,
-      }}
-    >
+    <div className="eikon-tb">
       {/*
         Only "Files" gets a toolbar toggle — Editor is a child of Files in
         the UX model (you pick a file in the tree, the editor opens). To
         close just the Editor while keeping Files open, use the × on the
         editor's title bar.
       */}
-      <ToggleButton
-        active={showFiles}
+      <button
+        type="button"
         onClick={toggleFiles}
-        label="Files"
         title={`${showFiles ? 'Hide' : 'Show'} file explorer`}
-      />
+        aria-pressed={showFiles}
+        className="eikon-tb-btn"
+        data-active={showFiles || undefined}
+      >
+        <FilesIcon />
+        <span>Files</span>
+      </button>
 
       {/* Push the quick-jump cluster + Reload to the right edge. Files
         sits alone on the left because it controls a *parent-side* panel
@@ -176,29 +164,9 @@ export function Toolbar({
         cluster because changing the frame size is much closer to the
         Files-side concern (presentation of the iframe) than to the
         in-iframe navigation controls on the far right. */}
-      <span
-        style={{
-          color: 'var(--fg-3)',
-          fontSize: 11,
-          textTransform: 'uppercase',
-          letterSpacing: 0.4,
-          marginRight: 2,
-        }}
-      >
-        Size
-      </span>
-      <div
-        role="group"
-        aria-label="Device frame size"
-        style={{
-          display: 'inline-flex',
-          border: '1px solid var(--border-1)',
-          borderRadius: 4,
-          overflow: 'hidden',
-          marginRight: 6,
-        }}
-      >
-        {FRAME_SIZES.map((size, idx) => {
+      <span className="eikon-tb-label">Size</span>
+      <div role="group" aria-label="Device frame size" className="eikon-tb-seg">
+        {FRAME_SIZES.map((size) => {
           const meta = FRAME_SIZE_LABELS[size];
           const active = frameSize === size;
           // Web uses the desktop reference dimensions (Safari frames a
@@ -213,94 +181,80 @@ export function Toolbar({
               onClick={() => setFrameSize(size)}
               title={tooltip}
               aria-pressed={active}
-              style={{
-                background: active
-                  ? 'rgb(148 163 184 / 0.15)'
-                  : 'transparent',
-                color: active ? 'var(--color-brand-300, #cbd5e1)' : 'var(--fg-2)',
-                border: 'none',
-                borderLeft: idx === 0 ? 'none' : '1px solid var(--border-1)',
-                padding: '3px 10px',
-                fontSize: 12,
-                fontWeight: active ? 600 : 400,
-                cursor: 'pointer',
-                minWidth: 26,
-              }}
+              className="eikon-tb-seg-btn"
+              data-active={active || undefined}
             >
               {meta.label}
             </button>
           );
         })}
       </div>
-      <span
-        aria-hidden="true"
-        style={{
-          width: 1,
-          height: 16,
-          background: 'var(--border-1)',
-          margin: '0 4px',
-        }}
-      />
 
+      <span aria-hidden="true" className="eikon-tb-div" />
 
-      <span
-        style={{
-          color: 'var(--fg-3)',
-          fontSize: 11,
-          textTransform: 'uppercase',
-          letterSpacing: 0.4,
-          marginRight: 2,
-        }}
-      >
-        Go to
-      </span>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-        {QUICK_LINKS.map((link) => (
-          <QuickJumpButton
-            key={link.target}
-            label={link.label}
-            title={link.title ?? `Navigate to ${link.label}`}
-            onClick={() => navigateInPreview(link.target)}
-            highlight={link.target.startsWith('/examples')}
-          />
-        ))}
+      <span className="eikon-tb-label">Go to</span>
+      <div role="group" aria-label="Navigate preview" className="eikon-tb-routes">
+        {QUICK_LINKS.map((link) => {
+          const highlight = link.target.startsWith('/examples');
+          return (
+            <button
+              key={link.target}
+              type="button"
+              onClick={() => navigateInPreview(link.target)}
+              title={link.title ?? `Navigate to ${link.label}`}
+              className="eikon-tb-route"
+              data-accent={highlight ? 'amber' : undefined}
+            >
+              {link.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Thin vertical divider separating "navigate inside preview"
         (quick-jump cluster) from "rebuild preview" (Reload). Both
         operate on the iframe but at different layers. */}
-      <span
-        aria-hidden="true"
-        style={{
-          width: 1,
-          height: 16,
-          background: 'var(--border-1)',
-          margin: '0 4px',
-        }}
-      />
+      <span aria-hidden="true" className="eikon-tb-div" />
 
-      <button
-        type="button"
-        onClick={reloadPreview}
-        title="Reload preview"
-        aria-label="Reload preview"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 4,
-          background: 'transparent',
-          color: 'var(--fg-2)',
-          border: '1px solid var(--border-1)',
-          borderRadius: 4,
-          padding: '3px 10px',
-          fontSize: 12,
-          cursor: 'pointer',
-        }}
+      <ReloadButton onReload={reloadPreview} labelled />
+    </div>
+  );
+}
+
+/**
+ * Reload control. Clicking spins the glyph one turn (`eikon-tb-reload-
+ * spin`) so the "I forced a rebuild" gesture has a tactile confirmation
+ * beat. `labelled` shows the "Reload" text (desktop strip); the compact
+ * toolbar uses the icon-only square form.
+ */
+function ReloadButton({
+  onReload,
+  labelled = false,
+}: {
+  onReload: () => void;
+  labelled?: boolean;
+}) {
+  const [spinning, setSpinning] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        setSpinning(true);
+        onReload();
+      }}
+      title="Reload preview"
+      aria-label="Reload preview"
+      className={'eikon-tb-btn' + (labelled ? '' : ' eikon-tb-icon-btn')}
+    >
+      <span
+        className="eikon-tb-reload-glyph"
+        data-spinning={spinning ? 'true' : undefined}
+        onAnimationEnd={() => setSpinning(false)}
       >
         <ReloadIcon />
-        <span>Reload</span>
-      </button>
-    </div>
+      </span>
+      {labelled && <span>Reload</span>}
+    </button>
   );
 }
 
@@ -676,74 +630,20 @@ function ReloadIcon() {
   );
 }
 
-function ToggleButton({
-  active,
-  onClick,
-  label,
-  title,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  title: string;
-}) {
+function FilesIcon() {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      style={{
-        background: active ? 'rgb(148 163 184 / 0.15)' : 'transparent',
-        color: active ? 'var(--color-brand-300, #cbd5e1)' : 'var(--fg-2)',
-        border:
-          '1px solid ' +
-          (active ? 'rgb(148 163 184 / 0.40)' : 'var(--border-1)'),
-        borderRadius: 4,
-        padding: '3px 10px',
-        fontSize: 12,
-        cursor: 'pointer',
-      }}
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
     >
-      {label}
-    </button>
-  );
-}
-
-/**
- * Quick-jump button for the in-iframe nav row. `highlight` flags the
- * showcase routes (Examples / Performance) so they read as the toolbar's
- * value-add rather than just generic navigation — those are the routes
- * the user can't easily discover from inside the preview itself.
- */
-function QuickJumpButton({
-  label,
-  title,
-  onClick,
-  highlight,
-}: {
-  label: string;
-  title: string;
-  onClick: () => void;
-  highlight?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      style={{
-        background: 'transparent',
-        color: highlight ? '#f59e0b' : 'var(--fg-2)',
-        border:
-          '1px solid ' + (highlight ? 'rgba(245, 158, 11, 0.45)' : 'var(--border-1)'),
-        borderRadius: 4,
-        padding: '3px 10px',
-        fontSize: 12,
-        cursor: 'pointer',
-        fontWeight: highlight ? 500 : 400,
-      }}
-    >
-      {label}
-    </button>
+      <path d="M3 7a2 2 0 0 1 2-2h3.5l2 2H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    </svg>
   );
 }
