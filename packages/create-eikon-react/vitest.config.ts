@@ -17,5 +17,11 @@ export default defineConfig({
     // case, low enough that a genuine hang still fails in reasonable time.
     testTimeout: 20000,
     hookTimeout: 20000,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      include: ['src/**/*.ts'],
+      exclude: ['src/__tests__/**', 'template/**', 'dist/**'],
+    },
   },
 });

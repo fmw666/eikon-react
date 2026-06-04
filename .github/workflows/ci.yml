@@ -69,3 +69,33 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm verify:full
+
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.10'
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      # Per-package v8 coverage (text summary in the log + lcov/html on disk).
+      # `--no-bail` so one package's report doesn't suppress the others; the
+      # underlying `vitest run` still fails the job if any test fails.
+      - run: pnpm -r --filter=./packages/* --no-bail test:coverage
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-lcov
+          path: packages/*/coverage/lcov.info
+          if-no-files-found: warn
