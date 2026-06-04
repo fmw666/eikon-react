@@ -1,36 +1,22 @@
-import { mkdir, readdir } from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import {
-  cancel,
-  confirm,
-  intro,
-  isCancel,
-  log,
-  note,
-  outro,
-  select,
-  spinner,
-  text,
-} from '@clack/prompts';
+import { cancel, confirm, intro, isCancel, note, outro } from '@clack/prompts';
 import kleur from 'kleur';
 
-import { copyTemplate } from './copy-template.js';
-import { applyUiSnapshot } from './apply-ui-snapshot.js';
-import { initGit } from './init-git.js';
-import { injectHtmlVariants } from './inject-html-variants.js';
-import { installDeps } from './install-deps.js';
-import { resolveProjectTarget } from './resolve-target.js';
-import { rewritePackageManagerFields } from './rewrite-package-manager.js';
+import { parseArgs } from './cli-args.js';
+import type { PlatformOverrides, VariantChoices } from './cli-prompts.js';
 import {
-  DEFAULT_VARIANTS,
-  stripFeatures,
-  type FeatureFlags,
-  type VariantSelections,
-} from './strip-features.js';
-import { isValidPackageName, toValidPackageName } from './validate.js';
+  promptProjectName,
+  resolveBoolean,
+  resolveFeatures,
+  resolvePackageManager,
+  resolveVariants,
+} from './cli-prompts.js';
+import { resolveProjectTarget } from './resolve-target.js';
+import { scaffold, type CliOptions } from './scaffold.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +30,10 @@ const TEMPLATE_DIR = path.resolve(__dirname, '..', 'template');
  * Order matters for the interactive prompt: `platform` is asked FIRST so
  * that subsequent prompts can apply per-platform default/value overrides
  * declared in `PLATFORM_OVERRIDES` below.
+ *
+ * NOTE: `VARIANT_CHOICES` and `PLATFORM_OVERRIDES` are parsed *textually*
+ * from this file by `__tests__/cli-schema-parity.test.ts` — they must stay
+ * inline here as object literals (do not extract to a sibling module).
  */
 const VARIANT_CHOICES = {
   platform: ['web', 'desktop', 'mobile'] as const,
@@ -80,18 +70,7 @@ const VARIANT_CHOICES = {
   ] as const,
   ui: ['custom', 'shadcn', 'animate-ui'] as const,
   toastPosition: ['top-right', 'top-center', 'bottom-center', 'bottom-right'] as const,
-} satisfies Record<string, readonly string[]>;
-
-type VariantAxis = keyof typeof VARIANT_CHOICES;
-type PlatformValue = (typeof VARIANT_CHOICES)['platform'][number];
-
-const VARIANT_FLAG_ALIASES: Record<VariantAxis, readonly string[]> = {
-  platform: ['platform'],
-  design: ['design'],
-  layout: ['layout'],
-  ui: ['ui'],
-  toastPosition: ['toastPosition', 'toast-position'],
-};
+} satisfies VariantChoices;
 
 /**
  * Per-platform narrowing of accepted values + default overrides. The
@@ -104,15 +83,7 @@ const VARIANT_FLAG_ALIASES: Record<VariantAxis, readonly string[]> = {
  * assert that synchronisation programmatically; for now the contract is
  * documented here and verified at e2e.
  */
-type PlatformOverride = {
-  readonly values?: readonly string[];
-  readonly default?: string;
-};
-
-const PLATFORM_OVERRIDES: Record<
-  Exclude<VariantAxis, 'platform'>,
-  Partial<Record<PlatformValue, PlatformOverride>>
-> = {
+const PLATFORM_OVERRIDES: PlatformOverrides = {
   layout: {
     // Web and desktop are restricted to the four desktop-shaped layouts —
     // the three mobile variants (mobile-drawer / bottom-tabs(-fab)) are
@@ -136,34 +107,6 @@ const PLATFORM_OVERRIDES: Record<
   ui: {},
   toastPosition: {},
 };
-
-function getEffectiveValues(
-  axis: VariantAxis,
-  platform: PlatformValue
-): readonly string[] {
-  if (axis === 'platform') return VARIANT_CHOICES.platform;
-  const override = PLATFORM_OVERRIDES[axis][platform];
-  return override?.values ?? VARIANT_CHOICES[axis];
-}
-
-function getEffectiveDefault(
-  axis: VariantAxis,
-  platform: PlatformValue
-): string {
-  if (axis === 'platform') return DEFAULT_VARIANTS.platform!;
-  const override = PLATFORM_OVERRIDES[axis][platform];
-  return override?.default ?? DEFAULT_VARIANTS[axis]!;
-}
-
-interface CliOptions {
-  targetDir: string;
-  projectName: string;
-  packageManager: 'pnpm' | 'npm' | 'bun';
-  features: FeatureFlags;
-  variants: VariantSelections;
-  installDeps: boolean;
-  initGit: boolean;
-}
 
 async function run(rawArgv: string[]): Promise<void> {
   const argv = parseArgs(rawArgv);
@@ -210,7 +153,7 @@ async function run(rawArgv: string[]): Promise<void> {
   }
 
   const features = await resolveFeatures(argv);
-  const variants = await resolveVariants(argv);
+  const variants = await resolveVariants(argv, VARIANT_CHOICES, PLATFORM_OVERRIDES);
   const packageManager = await resolvePackageManager(argv, variants);
   const wantInstall = await resolveBoolean(
     argv,
@@ -235,7 +178,7 @@ async function run(rawArgv: string[]): Promise<void> {
     initGit: wantGit,
   };
 
-  await scaffold(opts);
+  await scaffold(opts, TEMPLATE_DIR);
 
   const cwdRel = path.relative(process.cwd(), opts.targetDir);
   const steps: string[] = [];
@@ -254,422 +197,6 @@ async function run(rawArgv: string[]): Promise<void> {
 
   note(steps.join('\n'), 'Next steps');
   outro(kleur.green('Done.') + ' Happy hacking!');
-}
-
-async function promptProjectName(
-  fromArgv: string | undefined,
-  yes: boolean
-): Promise<string> {
-  if (fromArgv) {
-    // `.` / `./` are passed through unchanged; resolveProjectTarget() turns
-    // them into "scaffold into cwd" with a derived package name.
-    if (isCwdShortcut(fromArgv)) return fromArgv;
-    if (isValidPackageName(fromArgv)) return fromArgv;
-    return toValidPackageName(fromArgv);
-  }
-  if (yes) return 'my-eikon-app';
-  const name = await text({
-    message: 'Project name (or "." to use the current directory):',
-    placeholder: 'my-eikon-app',
-    initialValue: 'my-eikon-app',
-    validate(value) {
-      if (!value) return 'Required.';
-      if (isCwdShortcut(value)) return undefined;
-      if (!isValidPackageName(value))
-        return 'Must be a valid npm package name (lowercase, dashes, no spaces).';
-      return undefined;
-    },
-  });
-  if (isCancel(name)) {
-    cancel('Aborted.');
-    process.exit(1);
-  }
-  return name;
-}
-
-function isCwdShortcut(value: string): boolean {
-  return value === '.' || value === './';
-}
-
-async function resolveFeatures(argv: ParsedArgs): Promise<FeatureFlags> {
-  const flags: FeatureFlags = { supabase: false };
-
-  if (argv.supabase !== undefined) flags.supabase = argv.supabase;
-
-  if (!argv.yes && argv.supabase === undefined) {
-    const supabase = await select({
-      message: 'Include Supabase (auth + db + storage) scaffolding?',
-      initialValue: false as boolean,
-      options: [
-        { value: false, label: 'No — plain frontend only (recommended for new starters)' },
-        { value: true, label: 'Yes — include @supabase/supabase-js + client scaffold' },
-      ],
-    });
-    if (isCancel(supabase)) {
-      cancel('Aborted.');
-      process.exit(1);
-    }
-    flags.supabase = Boolean(supabase);
-  }
-
-  return flags;
-}
-
-async function resolveVariants(argv: ParsedArgs): Promise<VariantSelections> {
-  const out: VariantSelections = { ...DEFAULT_VARIANTS };
-  // Resolve `platform` FIRST so subsequent axes can default / restrict
-  // their accepted values per the chosen target. Order is enforced by
-  // walking `Object.keys(VARIANT_CHOICES)` which lists `platform` first.
-  const axes = Object.keys(VARIANT_CHOICES) as VariantAxis[];
-  for (const axis of axes) {
-    const platform = (out.platform ?? DEFAULT_VARIANTS.platform!) as PlatformValue;
-    const allowed = getEffectiveValues(axis, platform);
-    const effDefault = getEffectiveDefault(axis, platform);
-
-    // Snap any pre-set value (from --yes default-walk OR previous axis
-    // resolution) into the per-platform allowed set. E.g. when the user
-    // passes `--yes --platform mobile`, layout's seeded `'stacked'` would
-    // be invalid for mobile and gets snapped to `'mobile-drawer'`.
-    if (!allowed.includes(out[axis] ?? '')) {
-      out[axis] = effDefault;
-    }
-
-    const fromArgv = argv.variants?.[axis];
-    if (fromArgv !== undefined) {
-      // Argv values bypass the prompt but still respect the per-platform
-      // narrowing — pass through only if the user-supplied value is valid
-      // for the chosen platform; otherwise keep the snapped default and
-      // surface a one-line warning. Silent ignore would hide bugs.
-      if (allowed.includes(fromArgv)) {
-        out[axis] = fromArgv;
-      } else {
-        log.warn(
-          `--${axis}=${kleur.yellow(fromArgv)} is not valid for platform=${platform}.` +
-            ` Using ${kleur.cyan(effDefault)} instead.`
-        );
-      }
-      continue;
-    }
-    if (argv.yes) continue;
-    const choice = await select({
-      message: `Choose a ${axis} variant:`,
-      initialValue: out[axis] as string,
-      options: allowed.map((value) => ({
-        value,
-        label: value === effDefault ? `${value} (default)` : value,
-      })),
-    });
-    if (isCancel(choice)) {
-      cancel('Aborted.');
-      process.exit(1);
-    }
-    out[axis] = String(choice);
-  }
-  return out;
-}
-
-async function resolvePackageManager(
-  argv: ParsedArgs,
-  variants: VariantSelections
-): Promise<'pnpm' | 'npm' | 'bun'> {
-  // Desktop / mobile shells live in `apps/*` and are wired up via
-  // `pnpm-workspace.yaml` + `pnpm --filter` scripts in the root
-  // package.json. Neither npm nor bun has a drop-in equivalent for
-  // those filter calls, and rewriting the workspace topology to npm
-  // workspaces / bun workspaces is out of scope. Snap to pnpm with a
-  // visible warning so the user knows their `--pm` choice was overridden
-  // rather than silently ignored.
-  const platform = variants.platform;
-  const requiresPnpm = platform === 'desktop' || platform === 'mobile';
-
-  const snapIfNeeded = (chosen: 'pnpm' | 'npm' | 'bun'): 'pnpm' | 'npm' | 'bun' => {
-    if (requiresPnpm && chosen !== 'pnpm') {
-      log.warn(
-        `--pm=${kleur.yellow(chosen)} is not supported for platform=${kleur.yellow(
-          platform!
-        )} — apps/${platform}/ uses pnpm workspaces. Falling back to ${kleur.cyan(
-          'pnpm'
-        )}.`
-      );
-      return 'pnpm';
-    }
-    return chosen;
-  };
-
-  if (argv.pm) return snapIfNeeded(argv.pm);
-  if (argv.yes) return 'pnpm';
-  const pm = await select({
-    message: 'Package manager:',
-    initialValue: 'pnpm' as 'pnpm' | 'npm' | 'bun',
-    options: [
-      { value: 'pnpm', label: 'pnpm (recommended)' },
-      { value: 'npm', label: 'npm' },
-      { value: 'bun', label: 'bun' },
-    ],
-  });
-  if (isCancel(pm)) {
-    cancel('Aborted.');
-    process.exit(1);
-  }
-  return snapIfNeeded(pm);
-}
-
-async function resolveBoolean(
-  argv: ParsedArgs,
-  key: 'install' | 'git',
-  defaultValue: boolean,
-  message: string
-): Promise<boolean> {
-  const fromArgv = argv[key];
-  if (fromArgv !== undefined) return fromArgv;
-  if (argv.yes) return defaultValue;
-  const answer = await confirm({ message, initialValue: defaultValue });
-  if (isCancel(answer)) {
-    cancel('Aborted.');
-    process.exit(1);
-  }
-  return Boolean(answer);
-}
-
-async function scaffold(opts: CliOptions): Promise<void> {
-  const s = spinner();
-
-  s.start('Copying template files');
-  await mkdir(opts.targetDir, { recursive: true });
-  await copyTemplate({
-    src: TEMPLATE_DIR,
-    dest: opts.targetDir,
-    projectName: opts.projectName,
-  });
-  s.stop('Template copied');
-
-  s.start('Applying feature selection');
-  await stripFeatures(opts.targetDir, opts.features, opts.variants);
-  s.stop('Feature selection applied');
-
-  // Phase J: bake the chosen `--ui` library's components into the
-  // project. For `--ui custom` this is a no-op (the project keeps the
-  // self-authored Radix wrappers already in `src/shared/ui/`); for
-  // `--ui shadcn` / `--ui animate-ui` it swaps the seven replaceable
-  // primitives for the upstream-registry copies pre-baked under
-  // `template-snapshots/<ui>/`, drops `components.json` at the project
-  // root, and merges the snapshot's `package-deps.json` into the
-  // project's `package.json`.
-  //
-  // Scaffold step order:
-  //   stripFeatures → applyUiSnapshot → injectHtmlVariants → rewritePackageManagerFields
-  //
-  // - applyUiSnapshot runs AFTER stripFeatures so feature-strip doesn't
-  //   fight the snapshot files we're about to drop in.
-  // - applyUiSnapshot runs BEFORE rewritePackageManagerFields so the
-  //   deps merge happens on the same package.json the rewriter mutates.
-  // - The order between applyUiSnapshot and injectHtmlVariants is
-  //   convention rather than necessity — applyUiSnapshot only touches
-  //   `src/shared/ui/*.tsx`, `components.json`, and `package.json`,
-  //   while injectHtmlVariants only edits `index.html`. The two are
-  //   disjoint; if the snapshot ever starts rewriting `index.html` this
-  //   ordering MUST be preserved (snapshot first).
-  await applyUiSnapshot(opts.targetDir, opts.variants.ui ?? DEFAULT_VARIANTS.ui!);
-
-  // Phase I: stamp the picked design / layout onto `<html>` so the
-  // first paint renders without a flash and the runtime initialisers in
-  // `src/main.tsx` + `src/app/LayoutVariantContext.tsx` resolve to the
-  // same value. `default` design collapses to no class/data attrs,
-  // while `data-layout` is always stamped as the layout Context's
-  // initial value. The `ui` axis is NOT mirrored here — it's a
-  // scaffold-time file swap (Phase J), not a runtime style.
-  await injectHtmlVariants(opts.targetDir, opts.variants);
-
-  // Re-flavour `package.json` for the chosen package manager. No-op on
-  // pnpm (the template is already pnpm-flavoured); for npm/bun this
-  // rewrites `engines`, `packageManager`, and any `pnpm run` callsites
-  // in aggregate scripts (`check`, `ci`). Workspace-scoped scripts
-  // (`tauri:*`, `cap:*`) are pnpm-only — `resolvePackageManager` snaps
-  // `--pm` to pnpm on desktop/mobile so we never reach this with a
-  // non-pnpm PM on those platforms.
-  await rewritePackageManagerFields(opts.targetDir, opts.packageManager);
-
-  if (opts.initGit) {
-    s.start('Initializing git repository');
-    try {
-      const result = await initGit(opts.targetDir);
-      if (result.commitWarning) {
-        s.stop('Git repository initialized (no initial commit)');
-        log.warn(
-          `git commit skipped: ${result.commitWarning}. ` +
-            `Set user.email / user.name and run \`git commit\` manually.`
-        );
-      } else {
-        s.stop('Git repository initialized');
-      }
-    } catch (err) {
-      s.stop('Skipping git init (git not available or already initialized)');
-      log.warn(String(err));
-    }
-  }
-
-  if (opts.installDeps) {
-    s.start(`Installing dependencies with ${opts.packageManager}`);
-    try {
-      await installDeps(opts.targetDir, opts.packageManager);
-      s.stop('Dependencies installed');
-    } catch (err) {
-      s.stop(kleur.red('Dependency install failed'));
-      log.error(String(err));
-      log.info(
-        `You can retry manually: ${kleur.cyan(
-          `cd ${path.relative(process.cwd(), opts.targetDir)} && ${opts.packageManager} install`
-        )}`
-      );
-    }
-  }
-}
-
-interface ParsedArgs {
-  name?: string;
-  yes: boolean;
-  supabase?: boolean;
-  install?: boolean;
-  git?: boolean;
-  pm?: 'pnpm' | 'npm' | 'bun';
-  variants?: Partial<Record<VariantAxis, string>>;
-}
-
-function parseArgs(argv: string[]): ParsedArgs {
-  const out: ParsedArgs = { yes: false };
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i]!;
-    if (a === '-y' || a === '--yes') out.yes = true;
-    else if (a === '--supabase') out.supabase = true;
-    else if (a === '--no-supabase') out.supabase = false;
-    else if (a === '--install') out.install = true;
-    else if (a === '--no-install') out.install = false;
-    else if (a === '--git') out.git = true;
-    else if (a === '--no-git') out.git = false;
-    else if (a === '--pm') {
-      const next = argv[++i];
-      if (next === 'pnpm' || next === 'npm' || next === 'bun') out.pm = next;
-    } else if (a.startsWith('--pm=')) {
-      const v = a.slice('--pm='.length);
-      if (v === 'pnpm' || v === 'npm' || v === 'bun') out.pm = v;
-    } else if (tryParseVariant(a, argv, i, out)) {
-      // `tryParseVariant` consumes one or two argv positions and updates `out`.
-      if (a.indexOf('=') === -1) i += 1;
-    } else if (!a.startsWith('-') && out.name === undefined) {
-      out.name = a;
-    } else if (a.startsWith('-')) {
-      reportUnknownFlag(a);
-    }
-  }
-  return out;
-}
-
-/**
- * Every long-form flag the CLI recognises. Used to suggest a "did you
- * mean" candidate when the user typo's a flag name. Variant flags come
- * straight from `VARIANT_FLAG_ALIASES` so a future axis automatically
- * lands in the suggestion set without a second touch-point here.
- */
-function knownFlags(): readonly string[] {
-  const variantFlags: string[] = [];
-  for (const axis of Object.keys(VARIANT_FLAG_ALIASES) as VariantAxis[]) {
-    for (const alias of VARIANT_FLAG_ALIASES[axis]) {
-      variantFlags.push(`--${alias}`);
-    }
-  }
-  return [
-    '--yes',
-    '-y',
-    '--supabase',
-    '--no-supabase',
-    '--install',
-    '--no-install',
-    '--git',
-    '--no-git',
-    '--pm',
-    ...variantFlags,
-  ];
-}
-
-/**
- * Print a clear "Unknown flag: --x. Did you mean --y?" and exit non-zero.
- * The previous behaviour silently ignored typos, which meant
- * `create-eikon-react my-app --platfrom=mobile` ran as `web` with no
- * indication anything had gone wrong — the user thought they'd asked
- * for mobile and didn't notice until much later.
- */
-function reportUnknownFlag(typed: string): never {
-  const flagOnly = typed.split('=')[0]!;
-  const candidates = knownFlags();
-  let best: { flag: string; dist: number } | null = null;
-  for (const cand of candidates) {
-    const d = levenshtein(flagOnly, cand);
-    if (best === null || d < best.dist) best = { flag: cand, dist: d };
-  }
-  console.error(kleur.red(`Unknown flag: ${flagOnly}`));
-  if (best && best.dist <= Math.max(2, Math.floor(flagOnly.length / 3))) {
-    console.error(`Did you mean ${kleur.cyan(best.flag)}?`);
-  }
-  console.error(`Run ${kleur.cyan('create-eikon-react --help')} to see all flags.`);
-  process.exit(1);
-}
-
-function levenshtein(a: string, b: string): number {
-  if (a === b) return 0;
-  if (a.length === 0) return b.length;
-  if (b.length === 0) return a.length;
-  const prev = new Array<number>(b.length + 1);
-  const curr = new Array<number>(b.length + 1);
-  for (let j = 0; j <= b.length; j++) prev[j] = j;
-  for (let i = 1; i <= a.length; i++) {
-    curr[0] = i;
-    for (let j = 1; j <= b.length; j++) {
-      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      curr[j] = Math.min(curr[j - 1]! + 1, prev[j]! + 1, prev[j - 1]! + cost);
-    }
-    for (let j = 0; j <= b.length; j++) prev[j] = curr[j]!;
-  }
-  return prev[b.length]!;
-}
-
-/**
- * Parse one of the variant flags (`--design / --layout / --ui`) in either
- * `--flag value` or `--flag=value` form. Returns true if the token belonged
- * to a known variant axis (and was therefore consumed) regardless of
- * whether the value was valid.
- *
- * Always records the typed value when one was supplied (skipping only
- * tokens shaped like another flag, e.g. `--ui --design`), so
- * `resolveVariants` can produce a single, descriptive warning naming the
- * value, the axis, and the chosen default — visible in `--yes` mode
- * where there's no interactive re-prompt to soften the failure.
- */
-function tryParseVariant(
-  token: string,
-  argv: string[],
-  i: number,
-  out: ParsedArgs
-): boolean {
-  const axes = Object.keys(VARIANT_CHOICES) as VariantAxis[];
-  for (const axis of axes) {
-    for (const alias of VARIANT_FLAG_ALIASES[axis]) {
-      const longFlag = `--${alias}`;
-      let value: string | undefined;
-      if (token === longFlag) {
-        value = argv[i + 1];
-      } else if (token.startsWith(`${longFlag}=`)) {
-        value = token.slice(longFlag.length + 1);
-      } else {
-        continue;
-      }
-      if (value !== undefined && !value.startsWith('-')) {
-        out.variants ??= {};
-        out.variants[axis] = value;
-      }
-      return true;
-    }
-  }
-  return false;
 }
 
 run(process.argv.slice(2)).catch((err) => {

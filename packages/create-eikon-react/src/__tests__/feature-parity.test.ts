@@ -7,7 +7,7 @@
  *      for which features the scaffolder knows about).
  *   2. `PACKAGE_DEPS_BY_FEATURE` in `strip-features.ts` (npm deps removed
  *      when each feature is disabled).
- *   3. `resolveFeatures` in `index.ts` (reads each field from `argv` and
+ *   3. `resolveFeatures` in `cli-prompts.ts` (reads each field from `argv` and
  *      writes into the returned `flags` object).
  *
  * Adding a feature to (1) without updating (2) and (3) silently leaks
@@ -150,18 +150,18 @@ describe('FeatureFlags parity', () => {
     ).toEqual([]);
   });
 
-  it('resolveFeatures in index.ts assigns every FeatureFlags field', async () => {
+  it('resolveFeatures assigns every FeatureFlags field', async () => {
     // Audit Lane A close-out: `resolveFeatures` only knew about
     // `supabase`. Adding a future field to FeatureFlags without an
     // assignment line here would leave the field stuck at the literal
     // initial value forever, which silently disables the flag. This
-    // fence catches that.
-    const [stripSrc, indexSrc] = await Promise.all([
+    // fence catches that. (`resolveFeatures` lives in `cli-prompts.ts`.)
+    const [stripSrc, promptsSrc] = await Promise.all([
       readFile(path.join(SRC_ROOT, 'strip-features.ts'), 'utf8'),
-      readFile(path.join(SRC_ROOT, 'index.ts'), 'utf8'),
+      readFile(path.join(SRC_ROOT, 'cli-prompts.ts'), 'utf8'),
     ]);
     const declared = new Set(extractFeatureFlagFields(stripSrc));
-    const resolved = extractResolvedFields(indexSrc);
+    const resolved = extractResolvedFields(promptsSrc);
     const missing: string[] = [];
     for (const f of declared) {
       if (!resolved.has(f)) missing.push(f);

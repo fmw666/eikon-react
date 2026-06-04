@@ -2,6 +2,48 @@
   "schema_version": 2,
   "scans": [
     {
+      "date": "2026-06-04T17:30:00Z",
+      "mode": "full",
+      "skill_version": "3.0.0",
+      "total": 91,
+      "level": "EXCELLENT",
+      "total_loc": 56286,
+      "total_files": 432,
+      "project_scale": "LARGE",
+      "monorepo_packages": [
+        "template-react",
+        "preview-site",
+        "create-eikon-react"
+      ],
+      "refactoring_risk": 10,
+      "refactoring_risk_level": "MINIMAL",
+      "ai_extension_risk": 7,
+      "ai_extension_risk_level": "MINIMAL",
+      "perf_debt_signals": 8,
+      "prohibition_count": 22,
+      "context_artifact_score": 10,
+      "dimensions": {
+        "module_srp": 6,
+        "pattern_consistency": 14,
+        "type_safety_contracts": 11,
+        "test_coverage_invariants": 12,
+        "ai_context_artifacts": 10,
+        "architecture": 8,
+        "dependency_health": 7,
+        "prohibition_density": 6,
+        "naming": 6,
+        "duplication": 5,
+        "determinism": 3,
+        "security_tooling": 3
+      },
+      "top_issues": [
+        "module SRP held at band 6/14: 7 files >4000 tok remain (Nav 6573, i18n data, icons data, ChangedFilesTree 5258, e2e-scenarios data, a test, useFooterSpotlight) + 66 files >2000 — coarse size bands + cohesive data/test files cap the score without harmful fragmentation",
+        "type safety 11/12: 145 `as` assertions (mostly legitimate DOM/CodeMirror narrowing); clearing to <20 would require unsafe changes",
+        "Nav.tsx and ChangedFilesTree.tsx are the only two genuinely-unsplit god files; both internal to preview-site"
+      ],
+      "notes": "Post-workflow remediation (21-agent orchestration + manual cleanup). DONE: broke the preview-site circular dep (now 0 cycles in all 3 packages); 13 god files split cleanly preserving public exports (Footer 8904->3734, builder 6527->1157, index 5787->1613, e2e 10953->2726, Toolbar/FileExplorer/Hero/ScreenContent/handlers/simulate-strip/PlaygroundSection/ChangelogPage/apply-ui-snapshot/sync-ui-snapshots), dropping files>4000tok from 20 to 7; removed 4 genuinely-unused deps (@radix-ui/react-label, @tanstack/react-query, clsx, tailwind-merge) + 6 orphan files (device-mockups, ThemeToggle); expanded root AGENTS.md 39->129 lines; added preview-site/.agent/rules/00-structure.md (PR-PV-001..005). Cleaned up 2 incomplete parallel-agent splits (Nav, ChangedFilesTree) that had left orphan/duplicate files. VERIFIED GREEN: typecheck + 707 tests + lint (--max-warnings 0) + 0 madge cycles, all 3 packages; duplication 1.98%. Honest ceiling: a literal 100 would require fragmenting ~60 cohesive files (i18n tables, icon maps, UI showcases) below 1200 tokens and stripping ~125 legitimate `as` assertions, both of which degrade maintainability — declined as harmful."
+    },
+    {
       "date": "2026-06-04T00:00:00Z",
       "mode": "full",
       "skill_version": "3.0.0",
@@ -10,7 +52,11 @@
       "total_loc": 56369,
       "total_files": 359,
       "project_scale": "LARGE",
-      "monorepo_packages": ["template-react", "preview-site", "create-eikon-react"],
+      "monorepo_packages": [
+        "template-react",
+        "preview-site",
+        "create-eikon-react"
+      ],
       "refactoring_risk": 17,
       "refactoring_risk_level": "LOW",
       "ai_extension_risk": 13,

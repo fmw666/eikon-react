@@ -32,13 +32,27 @@
  * The seven primitives are the same set listed in
  * `apply-ui-snapshot.ts:REPLACEABLE_UI_FILES` — keep these two lists
  * in sync.
+ *
+ * Cohesive internals live in co-located sibling modules (data tables in
+ * `*.constants.mjs`, fs/normalisation in `*.fs.mjs`, post-harvest
+ * patchers in `*.patchers.mjs`). This file keeps the orchestration.
  */
 
 import { spawn } from 'node:child_process';
-import { copyFile, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { COMPONENTS_JSON } from './sync-ui-snapshots.constants.mjs';
+import { copyTreeWithRewrites, pathExists, sortObj } from './sync-ui-snapshots.fs.mjs';
+import {
+  assertPatched,
+  ensureCardHoverableClass,
+  ensureCardTitleIsHeading,
+  ensureToasterExportsToast,
+  generateAnimateUiShims,
+} from './sync-ui-snapshots.patchers.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,6 +60,10 @@ const __dirname = path.dirname(__filename);
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 const SNAPSHOTS_ROOT = path.join(PACKAGE_ROOT, 'template-snapshots');
 
+// COMPONENTS and ANIMATE_UI_REGISTRY_MAP stay inline here (not in the
+// sibling constants module) because the parity test in
+// `ui-snapshot-parity.test.ts` reads them by source-text search from
+// THIS file — they are the registry contract this script owns.
 const COMPONENTS = [
   'button',
   'dialog',
@@ -71,13 +89,6 @@ const COMPONENTS = [
   'alert',
 ];
 
-// Map upstream basename → our canonical basename. shadcn ships sonner.tsx,
-// animate-ui ships sonner.tsx — we normalise to toaster.tsx because the
-// rest of the template imports `@/shared/ui/toaster`.
-const FILENAME_REWRITE = {
-  'sonner.tsx': 'toaster.tsx',
-};
-
 // Animate-UI's registry doesn't expose components by simple slugs —
 // items are named like `components-buttons-button`,
 // `components-radix-dialog`, etc. (verified via
@@ -89,7 +100,7 @@ const FILENAME_REWRITE = {
 // animate-ui's native components write to nested paths like
 // `src/components/animate-ui/components/buttons/button.tsx`, not
 // `src/shared/ui/button.tsx`. We bridge that with re-export shims —
-// see ANIMATE_UI_NATIVE_TARGETS below.
+// see ANIMATE_UI_NATIVE_TARGETS in sync-ui-snapshots.constants.mjs.
 const ANIMATE_UI_REGISTRY_MAP = {
   button: 'https://animate-ui.com/r/components-buttons-button.json',
   dialog: 'https://animate-ui.com/r/components-radix-dialog.json',
@@ -116,48 +127,6 @@ const ANIMATE_UI_REGISTRY_MAP = {
   tooltip: 'tooltip',
   popover: 'popover',
   alert: 'alert',
-};
-
-// Minimal components.json each temp project needs so the registry CLI
-// knows where to write files. We use the same alias shape as the real
-// scaffolded project so the harvested files don't need rewriting.
-const COMPONENTS_JSON = {
-  $schema: 'https://ui.shadcn.com/schema.json',
-  style: 'new-york',
-  rsc: false,
-  tsx: true,
-  tailwind: {
-    config: '',
-    css: 'src/styles/index.css',
-    baseColor: 'neutral',
-    cssVariables: true,
-    prefix: '',
-  },
-  aliases: {
-    components: '@/shared/ui',
-    utils: '@/shared/lib/cn',
-    ui: '@/shared/ui',
-    lib: '@/shared/lib',
-    hooks: '@/shared/hooks',
-  },
-};
-
-// Animate-UI native components live under src/components/animate-ui/...
-// rather than src/shared/ui/. To keep the template's `@/shared/ui/<name>`
-// imports working, we generate a thin re-export shim per native component
-// at src/shared/ui/<name>.tsx that just `export * from` the nested file.
-// This is option A from the design discussion — keeps animate-ui's
-// internal layering intact (it imports primitives via
-// `@/components/animate-ui/primitives/...` and we don't fight that),
-// while still letting the rest of the template say `import { Button }
-// from '@/shared/ui/button'`. Components animate-ui doesn't ship
-// (card/command/toaster) come from the shadcn fallback and land at
-// src/shared/ui/ directly — no shim needed there.
-const ANIMATE_UI_NATIVE_TARGETS = {
-  'button.tsx': 'components/animate-ui/components/buttons/button',
-  'dialog.tsx': 'components/animate-ui/components/radix/dialog',
-  'tabs.tsx': 'components/animate-ui/components/radix/tabs',
-  'sheet.tsx': 'components/animate-ui/components/radix/sheet',
 };
 
 // Pin the shadcn CLI to a specific minor so a maintainer running this
@@ -368,237 +337,13 @@ async function harvestSnapshot(tmp, ui) {
   }
 
   // Each post-harvest patcher returns { changed: boolean } and we abort
-  // when a patch we expected to apply silently no-op'd — the most
-  // dangerous failure mode here is "upstream layout changed → regex
-  // didn't match → patcher returned without touching the file → snapshot
-  // ships missing the project's contract". `changed: false` can ALSO
-  // mean "patch already applied" (idempotent re-run), but on a fresh
-  // npx-shadcn-add harvest that's also a sign something is wrong, so
-  // either case fails loud.
+  // when a patch we expected to apply silently no-op'd — see
+  // sync-ui-snapshots.patchers.mjs for the rationale.
   assertPatched(ui, 'ensureToasterExportsToast', await ensureToasterExportsToast(dest));
   assertPatched(ui, 'ensureCardHoverableClass', await ensureCardHoverableClass(dest));
   assertPatched(ui, 'ensureCardTitleIsHeading', await ensureCardTitleIsHeading(dest));
 
   return { dest, fileCount };
-}
-
-function assertPatched(ui, name, result) {
-  if (!result || typeof result.changed !== 'boolean') {
-    throw new Error(`[${ui}] ${name}: expected { changed: boolean } result`);
-  }
-  if (!result.changed) {
-    throw new Error(
-      `[${ui}] ${name}: did not change the snapshot (reason: ${result.reason ?? 'unknown'}). ` +
-        `Either the upstream registry layout changed and the regex needs updating, ` +
-        `or the file the patcher targets is missing from the harvest.`
-    );
-  }
-}
-
-async function ensureToasterExportsToast(dest) {
-  const toasterPath = path.join(dest, 'src', 'shared', 'ui', 'toaster.tsx');
-  if (!(await pathExists(toasterPath))) {
-    return { changed: false, reason: 'toaster.tsx missing from snapshot' };
-  }
-  const body = await readFile(toasterPath, 'utf8');
-  if (/\bexport\s*\{\s*toast\s*\}/.test(body)) {
-    // Upstream already exports `toast` — no patch needed. Treat as a
-    // legitimate change so the driver doesn't false-alarm.
-    return { changed: true, reason: 'upstream already exports toast' };
-  }
-  const trailingNewline = body.endsWith('\n') ? '' : '\n';
-  const appended =
-    body +
-    trailingNewline +
-    `// Re-export the imperative \`toast()\` helper from sonner so the\n` +
-    `// template's \`@/shared/ui/toaster\` contract matches across all\n` +
-    `// \`--ui\` choices. Inserted by sync-ui-snapshots.mjs.\n` +
-    `export { toast } from 'sonner';\n`;
-  await writeFile(toasterPath, appended, 'utf8');
-  return { changed: true };
-}
-
-async function ensureCardHoverableClass(dest) {
-  const cardPath = path.join(dest, 'src', 'shared', 'ui', 'card.tsx');
-  if (!(await pathExists(cardPath))) {
-    return { changed: false, reason: 'card.tsx missing from snapshot' };
-  }
-  const body = await readFile(cardPath, 'utf8');
-  if (/\bcardHoverableClass\b/.test(body)) {
-    return { changed: true, reason: 'upstream already exports cardHoverableClass' };
-  }
-  const trailingNewline = body.endsWith('\n') ? '' : '\n';
-  const appended =
-    body +
-    trailingNewline +
-    `// Opt-in hover-lift class consumed by the template's HomePage,\n` +
-    `// TaskCard and CardShowcase. Defined here so the template's\n` +
-    `// \`@/shared/ui/card\` contract is identical across all \`--ui\`\n` +
-    `// choices. Inserted by sync-ui-snapshots.mjs.\n` +
-    `export const cardHoverableClass =\n` +
-    `  'transition-shadow duration-200 hover:[box-shadow:var(--surface-hover-shadow)] active:[box-shadow:var(--surface-active-shadow)]';\n`;
-  await writeFile(cardPath, appended, 'utf8');
-  return { changed: true };
-}
-
-async function ensureCardTitleIsHeading(dest) {
-  const cardPath = path.join(dest, 'src', 'shared', 'ui', 'card.tsx');
-  if (!(await pathExists(cardPath))) {
-    return { changed: false, reason: 'card.tsx missing from snapshot' };
-  }
-  const body = await readFile(cardPath, 'utf8');
-  // Already an h-element? Upstream did the right thing on its own.
-  if (/function\s+CardTitle[\s\S]*?<h[1-6]\b/.test(body)) {
-    return { changed: true, reason: 'upstream already renders CardTitle as <h*>' };
-  }
-  // Use [\s\S]*? for cross-line content — `[^)]*?` stops short on the
-  // `)` inside the type annotation. We match the function signature's
-  // `<"div">` annotation and the JSX `<div ... />` that follows, and
-  // rewrite both to h3.
-  const next = body.replace(
-    /(function\s+CardTitle\s*\([\s\S]*?React\.ComponentProps<")div("\s*>[\s\S]*?return\s*\(\s*)<div([\s\S]*?\/>)/,
-    '$1h3$2<h3$3'
-  );
-  if (next === body) {
-    // Pattern didn't match. The most likely cause is an upstream layout
-    // change (shadcn switched away from `React.ComponentProps<"div">`
-    // or stopped using a single `return (<div ... />)` body). Bail loud
-    // — silently shipping a snapshot whose CardTitle is still a `<div>`
-    // would break the template's structural a11y test in a way that's
-    // hard to trace back to this script.
-    return {
-      changed: false,
-      reason:
-        'CardTitle regex did not match — upstream shadcn layout likely changed; ' +
-        'inspect template-snapshots/<ui>/src/shared/ui/card.tsx and update the regex.',
-    };
-  }
-  await writeFile(cardPath, next, 'utf8');
-  return { changed: true };
-}
-
-async function generateAnimateUiShims(dest) {
-  const shimDir = path.join(dest, 'src', 'shared', 'ui');
-  await mkdir(shimDir, { recursive: true });
-  let count = 0;
-  for (const [filename, targetRel] of Object.entries(ANIMATE_UI_NATIVE_TARGETS)) {
-    const targetAbs = path.join(dest, 'src', `${targetRel}.tsx`);
-    // Only write the shim when animate-ui actually shipped the
-    // component. If the registry CLI fell back to plain shadcn (no
-    // native animate-ui version available), shadcn's file at
-    // src/shared/ui/<filename> is the answer — leave it alone.
-    if (!(await pathExists(targetAbs))) continue;
-    const shimPath = path.join(shimDir, filename);
-    const importPath = `@/${targetRel}`;
-    const body =
-      `// Generated by sync-ui-snapshots.mjs — re-export shim around\n` +
-      `// animate-ui's native component at ${importPath}. Edit the\n` +
-      `// underlying file (or pick \`--ui custom\`/\`--ui shadcn\`) to\n` +
-      `// change behaviour; this file is overwritten on next sync.\n` +
-      `export * from '${importPath}';\n`;
-    await writeFile(shimPath, body, 'utf8');
-    count += 1;
-  }
-  return { count };
-}
-
-async function copyTreeWithRewrites(src, dest) {
-  await mkdir(dest, { recursive: true });
-  const entries = await readdir(src, { withFileTypes: true });
-  let count = 0;
-  for (const e of entries) {
-    const s = path.join(src, e.name);
-    // Skip the placeholder index.css we wrote into the temp project so
-    // the registry CLI didn't fail on its absence — it's not part of
-    // the snapshot.
-    if (e.name === 'index.css' && path.basename(path.dirname(s)) === 'styles') continue;
-    if (e.isDirectory()) {
-      const sub = await copyTreeWithRewrites(s, path.join(dest, e.name));
-      count += sub;
-    } else if (e.isFile()) {
-      const renamed = FILENAME_REWRITE[e.name] ?? e.name;
-      const d = path.join(dest, renamed);
-      let body = await readFile(s, 'utf8');
-      // If we renamed sonner → toaster, rewrite project-internal import
-      // paths to the renamed file (e.g. `@/shared/ui/sonner` →
-      // `@/shared/ui/toaster`, `'./sonner'` → `'./toaster'`). DO NOT
-      // touch bare `'sonner'` imports — that's the npm package name and
-      // must stay intact.
-      if (e.name !== renamed) {
-        body = body
-          .replace(/(@\/shared\/ui\/)sonner\b/g, '$1toaster')
-          .replace(/(['"])\.\/sonner(['"])/g, '$1./toaster$2');
-      }
-      body = normaliseSnapshotSource(body);
-      await writeFile(d, body, 'utf8');
-      count += 1;
-    }
-  }
-  return count;
-}
-
-async function pathExists(p) {
-  try {
-    await stat(p);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-// Post-process upstream registry source so it survives the template's
-// strict tsconfig flags. Two narrow rewrites, both safe to re-apply:
-//
-// 1. Drop `import * as React from "react"` when nothing in the file
-//    references `React.` — registry files include the side-import for
-//    legacy compatibility, but with `jsx: "react-jsx"` it isn't needed,
-//    and `noUnusedLocals` (TS6133) blows up on it.
-//
-// 2. Mark known type-only re-exports as `type`-imports — needed under
-//    `verbatimModuleSyntax: true` (TS1484). The list is hard-coded
-//    rather than inferred because regex-level type-vs-value detection
-//    is unreliable; if upstream adds a new type-only name, the e2e
-//    typecheck will flag it and we extend this list.
-const TYPE_ONLY_IMPORT_NAMES = ['WithAsChild'];
-
-function normaliseSnapshotSource(body) {
-  let next = body;
-
-  // (1) Drop unused `import * as React from "react"`
-  const reactImport = /^import \* as React from ['"]react['"];?\s*\n/m;
-  if (reactImport.test(next)) {
-    const withoutImport = next.replace(reactImport, '');
-    if (!/\bReact\./.test(withoutImport)) {
-      next = withoutImport;
-    }
-  }
-
-  // (1b) If `React.` is referenced but no React import remains, prepend
-  //      a type-only import. shadcn's toaster uses `React.CSSProperties`
-  //      without importing React (it leans on the legacy global, which
-  //      isn't there under `jsx: react-jsx`).
-  if (/\bReact\./.test(next) && !/from ['"]react['"]/.test(next)) {
-    next = `import type * as React from 'react';\n` + next;
-  }
-
-  // (2) Convert known type-only names inside non-type imports to
-  //     `type X` named imports. Matches `{ A, X, B }` → `{ A, type X, B }`
-  //     when the import statement isn't already `import type {...}`.
-  for (const name of TYPE_ONLY_IMPORT_NAMES) {
-    const re = new RegExp(
-      `(import\\s+(?!type\\s)\\{[^}]*?)\\b(?<!type )${name}\\b([^}]*\\}\\s*from\\s+['"][^'"]+['"];?)`,
-      'g'
-    );
-    next = next.replace(re, (_match, before, after) => `${before}type ${name}${after}`);
-  }
-
-  return next;
-}
-
-function sortObj(obj) {
-  const out = {};
-  for (const k of Object.keys(obj).sort()) out[k] = obj[k];
-  return out;
 }
 
 run().catch((err) => {

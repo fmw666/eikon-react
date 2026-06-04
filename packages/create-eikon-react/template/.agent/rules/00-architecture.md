@@ -111,3 +111,16 @@ enforced as private by `eslint-plugin-import`.
 - The piece is glue between many features (auth context, analytics) → `src/shared/` (potentially a `shared/<area>/`).
 
 When in doubt, prefer creating a feature; "promote to shared" is a cheap later refactor, but "split a feature back apart" is expensive.
+
+## Prohibitions (grep-verifiable)
+
+Concrete `❌` rules, each with a backticked pattern you can `rg` over `src/` and
+an index (`PR-NNN`) so a regressing PR can name the rule it broke. These restate
+the import-boundary section above in enforceable form; the executable fence is
+[`__tests__/structure/boundary-imports.test.ts`](../../__tests__/structure/boundary-imports.test.ts)
+(ripgrep needs `-P` for the look-ahead patterns).
+
+- ❌ PR-001: `from '@/features/<name>/<deep>'` — cross-feature imports must target the barrel `@/features/<name>` or `@/features/<name>/routes`, never a deep path. rg: `from ['"]@/features/[^'"]+/(?!index|routes)['"]`
+- ❌ PR-002: `@/features/*` imported from `src/shared/**` — `shared/` is leaf-level and must not depend on features. rg (inside `src/shared/`): `from ['"]@/features/`
+- ❌ PR-003: `@/features/<name>/components/...` from `src/app/**` — the app shell consumes a feature only via its barrel or `routes`. rg (inside `src/app/`): `from ['"]@/features/[^'"]+/(?!index|routes)`
+- ❌ PR-004: `from '@/styles/...'` anywhere but `src/main.tsx` — styles are a side-effect import owned solely by the entrypoint. rg: `from ['"]@/styles/`

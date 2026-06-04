@@ -17,319 +17,57 @@
  *                        the entire changed-files tree + per-file diff
  *                        — we do NOT call the contents API per file.
  *
- * CACHE STRATEGY
+ * COMPOSITION
  *
- *   We layer three tiers, in this order on every read:
+ *   The mechanics live in three internal siblings so this file stays a
+ *   thin orchestration layer. They're stitched back together here so the
+ *   public `@/lib/github` import path and exports are unchanged:
  *
- *     1.  Memory map (`MEMO`) — process-lifetime, instant.
- *     2.  localStorage         — survives reloads, JSON-serialised under
- *                                a single namespaced key so a future
- *                                schema bump can bulk-invalidate.
- *     3.  Network              — fetch + write back through both layers.
- *
- *   TTLs differ by endpoint because their immutability differs:
- *
- *     - releases list:  60 minutes — releases CAN be added / re-tagged,
- *                       but the marketing changelog never needs sub-
- *                       hour freshness. The previous 5-minute TTL was
- *                       too aggressive against GitHub's anonymous
- *                       60-req/hr/IP quota: a dozen simultaneous
- *                       visitors with a 5-minute window guaranteed
- *                       rate-limit lockouts inside the same hour.
- *                       60 minutes lets cached visitors share work
- *                       and keeps fresh-data latency acceptable for
- *                       a changelog (a release goes stale in hours,
- *                       not seconds).
- *     - compare(A,B):   7 days   — both endpoints of a tag→tag compare
- *                       are immutable refs; the diff between them is
- *                       cacheable for as long as we like. We cap at a
- *                       week mostly to bound storage growth.
- *
- *   Storage failures (private mode, quota exceeded) are swallowed; the
- *   memory layer is always available so a single visit still benefits
- *   from cache hits even when localStorage is unusable.
- *
- *   We do NOT use ETags / If-None-Match — the simpler TTL model is
- *   plenty for a public marketing-side changelog and avoids a class
- *   of "stale despite 304" bugs.
+ *     - github-types.ts  — public payload shapes (GitHubRelease, etc.).
+ *     - github-cache.ts  — three-tier memory/localStorage/TTL cache; the
+ *                          per-endpoint TTL rationale (60 min releases,
+ *                          7 day compares) lives in that file's header.
+ *     - github-http.ts   — fetch wrapper + typed RateLimit/NotFound errors.
  *
  * STALE-WHILE-ERROR FALLBACK
  *
- *   When a network call fails (rate-limit, offline, GitHub outage),
- *   we don't blow away the page — we serve the LAST cached value
- *   even if its TTL has expired (`cacheGetStale`). The visitor sees
- *   slightly-old data instead of an empty error panel, which is the
- *   right trade for a read-only marketing surface where data
- *   freshness is far less valuable than "the page still works".
- *   Only when there's NO cache at all (cold cache + rate-limited)
- *   does the original error propagate to the UI.
- *
- * NETWORK
- *
- *   We send `Accept: application/vnd.github+json` (the documented
- *   modern content-type) and an `X-GitHub-Api-Version` pin so any
- *   future breaking version bump on GitHub's side doesn't silently
- *   change our payload shape. No auth header — anonymous calls
- *   (60/hr per IP) are sufficient for cached read-mostly traffic on
- *   a single repo. A future iteration can add a server-side proxy
- *   if/when this becomes a bottleneck.
+ *   When a network call fails (rate-limit, offline, GitHub outage), we
+ *   don't blow away the page — we serve the LAST cached value even if its
+ *   TTL has expired (`cacheGetStale`). The visitor sees slightly-old data
+ *   instead of an empty error panel, the right trade for a read-only
+ *   marketing surface. Only when there's NO cache at all (cold cache +
+ *   rate-limited) does the original error propagate to the UI.
  */
 
 import { isGithubConfigured, SITE } from '@/landing/site-config';
 
-// ---------------------------------------------------------------------------
-// Public types — narrow on purpose. We only surface the fields the UI
-// actually consumes so adding/removing a column in the future is a
-// localized diff instead of touching every consumer.
-// ---------------------------------------------------------------------------
+import {
+  cacheGet,
+  cacheGetStale,
+  cacheSet,
+  TTL,
+} from './github-cache';
+import { ghFetch, NotFoundError } from './github-http';
+import type {
+  CompareFile,
+  CompareResult,
+  FileChangeStatus,
+  GitHubRelease,
+} from './github-types';
 
-export interface GitHubRelease {
-  /** Stable identifier — the immutable tag this release was cut from. */
-  tagName: string;
-  /** Human-friendly title; falls back to `tagName` when omitted. */
-  name: string;
-  /** ISO-8601 timestamp; used for the relative-date subtitle. */
-  publishedAt: string;
-  /** Release notes (markdown). May be empty. */
-  body: string;
-  /** Public link back to the release page on github.com. */
-  htmlUrl: string;
-  /** Whether GitHub flagged this as a pre-release. Surfaced as a badge. */
-  prerelease: boolean;
-  /** Whether GitHub flagged this as a draft. We filter these out by default. */
-  draft: boolean;
-}
-
-export type FileChangeStatus =
-  | 'added'
-  | 'removed'
-  | 'modified'
-  | 'renamed'
-  | 'copied'
-  | 'changed'
-  | 'unchanged';
-
-export interface CompareFile {
-  /** Path inside the repo at the head ref (or base ref for `removed`). */
-  filename: string;
-  /** Previous filename when `status === 'renamed'`, else undefined. */
-  previousFilename?: string;
-  status: FileChangeStatus;
-  additions: number;
-  deletions: number;
-  changes: number;
-  /**
-   * Unified-diff text. May be undefined for binary files or for files
-   * whose patch was truncated by GitHub's 1MB-per-file cap; the UI
-   * gracefully degrades to "no preview available" in that case.
-   */
-  patch?: string;
-}
-
-export interface CompareResult {
-  base: string;
-  head: string;
-  /** GitHub's coarse comparison status: ahead | behind | identical | diverged. */
-  status: string;
-  aheadBy: number;
-  behindBy: number;
-  totalCommits: number;
-  files: CompareFile[];
-  htmlUrl: string;
-}
-
-// ---------------------------------------------------------------------------
-// Cache plumbing
-// ---------------------------------------------------------------------------
-
-interface CacheEntry<T> {
-  data: T;
-  /** Epoch-ms at which this entry was written. */
-  ts: number;
-}
-
-interface CacheBlob {
-  /** Schema version; bump to force-invalidate on shape changes. */
-  v: 1;
-  entries: Record<string, CacheEntry<unknown>>;
-}
-
-const STORAGE_KEY = 'eikon.changelog.cache.v1';
-
-/** Per-endpoint TTL in milliseconds. See file header for rationale. */
-const TTL = {
-  releases: 60 * 60 * 1000, // 60 min — anonymous quota is 60 req/hr/IP
-  compare: 7 * 24 * 60 * 60 * 1000, // 7 days
-} as const;
-
-const MEMO = new Map<string, CacheEntry<unknown>>();
-
-function readBlob(): CacheBlob {
-  if (typeof window === 'undefined') return { v: 1, entries: {} };
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { v: 1, entries: {} };
-    const parsed = JSON.parse(raw) as Partial<CacheBlob>;
-    if (!parsed || parsed.v !== 1 || typeof parsed.entries !== 'object') {
-      return { v: 1, entries: {} };
-    }
-    return parsed as CacheBlob;
-  } catch {
-    return { v: 1, entries: {} };
-  }
-}
-
-function writeBlob(blob: CacheBlob): void {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(blob));
-  } catch {
-    // Quota / private-mode failures are non-fatal — memory cache still
-    // makes the same-tab session feel responsive.
-  }
-}
-
-function cacheGet<T>(key: string, ttl: number): T | null {
-  const now = Date.now();
-  const fromMemo = MEMO.get(key);
-  if (fromMemo && now - fromMemo.ts < ttl) return fromMemo.data as T;
-
-  const blob = readBlob();
-  const stored = blob.entries[key];
-  if (!stored || now - stored.ts >= ttl) return null;
-  // Promote to memory so subsequent reads in the same session are hot.
-  MEMO.set(key, stored);
-  return stored.data as T;
-}
-
-/**
- * Read cache IGNORING the TTL — used by the stale-while-error fallback.
- * Returns whatever's there even if it's expired. Callers should only
- * reach for this AFTER a network attempt has failed (e.g. rate limit,
- * offline) — surfacing arbitrarily-old data is a deliberate degradation,
- * not a happy-path read.
- */
-function cacheGetStale<T>(key: string): T | null {
-  const fromMemo = MEMO.get(key);
-  if (fromMemo) return fromMemo.data as T;
-
-  const blob = readBlob();
-  const stored = blob.entries[key];
-  if (!stored) return null;
-  // Promote so subsequent reads in this session don't re-parse the blob.
-  MEMO.set(key, stored);
-  return stored.data as T;
-}
-
-function cacheSet<T>(key: string, data: T): void {
-  const entry: CacheEntry<T> = { data, ts: Date.now() };
-  MEMO.set(key, entry);
-  const blob = readBlob();
-  blob.entries[key] = entry;
-  writeBlob(blob);
-}
-
-/**
- * Force-purge a single cache key. Exposed so the UI's "refresh" affordance
- * can re-fetch even within the TTL window.
- */
-export function invalidateCacheKey(key: string): void {
-  MEMO.delete(key);
-  const blob = readBlob();
-  if (blob.entries[key]) {
-    delete blob.entries[key];
-    writeBlob(blob);
-  }
-}
-
-/** Bulk-purge all cached changelog data. Used by the "refresh" button. */
-export function invalidateAllChangelogCache(): void {
-  MEMO.clear();
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // ignore
-  }
-}
-
-// ---------------------------------------------------------------------------
-// HTTP plumbing
-// ---------------------------------------------------------------------------
-
-const REQUEST_HEADERS: HeadersInit = {
-  Accept: 'application/vnd.github+json',
-  'X-GitHub-Api-Version': '2022-11-28',
-};
-
-/**
- * Thin fetch wrapper that surfaces a consistent error model:
- *
- *   - HTTP 200-299: returns parsed JSON.
- *   - HTTP 403 with rate-limit headers: throws a typed
- *     `RateLimitError` so the UI can render a tailored message.
- *   - HTTP 404: throws with `notFound: true` so the picker can
- *     gracefully fall back when a tag was deleted upstream.
- *   - Anything else: throws a generic Error with the response body
- *     attached as message.
- */
-async function ghFetch<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const res = await fetch(url, {
-    headers: REQUEST_HEADERS,
-    signal,
-  });
-  if (res.status === 200) return (await res.json()) as T;
-  if (res.status === 403) {
-    const rem = res.headers.get('X-RateLimit-Remaining');
-    if (rem === '0') {
-      const reset = res.headers.get('X-RateLimit-Reset');
-      throw new RateLimitError(
-        reset ? new Date(Number(reset) * 1000) : null
-      );
-    }
-  }
-  if (res.status === 404) {
-    throw new NotFoundError(url);
-  }
-  let body = '';
-  try {
-    body = await res.text();
-  } catch {
-    // ignore — we'll just include the status code below
-  }
-  throw new Error(`GitHub ${res.status}: ${body || res.statusText}`);
-}
-
-export class RateLimitError extends Error {
-  resetAt: Date | null;
-  constructor(resetAt: Date | null) {
-    super('GitHub rate limit reached. Try again later.');
-    this.name = 'RateLimitError';
-    this.resetAt = resetAt;
-  }
-}
-
-/**
- * Thrown when GitHub returns 404. The two common reasons we hit this:
- *
- *   - The configured repo (`SITE.github.owner/repo`) doesn't exist or
- *     is private — the very first `listReleases()` call returns 404
- *     for the whole repo path. The Changelog UI catches this case and
- *     renders the empty-state CTA pointing the user back to GitHub
- *     instead of a scary red error panel.
- *   - One of the refs the user picked has been deleted upstream
- *     between cache write and read. We surface this on the compare
- *     pane only — the picker still works against the rest of the
- *     release list.
- */
-export class NotFoundError extends Error {
-  url: string;
-  constructor(url: string) {
-    super(`Not found: ${url}`);
-    this.name = 'NotFoundError';
-    this.url = url;
-  }
-}
+// Re-export the public surface so consumers keep importing from
+// `@/lib/github` with zero changes.
+export type {
+  CompareFile,
+  CompareResult,
+  FileChangeStatus,
+  GitHubRelease,
+} from './github-types';
+export {
+  invalidateAllChangelogCache,
+  invalidateCacheKey,
+} from './github-cache';
+export { NotFoundError, RateLimitError } from './github-http';
 
 // ---------------------------------------------------------------------------
 // Endpoint: releases
