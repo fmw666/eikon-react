@@ -150,3 +150,13 @@ Use a plain Tailwind utility (`transition-colors`, `transition-transform`, `dura
 - Don't add a parallel "design system" folder. Everything ui lives under `src/shared/ui/`.
 - Don't render `motion.*` components inside loops without keys — `<AnimatePresence>` requires stable keys.
 - Don't mix libraries — once `--ui` is chosen, keep all primitives under that library. Mixing shadcn + animate-ui in the same project means two motion philosophies fighting each other.
+
+## Prohibitions (grep-verifiable)
+
+Concrete `❌` rules with a backticked, `rg`-able pattern and a `PR-NNN` index so a
+regressing PR can name the rule it broke. These restate the "Don't" section above
+in enforceable form.
+
+- ❌ PR-020: `from 'framer-motion'` — use `motion` (the `motion/react` entrypoint) only. rg: `from ['"]framer-motion['"]`
+- ❌ PR-021: `from 'react-spring' | '@react-spring/*' | 'gsap'` — a single animation library (`motion`). rg: `from ['"](react-spring|@react-spring/web|gsap)['"]`
+- ❌ PR-022: `from 'react-hot-toast' | 'react-toastify' | 'notistack'` — toasts go through `@/shared/ui/toaster` (Sonner). rg: `from ['"](react-hot-toast|react-toastify|notistack)['"]`

@@ -146,3 +146,13 @@ The store is exported only so tests and devtools can poke `getState()`.
 - Don't sync server data into a Zustand store **as a cache layer over TanStack Query**. If TanStack Query owns the fetching, let it own the caching too. The Swappable-backends pattern is a different shape: the store IS the cache because the service layer is direct (no Query in front), and the store and service are co-designed.
 - Don't store form state in Zustand. Use React Hook Form locally, or `useState` for trivial forms.
 - Don't introduce a fourth flavour of state. The three primitives (`useState`, Zustand store, TanStack Query) cover every case in this codebase. If you reach for something else (event emitter, observable, context-as-state, …), describe the problem in the PR and we'll fold the right primitive's escape hatch into this rule instead.
+
+## Prohibitions (grep-verifiable)
+
+Concrete `❌` rules with a backticked, `rg`-able pattern and a `PR-NNN` index so a
+regressing PR can name the rule it broke. These restate the "Don't" section above
+in enforceable form.
+
+- ❌ PR-010: `from 'redux' | '@reduxjs/toolkit' | 'mobx' | 'jotai' | 'recoil'` — the sanctioned primitives are `useState`/`useReducer`, Zustand, and TanStack Query; no fourth state library. rg: `from ['"](redux|@reduxjs/toolkit|mobx|mobx-react|jotai|recoil)['"]`
+- ❌ PR-011: `from 'axios'` (or other HTTP clients) — server data flows through `fetch` wrapped in TanStack Query or the feature service layer. rg: `from ['"](axios|got|ky|superagent)['"]`
+- ❌ PR-012: a feature **component/page** importing its own `store/` directly — components see only the `selectors/` barrel and the service facade; the store is exported for tests/devtools only. rg (inside `features/*/components` and `features/*/pages`): `from ['"][^'"]*/store/`
