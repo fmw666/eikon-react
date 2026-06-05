@@ -1,6 +1,7 @@
 // Internal to the shell Toolbar — not part of the feature index barrel.
 
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import type { FrameSize } from '../store';
 import { FRAME_SIZES, FRAME_SIZE_LABELS } from './frame-sizes';
@@ -42,6 +43,39 @@ export function CompactToolbar({
   reloadPreview,
 }: CompactToolbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  // Fixed-position anchor for the portalled popover, in viewport
+  // coordinates. `right` is the distance from the viewport's right edge
+  // so the menu stays flush with the trigger's right side.
+  const [anchor, setAnchor] = useState<{ top: number; right: number }>({
+    top: 0,
+    right: 0,
+  });
+
+  // The toolbar uses `backdrop-filter`, which makes it its own stacking
+  // context. An absolutely-positioned popover nested inside is therefore
+  // trapped *behind* the sibling <main>/preview iframe no matter how high
+  // its z-index. We portal the menu to <body> to escape that context, and
+  // anchor it to the trigger's viewport rect with `position: fixed`.
+  useLayoutEffect(() => {
+    if (!menuOpen) return;
+    const place = () => {
+      const el = triggerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      setAnchor({
+        top: rect.bottom + 6,
+        right: Math.max(12, window.innerWidth - rect.right),
+      });
+    };
+    place();
+    window.addEventListener('resize', place);
+    window.addEventListener('scroll', place, true);
+    return () => {
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
+    };
+  }, [menuOpen]);
 
   function jump(target: string) {
     navigateInPreview(target);
@@ -102,6 +136,7 @@ export function CompactToolbar({
           three control clusters (tab strip / overflow / reload)
           all read as one consistent 40px-tall row. */}
       <button
+        ref={triggerRef}
         type="button"
         aria-label="More tools"
         aria-expanded={menuOpen}
@@ -151,18 +186,21 @@ export function CompactToolbar({
         <ReloadIcon />
       </button>
 
-      {menuOpen && (
+      {menuOpen && createPortal(
         <>
           {/* Backdrop swallows the next pointer down so a tap on
               page background closes the menu without firing on
-              whatever was underneath. */}
+              whatever was underneath. Portalled to <body> alongside the
+              menu so both escape the toolbar's backdrop-filter stacking
+              context (otherwise the menu paints behind the preview
+              iframe and the trigger looks dead). */}
           <div
             aria-hidden="true"
             onClick={() => setMenuOpen(false)}
             style={{
               position: 'fixed',
               inset: 0,
-              zIndex: 30,
+              zIndex: 1000,
               background: 'transparent',
             }}
           />
@@ -171,10 +209,10 @@ export function CompactToolbar({
             aria-label="Toolbar overflow"
             className="eikon-scroll-dropdown"
             style={{
-              position: 'absolute',
-              top: 'calc(100% + 6px)',
-              right: 8,
-              zIndex: 40,
+              position: 'fixed',
+              top: anchor.top,
+              right: anchor.right,
+              zIndex: 1001,
               width: 'min(260px, calc(100vw - 24px))',
               maxHeight: 'min(70dvh, 360px)',
               overflowY: 'auto',
@@ -284,7 +322,8 @@ export function CompactToolbar({
               </ul>
             </MenuSection>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   );
