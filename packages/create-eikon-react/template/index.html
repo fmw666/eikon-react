@@ -88,6 +88,23 @@
       rel="stylesheet"
     />
     <!-- @eikon:variant(design=evomap) end -->
+    <!-- @eikon:variant(design=pixel) begin -->
+    <!--
+      Press Start 2P — the canonical bitmap pixel face — for headlines, over
+      Space Mono (retro monospace) for body / UI. Both are SIL OFL fonts on
+      Google Fonts; loaded eagerly because the pixel face defines the first
+      paint of every title. They fall back to ui-monospace / system mono on
+      networks that block Google Fonts — see --font-display / --font-sans in
+      src/styles/index.css. Each ships a single weight (Press Start 2P 400,
+      Space Mono 400/700), which is all the pixel preset asks for.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- @eikon:variant(design=pixel) end -->
     <title>Eikon App</title>
     <script>
       (function () {

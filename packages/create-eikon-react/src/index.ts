@@ -58,6 +58,7 @@ const VARIANT_CHOICES = {
     'editorial',
     'animal-crossing',
     'evomap',
+    'pixel',
   ] as const,
   layout: [
     'stacked',

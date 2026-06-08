@@ -129,6 +129,7 @@ export const PARAMS = [
       'editorial',
       'animal-crossing',
       'evomap',
+      'pixel',
     ],
     default: 'default',
     cliFlag: 'design',
@@ -155,6 +156,7 @@ export const PARAMS = [
       editorial: 'Editorial (black-and-white print)',
       'animal-crossing': 'Animal Crossing (mint teal + parchment)',
       evomap: 'EvoMap (agent economy cyan)',
+      pixel: 'Pixel Pop (8-bit pastel arcade)',
     },
   },
   {
