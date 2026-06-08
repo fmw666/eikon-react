@@ -58,6 +58,7 @@ translate them to OKLCH for perceptual-uniform contrast checking.
 | `carbon`          | IBM Carbon Design System     | IBM Blue `#0F62FE` on layered grays     | IBM Plex Sans             | Dense (0.22rem)                           | Square corners, 2px focus, enterprise. |
 | `editorial`       | Broadsheet / magazine print  | black ink `#262626` on white paper      | Playfair Display / Georgia | Editorial (0.27rem) · 17px · 1.85 LH      | Stark B&W serif, hairline rules, flat. |
 | `animal-crossing` | [animal-island-ui]           | mint teal `#19c8b9` + parchment `#f8f8f0`, brown ink `#794f27`, focus yellow `#ffcc00` | Baloo 2 / M PLUS Rounded 1c | Spacious (0.27rem) · chunky 12–24px radii | Cosy island; hard flat-bottom shadow, rounded gothic, bouncy easing. |
+| `pixel`           | Retro 8-bit / pixel-art (self-authored) | candy pastels — lavender `oklch(0.78 0.13 300)` + mint + pink + butter + sky on lavender-gray paper, ink-black outline | Press Start 2P (display) / Space Mono (body) | Standard (0.25rem) · tamed display scale | 8-bit pastel arcade; brutalist 3px ink borders + hard-offset shadows, zero radius, `image-rendering: pixelated`, pixel-dot field. Hover pops, active slams. |
 
 [linear.app/brand]: https://linear.app/brand
 [Anthropic brand guidelines]: https://github.com/anthropics/skills/blob/main/skills/brand-guidelines/SKILL.md

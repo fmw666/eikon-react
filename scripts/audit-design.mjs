@@ -784,6 +784,46 @@ const SPECS = {
       ),
     ],
   },
+
+  pixel: {
+    label: 'Pixel Pop (8-bit pastel arcade)',
+    inspiration: 'Retro 8-bit / pixel-art pop',
+    voice: [
+      check('pixel-font', '像素位图标题字体 (Press Start 2P)', 2, (c) =>
+        bool(
+          /Press Start 2P/i.test(c.L['--font-display'] || ''),
+          `display=${short(c.L['--font-display'])}`
+        )
+      ),
+      check('hard-shadow', '硬偏移零模糊阴影 (Npx Npx 0)', 2, (c) =>
+        bool(
+          /-?\d+px -?\d+px 0\b/.test(c.L['--shadow-md'] || ''),
+          `shadow-md=${short(c.L['--shadow-md'])}`
+        )
+      ),
+      check('zero-radius', '零圆角 --radius-lg = 0', 2, (c) =>
+        near(lenRem(c.L['--radius-lg']) ?? 1, 0, 0.01, 'rem')
+      ),
+      check('thick-border', '粗边框 --surface-border-width = 3px', 1, (c) =>
+        atLeast(lenRem(c.L['--surface-border-width']) * 16, 3, 'px')
+      ),
+      check('pastel-primary', '糖果柔彩 primary (0.08 ≤ C ≤ 0.17, L ≥ 0.7)', 1, (c) => {
+        const p = c.color(c.L['--color-primary']);
+        if (!p) return bool(false, 'primary 无法解析');
+        const ok = p.oklch.C >= 0.08 && p.oklch.C <= 0.17 && p.oklch.L >= 0.7;
+        return bool(ok, `primary L=${p.oklch.L.toFixed(2)} C=${p.oklch.C.toFixed(2)}`);
+      }),
+      check('mono', '等宽正文字体', 1, (c) =>
+        bool(/Mono|Fira Code/i.test(c.fontSans), `font-sans=${short(c.fontSans)}`)
+      ),
+      check('hover-pop', 'hover 阴影弹出 --surface-hover-shadow', 1, (c) =>
+        bool(
+          /-?\d+px -?\d+px 0\b/.test(c.L['--surface-hover-shadow'] || ''),
+          `hover=${short(c.L['--surface-hover-shadow'])}`
+        )
+      ),
+    ],
+  },
 };
 
 // Small result builders for voice checks → { score: 0..1, detail }.
