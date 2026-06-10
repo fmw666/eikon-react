@@ -136,6 +136,32 @@ const DICT = {
     'pain.4.desc':
       '.agent/rules 与 .agent/skills 已写好架构约束、命名规范、测试要求，AI 一加载即对齐你的口味。',
 
+    'toil.eyebrow': '真实痛点',
+    'toil.title': '别再为糟糕的架构，一句句「请继续」',
+    'toil.lead':
+      '你有没有过这样的深夜：让 agent 跑了一个多小时，你却只能一遍遍地敲下「请继续」。不是它不够努力——而是项目从一开始就缺少架构约束与工程规范，它只能边打地基边盖楼，反复返工。',
+    'toil.plea.label': '作者的良苦用心',
+    'toil.plea.body':
+      '每一次「请继续」，烧掉的都是你的 token 和时间。下载这个项目，让你的工程底座本身足够优秀——把 agent 的专注力还给真正的业务需求，而不是从零维护项目质量。',
+    'toil.plea.kicker': '省点 token，省点时间。这，很重要。',
+    'toil.caption':
+      '搭好了、又发现设计缺陷、于是再一次「请继续」——这一个多小时，本可以花在你的业务上。',
+
+    'toil.demo.aria': 'AI 编码 agent 已运行一个多小时、用户反复输入「请继续」的演示动画',
+    'toil.demo.agent': 'Coding Agent',
+    'toil.demo.elapsed': '{h}h {m}m',
+    'toil.demo.tokens': '{n}M tokens',
+    'toil.demo.user': '帮我从零做一个跨端应用，注意代码质量',
+    'toil.demo.done1': '已搭建项目骨架与目录结构',
+    'toil.demo.done2': '已接入 ESLint / Prettier / Vitest',
+    'toil.demo.done3': '已补齐错误边界、类型与状态管理',
+    'toil.demo.done4': '质量保证：测试覆盖率 87%，构建通过',
+    'toil.demo.quality': 'build ✓  ·  tests 87%  ·  lint clean',
+    'toil.demo.question':
+      '不过我发现当前的设计模式仍存在一个架构缺陷，需要重构数据层才能彻底修复。是否继续落地？',
+    'toil.demo.placeholder': '要求后续变更…',
+    'toil.demo.reply': '请继续',
+
     'philosophy.title': '一些技术取舍',
     'philosophy.subtitle': '工程化偏好 —— 为什么是这套，而不是别的',
     'philosophy.intro':
@@ -154,10 +180,10 @@ const DICT = {
       'src/features/<name>/ 一切自治，跨 feature 只能从 barrel 进入 —— 团队和 AI 都不容易越界。',
 
     'outputs.title': '一份源码，三种交付',
-    'outputs.subtitle':
-      '同一套 React + TS 代码，按需打包为 Web 站点、桌面应用或移动 App',
+    'outputs.subtitle': '同一套 React + TS 代码，按需打包为 Web 站点、桌面应用或移动 App',
     'outputs.web.title': 'Web 应用',
-    'outputs.web.desc': '部署到 Vercel / Cloudflare Pages / 自建静态托管。SEO 友好、PWA 可选、CDN 即享。',
+    'outputs.web.desc':
+      '部署到 Vercel / Cloudflare Pages / 自建静态托管。SEO 友好、PWA 可选、CDN 即享。',
     'outputs.web.bullet1': 'Vite + React 19 + TypeScript',
     'outputs.web.bullet2': '静态部署，秒级冷启动',
     'outputs.web.bullet3': '可选 SSR（升级为 Next.js 路径已留好）',
@@ -167,7 +193,8 @@ const DICT = {
     'outputs.desktop.bullet2': '5MB 量级安装包',
     'outputs.desktop.bullet3': '原生菜单 / 托盘 / 自动更新',
     'outputs.mobile.title': '移动应用',
-    'outputs.mobile.desc': 'Capacitor 框架封装为 iOS / Android，Web 代码原样复用，原生能力按需开放。',
+    'outputs.mobile.desc':
+      'Capacitor 框架封装为 iOS / Android，Web 代码原样复用，原生能力按需开放。',
     'outputs.mobile.bullet1': 'iOS / Android',
     'outputs.mobile.bullet2': 'Web 视图 + 原生桥',
     'outputs.mobile.bullet3': '原生相机 / 推送 / 文件系统',
@@ -217,8 +244,7 @@ const DICT = {
 
     'changelog.eyebrow': '版本对比',
     'changelog.title': '更新日志',
-    'changelog.subtitle':
-      '从 GitHub 实时拉取每个 Tag 的发行包，并以左右双侧版本可视化代码差异。',
+    'changelog.subtitle': '从 GitHub 实时拉取每个 Tag 的发行包，并以左右双侧版本可视化代码差异。',
     'changelog.picker.base': '基线',
     'changelog.picker.head': '目标',
     'changelog.picker.refresh': '刷新',
@@ -234,8 +260,7 @@ const DICT = {
     'changelog.error.retry': '重试',
     'changelog.error.rateLimitUntil': '请求被限流，预计恢复时间：',
     'changelog.empty.title': '该仓库暂无发布版本',
-    'changelog.empty.subtitle':
-      '一旦在 GitHub 上发布带 Tag 的 Release，更新日志会自动出现在这里。',
+    'changelog.empty.subtitle': '一旦在 GitHub 上发布带 Tag 的 Release，更新日志会自动出现在这里。',
     'changelog.empty.missingTitle': '找不到这个 GitHub 仓库',
     'changelog.empty.missingSubtitle':
       '在 src/landing/site-config.ts 里把 owner / repo 改成你实际的公开仓库（私有仓库匿名访问会拿到相同的 404）。',
@@ -277,8 +302,7 @@ const DICT = {
 
     'playground.eyebrow': 'Live playground',
     'params.title': 'Configure your stack',
-    'params.subtitle':
-      'Every choice updates the preview and the command in real time',
+    'params.subtitle': 'Every choice updates the preview and the command in real time',
     'params.section.product': 'Product shape',
     'params.section.feature': 'Features',
     'params.section.tooling': 'Tooling',
@@ -308,8 +332,7 @@ const DICT = {
     'sidebar.sectionsNav': 'Panel sections',
 
     'prompt.title': 'Copy this, start now',
-    'prompt.subtitle':
-      'Paste it into Cursor / Claude / Codex — let your AI take the rest',
+    'prompt.subtitle': 'Paste it into Cursor / Claude / Codex — let your AI take the rest',
     'prompt.tab.prompt': 'Prompt',
     'prompt.tab.cli': 'CLI',
     'prompt.copy': 'Copy',
@@ -318,8 +341,7 @@ const DICT = {
 
     'stack.eyebrow': 'Stack',
     'stack.title': 'A full stack, batteries included',
-    'stack.subtitle':
-      'Mainstream, stable, AI-friendly — pick it up and start shipping',
+    'stack.subtitle': 'Mainstream, stable, AI-friendly — pick it up and start shipping',
     'stack.tier.core': 'Core runtime',
     'stack.tier.state': 'State & data',
     'stack.tier.quality': 'Quality & testing',
@@ -327,8 +349,7 @@ const DICT = {
 
     'pain.eyebrow': 'Pain Points',
     'pain.title': 'Why you might want this',
-    'pain.subtitle':
-      "Solve the things you'd otherwise re-fight with your AI every project",
+    'pain.subtitle': "Solve the things you'd otherwise re-fight with your AI every project",
     'pain.1.title': 'Configuring from scratch every time',
     'pain.1.desc':
       "Stop letting your AI start from 'do you want TypeScript?'. The scaffold already encodes structure, deps, and scripts.",
@@ -340,11 +361,37 @@ const DICT = {
       'i18n, theming, modals, responsive, toast, forms, state, error boundaries — all wired. No more midnight i18next debugging.',
     'pain.4.title': "Your AI doesn't know your standards",
     'pain.4.desc':
-      ".agent/rules and .agent/skills encode architecture, naming, tests — your AI matches your conventions the moment it loads them.",
+      '.agent/rules and .agent/skills encode architecture, naming, tests — your AI matches your conventions the moment it loads them.',
+
+    'toil.eyebrow': 'The real cost',
+    'toil.title': 'Stop paying for bad architecture, one "please continue" at a time',
+    'toil.lead':
+      'Ever spent a whole night watching your agent run for over an hour — while you do nothing but type "please continue" again and again? It isn\'t that it\'s slacking. The project simply had no architectural constraints or engineering standards to begin with, so it keeps pouring the foundation while building the walls, redoing the same work over and over.',
+    'toil.plea.label': 'Why I built this',
+    'toil.plea.body':
+      'Every "please continue" burns your tokens and your hours. Download this project and start from an engineering base that\'s already good — so your agent spends its focus on the actual product, not on babysitting the quality of a from-scratch scaffold.',
+    'toil.plea.kicker': 'Save the tokens. Save the time. It matters.',
+    'toil.caption':
+      'Build, find another flaw, "continue" again — that hour could\'ve gone to your product.',
+
+    'toil.demo.aria':
+      'Animated demo: an AI coding agent that has run for over an hour while the user keeps typing "please continue"',
+    'toil.demo.agent': 'Coding Agent',
+    'toil.demo.elapsed': '{h}h {m}m',
+    'toil.demo.tokens': '{n}M tokens',
+    'toil.demo.user': 'Build me a cross-platform app from scratch — keep the code quality high',
+    'toil.demo.done1': 'Scaffolded the project structure & folders',
+    'toil.demo.done2': 'Wired ESLint / Prettier / Vitest',
+    'toil.demo.done3': 'Added error boundaries, types & state management',
+    'toil.demo.done4': 'Quality pass: 87% test coverage, build green',
+    'toil.demo.quality': 'build ✓  ·  tests 87%  ·  lint clean',
+    'toil.demo.question':
+      'That said, the current design pattern still has an architectural flaw — fixing it properly means refactoring the data layer. Want me to continue?',
+    'toil.demo.placeholder': 'Request a change…',
+    'toil.demo.reply': 'please continue',
 
     'philosophy.title': 'A few engineering choices',
-    'philosophy.subtitle':
-      'Why this stack, not the trendiest one',
+    'philosophy.subtitle': 'Why this stack, not the trendiest one',
     'philosophy.intro':
       "This template reflects how I ship products: get something running fast, leave room to grow. It deliberately picks the 'fewest landmines, easiest to maintain, easiest for AI to understand' combination — not the shiniest one.",
     'philosophy.points.1.title': 'Vite, not Next.js',
@@ -362,7 +409,7 @@ const DICT = {
 
     'outputs.title': 'One codebase, three shipping shapes',
     'outputs.subtitle':
-      "Same React + TS code packs into a web site, desktop app, or mobile app on demand",
+      'Same React + TS code packs into a web site, desktop app, or mobile app on demand',
     'outputs.web.title': 'Web app',
     'outputs.web.desc':
       'Deploy to Vercel / Cloudflare Pages / your own static host. SEO-friendly, PWA-optional, CDN by default.',
@@ -377,7 +424,7 @@ const DICT = {
     'outputs.desktop.bullet3': 'Native menu / tray / auto-update',
     'outputs.mobile.title': 'Mobile app',
     'outputs.mobile.desc':
-      "Capacitor wraps it as iOS / Android. Reuse your web code as-is, open native APIs on demand.",
+      'Capacitor wraps it as iOS / Android. Reuse your web code as-is, open native APIs on demand.',
     'outputs.mobile.bullet1': 'iOS / Android',
     'outputs.mobile.bullet2': 'Web view + native bridge',
     'outputs.mobile.bullet3': 'Native camera / push / filesystem',
@@ -385,14 +432,13 @@ const DICT = {
 
     'qa.eyebrow': 'Support',
     'qa.title': 'FAQ',
-    'qa.subtitle': "Things you might ask before getting started",
+    'qa.subtitle': 'Things you might ask before getting started',
     'qa.contact.text':
       "Can't find the answer you're looking for? Email the author directly — usually a reply within 24 hours. … or … why not just ask your AI?",
     'qa.contact.cta': 'Contact author',
-    'qa.1.q':
-      "How is this different from create-next-app / create-t3-app?",
+    'qa.1.q': 'How is this different from create-next-app / create-t3-app?',
     'qa.1.a':
-      "Next/T3 lean full-stack-web. Eikon-React leans cross-platform + AI workflow — one codebase ships to Web / Desktop (Tauri) / Mobile (Capacitor) and the .agent/ rules teach your AI your conventions. If you only ship web full-stack, T3 fits better; if you want cross-platform and AI-heavy collaboration, this is the more direct path.",
+      'Next/T3 lean full-stack-web. Eikon-React leans cross-platform + AI workflow — one codebase ships to Web / Desktop (Tauri) / Mobile (Capacitor) and the .agent/ rules teach your AI your conventions. If you only ship web full-stack, T3 fits better; if you want cross-platform and AI-heavy collaboration, this is the more direct path.',
     'qa.2.q': 'Why Vite over Next.js / Remix?',
     'qa.2.a':
       "Vite's startup speed, configuration clarity, and cross-platform packaging are friendlier for indie work. Eikon-React is pure CSR by default — no SSR/SSG complexity. The feature structure and stores are designed so you can migrate to Next.js or Astro later if you need SSR.",
@@ -404,13 +450,13 @@ const DICT = {
       "It's an AI-collaboration protocol. rules/ are non-negotiable engineering constraints (architecture, tests, i18n, naming); skills/ are callable task playbooks (add-feature, add-page, enable-supabase, etc.). Any file-aware AI agent that loads it will follow these conventions automatically.",
     'qa.5.q': 'Commercial / closed-source use?',
     'qa.5.a':
-      "Allowed. Template is MIT-licensed. Scaffolded projects belong to you; no attribution required (a star would still make my day).",
+      'Allowed. Template is MIT-licensed. Scaffolded projects belong to you; no attribution required (a star would still make my day).',
     'qa.6.q': 'How do I upgrade to a new version?',
     'qa.6.a':
-      "Diff against the changelog and cherry-pick the deltas you care about. The template is a starting point, not a dependency — version drift is expected.",
+      'Diff against the changelog and cherry-pick the deltas you care about. The template is a starting point, not a dependency — version drift is expected.',
     'qa.7.q': "Why don't the component demos show usage code?",
     'qa.7.a':
-      "Intentionally omitted. Component APIs, props, and composition patterns all live in .agent/ — once your coding agent loads them, it knows what to call, what to import, and what to pass in. You describe the page you want; spend your attention on the requirement, not on copying imports from a demo.",
+      'Intentionally omitted. Component APIs, props, and composition patterns all live in .agent/ — once your coding agent loads them, it knows what to call, what to import, and what to pass in. You describe the page you want; spend your attention on the requirement, not on copying imports from a demo.',
 
     'footer.author': 'fmw · indie developer',
     'footer.tagline': 'AI · frontend · cross-platform tooling',
@@ -445,8 +491,7 @@ const DICT = {
     'changelog.error.retry': 'Retry',
     'changelog.error.rateLimitUntil': 'Rate-limited until',
     'changelog.empty.title': 'No releases yet',
-    'changelog.empty.subtitle':
-      'Tag a Release on GitHub and it will show up here automatically.',
+    'changelog.empty.subtitle': 'Tag a Release on GitHub and it will show up here automatically.',
     'changelog.empty.missingTitle': "Couldn't find that GitHub repo",
     'changelog.empty.missingSubtitle':
       'Update owner / repo in src/landing/site-config.ts to point at your real public repository (private repos return the same 404 anonymously).',

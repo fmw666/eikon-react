@@ -8,6 +8,7 @@
 @import './scrollbar.css';
 @import './sidebar.css';
 @import './footer.css';
+@import './agent-chat.css';
 @import './responsive.css';
 
 @import 'tailwindcss';
