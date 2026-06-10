@@ -1,0 +1,176 @@
+/* ---------------------------------------------------------------------------
+ * agent-chat.css — bespoke bits for the "stop saying 请继续" demo panel.
+ *
+ * The replay itself (typing → enter → spinner → loop) is driven entirely by
+ * React state in `sections/agent-toil/AgentChatReplay.tsx`; this file only
+ * carries the two pieces that are cleaner as CSS than as inline style:
+ *
+ *   1. eikon-agent-spinner — the send button's "thinking" ring. A thin
+ *      circle (in the button's own colour) with a brighter top arc that
+ *      spins. This is the
+ *      moment the demo is built around: the user hit Enter, and the agent is
+ *      about to burn another stretch of time/tokens.
+ *
+ *   2. eikon-agent-send-pop — a one-shot scale pop applied to the send
+ *      control the instant it flips from arrow → spinner, so the submit
+ *      reads as a deliberate keypress rather than a silent swap.
+ *
+ * Reduced motion: the React layer already renders a static composed state
+ * (reply visible, no spinner) when `prefers-reduced-motion: reduce`, so the
+ * spinner class is never mounted then — but we still null the animation here
+ * as a belt-and-braces guard in case the class is ever reused elsewhere.
+ * --------------------------------------------------------------------------- */
+
+@keyframes eikon-agent-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.eikon-agent-spinner {
+  border-radius: 999px;
+  /* Inherit the send button's colour (white on the coral button) rather than
+     the site brand, so the spinner reads as part of the agent product. */
+  border: 2px solid color-mix(in oklch, currentColor 35%, transparent);
+  border-top-color: currentColor;
+  animation: eikon-agent-spin 0.7s linear infinite;
+}
+
+@keyframes eikon-agent-send-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(0.86);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.eikon-agent-send-pop {
+  animation: eikon-agent-send-pop 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-agent-spinner,
+  .eikon-agent-send-pop {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * eikon-toil-float — the chat mock's "floating product screen" treatment.
+ *
+ * Applied to the WRAPPER around AgentChatReplay in the AgentToil section, so
+ * the centerpiece file itself is never touched. No glowing border: instead a
+ * DEEP black drop shadow (so it reads as lifted off the band) plus, on lg, a
+ * subtle 3D tilt and a slow vertical bob — the panel hangs in space like a
+ * floating device rather than sitting flat.
+ *
+ *   - The deep shadow is plain black (not --accent-glow) so it reads as
+ *     depth/weight, not light. A heavier variant kicks in under `.dark`,
+ *     where a faint black shadow would otherwise vanish on the near-black
+ *     band.
+ *   - The 3D pose (`perspective + rotateX/rotateY`) and the bob are lg-only:
+ *     a full-width mobile card tilted in 3D looks broken, so phones just get
+ *     the deep shadow on a flat panel.
+ *   - `filter: blur(0px)` is the GPU anti-aliasing hack (see the blur(0px)
+ *     memory): without it, the panel's rounded corners rasterise jagged once
+ *     it lives on a 3D-transformed compositor layer.
+ *   - The bob is the only motion and is disabled under reduced-motion; the
+ *     static tilt + shadow remain (a pose, not an animation).
+ * --------------------------------------------------------------------------- */
+@keyframes eikon-toil-float {
+  0%,
+  100% {
+    transform: perspective(1400px) rotateX(2deg) rotateY(-6deg) translateY(0);
+  }
+  50% {
+    transform: perspective(1400px) rotateX(2deg) rotateY(-6deg) translateY(-9px);
+  }
+}
+
+.eikon-toil-float {
+  box-shadow:
+    0 2px 6px rgb(0 0 0 / 0.1),
+    0 22px 44px -14px rgb(0 0 0 / 0.34),
+    0 48px 80px -30px rgb(0 0 0 / 0.5);
+}
+
+.dark .eikon-toil-float {
+  box-shadow:
+    0 2px 6px rgb(0 0 0 / 0.45),
+    0 24px 48px -14px rgb(0 0 0 / 0.62),
+    0 52px 90px -30px rgb(0 0 0 / 0.75);
+}
+
+@media (min-width: 1024px) {
+  .eikon-toil-float {
+    transform: perspective(1400px) rotateX(2deg) rotateY(-6deg);
+    backface-visibility: hidden;
+    filter: blur(0px);
+    will-change: transform;
+    animation: eikon-toil-float 6s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-toil-float {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * eikon-toil-backlight — cool "screen light" bloom behind the floating panel.
+ *
+ * The chat panel is dark and it sits on a dark band, so a black drop shadow
+ * has nothing to read against and the float falls flat. This sibling layer
+ * (painted BEHIND the panel) leaks a cool light out around the panel's edges:
+ * the dark silhouette now pops against a lit halo, which is what actually
+ * sells the depth on a dark surface. The bloom is biased UPWARD so it reads
+ * as light coming from behind-above while the drop shadow grounds the bottom
+ * — the two cooperate instead of cancelling.
+ *
+ *   - Far stronger under `.dark` (where it's needed); a gentle tint in light
+ *     mode, where the drop shadow already carries the depth.
+ *   - Slow opacity+scale pulse on a 7s cycle — deliberately off the panel's
+ *     6s bob so the two drift in and out of phase and the whole thing breathes
+ *     instead of marching. Disabled under reduced-motion.
+ *   - Heavy blur turns the radial into a soft bloom; the panel (opaque) hides
+ *     the bright core, leaving only the rim of light.
+ * --------------------------------------------------------------------------- */
+@keyframes eikon-toil-backlight {
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.eikon-toil-backlight {
+  border-radius: 2.5rem;
+  background: radial-gradient(62% 64% at 50% 42%, rgba(99, 130, 200, 0.16), transparent 72%);
+  filter: blur(34px);
+  animation: eikon-toil-backlight 7s ease-in-out infinite;
+}
+
+.dark .eikon-toil-backlight {
+  background: radial-gradient(
+    62% 64% at 50% 42%,
+    rgba(140, 178, 238, 0.36),
+    rgba(120, 158, 230, 0.15) 46%,
+    transparent 74%
+  );
+  filter: blur(42px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eikon-toil-backlight {
+    animation: none;
+  }
+}

@@ -21,9 +21,12 @@
  *                          choices flow into the final command.
  *   5. TechStackWall     — marquee + tiered logo grid.
  *   6. PainPoints        — 4-up "problem → solution" cards.
- *   7. Philosophy        — author's tech-stack opinions.
- *   8. QASection         — accordion FAQ + author-email CTA.
- *   9. Footer            — author / contact.
+ *   7. AgentToil         — the cost beat: a looping agent-chat mock
+ *                          (runs 1h+, user keeps typing «请继续») beside
+ *                          the author's direct appeal.
+ *   8. Philosophy        — author's tech-stack opinions.
+ *   9. QASection         — accordion FAQ + author-email CTA.
+ *  10. Footer            — author / contact.
  *
  * The page is intentionally split into a "tool half" (sections 2-4)
  * and a "story half" (sections 5-8), separated by a thin divider.
@@ -63,6 +66,7 @@ import {
   type AppRoute,
 } from './nav/route';
 import { loadChangelog, loadPlayground } from './nav/route-loaders';
+import { AgentToil } from './sections/AgentToil';
 import { Footer } from './sections/footer';
 import { Hero } from './sections/Hero';
 import { PainPoints } from './sections/PainPoints';
@@ -304,6 +308,14 @@ function HomeRoute() {
       <Reveal variant="rise-scale">
         <PainPoints />
       </Reveal>
+      {/* A divider caps the dense PainPoints grid before the AgentToil band.
+          AgentToil is a full-bleed tinted band and is intentionally NOT
+          wrapped in <Reveal>: a scale-in transform would pull the band in
+          from the viewport edges. It reveals its own (centred) content. */}
+      <Reveal variant="zoom">
+        <SectionDivider />
+      </Reveal>
+      <AgentToil />
       <Reveal>
         <Philosophy />
       </Reveal>
