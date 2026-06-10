@@ -1,0 +1,145 @@
+{
+  "scripts/dev.mjs": [],
+  "scripts/e2e-scenarios.mjs": [],
+  "scripts/e2e-utils.mjs": [],
+  "scripts/e2e-verify.mjs": [],
+  "scripts/e2e.mjs": [
+    "scripts/e2e-scenarios.mjs",
+    "scripts/e2e-utils.mjs",
+    "scripts/e2e-verify.mjs"
+  ],
+  "scripts/smoke.mjs": [],
+  "scripts/sync-template.mjs": [],
+  "scripts/sync-ui-snapshots.constants.mjs": [],
+  "scripts/sync-ui-snapshots.fs.mjs": [
+    "scripts/sync-ui-snapshots.constants.mjs"
+  ],
+  "scripts/sync-ui-snapshots.mjs": [
+    "scripts/sync-ui-snapshots.constants.mjs",
+    "scripts/sync-ui-snapshots.fs.mjs",
+    "scripts/sync-ui-snapshots.patchers.mjs"
+  ],
+  "scripts/sync-ui-snapshots.patchers.mjs": [
+    "scripts/sync-ui-snapshots.constants.mjs",
+    "scripts/sync-ui-snapshots.fs.mjs"
+  ],
+  "src/__tests__/apply-ui-snapshot.test.ts": [
+    "src/apply-ui-snapshot.ts"
+  ],
+  "src/__tests__/cli-schema-parity.test.ts": [],
+  "src/__tests__/design-class-validity.test.ts": [],
+  "src/__tests__/feature-parity.test.ts": [
+    "src/strip-features.ts"
+  ],
+  "src/__tests__/inject-html-variants.test.ts": [
+    "src/inject-html-variants.ts",
+    "src/strip-features.ts"
+  ],
+  "src/__tests__/no-orphan-tokens.test.ts": [
+    "src/copy-template.ts"
+  ],
+  "src/__tests__/platform-parity.test.ts": [
+    "src/strip-features.ts"
+  ],
+  "src/__tests__/resolve-target.test.ts": [
+    "src/resolve-target.ts"
+  ],
+  "src/__tests__/rewrite-package-manager.test.ts": [
+    "src/rewrite-package-manager.ts"
+  ],
+  "src/__tests__/skip-list-parity.test.ts": [
+    "src/skip-list.ts"
+  ],
+  "src/__tests__/strip-features-file-marker.test.ts": [
+    "src/strip-features.ts"
+  ],
+  "src/__tests__/strip-features-internals.test.ts": [
+    "src/strip-features.ts"
+  ],
+  "src/__tests__/strip-features-options.test.ts": [
+    "src/strip-features.ts"
+  ],
+  "src/__tests__/strip-features-platform-content.test.ts": [
+    "src/strip-features.ts"
+  ],
+  "src/__tests__/strip-features-platform.test.ts": [
+    "src/strip-features.ts"
+  ],
+  "src/__tests__/strip-features-rootlayout.test.ts": [
+    "src/strip-features.ts"
+  ],
+  "src/__tests__/strip-features-variants.test.ts": [
+    "src/strip-features.ts"
+  ],
+  "src/__tests__/strip-features.test.ts": [
+    "src/strip-features.ts"
+  ],
+  "src/__tests__/ui-snapshot-parity.test.ts": [
+    "src/apply-ui-snapshot.ts"
+  ],
+  "src/apply-ui-snapshot.constants.ts": [],
+  "src/apply-ui-snapshot.eslint.ts": [
+    "src/apply-ui-snapshot.constants.ts"
+  ],
+  "src/apply-ui-snapshot.fs.ts": [
+    "src/apply-ui-snapshot.constants.ts",
+    "src/strip-features.ts"
+  ],
+  "src/apply-ui-snapshot.read.ts": [
+    "src/apply-ui-snapshot.constants.ts",
+    "src/apply-ui-snapshot.fs.ts"
+  ],
+  "src/apply-ui-snapshot.ts": [
+    "src/apply-ui-snapshot.constants.ts",
+    "src/apply-ui-snapshot.eslint.ts",
+    "src/apply-ui-snapshot.fs.ts",
+    "src/apply-ui-snapshot.read.ts"
+  ],
+  "src/binary-detect.ts": [],
+  "src/cli-args.ts": [],
+  "src/cli-prompts.ts": [
+    "src/cli-args.ts",
+    "src/strip-features.ts",
+    "src/validate.ts"
+  ],
+  "src/copy-template.ts": [
+    "src/skip-list.ts"
+  ],
+  "src/index.ts": [
+    "src/cli-args.ts",
+    "src/cli-prompts.ts",
+    "src/resolve-target.ts",
+    "src/scaffold.ts"
+  ],
+  "src/init-git.ts": [],
+  "src/inject-html-variants.ts": [
+    "src/strip-features.ts"
+  ],
+  "src/install-deps.ts": [],
+  "src/markers.ts": [],
+  "src/prune.ts": [
+    "src/variant-types.ts"
+  ],
+  "src/resolve-target.ts": [
+    "src/validate.ts"
+  ],
+  "src/rewrite-package-manager.ts": [],
+  "src/scaffold.ts": [
+    "src/apply-ui-snapshot.ts",
+    "src/copy-template.ts",
+    "src/init-git.ts",
+    "src/inject-html-variants.ts",
+    "src/install-deps.ts",
+    "src/rewrite-package-manager.ts",
+    "src/strip-features.ts"
+  ],
+  "src/skip-list.ts": [],
+  "src/strip-features.ts": [
+    "src/binary-detect.ts",
+    "src/markers.ts",
+    "src/prune.ts",
+    "src/variant-types.ts"
+  ],
+  "src/validate.ts": [],
+  "src/variant-types.ts": []
+}

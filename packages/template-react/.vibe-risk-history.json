@@ -1,0 +1,63 @@
+{
+  "schema_version": 3,
+  "package": "@eikon/react",
+  "standing_deductions": [
+    {
+      "id": "SD-TR-002", "dimension": "type_safety_contracts", "sub_item": "TYP-Q4", "points": -1, "kind": "policy",
+      "reason": "145 `as` assertions (zod-inferred / radix / event narrowing); 0 any / 0 ts-ignore",
+      "clearing_condition": "project policy change; strong zod + react-hook-form contracts already in place",
+      "verify_cmd": "rg -c \"\\bas\\s+[A-Z]\" packages/template-react/src",
+      "registered": "2026-06-11", "last_verified": "2026-06-11"
+    }
+  ],
+  "ledger_diff_2026-06-11-remediation": {
+    "cleared": [
+      "SD-TR-001 (shared/ui semi-vendored) — declared vendorGlobs (packages/template-react/src/shared/ui/**); animate-ui/radix primitives now excluded from first-party size thresholds"
+    ],
+    "note": "No code changes to this package — remediation was a .vibe-riskrc classification only. AI-native ceiling retained."
+  },
+  "scans": [
+    {
+      "date": "2026-06-11T02:40:00Z", "mode": "full", "skill_version": "4.1.0", "rubric": "v4", "phase": "post-remediation",
+      "total": 96, "level": "EXCELLENT", "ai_native_ceiling": true,
+      "total_loc": 17779, "total_files": 136, "project_scale": "MEDIUM",
+      "refactoring_risk": 4, "refactoring_risk_level": "MINIMAL",
+      "ai_extension_risk": 3, "ai_extension_risk_level": "MINIMAL",
+      "drift_watch": { "new_guard_density": "green", "new_code_coverage": "green", "stale_prohibitions": 0 },
+      "perf_debt_confirmed": 2, "perf_debt_candidates": 14,
+      "prohibition_count": 28, "context_artifact_score": 10, "ai_app_surface_active": false,
+      "scorecard": ".vibe-risk/scorecard-template-react.json",
+      "dimensions": {
+        "module_srp": 11, "pattern_consistency": 14, "type_safety_contracts": 11, "test_coverage_invariants": 12,
+        "ai_context_artifacts": 10, "architecture": 8, "dependency_health": 7, "prohibition_density": 6,
+        "naming": 6, "duplication": 5, "determinism": 3, "security_tooling": 3, "ai_app_surface": null
+      },
+      "top_issues": [
+        "AI-native ceiling; remaining SRP-F2 = genuine showcase pages, 145 `as` = policy",
+        "shared/ui now correctly vendored",
+        "12 structural scan tests, .env.example, custom eslint-rules — exemplary"
+      ],
+      "notes": "Post-remediation re-verify. No code changes (rc classification only). 0 files >4000, feature-first, 412 tests green."
+    },
+    {
+      "date": "2026-06-11T00:00:00Z", "mode": "full", "skill_version": "4.1.0", "rubric": "v4", "phase": "baseline",
+      "total": 96, "level": "EXCELLENT", "ai_native_ceiling": true,
+      "total_loc": 17779, "total_files": 170, "project_scale": "MEDIUM",
+      "refactoring_risk": 4, "refactoring_risk_level": "MINIMAL",
+      "ai_extension_risk": 3, "ai_extension_risk_level": "MINIMAL",
+      "perf_debt_confirmed": 2, "perf_debt_candidates": 14,
+      "prohibition_count": 28, "context_artifact_score": 10, "ai_app_surface_active": false,
+      "dimensions": {
+        "module_srp": 11, "pattern_consistency": 14, "type_safety_contracts": 11, "test_coverage_invariants": 12,
+        "ai_context_artifacts": 10, "architecture": 8, "dependency_health": 7, "prohibition_density": 6,
+        "naming": 6, "duplication": 5, "determinism": 3, "security_tooling": 3, "ai_app_surface": null
+      },
+      "top_issues": [
+        "shared/ui primitives > 2000 tok are semi-vendored — declare vendorGlobs",
+        "145 `as` assertions (policy)",
+        "AI-native ceiling reached"
+      ],
+      "notes": "First v4 per-package scan. AI-native ceiling >=95. 0 files >4000, 12 structural scan tests, 10 .agent/rules + 14 .agent/skills."
+    }
+  ]
+}

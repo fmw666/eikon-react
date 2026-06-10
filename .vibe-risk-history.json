@@ -1,6 +1,53 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
+  "rubric_note": "v4 per-package scoring introduced 2026-06-11. Per-package histories + ledgers now live in packages/*/.vibe-risk-history.json. v4 scores are NOT directly comparable to the v3 unified totals below (rubric baseline reset: deterministic composition, first-party-only thresholds, flow-cost, .vibe-riskrc exclusions).",
+  "standing_deductions": [
+    { "id": "SD-ROOT-001", "dimension": "module_srp", "sub_item": "SRP-F1", "points": -2, "kind": "disputed", "reason": "preview-site god files Nav.tsx/ChangedFilesTree.tsx >4000 tok — tracked in packages/preview-site ledger (SD-PV-001)", "clearing_condition": "see SD-PV-001", "verify_cmd": "node .claude/skills/vibe-risk-analyzer/references/scripts/census.mjs packages/preview-site/src --rc .vibe-riskrc.json", "registered": "2026-06-11", "last_verified": "2026-06-11" },
+    { "id": "SD-ROOT-002", "dimension": "type_safety_contracts", "sub_item": "TYP-Q4", "points": -1, "kind": "disputed", "reason": "`as` assertion density across packages (DOM/CodeMirror/zod narrowing; 0 any) — tracked per package (SD-PV-003, SD-TR-002, SD-CE-002)", "clearing_condition": "see per-package ledgers", "verify_cmd": "rg -c \"\\bas\\s+[A-Z]\" packages/*/src", "registered": "2026-06-11", "last_verified": "2026-06-11" }
+  ],
   "scans": [
+    {
+      "date": "2026-06-11T02:40:00Z",
+      "mode": "full",
+      "skill_version": "4.1.0",
+      "rubric": "v4",
+      "phase": "post-remediation",
+      "monorepo_summary": true,
+      "total": 94,
+      "total_basis": "simple average of per-package v4 totals (95/92/96)",
+      "level": "EXCELLENT",
+      "per_package": {
+        "create-eikon-react": { "total": 95, "delta": "+3", "ai_native_ceiling": true },
+        "preview-site": { "total": 92, "delta": "+3" },
+        "template-react": { "total": 96, "delta": 0, "ai_native_ceiling": true }
+      },
+      "ledger": { "cleared": 5, "kept_policy": 3, "real_violation_fixed": "lib->landing (site-config relocated to lib/)" },
+      "build_status": "green: typecheck + lint + 725 tests (132+181+412) across all 3 packages; 0 console errors on live preview (port 3100)",
+      "notes": "Full remediation landed build-green. 0 files >4000 anywhere (4 god files split + data/vendored declared). Added i18n-dict.ts, spawn-collect.ts, package AGENTS.md, and a PR-PV scan-test fence that caught + fixed a real un-fenced lib->landing import. Remaining deductions are policy (as-assertion ceilings, intentional behavioral-test fixtures, ui_heavy coverage) — no debt left."
+    },
+    {
+      "date": "2026-06-11T00:00:00Z",
+      "mode": "full",
+      "skill_version": "4.1.0",
+      "rubric": "v4",
+      "monorepo_summary": true,
+      "total": 92,
+      "total_basis": "simple average of per-package v4 totals (optional summary row; not a substitute for per-package trend lines)",
+      "level": "EXCELLENT",
+      "per_package": {
+        "create-eikon-react": { "total": 92, "level": "EXCELLENT", "refactoring_risk": 5, "ai_extension_risk": 6, "history": "packages/create-eikon-react/.vibe-risk-history.json" },
+        "preview-site": { "total": 89, "level": "EXCELLENT", "refactoring_risk": 11, "ai_extension_risk": 8, "history": "packages/preview-site/.vibe-risk-history.json" },
+        "template-react": { "total": 96, "level": "EXCELLENT", "ai_native_ceiling": true, "refactoring_risk": 4, "ai_extension_risk": 3, "history": "packages/template-react/.vibe-risk-history.json" }
+      },
+      "ai_app_surface_active": false,
+      "vibe_riskrc": ".vibe-riskrc.json (added this scan: generatedGlobs .preview-cache + create-eikon-react/template; dataAssetGlobs template-snapshots)",
+      "top_issues": [
+        "template-react 96 = AI-native ceiling; preview-site 89 lowest (god files + thin behavioral tests)",
+        "per-package scoring reveals what the unified 91 average hid: preview-site test thinness",
+        "no .vibe-riskrc previously — generated/.preview-cache mirrors were polluting first-party size"
+      ],
+      "notes": "First v4 scan, per-package mode. All 3 packages EXCELLENT (>=86). No package is an LLM application (Dim 13 inactive). madge reported 0 files (vacuous on Windows) — circular-dep cleanliness rests on graph-fallback import-scan (no cycle clusters) + boundary-imports.test + PR-PV import prohibitions + eslint. pnpm audit (official registry): 0 vulns. jscpd: 3.26%/1.62%/2.70%."
+    },
     {
       "date": "2026-06-04T17:30:00Z",
       "mode": "full",

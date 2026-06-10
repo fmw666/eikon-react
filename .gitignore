@@ -57,3 +57,7 @@ coverage
 # Claude Code — local-machine permission overrides + local-only skills
 .claude/settings.local.json
 .claude/skills/*-local/
+
+# vibe-risk: track scorecards / report / graphs / history; ignore regenerable tool scratch
+.vibe-risk/jscpd-*/
+.vibe-risk/audit.json

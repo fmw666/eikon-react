@@ -1,0 +1,37 @@
+{
+  "package": "@eikon/react (template-react)",
+  "scan_date": "2026-06-11",
+  "phase": "post-remediation",
+  "rubric": "v4",
+  "skill_version": "4.1.0",
+  "mode": "full",
+  "ai_app_surface_active": false,
+  "total": 96,
+  "level": "EXCELLENT",
+  "ai_native_ceiling": true,
+  "delta_from_baseline": "0 (96; rc classification only, no code change)",
+  "scale": "MEDIUM",
+  "profile": "ui_heavy",
+  "first_party": { "source_files": 136, "loc": 17779, "test_files": 43 },
+  "dimensions": {
+    "module_srp": 11, "pattern_consistency": 14, "type_safety_contracts": 11, "test_coverage_invariants": 12,
+    "ai_context_artifacts": 10, "architecture": 8, "dependency_health": 7, "prohibition_density": 6,
+    "naming": 6, "duplication": 5, "determinism": 3, "security_tooling": 3, "ai_app_surface": null
+  },
+  "deductions": [
+    { "id": "SRP-F2", "dimension": "module_srp", "points": -2, "kind": "policy", "reason": "11/136 first-party >2000 tok (8.1%); genuine showcase pages (DialogShowcasePage, ExamplesSidebar, SignInModal), 0 files >4000" },
+    { "id": "SRP-W3", "dimension": "module_srp", "points": -1, "kind": "disputed", "reason": "feature-flow p90 flow-cost ~5-8k; feature-first isolation keeps closures bounded" },
+    { "id": "TYP-Q4", "dimension": "type_safety_contracts", "points": -1, "kind": "policy", "reason": "145 `as` (zod/radix/event narrowing); 0 any / 0 ts-ignore" }
+  ],
+  "bonuses": [
+    { "id": "COV-S3", "dimension": "test_coverage_invariants", "points": 1, "capped": true, "reason": "12 structural scan tests (__tests__/structure/*)" }
+  ],
+  "cleared_this_remediation": [
+    "SD-TR-001 (shared/ui semi-vendored → vendorGlobs; animate-ui/radix primitives excluded from first-party thresholds)"
+  ],
+  "risk": {
+    "refactoring": { "score": 4, "level": "MINIMAL" },
+    "ai_extension": { "score": 3, "level": "MINIMAL" }
+  },
+  "build_status": "green (typecheck + lint + 412 tests)"
+}

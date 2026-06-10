@@ -1,0 +1,70 @@
+{
+  "schema_version": 3,
+  "package": "create-eikon-react",
+  "standing_deductions": [
+    {
+      "id": "SD-CE-002", "dimension": "type_safety_contracts", "sub_item": "TYP-Q4", "points": -1, "kind": "policy",
+      "reason": "51 `as` assertions (file/template string-manipulation narrowing); 0 any / 0 ts-ignore",
+      "clearing_condition": "project policy change; clearing below 20 would require unsafe casts",
+      "verify_cmd": "rg -c \"\\bas\\s+[A-Z]\" packages/create-eikon-react/src",
+      "registered": "2026-06-11", "last_verified": "2026-06-11"
+    },
+    {
+      "id": "SD-CE-003", "dimension": "duplication", "sub_item": "DUP-C1", "points": -1, "kind": "policy",
+      "reason": "jscpd 3.11% — 20 of 21 clones are intentional self-contained behavioral test fixtures (strip-features-*); the one production clone (init-git/install-deps spawn plumbing) was factored to spawn-collect.ts",
+      "clearing_condition": "would require collapsing readable per-case test fixtures into shared helpers (harmful to test clarity)",
+      "verify_cmd": "npx jscpd packages/create-eikon-react/src --min-lines 5 --min-tokens 50",
+      "registered": "2026-06-11", "last_verified": "2026-06-11"
+    }
+  ],
+  "ledger_diff_2026-06-11-remediation": {
+    "cleared": [
+      "SD-CE-001 (e2e-scenarios.mjs >4000) — declared dataAssetGlobs (it is e2e scenario data); 0 files >4000",
+      "CTX-C2 (no package-local briefing) — added packages/create-eikon-react/AGENTS.md (build/sync-template/template-mirror invariant + parity fence)"
+    ]
+  },
+  "scans": [
+    {
+      "date": "2026-06-11T02:40:00Z", "mode": "full", "skill_version": "4.1.0", "rubric": "v4", "phase": "post-remediation",
+      "total": 95, "level": "EXCELLENT", "ai_native_ceiling": true,
+      "total_loc": 5450, "total_files": 36, "project_scale": "SMALL",
+      "refactoring_risk": 4, "refactoring_risk_level": "MINIMAL",
+      "ai_extension_risk": 5, "ai_extension_risk_level": "MINIMAL",
+      "drift_watch": { "new_guard_density": "green", "new_code_coverage": "green", "stale_prohibitions": 0 },
+      "perf_debt_confirmed": 0, "perf_debt_candidates": 0,
+      "prohibition_count": 10, "context_artifact_score": 10, "ai_app_surface_active": false,
+      "scorecard": ".vibe-risk/scorecard-create-eikon-react.json",
+      "dimensions": {
+        "module_srp": 12, "pattern_consistency": 14, "type_safety_contracts": 11, "test_coverage_invariants": 12,
+        "ai_context_artifacts": 10, "architecture": 8, "dependency_health": 7, "prohibition_density": 5,
+        "naming": 6, "duplication": 4, "determinism": 3, "security_tooling": 3, "ai_app_surface": null
+      },
+      "top_issues": [
+        "AI-native ceiling reached (>=95); remaining deductions are policy",
+        "3.11% dup = intentional behavioral test fixtures (policy)",
+        "51 `as` (policy — file/template narrowing)"
+      ],
+      "notes": "Post-remediation: AI-native ceiling. Added package AGENTS.md, factored init-git/install-deps spawn plumbing to spawn-collect.ts (exact error messages preserved), e2e-scenarios declared data. 0 files >4000. Build green: typecheck + lint + 132 tests."
+    },
+    {
+      "date": "2026-06-11T00:00:00Z", "mode": "full", "skill_version": "4.1.0", "rubric": "v4", "phase": "baseline",
+      "total": 92, "level": "EXCELLENT",
+      "total_loc": 5404, "total_files": 36, "project_scale": "SMALL",
+      "refactoring_risk": 5, "refactoring_risk_level": "MINIMAL",
+      "ai_extension_risk": 6, "ai_extension_risk_level": "MINIMAL",
+      "perf_debt_confirmed": 0, "perf_debt_candidates": 0,
+      "prohibition_count": 9, "context_artifact_score": 9, "ai_app_surface_active": false,
+      "dimensions": {
+        "module_srp": 10, "pattern_consistency": 14, "type_safety_contracts": 11, "test_coverage_invariants": 12,
+        "ai_context_artifacts": 9, "architecture": 8, "dependency_health": 7, "prohibition_density": 5,
+        "naming": 6, "duplication": 4, "determinism": 3, "security_tooling": 3, "ai_app_surface": null
+      },
+      "top_issues": [
+        "e2e-scenarios.mjs (4416 tok) is data — move to dataAssetGlobs",
+        "jscpd 3.26% (strip-features test fixtures)",
+        "no CLI-package-local AGENTS section"
+      ],
+      "notes": "First v4 per-package scan. Published CLI; SMALL scale, 0 vulns, 0 cycles, zero `any`. Strong parity/invariant test fence."
+    }
+  ]
+}

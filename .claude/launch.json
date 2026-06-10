@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "preview-site",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@eikon/preview", "dev"],
+      "port": 3100
+    }
+  ]
+}

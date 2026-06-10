@@ -1,0 +1,44 @@
+{
+  "package": "@eikon/preview (preview-site)",
+  "scan_date": "2026-06-11",
+  "phase": "post-remediation",
+  "rubric": "v4",
+  "skill_version": "4.1.0",
+  "mode": "full",
+  "ai_app_surface_active": false,
+  "total": 92,
+  "level": "EXCELLENT",
+  "delta_from_baseline": "+3 (was 89)",
+  "scale": "MEDIUM",
+  "profile": "ui_heavy",
+  "first_party": { "source_files": 167, "loc": 24200, "test_files": 14 },
+  "dimensions": {
+    "module_srp": 11, "pattern_consistency": 14, "type_safety_contracts": 11, "test_coverage_invariants": 10,
+    "ai_context_artifacts": 9, "architecture": 8, "dependency_health": 7, "prohibition_density": 5,
+    "naming": 6, "duplication": 5, "determinism": 3, "security_tooling": 3, "ai_app_surface": null
+  },
+  "deductions": [
+    { "id": "SRP-F2", "dimension": "module_srp", "points": -2, "kind": "policy", "reason": "32/167 first-party >2000 tok (19.2%); cohesive 2-3k component files (post-split), 0 files >4000" },
+    { "id": "SRP-W3", "dimension": "module_srp", "points": -1, "kind": "disputed", "reason": "landing-flow p90 flow-cost ~5-8k (lower after god-file splits)" },
+    { "id": "TYP-Q4", "dimension": "type_safety_contracts", "points": -1, "kind": "policy", "reason": "257 `as` (DOM/CodeMirror narrowing); 0 any / 0 ts-ignore" },
+    { "id": "COV-E3", "dimension": "test_coverage_invariants", "points": -2, "kind": "policy", "reason": "ui_heavy: thin behavioral token ratio; core params/cli/store/url fully tested + new tree-build unit test" },
+    { "id": "CTX-C2", "dimension": "ai_context_artifacts", "points": -1, "kind": "debt", "reason": "1 package rule file; root AGENTS.md + docs cover the rest" },
+    { "id": "PRO-G3", "dimension": "prohibition_density", "points": -1, "kind": "debt", "reason": "5 PR-PV + root catalog (6-15 band) — now scan-test-enforced" }
+  ],
+  "bonuses": [],
+  "cleared_this_remediation": [
+    "SRP-F1 (Nav.tsx 6533 + ChangedFilesTree.tsx 5252 + useFooterSpotlight.ts 4066 → split into cohesive modules; 0 files >4000)",
+    "SD-PV-002 (i18n.ts/icons.ts → i18n-dict.ts + dataAssetGlobs)",
+    "COV-S2 (added import-boundaries.test.ts enforcing PR-PV-001..005)",
+    "real lib->landing violation (site-config relocated landing/ -> lib/, caught by the new scan test)"
+  ],
+  "documented_exceptions_policy": [
+    "shell/main.tsx -> LandingPage (composition root)",
+    "shell -> landing/theme/** (site-wide i18n shared by embedded playground; 28/29 importers are landing)"
+  ],
+  "risk": {
+    "refactoring": { "score": 8, "level": "MINIMAL" },
+    "ai_extension": { "score": 7, "level": "MINIMAL" }
+  },
+  "build_status": "green (typecheck + lint + 181 tests + 0 console errors on live landing page port 3100)"
+}

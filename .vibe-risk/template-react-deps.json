@@ -1,0 +1,443 @@
+{
+  "App.tsx": [],
+  "app/LayoutVariantContext.tsx": [],
+  "app/LayoutVariantProvider.tsx": [
+    "app/LayoutVariantContext.tsx"
+  ],
+  "app/layouts/BottomTabsFabRootLayout.tsx": [],
+  "app/layouts/BottomTabsRootLayout.tsx": [],
+  "app/layouts/CenteredRootLayout.tsx": [],
+  "app/layouts/MobileDrawerRootLayout.tsx": [],
+  "app/layouts/RootLayout.tsx": [
+    "app/layouts/BottomTabsFabRootLayout.tsx",
+    "app/layouts/BottomTabsRootLayout.tsx",
+    "app/layouts/CenteredRootLayout.tsx",
+    "app/layouts/MobileDrawerRootLayout.tsx",
+    "app/layouts/SidebarRootLayout.tsx",
+    "app/layouts/StackedRootLayout.tsx",
+    "app/layouts/TopbarSidebarRootLayout.tsx"
+  ],
+  "app/layouts/SidebarRootLayout.tsx": [],
+  "app/layouts/StackedRootLayout.tsx": [],
+  "app/layouts/TopbarSidebarRootLayout.tsx": [],
+  "app/pages/NotFoundPage.tsx": [],
+  "app/providers.tsx": [],
+  "app/router.tsx": [],
+  "features/auth/__tests__/components/SignInModal.test.tsx": [
+    "features/auth/components/SignInModal.tsx",
+    "features/auth/types.ts"
+  ],
+  "features/auth/__tests__/store/authStore.test.ts": [
+    "features/auth/store/authStore.ts",
+    "features/auth/types.ts"
+  ],
+  "features/auth/components/SignInButton.tsx": [
+    "features/auth/selectors/index.ts"
+  ],
+  "features/auth/components/SignInModal.tsx": [
+    "features/auth/types.ts"
+  ],
+  "features/auth/components/SignInModalMount.tsx": [
+    "features/auth/components/SignInModal.tsx",
+    "features/auth/selectors/index.ts",
+    "features/auth/types.ts"
+  ],
+  "features/auth/components/index.ts": [
+    "features/auth/components/SignInButton.tsx",
+    "features/auth/components/SignInModal.tsx",
+    "features/auth/components/SignInModalMount.tsx"
+  ],
+  "features/auth/index.ts": [
+    "features/auth/components/index.ts",
+    "features/auth/routes.tsx",
+    "features/auth/selectors/index.ts",
+    "features/auth/services/authService.ts",
+    "features/auth/store/authStore.ts",
+    "features/auth/types.ts"
+  ],
+  "features/auth/routes.tsx": [],
+  "features/auth/selectors/actions.ts": [
+    "features/auth/store/authStore.ts"
+  ],
+  "features/auth/selectors/basic.ts": [
+    "features/auth/store/authStore.ts"
+  ],
+  "features/auth/selectors/computed.ts": [
+    "features/auth/store/authStore.ts"
+  ],
+  "features/auth/selectors/index.ts": [
+    "features/auth/selectors/actions.ts",
+    "features/auth/selectors/basic.ts",
+    "features/auth/selectors/computed.ts"
+  ],
+  "features/auth/services/authService.ts": [
+    "features/auth/services/factory/authServiceFactory.ts"
+  ],
+  "features/auth/services/factory/authServiceFactory.ts": [
+    "features/auth/services/implementations/MockAuthService.ts",
+    "features/auth/services/implementations/SupabaseAuthService.ts",
+    "features/auth/services/interfaces/IAuthService.ts"
+  ],
+  "features/auth/services/implementations/MockAuthService.ts": [
+    "features/auth/services/interfaces/IAuthService.ts",
+    "features/auth/types.ts"
+  ],
+  "features/auth/services/implementations/SupabaseAuthService.ts": [
+    "features/auth/services/interfaces/IAuthService.ts",
+    "features/auth/types.ts"
+  ],
+  "features/auth/services/interfaces/IAuthService.ts": [
+    "features/auth/types.ts"
+  ],
+  "features/auth/store/authStore.ts": [
+    "features/auth/services/authService.ts",
+    "features/auth/types.ts"
+  ],
+  "features/auth/types.ts": [],
+  "features/counter/__tests__/components/CounterDisplay.test.tsx": [
+    "features/counter/components/CounterDisplay.tsx"
+  ],
+  "features/counter/__tests__/pages/CounterPage.test.tsx": [
+    "features/counter/pages/CounterPage.tsx",
+    "features/counter/stores/counterStore.ts"
+  ],
+  "features/counter/__tests__/stores/counterStore.test.ts": [
+    "features/counter/stores/counterStore.ts"
+  ],
+  "features/counter/components/CounterDisplay.tsx": [],
+  "features/counter/index.ts": [
+    "features/counter/routes.tsx",
+    "features/counter/stores/counterStore.ts"
+  ],
+  "features/counter/pages/CounterPage.tsx": [
+    "features/counter/components/CounterDisplay.tsx",
+    "features/counter/stores/counterStore.ts"
+  ],
+  "features/counter/routes.tsx": [
+    "features/counter/pages/CounterPage.tsx"
+  ],
+  "features/counter/stores/counterStore.ts": [],
+  "features/examples/__tests__/components/SignUpFormShowcase.test.tsx": [
+    "features/examples/components/inline/SignUpFormShowcase.tsx"
+  ],
+  "features/examples/__tests__/pages/ExamplesIndexPage.test.tsx": [
+    "features/examples/pages/ExamplesIndexPage.tsx",
+    "features/examples/pages/ExamplesLayout.tsx"
+  ],
+  "features/examples/__tests__/pages/ToasterShowcasePage.test.tsx": [
+    "features/examples/pages/ToasterShowcasePage.tsx"
+  ],
+  "features/examples/components/ExamplesRouteFallback.tsx": [],
+  "features/examples/components/ExamplesSidebar.tsx": [
+    "features/examples/components/exampleSections.ts",
+    "features/examples/components/sectionMeta.ts"
+  ],
+  "features/examples/components/ExamplesTopNav.tsx": [
+    "features/examples/components/exampleSections.ts",
+    "features/examples/components/sectionMeta.ts"
+  ],
+  "features/examples/components/SectionPager.tsx": [
+    "features/examples/components/sectionMeta.ts"
+  ],
+  "features/examples/components/ShowcaseFrame.tsx": [],
+  "features/examples/components/ShowcasePageHeader.tsx": [],
+  "features/examples/components/ShowcaseSection.tsx": [],
+  "features/examples/components/exampleSections.ts": [
+    "features/examples/components/inline/AnimationShowcase.tsx",
+    "features/examples/components/inline/BreadcrumbShowcase.tsx",
+    "features/examples/components/inline/ButtonShowcase.tsx",
+    "features/examples/components/inline/CardShowcase.tsx",
+    "features/examples/components/inline/CheckoutFormShowcase.tsx",
+    "features/examples/components/inline/CodeBlockShowcase.tsx",
+    "features/examples/components/inline/CollapseShowcase.tsx",
+    "features/examples/components/inline/CursorShowcase.tsx",
+    "features/examples/components/inline/DataDisplayShowcase.tsx",
+    "features/examples/components/inline/DividerShowcase.tsx",
+    "features/examples/components/inline/FeedbackShowcase.tsx",
+    "features/examples/components/inline/FooterShowcase.tsx",
+    "features/examples/components/inline/FormShowcase.tsx",
+    "features/examples/components/inline/I18nShowcase.tsx",
+    "features/examples/components/inline/IconShowcase.tsx",
+    "features/examples/components/inline/KbdShowcase.tsx",
+    "features/examples/components/inline/LoadingShowcase.tsx",
+    "features/examples/components/inline/ProfileFormShowcase.tsx",
+    "features/examples/components/inline/ProgressShowcase.tsx",
+    "features/examples/components/inline/SignUpFormShowcase.tsx",
+    "features/examples/components/inline/TableShowcase.tsx",
+    "features/examples/components/inline/TabsShowcase.tsx",
+    "features/examples/components/inline/ThemeShowcase.tsx",
+    "features/examples/components/inline/TitleShowcase.tsx",
+    "features/examples/components/inline/TypewriterShowcase.tsx"
+  ],
+  "features/examples/components/inline/AnimationShowcase.tsx": [],
+  "features/examples/components/inline/BreadcrumbShowcase.tsx": [],
+  "features/examples/components/inline/ButtonShowcase.tsx": [],
+  "features/examples/components/inline/CardShowcase.tsx": [],
+  "features/examples/components/inline/CheckoutFormShowcase.tsx": [],
+  "features/examples/components/inline/CodeBlockShowcase.tsx": [],
+  "features/examples/components/inline/CollapseShowcase.tsx": [],
+  "features/examples/components/inline/CursorShowcase.tsx": [],
+  "features/examples/components/inline/DataDisplayShowcase.tsx": [],
+  "features/examples/components/inline/DividerShowcase.tsx": [],
+  "features/examples/components/inline/FeedbackShowcase.tsx": [],
+  "features/examples/components/inline/FooterShowcase.tsx": [],
+  "features/examples/components/inline/FormShowcase.tsx": [],
+  "features/examples/components/inline/I18nShowcase.tsx": [],
+  "features/examples/components/inline/IconShowcase.tsx": [],
+  "features/examples/components/inline/KbdShowcase.tsx": [],
+  "features/examples/components/inline/LoadingShowcase.tsx": [],
+  "features/examples/components/inline/ProfileFormShowcase.tsx": [],
+  "features/examples/components/inline/ProgressShowcase.tsx": [],
+  "features/examples/components/inline/SignUpFormShowcase.tsx": [],
+  "features/examples/components/inline/TableShowcase.tsx": [],
+  "features/examples/components/inline/TabsShowcase.tsx": [],
+  "features/examples/components/inline/ThemeShowcase.tsx": [],
+  "features/examples/components/inline/TitleShowcase.tsx": [],
+  "features/examples/components/inline/TypewriterShowcase.tsx": [],
+  "features/examples/components/performance/LazyLoadDemo.tsx": [
+    "features/examples/components/performance/LazyLoadHeavyComponent.tsx"
+  ],
+  "features/examples/components/performance/LazyLoadHeavyComponent.tsx": [],
+  "features/examples/components/performance/VirtualListDemo.tsx": [],
+  "features/examples/components/performance/WebVitalsPanel.tsx": [],
+  "features/examples/components/sectionMeta.ts": [
+    "features/examples/components/exampleSections.ts"
+  ],
+  "features/examples/index.ts": [
+    "features/examples/routes.tsx"
+  ],
+  "features/examples/pages/CommandShowcasePage.tsx": [
+    "features/examples/components/ShowcasePageHeader.tsx",
+    "features/examples/components/ShowcaseSection.tsx"
+  ],
+  "features/examples/pages/DialogShowcasePage.tsx": [
+    "features/examples/components/ShowcasePageHeader.tsx",
+    "features/examples/components/ShowcaseSection.tsx"
+  ],
+  "features/examples/pages/ExamplesIndexPage.tsx": [
+    "features/examples/components/ShowcasePageHeader.tsx",
+    "features/examples/components/exampleSections.ts",
+    "features/examples/components/sectionMeta.ts"
+  ],
+  "features/examples/pages/ExamplesLayout.tsx": [
+    "features/examples/components/ExamplesSidebar.tsx",
+    "features/examples/components/ExamplesTopNav.tsx",
+    "features/examples/components/sectionMeta.ts"
+  ],
+  "features/examples/pages/ExamplesSectionPage.tsx": [
+    "features/examples/components/SectionPager.tsx",
+    "features/examples/components/ShowcaseFrame.tsx",
+    "features/examples/components/ShowcasePageHeader.tsx",
+    "features/examples/components/exampleSections.ts",
+    "features/examples/components/sectionMeta.ts"
+  ],
+  "features/examples/pages/MotionShowcasePage.tsx": [
+    "features/examples/components/ShowcasePageHeader.tsx"
+  ],
+  "features/examples/pages/PerformanceShowcasePage.tsx": [
+    "features/examples/components/ShowcasePageHeader.tsx",
+    "features/examples/components/ShowcaseSection.tsx",
+    "features/examples/components/performance/LazyLoadDemo.tsx",
+    "features/examples/components/performance/VirtualListDemo.tsx",
+    "features/examples/components/performance/WebVitalsPanel.tsx"
+  ],
+  "features/examples/pages/SheetShowcasePage.tsx": [
+    "features/examples/components/ShowcasePageHeader.tsx",
+    "features/examples/components/ShowcaseSection.tsx"
+  ],
+  "features/examples/pages/SignInModalShowcasePage.tsx": [
+    "features/examples/components/ShowcasePageHeader.tsx",
+    "features/examples/components/ShowcaseSection.tsx"
+  ],
+  "features/examples/pages/ToasterShowcasePage.tsx": [
+    "features/examples/components/ShowcasePageHeader.tsx"
+  ],
+  "features/examples/routes.tsx": [
+    "features/examples/components/ExamplesRouteFallback.tsx",
+    "features/examples/pages/CommandShowcasePage.tsx",
+    "features/examples/pages/DialogShowcasePage.tsx",
+    "features/examples/pages/ExamplesIndexPage.tsx",
+    "features/examples/pages/ExamplesLayout.tsx",
+    "features/examples/pages/ExamplesSectionPage.tsx",
+    "features/examples/pages/MotionShowcasePage.tsx",
+    "features/examples/pages/PerformanceShowcasePage.tsx",
+    "features/examples/pages/SheetShowcasePage.tsx",
+    "features/examples/pages/SignInModalShowcasePage.tsx",
+    "features/examples/pages/ToasterShowcasePage.tsx"
+  ],
+  "features/home/__tests__/pages/HomePage.test.tsx": [
+    "features/home/pages/HomePage.tsx"
+  ],
+  "features/home/index.ts": [
+    "features/home/routes.tsx"
+  ],
+  "features/home/pages/HomePage.tsx": [],
+  "features/home/routes.tsx": [
+    "features/home/pages/HomePage.tsx"
+  ],
+  "features/tasks/__tests__/components/TaskCard.test.tsx": [
+    "features/tasks/components/TaskCard.tsx",
+    "features/tasks/types.ts"
+  ],
+  "features/tasks/__tests__/components/TaskForm.test.tsx": [
+    "features/tasks/components/TaskForm.tsx"
+  ],
+  "features/tasks/__tests__/components/TasksScreen.test.tsx": [
+    "features/tasks/components/TasksScreen.tsx"
+  ],
+  "features/tasks/__tests__/pages/TaskDetailsPage.test.tsx": [
+    "features/tasks/pages/TaskDetailsPage.tsx",
+    "features/tasks/services/tasksService.ts",
+    "features/tasks/store/tasksStore.ts"
+  ],
+  "features/tasks/__tests__/pages/TaskNewPage.test.tsx": [
+    "features/tasks/pages/TaskNewPage.tsx",
+    "features/tasks/services/tasksService.ts",
+    "features/tasks/store/tasksStore.ts"
+  ],
+  "features/tasks/__tests__/pages/TasksIndexPage.test.tsx": [
+    "features/tasks/pages/TasksIndexPage.tsx",
+    "features/tasks/services/tasksService.ts",
+    "features/tasks/store/tasksStore.ts"
+  ],
+  "features/tasks/__tests__/services/MockTasksService.test.ts": [
+    "features/tasks/services/implementations/MockTasksService.ts"
+  ],
+  "features/tasks/__tests__/store/tasksStore.test.ts": [
+    "features/tasks/store/tasksStore.ts"
+  ],
+  "features/tasks/components/TaskCard.tsx": [
+    "features/tasks/types.ts"
+  ],
+  "features/tasks/components/TaskForm.tsx": [],
+  "features/tasks/components/TasksScreen.tsx": [],
+  "features/tasks/index.ts": [
+    "features/tasks/routes.tsx",
+    "features/tasks/selectors/index.ts",
+    "features/tasks/services/tasksService.ts",
+    "features/tasks/store/tasksStore.ts",
+    "features/tasks/types.ts"
+  ],
+  "features/tasks/pages/TaskDetailsPage.tsx": [
+    "features/tasks/components/TasksScreen.tsx",
+    "features/tasks/selectors/index.ts",
+    "features/tasks/types.ts"
+  ],
+  "features/tasks/pages/TaskNewPage.tsx": [
+    "features/tasks/components/TaskForm.tsx",
+    "features/tasks/components/TasksScreen.tsx",
+    "features/tasks/selectors/index.ts"
+  ],
+  "features/tasks/pages/TasksIndexPage.tsx": [
+    "features/tasks/components/TaskCard.tsx",
+    "features/tasks/components/TasksScreen.tsx",
+    "features/tasks/selectors/index.ts"
+  ],
+  "features/tasks/routes.tsx": [
+    "features/tasks/pages/TaskDetailsPage.tsx",
+    "features/tasks/pages/TaskNewPage.tsx",
+    "features/tasks/pages/TasksIndexPage.tsx"
+  ],
+  "features/tasks/selectors/actions.ts": [
+    "features/tasks/store/tasksStore.ts"
+  ],
+  "features/tasks/selectors/basic.ts": [
+    "features/tasks/store/tasksStore.ts"
+  ],
+  "features/tasks/selectors/computed.ts": [
+    "features/tasks/store/tasksStore.ts",
+    "features/tasks/types.ts"
+  ],
+  "features/tasks/selectors/index.ts": [
+    "features/tasks/selectors/actions.ts",
+    "features/tasks/selectors/basic.ts",
+    "features/tasks/selectors/computed.ts",
+    "features/tasks/selectors/memoized.ts"
+  ],
+  "features/tasks/selectors/memoized.ts": [
+    "features/tasks/store/tasksStore.ts",
+    "features/tasks/types.ts"
+  ],
+  "features/tasks/services/factory/tasksServiceFactory.ts": [
+    "features/tasks/services/implementations/MockTasksService.ts",
+    "features/tasks/services/implementations/SupabaseTasksService.ts",
+    "features/tasks/services/interfaces/ITasksService.ts"
+  ],
+  "features/tasks/services/implementations/MockTasksService.ts": [
+    "features/tasks/services/implementations/mockData.ts",
+    "features/tasks/services/interfaces/ITasksService.ts",
+    "features/tasks/types.ts"
+  ],
+  "features/tasks/services/implementations/SupabaseTasksService.ts": [
+    "features/tasks/services/interfaces/ITasksService.ts",
+    "features/tasks/types.ts"
+  ],
+  "features/tasks/services/implementations/mockData.ts": [
+    "features/tasks/types.ts"
+  ],
+  "features/tasks/services/interfaces/ITasksService.ts": [
+    "features/tasks/types.ts"
+  ],
+  "features/tasks/services/tasksService.ts": [
+    "features/tasks/services/factory/tasksServiceFactory.ts"
+  ],
+  "features/tasks/store/tasksStore.ts": [
+    "features/tasks/services/tasksService.ts",
+    "features/tasks/types.ts"
+  ],
+  "features/tasks/types.ts": [],
+  "main.tsx": [],
+  "shared/i18n/index.ts": [],
+  "shared/lib/cn.ts": [],
+  "shared/nav/index.ts": [
+    "shared/nav/navLinks.ts"
+  ],
+  "shared/nav/navLinks.ts": [],
+  "shared/services/config/serviceConfig.ts": [],
+  "shared/services/index.ts": [
+    "shared/services/config/serviceConfig.ts"
+  ],
+  "shared/supabase/client.ts": [],
+  "shared/supabase/index.ts": [
+    "shared/supabase/client.ts"
+  ],
+  "shared/theme/index.ts": [
+    "shared/theme/themeStore.ts"
+  ],
+  "shared/theme/themeStore.ts": [],
+  "shared/ui/accordion.tsx": [],
+  "shared/ui/alert.tsx": [],
+  "shared/ui/avatar.tsx": [],
+  "shared/ui/badge.tsx": [],
+  "shared/ui/breadcrumb.tsx": [],
+  "shared/ui/button.tsx": [],
+  "shared/ui/card.tsx": [],
+  "shared/ui/checkbox.tsx": [],
+  "shared/ui/code-block.tsx": [],
+  "shared/ui/command.tsx": [],
+  "shared/ui/dialog.tsx": [],
+  "shared/ui/footer.tsx": [],
+  "shared/ui/form.tsx": [],
+  "shared/ui/heading.tsx": [],
+  "shared/ui/input.tsx": [],
+  "shared/ui/kbd.tsx": [],
+  "shared/ui/label.tsx": [],
+  "shared/ui/language-switcher.tsx": [],
+  "shared/ui/popover.tsx": [],
+  "shared/ui/progress.tsx": [],
+  "shared/ui/radio-group.tsx": [],
+  "shared/ui/select.tsx": [],
+  "shared/ui/separator.tsx": [],
+  "shared/ui/sheet.tsx": [],
+  "shared/ui/skeleton.tsx": [],
+  "shared/ui/spinner.tsx": [],
+  "shared/ui/switch.tsx": [],
+  "shared/ui/table.tsx": [],
+  "shared/ui/tabs.tsx": [],
+  "shared/ui/textarea.tsx": [],
+  "shared/ui/theme-toggle.tsx": [],
+  "shared/ui/toaster.tsx": [],
+  "shared/ui/tooltip.tsx": [],
+  "shared/ui/typewriter.tsx": [],
+  "vite-env.d.ts": []
+}

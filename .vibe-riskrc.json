@@ -1,0 +1,15 @@
+{
+  "vendorGlobs": [
+    "packages/template-react/src/shared/ui/**"
+  ],
+  "dataAssetGlobs": [
+    "packages/create-eikon-react/template-snapshots/**",
+    "packages/create-eikon-react/scripts/e2e-scenarios.mjs",
+    "packages/preview-site/src/landing/theme/i18n-dict.ts",
+    "packages/preview-site/src/landing/icons.ts"
+  ],
+  "generatedGlobs": [
+    "packages/template-react/.preview-cache/**",
+    "packages/create-eikon-react/template/**"
+  ]
+}

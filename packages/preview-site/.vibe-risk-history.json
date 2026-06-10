@@ -1,0 +1,71 @@
+{
+  "schema_version": 3,
+  "package": "@eikon/preview",
+  "standing_deductions": [
+    {
+      "id": "SD-PV-003", "dimension": "type_safety_contracts", "sub_item": "TYP-Q4", "points": -1, "kind": "policy",
+      "reason": "257 `as` assertions (DOM/CodeMirror/getBoundingClientRect/event-target narrowing); 0 any / 0 ts-ignore",
+      "clearing_condition": "project policy change; clearing below 20 would require unsafe casts",
+      "verify_cmd": "rg -c \"\\bas\\s+[A-Z]\" packages/preview-site/src",
+      "registered": "2026-06-11", "last_verified": "2026-06-11"
+    },
+    {
+      "id": "SD-PV-005", "dimension": "architecture", "sub_item": "PR-PV-003-exempt", "points": 0, "kind": "policy",
+      "reason": "Two documented shell->landing exceptions pinned by import-boundaries.test.ts: src/shell/main.tsx (composition root mounts LandingPage) + src/landing/theme/** (site-wide theme/i18n shared by the embedded playground; 28/29 importers are landing)",
+      "clearing_condition": "optional: relocate theme/ to a shared leaf if the playground is ever shipped fully standalone",
+      "verify_cmd": "pnpm --filter @eikon/preview exec vitest run __tests__/structure/import-boundaries.test.ts",
+      "registered": "2026-06-11", "last_verified": "2026-06-11"
+    }
+  ],
+  "ledger_diff_2026-06-11-remediation": {
+    "cleared": [
+      "SD-PV-001 (Nav.tsx/ChangedFilesTree.tsx >4000) — split into NavPill/NavLinks/useScrolled + ChangedFileRow/changed-files-tree.build/.shared; 0 files >4000",
+      "SD-PV-002 (i18n.ts/icons.ts data) — DICT extracted to i18n-dict.ts + declared dataAssetGlobs",
+      "SD-PV-004 (PR-PV not scan-tested) — added __tests__/structure/import-boundaries.test.ts (5 sweeps); also FIXED a real lib->landing violation (site-config moved to lib/)"
+    ]
+  },
+  "scans": [
+    {
+      "date": "2026-06-11T02:40:00Z", "mode": "full", "skill_version": "4.1.0", "rubric": "v4", "phase": "post-remediation",
+      "total": 92, "level": "EXCELLENT",
+      "total_loc": 24200, "total_files": 167, "project_scale": "MEDIUM",
+      "refactoring_risk": 8, "refactoring_risk_level": "MINIMAL",
+      "ai_extension_risk": 7, "ai_extension_risk_level": "MINIMAL",
+      "drift_watch": { "new_guard_density": "green", "new_code_coverage": "green", "stale_prohibitions": 0 },
+      "perf_debt_confirmed": 3, "perf_debt_candidates": 40,
+      "prohibition_count": 5, "context_artifact_score": 9, "ai_app_surface_active": false,
+      "scorecard": ".vibe-risk/scorecard-preview-site.json",
+      "dimensions": {
+        "module_srp": 11, "pattern_consistency": 14, "type_safety_contracts": 11, "test_coverage_invariants": 10,
+        "ai_context_artifacts": 9, "architecture": 8, "dependency_health": 7, "prohibition_density": 5,
+        "naming": 6, "duplication": 5, "determinism": 3, "security_tooling": 3, "ai_app_surface": null
+      },
+      "top_issues": [
+        "remaining SRP-F2 (19.2% >2000) is cohesive 2-3k component files — policy, not debt",
+        "ui_heavy behavioral coverage thin (COV-E3); core params/cli/store/url fully tested",
+        "257 `as` (policy ceiling — DOM/CodeMirror narrowing)"
+      ],
+      "notes": "Post-remediation: 4 god files split (0 >4000), i18n DICT extracted to data, site-config relocated landing->lib (cleared a real un-fenced lib->landing import), PR-PV scan-test fence added (also caught + fixed the boundary violation). Build green: typecheck + lint + 181 tests + 0 console errors on the live landing page (port 3100). jscpd 1.52%."
+    },
+    {
+      "date": "2026-06-11T00:00:00Z", "mode": "full", "skill_version": "4.1.0", "rubric": "v4", "phase": "baseline",
+      "total": 89, "level": "EXCELLENT",
+      "total_loc": 24222, "total_files": 159, "project_scale": "MEDIUM",
+      "refactoring_risk": 11, "refactoring_risk_level": "MINIMAL",
+      "ai_extension_risk": 8, "ai_extension_risk_level": "MINIMAL",
+      "perf_debt_confirmed": 3, "perf_debt_candidates": 40,
+      "prohibition_count": 5, "context_artifact_score": 9, "ai_app_surface_active": false,
+      "dimensions": {
+        "module_srp": 9, "pattern_consistency": 14, "type_safety_contracts": 11, "test_coverage_invariants": 9,
+        "ai_context_artifacts": 9, "architecture": 8, "dependency_health": 7, "prohibition_density": 5,
+        "naming": 6, "duplication": 5, "determinism": 3, "security_tooling": 3, "ai_app_surface": null
+      },
+      "top_issues": [
+        "Nav.tsx 6533 + ChangedFilesTree.tsx 5252 god files (cohesive but unsplit)",
+        "thin behavioral tests (13 files / 159 source); ui_heavy profile",
+        "PR-PV prohibitions not backed by an in-package scan test"
+      ],
+      "notes": "First v4 per-package scan (baseline reset from v3 unified 91). ui_heavy showcase SPA. 0 cycles, 0 vulns, 1.62% dup, zero `any`."
+    }
+  ]
+}

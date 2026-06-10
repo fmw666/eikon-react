@@ -1,0 +1,618 @@
+{
+  "../create-eikon-react/src/apply-ui-snapshot.constants.ts": [],
+  "../create-eikon-react/src/apply-ui-snapshot.eslint.ts": [
+    "../create-eikon-react/src/apply-ui-snapshot.constants.ts"
+  ],
+  "../create-eikon-react/src/apply-ui-snapshot.fs.ts": [
+    "../create-eikon-react/src/apply-ui-snapshot.constants.ts",
+    "../create-eikon-react/src/strip-features.ts"
+  ],
+  "../create-eikon-react/src/apply-ui-snapshot.read.ts": [
+    "../create-eikon-react/src/apply-ui-snapshot.constants.ts",
+    "../create-eikon-react/src/apply-ui-snapshot.fs.ts"
+  ],
+  "../create-eikon-react/src/apply-ui-snapshot.ts": [
+    "../create-eikon-react/src/apply-ui-snapshot.constants.ts",
+    "../create-eikon-react/src/apply-ui-snapshot.eslint.ts",
+    "../create-eikon-react/src/apply-ui-snapshot.fs.ts",
+    "../create-eikon-react/src/apply-ui-snapshot.read.ts"
+  ],
+  "../create-eikon-react/src/binary-detect.ts": [],
+  "../create-eikon-react/src/inject-html-variants.ts": [
+    "../create-eikon-react/src/strip-features.ts"
+  ],
+  "../create-eikon-react/src/markers.ts": [],
+  "../create-eikon-react/src/prune.ts": [
+    "../create-eikon-react/src/variant-types.ts"
+  ],
+  "../create-eikon-react/src/rewrite-package-manager.ts": [],
+  "../create-eikon-react/src/skip-list.ts": [],
+  "../create-eikon-react/src/strip-features.ts": [
+    "../create-eikon-react/src/binary-detect.ts",
+    "../create-eikon-react/src/markers.ts",
+    "../create-eikon-react/src/prune.ts",
+    "../create-eikon-react/src/variant-types.ts"
+  ],
+  "../create-eikon-react/src/variant-types.ts": [],
+  "server/__tests__/builder-eviction.test.ts": [
+    "server/builder.ts"
+  ],
+  "server/__tests__/fingerprint-debounce.test.ts": [
+    "server/fingerprint.ts"
+  ],
+  "server/build-inputs.ts": [
+    "server/builder.ts",
+    "server/hash.ts"
+  ],
+  "server/build-worker.ts": [],
+  "server/builder-config.ts": [],
+  "server/builder-eviction.ts": [
+    "server/builder-paths.ts",
+    "server/builder-state.ts",
+    "server/log.ts",
+    "server/metrics.ts"
+  ],
+  "server/builder-paths.ts": [
+    "../create-eikon-react/src/skip-list.ts",
+    "server/hash.ts"
+  ],
+  "server/builder-run.ts": [
+    "../create-eikon-react/src/apply-ui-snapshot.ts",
+    "../create-eikon-react/src/strip-features.ts",
+    "server/builder-config.ts",
+    "server/builder-paths.ts",
+    "server/copy-tree.ts",
+    "server/hash.ts",
+    "server/vite-runner.ts"
+  ],
+  "server/builder-state.ts": [
+    "server/builder-paths.ts"
+  ],
+  "server/builder.ts": [
+    "server/builder-config.ts",
+    "server/builder-eviction.ts",
+    "server/builder-paths.ts",
+    "server/builder-run.ts",
+    "server/builder-state.ts",
+    "server/fingerprint.ts",
+    "server/hash.ts",
+    "server/log.ts",
+    "server/metrics.ts",
+    "server/vite-runner.ts"
+  ],
+  "server/copy-tree.ts": [],
+  "server/file-tree.ts": [],
+  "server/fingerprint.ts": [
+    "../create-eikon-react/src/skip-list.ts"
+  ],
+  "server/handlers.ts": [
+    "server/build-inputs.ts",
+    "server/builder.ts",
+    "server/file-tree.ts",
+    "server/fingerprint.ts",
+    "server/http-response.ts",
+    "server/metrics.ts",
+    "server/preview-serve.ts",
+    "server/sim-cache.ts",
+    "server/simulate-strip.ts"
+  ],
+  "server/hash.ts": [],
+  "server/http-response.ts": [
+    "server/log.ts",
+    "server/metrics.ts"
+  ],
+  "server/log.ts": [],
+  "server/metrics.ts": [],
+  "server/middleware.ts": [
+    "server/builder.ts",
+    "server/fingerprint.ts",
+    "server/handlers.ts"
+  ],
+  "server/preview-serve.ts": [
+    "../create-eikon-react/src/inject-html-variants.ts",
+    "../create-eikon-react/src/strip-features.ts",
+    "server/builder.ts",
+    "server/http-response.ts",
+    "src/lib/params-schema.ts"
+  ],
+  "server/prod.ts": [
+    "server/builder.ts",
+    "server/fingerprint.ts",
+    "server/handlers.ts",
+    "server/log.ts"
+  ],
+  "server/sim-cache.ts": [
+    "server/builder.ts"
+  ],
+  "server/simulate-strip-filters.ts": [
+    "../create-eikon-react/src/strip-features.ts"
+  ],
+  "server/simulate-strip-inputs.ts": [
+    "../create-eikon-react/src/rewrite-package-manager.ts",
+    "../create-eikon-react/src/strip-features.ts",
+    "server/hash.ts"
+  ],
+  "server/simulate-strip-package-json.ts": [
+    "../create-eikon-react/src/rewrite-package-manager.ts",
+    "../create-eikon-react/src/strip-features.ts",
+    "server/simulate-strip-inputs.ts"
+  ],
+  "server/simulate-strip-snapshot.ts": [
+    "../create-eikon-react/src/apply-ui-snapshot.ts",
+    "../create-eikon-react/src/strip-features.ts",
+    "server/builder.ts",
+    "server/hash.ts",
+    "server/simulate-strip-filters.ts"
+  ],
+  "server/simulate-strip-walk.ts": [
+    "../create-eikon-react/src/apply-ui-snapshot.ts",
+    "../create-eikon-react/src/skip-list.ts",
+    "../create-eikon-react/src/strip-features.ts",
+    "server/builder.ts",
+    "server/simulate-strip-filters.ts"
+  ],
+  "server/simulate-strip.ts": [
+    "../create-eikon-react/src/apply-ui-snapshot.ts",
+    "../create-eikon-react/src/inject-html-variants.ts",
+    "server/builder.ts",
+    "server/hash.ts",
+    "server/simulate-strip-filters.ts",
+    "server/simulate-strip-inputs.ts",
+    "server/simulate-strip-package-json.ts",
+    "server/simulate-strip-snapshot.ts",
+    "server/simulate-strip-walk.ts"
+  ],
+  "server/vite-runner.ts": [],
+  "src/landing/LandingPage.tsx": [
+    "src/landing/components/Reveal.tsx",
+    "src/landing/nav/Nav.tsx",
+    "src/landing/nav/route-loaders.ts",
+    "src/landing/nav/route.ts",
+    "src/landing/sections/Hero.tsx",
+    "src/landing/sections/PainPoints.tsx",
+    "src/landing/sections/Philosophy.tsx",
+    "src/landing/sections/PlaygroundSection.tsx",
+    "src/landing/sections/QASection.tsx",
+    "src/landing/sections/TechStackWall.tsx",
+    "src/landing/sections/footer/index.ts",
+    "src/landing/sections/platform-picker/index.ts",
+    "src/landing/theme/theme-store.ts"
+  ],
+  "src/landing/PlaygroundPage.tsx": [
+    "src/landing/components/collapsible-sidebar/index.ts",
+    "src/landing/nav/nav-metrics.ts",
+    "src/landing/sections/PromptOutput.tsx",
+    "src/landing/sections/platform-picker/index.ts",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/changelog/ChangedFilesTree.tsx": [],
+  "src/landing/changelog/ChangelogPage.tsx": [
+    "src/landing/changelog/ChangelogStates.tsx",
+    "src/landing/changelog/ChangelogSummary.tsx",
+    "src/landing/changelog/ChangelogWorkspace.tsx",
+    "src/landing/changelog/VersionPicker.tsx",
+    "src/landing/changelog/store.ts",
+    "src/landing/changelog/use-changelog-data.ts"
+  ],
+  "src/landing/changelog/ChangelogStates.tsx": [
+    "src/landing/changelog/use-changelog-data.ts",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/changelog/ChangelogSummary.tsx": [
+    "src/landing/changelog/use-changelog-data.ts",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/changelog/ChangelogWorkspace.tsx": [
+    "src/landing/changelog/ChangedFilesTree.tsx",
+    "src/landing/changelog/DiffView.tsx",
+    "src/landing/changelog/use-changelog-data.ts",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/changelog/DiffView.tsx": [
+    "src/landing/changelog/diff-parser.ts"
+  ],
+  "src/landing/changelog/VersionPicker.tsx": [
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/changelog/__tests__/diff-parser.test.ts": [
+    "src/landing/changelog/diff-parser.ts"
+  ],
+  "src/landing/changelog/demo-data.ts": [],
+  "src/landing/changelog/diff-parser.ts": [],
+  "src/landing/changelog/store.ts": [],
+  "src/landing/changelog/use-changelog-data.ts": [
+    "src/landing/changelog/demo-data.ts"
+  ],
+  "src/landing/components/CtaButton.tsx": [],
+  "src/landing/components/Reveal.tsx": [
+    "src/landing/nav/route.ts"
+  ],
+  "src/landing/components/collapsible-sidebar/CollapsibleSidebar.tsx": [
+    "src/landing/components/collapsible-sidebar/DesktopSidebar.tsx",
+    "src/landing/components/collapsible-sidebar/MobileSidebar.tsx",
+    "src/landing/components/collapsible-sidebar/types.ts",
+    "src/landing/hooks/useSidebarMode.ts"
+  ],
+  "src/landing/components/collapsible-sidebar/DesktopSidebar.tsx": [
+    "src/landing/components/collapsible-sidebar/PanelContent.tsx",
+    "src/landing/components/collapsible-sidebar/Rail.tsx",
+    "src/landing/components/collapsible-sidebar/types.ts",
+    "src/landing/hooks/useSidebarMode.ts",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/components/collapsible-sidebar/MobileSidebar.tsx": [
+    "src/landing/components/collapsible-sidebar/icons.tsx",
+    "src/landing/components/collapsible-sidebar/types.ts"
+  ],
+  "src/landing/components/collapsible-sidebar/PanelContent.tsx": [
+    "src/landing/components/collapsible-sidebar/MobileSidebar.tsx",
+    "src/landing/components/collapsible-sidebar/icons.tsx",
+    "src/landing/components/collapsible-sidebar/types.ts",
+    "src/landing/hooks/useSidebarMode.ts",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/components/collapsible-sidebar/Rail.tsx": [
+    "src/landing/components/collapsible-sidebar/icons.tsx",
+    "src/landing/hooks/useSidebarMode.ts"
+  ],
+  "src/landing/components/collapsible-sidebar/icons.tsx": [],
+  "src/landing/components/collapsible-sidebar/index.ts": [
+    "src/landing/components/collapsible-sidebar/CollapsibleSidebar.tsx",
+    "src/landing/components/collapsible-sidebar/icons.tsx",
+    "src/landing/components/collapsible-sidebar/types.ts"
+  ],
+  "src/landing/components/collapsible-sidebar/types.ts": [
+    "src/landing/hooks/useSidebarMode.ts"
+  ],
+  "src/landing/hooks/useSidebarMode.ts": [],
+  "src/landing/icons.ts": [],
+  "src/landing/nav/LangSwitcher.tsx": [
+    "src/landing/theme/i18n.ts",
+    "src/landing/theme/theme-store.ts"
+  ],
+  "src/landing/nav/LoadingBar.tsx": [],
+  "src/landing/nav/Nav.tsx": [
+    "src/landing/nav/LangSwitcher.tsx",
+    "src/landing/nav/LoadingBar.tsx",
+    "src/landing/nav/nav-metrics.ts",
+    "src/landing/nav/route-loaders.ts",
+    "src/landing/nav/route.ts",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/nav/ThemeToggle.tsx": [
+    "src/landing/theme/i18n.ts",
+    "src/landing/theme/theme-store.ts"
+  ],
+  "src/landing/nav/nav-metrics.ts": [],
+  "src/landing/nav/route-loaders.ts": [
+    "src/landing/PlaygroundPage.tsx",
+    "src/landing/changelog/ChangelogPage.tsx",
+    "src/landing/nav/route.ts"
+  ],
+  "src/landing/nav/route.ts": [],
+  "src/landing/sections/Hero.tsx": [
+    "src/landing/components/CtaButton.tsx",
+    "src/landing/sections/hero/FindItPill.tsx",
+    "src/landing/sections/hero/HeroBackdrop.tsx",
+    "src/landing/sections/hero/TerminalCard.tsx",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/sections/PainPoints.tsx": [
+    "src/landing/icons.ts",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/sections/Philosophy.tsx": [
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/sections/PlaygroundSection.tsx": [
+    "src/landing/sections/playground-section/WorkbenchBackdrop.tsx",
+    "src/landing/sections/playground-section/WorkbenchCard.tsx",
+    "src/landing/sections/playground-section/WorkbenchHeader.tsx"
+  ],
+  "src/landing/sections/PromptOutput.tsx": [
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/sections/QASection.tsx": [
+    "src/landing/site-config.ts",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/sections/TechStackWall.tsx": [
+    "src/landing/icons.ts",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/sections/footer/Footer.tsx": [
+    "src/landing/sections/footer/FooterParts.tsx",
+    "src/landing/sections/footer/HuntCard.tsx",
+    "src/landing/sections/footer/Meadow.tsx",
+    "src/landing/sections/footer/constants.ts",
+    "src/landing/sections/footer/icons.tsx",
+    "src/landing/sections/footer/useFooterSpotlight.ts",
+    "src/landing/site-config.ts",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/sections/footer/FooterParts.tsx": [
+    "src/landing/nav/route.ts",
+    "src/landing/sections/footer/constants.ts",
+    "src/landing/sections/footer/icons.tsx"
+  ],
+  "src/landing/sections/footer/HuntCard.tsx": [
+    "src/landing/sections/footer/constants.ts",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/sections/footer/Meadow.tsx": [],
+  "src/landing/sections/footer/constants.ts": [],
+  "src/landing/sections/footer/icons.tsx": [],
+  "src/landing/sections/footer/index.ts": [
+    "src/landing/sections/footer/Footer.tsx"
+  ],
+  "src/landing/sections/footer/useFooterSpotlight.ts": [],
+  "src/landing/sections/hero/FindItPill.tsx": [
+    "src/landing/components/CtaButton.tsx",
+    "src/landing/sections/hero/GithubIcon.tsx",
+    "src/landing/site-config.ts",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/sections/hero/GithubIcon.tsx": [],
+  "src/landing/sections/hero/HeroBackdrop.tsx": [],
+  "src/landing/sections/hero/TerminalCard.tsx": [],
+  "src/landing/sections/platform-picker/ActiveAmbience.tsx": [],
+  "src/landing/sections/platform-picker/HardwareShells.tsx": [],
+  "src/landing/sections/platform-picker/PlatformPicker.tsx": [
+    "src/landing/sections/platform-picker/StackedStage.tsx",
+    "src/landing/sections/platform-picker/constants.ts",
+    "src/landing/sections/platform-picker/icons.tsx",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/sections/platform-picker/ScaledDeviceShell.tsx": [
+    "src/landing/sections/platform-picker/ActiveAmbience.tsx",
+    "src/landing/sections/platform-picker/HardwareShells.tsx",
+    "src/landing/sections/platform-picker/constants.ts"
+  ],
+  "src/landing/sections/platform-picker/ScreenContent.tsx": [
+    "src/landing/sections/platform-picker/screen-content/DesktopScreenContent.tsx",
+    "src/landing/sections/platform-picker/screen-content/MobileScreenContent.tsx",
+    "src/landing/sections/platform-picker/screen-content/WebScreenContent.tsx"
+  ],
+  "src/landing/sections/platform-picker/StackedStage.tsx": [
+    "src/landing/sections/platform-picker/ScaledDeviceShell.tsx",
+    "src/landing/sections/platform-picker/ScreenContent.tsx",
+    "src/landing/sections/platform-picker/constants.ts",
+    "src/landing/sections/platform-picker/usePlatformKeyboard.ts",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/sections/platform-picker/__tests__/rendering-quality.test.ts": [
+    "src/landing/sections/platform-picker/constants.ts"
+  ],
+  "src/landing/sections/platform-picker/constants.ts": [
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/sections/platform-picker/icons.tsx": [],
+  "src/landing/sections/platform-picker/index.ts": [
+    "src/landing/sections/platform-picker/PlatformPicker.tsx"
+  ],
+  "src/landing/sections/platform-picker/screen-content/DesktopScreenContent.tsx": [
+    "src/landing/sections/platform-picker/screen-content/mockup-icons.tsx",
+    "src/landing/sections/platform-picker/screen-content/theme.ts"
+  ],
+  "src/landing/sections/platform-picker/screen-content/MobileScreenContent.tsx": [
+    "src/landing/sections/platform-picker/screen-content/mockup-icons.tsx",
+    "src/landing/sections/platform-picker/screen-content/theme.ts"
+  ],
+  "src/landing/sections/platform-picker/screen-content/WebScreenContent.tsx": [
+    "src/landing/sections/platform-picker/screen-content/mockup-icons.tsx",
+    "src/landing/sections/platform-picker/screen-content/theme.ts"
+  ],
+  "src/landing/sections/platform-picker/screen-content/mockup-icons.tsx": [],
+  "src/landing/sections/platform-picker/screen-content/theme.ts": [],
+  "src/landing/sections/platform-picker/usePlatformKeyboard.ts": [
+    "src/landing/sections/platform-picker/constants.ts"
+  ],
+  "src/landing/sections/playground-section/WorkbenchBackdrop.tsx": [],
+  "src/landing/sections/playground-section/WorkbenchCard.tsx": [
+    "src/landing/sections/playground-section/WorkbenchSidebar.tsx"
+  ],
+  "src/landing/sections/playground-section/WorkbenchHeader.tsx": [
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/sections/playground-section/WorkbenchSidebar.tsx": [
+    "src/landing/components/collapsible-sidebar/index.ts",
+    "src/landing/sections/PromptOutput.tsx",
+    "src/landing/theme/i18n.ts"
+  ],
+  "src/landing/site-config.ts": [],
+  "src/landing/theme/i18n.ts": [
+    "src/landing/theme/lang.ts",
+    "src/landing/theme/theme-store.ts"
+  ],
+  "src/landing/theme/lang.ts": [],
+  "src/landing/theme/theme-store.ts": [
+    "src/landing/theme/lang.ts"
+  ],
+  "src/lib/__tests__/cli-command.test.ts": [
+    "src/lib/cli-command.ts",
+    "src/lib/params-schema.ts",
+    "src/lib/params-store.ts"
+  ],
+  "src/lib/__tests__/params-schema.test.ts": [
+    "src/lib/params-schema.ts"
+  ],
+  "src/lib/__tests__/params-store.test.ts": [
+    "src/lib/params-schema.ts",
+    "src/lib/params-store.ts"
+  ],
+  "src/lib/__tests__/params-url.test.ts": [
+    "src/lib/params-schema.ts",
+    "src/lib/params-url.ts"
+  ],
+  "src/lib/cli-command.ts": [
+    "src/lib/params-schema.ts"
+  ],
+  "src/lib/github-cache.ts": [],
+  "src/lib/github-http.ts": [],
+  "src/lib/github-types.ts": [],
+  "src/lib/github.ts": [
+    "src/lib/github-cache.ts",
+    "src/lib/github-http.ts",
+    "src/lib/github-types.ts"
+  ],
+  "src/lib/params-schema.ts": [],
+  "src/lib/params-store.ts": [
+    "src/lib/params-schema.ts"
+  ],
+  "src/lib/params-url.ts": [
+    "src/lib/params-schema.ts"
+  ],
+  "src/shell/App.tsx": [
+    "src/shell/CodeView.tsx",
+    "src/shell/FileExplorer.tsx",
+    "src/shell/PreviewFrame.tsx",
+    "src/shell/Toolbar.tsx",
+    "src/shell/store.ts"
+  ],
+  "src/shell/CodeView.tsx": [
+    "src/shell/store.ts",
+    "src/shell/useScrollFade.ts"
+  ],
+  "src/shell/FileExplorer.tsx": [
+    "src/shell/file-explorer/Row.tsx",
+    "src/shell/file-explorer/TreeSpinner.tsx",
+    "src/shell/file-explorer/icons.ts",
+    "src/shell/file-explorer/sim-inputs.ts",
+    "src/shell/file-explorer/tokens.ts",
+    "src/shell/file-explorer/types.ts",
+    "src/shell/store.ts",
+    "src/shell/useScrollFade.ts"
+  ],
+  "src/shell/ParamsPanel.tsx": [
+    "src/shell/store.ts"
+  ],
+  "src/shell/PreviewFrame.tsx": [
+    "src/shell/device-shell/index.ts",
+    "src/shell/hooks/usePreviewMessaging.ts",
+    "src/shell/hooks/useQuickJumpNav.ts",
+    "src/shell/hooks/useShellOuterPadding.ts",
+    "src/shell/hooks/useTemplateBuild.ts",
+    "src/shell/hooks/useTemplateRev.ts",
+    "src/shell/preview-frame/ScaledShellWrapper.tsx",
+    "src/shell/preview-frame/build-inputs.ts",
+    "src/shell/preview-frame/geometry.ts",
+    "src/shell/preview-frame/scrollbar.ts",
+    "src/shell/store.ts"
+  ],
+  "src/shell/Toolbar.tsx": [
+    "src/shell/store.ts",
+    "src/shell/toolbar/CompactToolbar.tsx",
+    "src/shell/toolbar/ReloadButton.tsx",
+    "src/shell/toolbar/frame-sizes.ts",
+    "src/shell/toolbar/icons.tsx",
+    "src/shell/toolbar/quick-links.ts",
+    "src/shell/toolbar/types.ts"
+  ],
+  "src/shell/__tests__/loading-gate.test.ts": [
+    "src/shell/store.ts"
+  ],
+  "src/shell/device-shell/DesktopShell.tsx": [
+    "src/shell/device-shell/tokens.ts",
+    "src/shell/device-shell/types.ts",
+    "src/shell/store.ts"
+  ],
+  "src/shell/device-shell/DeviceShell.tsx": [
+    "src/shell/device-shell/DesktopShell.tsx",
+    "src/shell/device-shell/MobileShell.tsx",
+    "src/shell/device-shell/WebShell.tsx",
+    "src/shell/device-shell/types.ts"
+  ],
+  "src/shell/device-shell/MobileShell.tsx": [
+    "src/shell/device-shell/tokens.ts",
+    "src/shell/device-shell/types.ts",
+    "src/shell/store.ts"
+  ],
+  "src/shell/device-shell/WebShell.tsx": [
+    "src/shell/device-shell/DesktopShell.tsx",
+    "src/shell/device-shell/tokens.ts",
+    "src/shell/device-shell/types.ts",
+    "src/shell/store.ts"
+  ],
+  "src/shell/device-shell/index.ts": [
+    "src/shell/device-shell/DeviceShell.tsx",
+    "src/shell/device-shell/types.ts"
+  ],
+  "src/shell/device-shell/tokens.ts": [],
+  "src/shell/device-shell/types.ts": [
+    "src/shell/store.ts"
+  ],
+  "src/shell/file-explorer/Row.tsx": [
+    "src/shell/file-explorer/tokens.ts",
+    "src/shell/file-explorer/types.ts",
+    "src/shell/fileIcons.ts"
+  ],
+  "src/shell/file-explorer/TreeSpinner.tsx": [
+    "src/shell/file-explorer/tokens.ts"
+  ],
+  "src/shell/file-explorer/icons.ts": [
+    "src/shell/file-explorer/types.ts",
+    "src/shell/fileIcons.ts"
+  ],
+  "src/shell/file-explorer/sim-inputs.ts": [
+    "src/shell/file-explorer/types.ts"
+  ],
+  "src/shell/file-explorer/tokens.ts": [],
+  "src/shell/file-explorer/types.ts": [],
+  "src/shell/fileIcons.ts": [],
+  "src/shell/hooks/usePreviewMessaging.ts": [
+    "src/shell/preview-frame/build-inputs.ts",
+    "src/shell/store.ts"
+  ],
+  "src/shell/hooks/useQuickJumpNav.ts": [
+    "src/shell/store.ts"
+  ],
+  "src/shell/hooks/useShellOuterPadding.ts": [
+    "src/shell/device-shell/index.ts",
+    "src/shell/preview-frame/geometry.ts"
+  ],
+  "src/shell/hooks/useTemplateBuild.ts": [
+    "src/shell/preview-frame/build-inputs.ts",
+    "src/shell/preview-frame/iframe-utils.ts",
+    "src/shell/store.ts"
+  ],
+  "src/shell/hooks/useTemplateRev.ts": [
+    "src/shell/preview-frame/iframe-utils.ts"
+  ],
+  "src/shell/main.tsx": [],
+  "src/shell/preview-frame/ScaledShellWrapper.tsx": [
+    "src/shell/device-shell/index.ts",
+    "src/shell/preview-frame/geometry.ts",
+    "src/shell/store.ts"
+  ],
+  "src/shell/preview-frame/build-inputs.ts": [],
+  "src/shell/preview-frame/geometry.ts": [
+    "src/shell/device-shell/DesktopShell.tsx",
+    "src/shell/device-shell/WebShell.tsx",
+    "src/shell/device-shell/index.ts",
+    "src/shell/device-shell/types.ts",
+    "src/shell/store.ts"
+  ],
+  "src/shell/preview-frame/iframe-utils.ts": [],
+  "src/shell/preview-frame/scrollbar.ts": [
+    "src/shell/device-shell/index.ts"
+  ],
+  "src/shell/store.ts": [],
+  "src/shell/toolbar/CompactToolbar.tsx": [
+    "src/shell/store.ts",
+    "src/shell/toolbar/frame-sizes.ts",
+    "src/shell/toolbar/icons.tsx",
+    "src/shell/toolbar/quick-links.ts",
+    "src/shell/toolbar/types.ts"
+  ],
+  "src/shell/toolbar/ReloadButton.tsx": [
+    "src/shell/toolbar/icons.tsx"
+  ],
+  "src/shell/toolbar/frame-sizes.ts": [
+    "src/shell/store.ts"
+  ],
+  "src/shell/toolbar/icons.tsx": [],
+  "src/shell/toolbar/quick-links.ts": [],
+  "src/shell/toolbar/types.ts": [],
+  "src/shell/useScrollFade.ts": [],
+  "src/vite-env.d.ts": []
+}
