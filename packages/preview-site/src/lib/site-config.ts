@@ -1,8 +1,10 @@
 /**
  * @file site-config.ts
- * @description Single source for landing-side external references —
- * repo URL, author email, brand version. Centralised so a future
- * domain or handle change is one diff away from being site-wide.
+ * @description Single source for the site's external references — repo
+ * URL, author email, brand version. Lives in `lib/` (the shell-agnostic
+ * shared leaf) because it's consumed by both the landing UI AND the
+ * changelog data layer (`lib/github.ts`); centralised so a future domain
+ * or handle change is one diff away from being site-wide.
  *
  * Anything Tailwind-/visual- is NOT here: this file is plain data only.
  *

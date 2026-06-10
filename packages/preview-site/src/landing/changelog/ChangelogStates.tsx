@@ -8,7 +8,7 @@
  * consumed only by ChangelogPage.
  */
 
-import { isGithubConfigured, SITE } from '@/landing/site-config';
+import { isGithubConfigured, SITE } from '@/lib/site-config';
 
 import { useI18n } from '../theme/i18n';
 

@@ -39,7 +39,7 @@
  *   rate-limited) does the original error propagate to the UI.
  */
 
-import { isGithubConfigured, SITE } from '@/landing/site-config';
+import { isGithubConfigured, SITE } from './site-config';
 
 import {
   cacheGet,

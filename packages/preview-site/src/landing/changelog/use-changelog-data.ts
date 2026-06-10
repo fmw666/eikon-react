@@ -30,7 +30,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { isGithubConfigured } from '@/landing/site-config';
+import { isGithubConfigured } from '@/lib/site-config';
 import {
   compareRefs,
   invalidateAllChangelogCache,

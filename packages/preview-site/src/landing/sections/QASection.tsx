@@ -47,7 +47,7 @@
 
 import { useState } from 'react';
 
-import { SITE } from '../site-config';
+import { SITE } from '@/lib/site-config';
 import { useI18n, type I18nKey } from '../theme/i18n';
 
 interface QA {

@@ -1,36 +1,19 @@
-import { spawn } from 'node:child_process';
+import { spawnCollectStderr } from './spawn-collect';
 
-function exec(
+async function exec(
   cmd: string,
   args: string[],
   cwd: string
 ): Promise<{ stderr: string }> {
-  return new Promise((resolve, reject) => {
-    let stderr = '';
-    const child = spawn(cmd, args, {
-      cwd,
-      stdio: ['ignore', 'ignore', 'pipe'],
-      shell: process.platform === 'win32',
-    });
-    child.stderr?.on('data', (chunk: Buffer) => {
-      stderr += chunk.toString('utf8');
-    });
-    child.on('error', reject);
-    child.on('close', (code) => {
-      if (code === 0) resolve({ stderr });
-      else {
-        const trimmed = stderr.trim();
-        const tail = trimmed
-          ? `: ${trimmed.split(/\r?\n/).slice(-5).join(' / ')}`
-          : '';
-        reject(
-          new Error(
-            `${cmd} ${args.join(' ')} exited with code ${code}${tail}`
-          )
-        );
-      }
-    });
-  });
+  const { code, stderr } = await spawnCollectStderr(cmd, args, cwd);
+  if (code === 0) return { stderr };
+  // git errors are short — a terse one-line tail (last 5 lines, ` / `
+  // separated) is enough to point the user at the cause.
+  const trimmed = stderr.trim();
+  const tail = trimmed
+    ? `: ${trimmed.split(/\r?\n/).slice(-5).join(' / ')}`
+    : '';
+  throw new Error(`${cmd} ${args.join(' ')} exited with code ${code}${tail}`);
 }
 
 export interface InitGitResult {

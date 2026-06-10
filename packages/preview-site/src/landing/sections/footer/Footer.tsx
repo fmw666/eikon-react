@@ -72,7 +72,7 @@ import {
   type MouseEvent as ReactMouseEvent,
 } from 'react';
 
-import { isGithubConfigured, SITE } from '../../site-config';
+import { isGithubConfigured, SITE } from '@/lib/site-config';
 import { useI18n } from '../../theme/i18n';
 
 import { HERO_TOP_ID, MEADOW_ANCHOR_ID } from './constants';

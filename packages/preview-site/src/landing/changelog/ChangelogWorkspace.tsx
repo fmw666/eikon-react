@@ -8,7 +8,7 @@
  * ChangelogPage.
  */
 
-import { SITE } from '@/landing/site-config';
+import { SITE } from '@/lib/site-config';
 
 import { useI18n } from '../theme/i18n';
 

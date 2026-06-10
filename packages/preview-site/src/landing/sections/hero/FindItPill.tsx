@@ -16,7 +16,7 @@
  */
 
 import { WordReveal } from '../../components/CtaButton';
-import { SITE } from '../../site-config';
+import { SITE } from '@/lib/site-config';
 import { useI18n } from '../../theme/i18n';
 import { GithubIcon } from './GithubIcon';
 

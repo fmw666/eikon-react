@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawnCollectStderr } from './spawn-collect';
 
 type Pm = 'pnpm' | 'npm' | 'bun';
 
@@ -14,28 +14,12 @@ const STDERR_TAIL_LINES = 50;
  * dependency graph there that would drown the spinner / next-steps
  * output. Stderr carries the diagnostics the user actually needs.
  */
-export function installDeps(cwd: string, pm: Pm): Promise<void> {
+export async function installDeps(cwd: string, pm: Pm): Promise<void> {
   const args = pm === 'npm' ? ['install', '--no-audit', '--no-fund'] : ['install'];
-  return new Promise((resolve, reject) => {
-    let stderr = '';
-    const child = spawn(pm, args, {
-      cwd,
-      stdio: ['ignore', 'ignore', 'pipe'],
-      shell: process.platform === 'win32',
-    });
-    child.stderr?.on('data', (chunk: Buffer) => {
-      stderr += chunk.toString('utf8');
-    });
-    child.on('error', reject);
-    child.on('close', (code) => {
-      if (code === 0) {
-        resolve();
-        return;
-      }
-      const lines = stderr.trimEnd().split(/\r?\n/);
-      const tail = lines.slice(-STDERR_TAIL_LINES).join('\n');
-      const detail = tail.length > 0 ? `\n${tail}` : '';
-      reject(new Error(`${pm} install exited with code ${code}${detail}`));
-    });
-  });
+  const { code, stderr } = await spawnCollectStderr(pm, args, cwd);
+  if (code === 0) return;
+  const lines = stderr.trimEnd().split(/\r?\n/);
+  const tail = lines.slice(-STDERR_TAIL_LINES).join('\n');
+  const detail = tail.length > 0 ? `\n${tail}` : '';
+  throw new Error(`${pm} install exited with code ${code}${detail}`);
 }
